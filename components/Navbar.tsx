@@ -1,0 +1,49 @@
+import Image from "next/image";
+import Link from "next/link";
+import greenLedgerLogo from "@/assets/GreenLedger Logo - without the write up.png";
+
+const navLinks = [
+    { href: "#pillars", label: "Platform" },
+    { href: "#deep-dive", label: "Solutions" },
+    { href: "#traceability", label: "Traceability" },
+    { href: "#cta", label: "Demo" },
+];
+
+const Navbar = () => {
+    return (
+        <header className="sticky top-0 z-50 w-full border-b border-white/40 bg-[#f6fff8]/85 backdrop-blur-md">
+            <nav className="mx-auto flex w-full max-w-[100rem] items-center justify-between gap-4 px-4 py-3 sm:px-5 md:px-6 lg:px-7">
+                <Link href="/" className="flex min-w-0 items-center gap-2 sm:gap-3">
+                    <Image
+                        src={greenLedgerLogo}
+                        width={56}
+                        height={56}
+                        alt="Green Ledger"
+                        className="h-11 w-11 shrink-0 object-contain sm:h-12 sm:w-12"
+                    />
+                    <span className="truncate text-xl font-semibold tracking-tight text-[#1f5c2e] sm:text-2xl">
+                        Green Ledger
+                    </span>
+                </Link>
+                <ul className="hidden items-center gap-1 text-sm font-medium text-slate-700 md:flex md:gap-2">
+                    {navLinks.map((l) => (
+                        <li key={l.href}>
+                            <a
+                                href={l.href}
+                                className="rounded-full px-3 py-2 transition hover:bg-emerald-100/80 hover:text-emerald-950">
+                                {l.label}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+                <a
+                    href="#cta"
+                    className="shrink-0 rounded-full bg-emerald-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700 sm:px-4 sm:text-sm">
+                    Book demo
+                </a>
+            </nav>
+        </header>
+    );
+};
+
+export default Navbar;

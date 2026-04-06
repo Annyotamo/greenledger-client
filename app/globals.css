@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+:root,
+html,
+body {
+    min-height: 100%;
+}
+
+html,
+body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+body {
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        Segoe UI,
+        Roboto,
+        sans-serif;
+    color: #0f2f14;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.88)), url("/GreenLedger_Background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --color-primary: #1f7a3f;
+    --color-primary-2: #4ea56c;
+    --color-secondary: #f6fff8;
+    --color-accent: #88be97;
+    --color-text: #0f2f14;
+    --color-muted: #315a43;
+    --border-radius: 16px;
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2.5rem;
+    --anim-fast: 160ms;
+    --anim-standard: 360ms;
+    --anim-smooth: 620ms;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulseScale {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+.animate-fade-up {
+    animation: fadeInUp var(--anim-smooth) ease-out both;
+}
+
+.animate-pulse-strong:hover {
+    animation: pulseScale var(--anim-fast) ease-in-out both;
+}
+
+.card-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(20, 80, 40, 0.18);
+}
+
+.card-hover {
+    transition:
+        transform var(--anim-fast) ease,
+        box-shadow var(--anim-fast) ease;
+}
+
+.section-bg {
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(4px);
+}
+
+.full-bleed {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+}
+
+.landing-strip {
+    background: linear-gradient(90deg, rgba(31, 122, 63, 0.08), rgba(136, 190, 151, 0.2), rgba(31, 122, 63, 0.08));
+    border-block: 1px solid rgba(31, 122, 63, 0.12);
+}
+
+/* Fully hidden scrollbar (slider, etc.) */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+    height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(31, 122, 63, 0.35);
+    border-radius: 999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: rgba(31, 122, 63, 0.06);
+}

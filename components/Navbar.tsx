@@ -18,11 +18,11 @@ const Navbar = () => {
                         src={greenLedgerLogo}
                         width={56}
                         height={56}
-                        alt="Green Ledger"
+                        alt="GreenLedger"
                         className="h-11 w-11 shrink-0 object-contain sm:h-12 sm:w-12"
                     />
                     <span className="truncate text-xl font-semibold tracking-tight text-[#1f5c2e] sm:text-2xl">
-                        Green Ledger
+                        GreenLedger
                     </span>
                 </Link>
                 <ul className="hidden items-center gap-1 text-sm font-medium text-slate-700 md:flex md:gap-2">

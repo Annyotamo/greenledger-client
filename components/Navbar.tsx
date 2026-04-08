@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import greenLedgerLogo from "@/assets/GreenLedger Logo - without the write up.png";
+import greenLedgerLogo from "@/assets/GLLogo.png";
 
 const navLinks = [
     { href: "#pillars", label: "Platform" },

@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useEffect } from "react";
 import { LuBolt, LuChartBar, LuCloud, LuFactory, LuScanLine, LuShieldCheck } from "react-icons/lu";
 import greenLedgerLogo from "@/assets/GLLogo.png";
+import startupIndia from "@/assets/startupIndia.png";
+import isoCertifaction from "@/assets/isoCertifaction.png";
 import heroMosaic from "@/assets/landing-images/esg_main.960_0_1.jpg";
 import esgAccountingImg from "@/assets/landing-images/14841_esgaccounting_572996_crop.jpg";
 import esgReportingImg from "@/assets/landing-images/esg-reporting.jpg";
@@ -297,6 +299,32 @@ export default function Home() {
                                         Request a demo
                                     </a>
                                 </div>
+                                <div className="mt-7 flex flex-wrap items-center gap-3">
+                                    <div className="inline-flex items-center gap-3 rounded-2xl border border-white/25 bg-white/10 px-4 py-2 shadow-sm backdrop-blur-md transition hover:bg-white/15">
+                                        <span className="text-[0.7rem] font-bold uppercase tracking-[0.22em] text-emerald-50/85">
+                                            Supported by
+                                        </span>
+                                        <span className="h-5 w-px bg-white/20" aria-hidden />
+                                        <Image
+                                            src={startupIndia}
+                                            alt="Startup India"
+                                            className="h-7 w-auto object-contain opacity-95"
+                                        />
+                                    </div>
+                                    <div className="inline-flex items-center gap-3 rounded-2xl border border-white/25 bg-white/10 px-4 py-2 shadow-sm backdrop-blur-md">
+                                        <Image
+                                            src={isoCertifaction}
+                                            alt="ISO 27001 certification"
+                                            className="h-8 w-auto object-contain opacity-95"
+                                        />
+                                        <span className="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-emerald-50/85">
+                                            ISO 27001
+                                        </span>
+                                    </div>
+                                    <span className="text-xs font-medium text-emerald-50/80">
+                                        Startup India ecosystem recognition · ISO 27001 aligned
+                                    </span>
+                                </div>
                             </div>
                             <div
                                 className="flex shrink-0 flex-col items-center gap-5 will-change-transform md:items-end"
@@ -435,8 +463,9 @@ export default function Home() {
                                                 Board‑ready disclosures with audit‑defensible lineage
                                             </h3>
                                             <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-700 sm:text-base">
-                                                Build ESG reports like financial statements: controlled inputs, validations,
-                                                versioned narratives, and outputs you can stand behind in assurance cycles.
+                                                Build ESG reports like financial statements: controlled inputs,
+                                                validations, versioned narratives, and outputs you can stand behind in
+                                                assurance cycles.
                                             </p>
                                         </div>
 
@@ -465,7 +494,9 @@ export default function Home() {
                                                         <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-700/10">
                                                             {it.icon}
                                                         </span>
-                                                        <p className="text-xs font-bold uppercase tracking-wide">{it.k}</p>
+                                                        <p className="text-xs font-bold uppercase tracking-wide">
+                                                            {it.k}
+                                                        </p>
                                                     </div>
                                                     <p className="mt-2 text-sm font-semibold text-slate-800">{it.v}</p>
                                                 </div>
@@ -531,8 +562,8 @@ export default function Home() {
                                                 Built‑in audit trails for every decision, factor, and override
                                             </h3>
                                             <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-700 sm:text-base">
-                                                Capture “who changed what, when, and why” with structured traits so reviewers
-                                                can replay methodology—without hunting through email threads.
+                                                Capture “who changed what, when, and why” with structured traits so
+                                                reviewers can replay methodology—without hunting through email threads.
                                             </p>
                                         </div>
 
@@ -641,14 +672,14 @@ export default function Home() {
                                                 { k: "Energy trails", icon: <LuBolt className="h-4 w-4" /> },
                                                 { k: "Review‑ready", icon: <LuShieldCheck className="h-4 w-4" /> },
                                             ].map((it) => (
-                                                <div
-                                                    key={it.k}
-                                                    className="rounded-2xl bg-white/70 p-4 shadow-sm">
+                                                <div key={it.k} className="rounded-2xl bg-white/70 p-4 shadow-sm">
                                                     <div className="flex items-center gap-2 text-emerald-900/80">
                                                         <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-700/10">
                                                             {it.icon}
                                                         </span>
-                                                        <p className="text-xs font-bold uppercase tracking-wide">{it.k}</p>
+                                                        <p className="text-xs font-bold uppercase tracking-wide">
+                                                            {it.k}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             ))}
@@ -951,6 +982,50 @@ export default function Home() {
                                     Contact
                                 </a>
                             </nav>
+                            <a
+                                href="https://www.startupindia.gov.in/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group w-full rounded-2xl bg-white/75 p-4 text-slate-700 shadow-sm transition hover:bg-white/90 hover:shadow-md sm:p-5"
+                                aria-label="Supported by Startup India (opens in new tab)">
+                                <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-emerald-900/65">
+                                            Supported by
+                                        </p>
+                                        <p className="mt-1 text-base font-bold tracking-tight text-emerald-950 sm:text-lg">
+                                            Startup India
+                                        </p>
+                                    </div>
+                                    <Image
+                                        src={startupIndia}
+                                        alt="Startup India"
+                                        className="h-12 w-auto object-contain opacity-95 sm:h-14"
+                                    />
+                                </div>
+                            </a>
+                            <a
+                                href="https://www.iso.org/isoiec-27001-information-security.html"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group w-full rounded-2xl bg-white/75 p-4 text-slate-700 shadow-sm transition hover:bg-white/90 hover:shadow-md sm:p-5"
+                                aria-label="ISO 27001 information (opens in new tab)">
+                                <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-emerald-900/65">
+                                            Certification
+                                        </p>
+                                        <p className="mt-1 text-base font-bold tracking-tight text-emerald-950 sm:text-lg">
+                                            ISO 27001
+                                        </p>
+                                    </div>
+                                    <Image
+                                        src={isoCertifaction}
+                                        alt="ISO 27001 certification"
+                                        className="h-20 w-auto object-contain opacity-95 sm:h-12"
+                                    />
+                                </div>
+                            </a>
                             <p className="text-xs text-slate-500 sm:w-full sm:text-center">
                                 © {new Date().getFullYear()} GreenLedger. All rights reserved.
                             </p>

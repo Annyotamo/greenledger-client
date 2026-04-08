@@ -10,7 +10,6 @@ import {
     Cell,
     Pie,
     PieChart,
-    ResponsiveContainer,
     Tooltip,
     XAxis,
     YAxis,
@@ -48,6 +47,34 @@ function useInView(opts: InViewOptions = {}) {
     }, [opts.rootMargin, opts.threshold]);
 
     return { ref, inView };
+}
+
+function useElementSize<T extends HTMLElement>() {
+    const ref = useRef<T | null>(null);
+    const [size, setSize] = useState({ width: 0, height: 0 });
+
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+
+        const update = () => {
+            const rect = el.getBoundingClientRect();
+            const width = Math.max(0, Math.floor(rect.width));
+            const height = Math.max(0, Math.floor(rect.height));
+            setSize({ width, height });
+        };
+
+        update();
+        const ro = new ResizeObserver(update);
+        ro.observe(el);
+        window.addEventListener("resize", update, { passive: true });
+        return () => {
+            ro.disconnect();
+            window.removeEventListener("resize", update);
+        };
+    }, []);
+
+    return { ref, ...size };
 }
 
 function GlowCard({
@@ -120,6 +147,9 @@ export function DataVizShowcase() {
     const { ref, inView } = useInView();
     const [mounted, setMounted] = useState(false);
     const [animKey, setAnimKey] = useState(0);
+    const barsSize = useElementSize<HTMLDivElement>();
+    const areaSize = useElementSize<HTMLDivElement>();
+    const pieSize = useElementSize<HTMLDivElement>();
 
     useEffect(() => {
         setMounted(true);
@@ -184,15 +214,15 @@ export function DataVizShowcase() {
                         subtitle="Carbon accounting"
                         icon={<LuFactory className="h-5 w-5" aria-hidden />}
                     >
-                        <div className="h-56 sm:h-60">
-                            {mounted ? (
-                                <ResponsiveContainer
-                                    width="100%"
-                                    height="100%"
-                                    minHeight={1}
+                        <div ref={barsSize.ref} className="h-56 sm:h-60">
+                            {mounted && barsSize.width > 0 && barsSize.height > 0 ? (
+                                <BarChart
                                     key={`bar-${animKey}`}
+                                    width={barsSize.width}
+                                    height={barsSize.height}
+                                    data={scopeBars}
+                                    barCategoryGap={16}
                                 >
-                                    <BarChart data={scopeBars} barCategoryGap={16}>
                                         <CartesianGrid stroke="rgba(15,47,20,0.08)" vertical={false} />
                                         <XAxis dataKey="month" tickLine={false} axisLine={false} />
                                         <YAxis tickLine={false} axisLine={false} />
@@ -221,8 +251,7 @@ export function DataVizShowcase() {
                                             isAnimationActive
                                             animationDuration={1300}
                                         />
-                                    </BarChart>
-                                </ResponsiveContainer>
+                                </BarChart>
                             ) : (
                                 <div className="h-full w-full animate-pulse rounded-2xl bg-linear-to-r from-emerald-50/80 via-white/80 to-emerald-50/80 shadow-sm" />
                             )}
@@ -239,15 +268,15 @@ export function DataVizShowcase() {
                         subtitle="Performance"
                         icon={<LuCloud className="h-5 w-5" aria-hidden />}
                     >
-                        <div className="h-56 sm:h-60">
-                            {mounted ? (
-                                <ResponsiveContainer
-                                    width="100%"
-                                    height="100%"
-                                    minHeight={1}
+                        <div ref={areaSize.ref} className="h-56 sm:h-60">
+                            {mounted && areaSize.width > 0 && areaSize.height > 0 ? (
+                                <AreaChart
                                     key={`area-${animKey}`}
+                                    width={areaSize.width}
+                                    height={areaSize.height}
+                                    data={intensity}
+                                    margin={{ left: 0, right: 6, top: 8, bottom: 0 }}
                                 >
-                                    <AreaChart data={intensity} margin={{ left: 0, right: 6, top: 8, bottom: 0 }}>
                                         <CartesianGrid stroke="rgba(15,47,20,0.08)" vertical={false} />
                                         <XAxis dataKey="q" tickLine={false} axisLine={false} />
                                         <YAxis tickLine={false} axisLine={false} />
@@ -273,8 +302,7 @@ export function DataVizShowcase() {
                                             isAnimationActive
                                             animationDuration={1200}
                                         />
-                                    </AreaChart>
-                                </ResponsiveContainer>
+                                </AreaChart>
                             ) : (
                                 <div className="h-full w-full animate-pulse rounded-2xl bg-linear-to-r from-emerald-50/80 via-white/80 to-emerald-50/80 shadow-sm" />
                             )}
@@ -289,15 +317,13 @@ export function DataVizShowcase() {
                         subtitle="Audit‑ready reporting"
                         icon={<LuShieldCheck className="h-5 w-5" aria-hidden />}
                     >
-                        <div className="h-56 sm:h-60">
-                            {mounted ? (
-                                <ResponsiveContainer
-                                    width="100%"
-                                    height="100%"
-                                    minHeight={1}
+                        <div ref={pieSize.ref} className="h-56 sm:h-60">
+                            {mounted && pieSize.width > 0 && pieSize.height > 0 ? (
+                                <PieChart
                                     key={`pie-${animKey}`}
+                                    width={pieSize.width}
+                                    height={pieSize.height}
                                 >
-                                    <PieChart>
                                         <Tooltip content={<ChartTooltip />} />
                                         <Pie
                                             data={pie}
@@ -313,8 +339,7 @@ export function DataVizShowcase() {
                                                 <Cell key={p.name} fill={p.color} />
                                             ))}
                                         </Pie>
-                                    </PieChart>
-                                </ResponsiveContainer>
+                                </PieChart>
                             ) : (
                                 <div className="h-full w-full animate-pulse rounded-2xl bg-linear-to-r from-emerald-50/80 via-white/80 to-emerald-50/80 shadow-sm" />
                             )}

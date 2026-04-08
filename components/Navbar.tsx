@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import greenLedgerLogo from "@/assets/GreenLedger Logo - without the write up.png";
 
 const navLinks = [
@@ -10,9 +13,15 @@ const navLinks = [
 ];
 
 const Navbar = () => {
+    const pathname = usePathname();
+    const isDashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+
     return (
         <header className="sticky top-0 z-50 w-full border-b border-white/40 bg-[#f6fff8]/85 backdrop-blur-md">
-            <nav className="mx-auto flex w-full max-w-[100rem] items-center justify-between gap-4 px-4 py-3 sm:px-5 md:px-6 lg:px-7">
+            <nav
+                className={`mx-auto flex w-full max-w-[100rem] items-center justify-between gap-4 px-4 py-3 sm:px-5 md:px-6 lg:px-7 ${
+                    isDashboard ? "md:pl-72" : ""
+                }`}>
                 <Link href="/" className="flex min-w-0 items-center gap-2 sm:gap-3">
                     <Image
                         src={greenLedgerLogo}

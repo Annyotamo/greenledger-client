@@ -2,9 +2,17 @@
 
 import Image from "next/image";
 import { useEffect } from "react";
+import { LuBolt, LuChartBar, LuCloud, LuFactory, LuScanLine, LuShieldCheck } from "react-icons/lu";
 import greenLedgerLogo from "@/assets/GLLogo.png";
+import heroMosaic from "@/assets/landing-images/esg_main.960_0_1.jpg";
+import esgAccountingImg from "@/assets/landing-images/14841_esgaccounting_572996_crop.jpg";
+import esgReportingImg from "@/assets/landing-images/esg-reporting.jpg";
+import sustainableFinanceImg from "@/assets/landing-images/ESG-Courses-Sustainable-Finance-1600x900-1.jpg";
+import sasbImg from "@/assets/landing-images/Navigating-SASB.webp";
+import opsImg from "@/assets/landing-images/746569-848x441.jpg";
 import { FeatureSlider, type SliderCard } from "@/components/landing/FeatureSlider";
 import { HoverInsightGrid, type HoverInsight } from "@/components/landing/HoverInsightGrid";
+import { DataVizShowcase } from "@/components/landing/DataVizShowcase";
 import { ScrollProgress } from "@/components/landing/ScrollProgress";
 import { ScrollReveal, useParallaxScroll } from "@/components/landing/ScrollReveal";
 import { SolutionsAccordion, type AccordionItem } from "@/components/landing/SolutionsAccordion";
@@ -23,6 +31,7 @@ const sliderCards: SliderCard[] = [
             "Banking edition: financed emissions linked to loans and portfolios (PCAF-style workflows)",
         ],
         accent: "#1f7a3f",
+        imageSrc: esgReportingImg.src,
     },
     {
         id: "carbon",
@@ -37,6 +46,7 @@ const sliderCards: SliderCard[] = [
             "Exports that plug into ESG reports and management commentary",
         ],
         accent: "#315a43",
+        imageSrc: opsImg.src,
     },
     {
         id: "trace",
@@ -51,6 +61,7 @@ const sliderCards: SliderCard[] = [
             "Faster verification cycles for procurement and compliance teams",
         ],
         accent: "#2d6b4e",
+        imageSrc: heroMosaic.src,
     },
     {
         id: "platform",
@@ -64,6 +75,7 @@ const sliderCards: SliderCard[] = [
             "Implementation paths: start with reporting, expand to Scope 3, add traceability",
         ],
         accent: "#1f7a3f",
+        imageSrc: sustainableFinanceImg.src,
     },
 ];
 
@@ -193,7 +205,7 @@ export default function Home() {
     return (
         <div className="min-h-screen w-full text-slate-900">
             <ScrollProgress />
-            <main className="mx-auto w-full max-w-[100rem] px-4 sm:px-5 md:px-6 lg:px-7">
+            <main className="mx-auto w-full max-w-400 px-4 sm:px-5 md:px-6 lg:px-7">
                 {/* Hero */}
                 <ScrollReveal className="mb-12" rootMargin="0px 0px 0px 0px" threshold={0.05}>
                     <section className="full-bleed relative min-h-[min(90vh,820px)] overflow-hidden rounded-none shadow-[0_24px_80px_-30px_rgba(0,40,25,0.55)]">
@@ -206,15 +218,50 @@ export default function Home() {
                             sizes="100vw"
                         />
                         <div
-                            className="absolute inset-0 bg-gradient-to-br from-emerald-950/92 via-emerald-900/78 to-teal-950/88"
+                            className="absolute inset-0 bg-linear-to-br from-emerald-950/92 via-emerald-900/78 to-teal-950/88"
                             aria-hidden
                         />
                         <div
-                            className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-emerald-950/35"
+                            className="absolute inset-0 bg-linear-to-t from-black/60 via-black/15 to-emerald-950/35"
                             aria-hidden
                         />
                         <div
                             className="absolute inset-0 bg-[radial-gradient(ellipse_110%_70%_at_50%_-10%,rgba(255,255,255,0.16),transparent_52%)]"
+                            aria-hidden
+                        />
+                        <div className="gl-grain" aria-hidden />
+                        {/* Ambient orbs (award-site feel) */}
+                        <div
+                            className="gl-orb gl-drift"
+                            style={{
+                                left: "6%",
+                                top: "18%",
+                                width: "320px",
+                                height: "320px",
+                                background: "rgba(136,190,151,0.55)",
+                            }}
+                            aria-hidden
+                        />
+                        <div
+                            className="gl-orb gl-drift-2"
+                            style={{
+                                right: "7%",
+                                top: "10%",
+                                width: "260px",
+                                height: "260px",
+                                background: "rgba(31,122,63,0.45)",
+                            }}
+                            aria-hidden
+                        />
+                        <div
+                            className="gl-orb gl-drift"
+                            style={{
+                                right: "16%",
+                                bottom: "12%",
+                                width: "360px",
+                                height: "360px",
+                                background: "rgba(45,107,78,0.35)",
+                            }}
                             aria-hidden
                         />
                         <div className="relative z-10 mx-auto flex w-full max-w-none flex-col gap-10 px-4 py-14 sm:px-5 md:flex-row md:items-center md:justify-between md:px-6 md:py-16 lg:px-12 lg:py-20">
@@ -229,9 +276,9 @@ export default function Home() {
                                 </h1>
                                 <p className="mt-6 max-w-3xl text-pretty text-base leading-relaxed text-emerald-50/95 sm:text-lg">
                                     GreenLedger helps organizations collect environmental and social data, auto-generate
-                                    standards-aligned reports (including CSRD / ESRS), run rigorous carbon accounting
-                                    across Scopes 1–3, and prove product stories with supply chain traceability—from
-                                    factory floor to QR code in a shopper’s hand.
+                                    standards-aligned reports (including CSRD / ESRS / BRSR), run rigorous carbon
+                                    accounting across Scopes 1–3, and prove product stories with supply chain
+                                    traceability—from factory floor to QR code in a shopper’s hand.
                                 </p>
                                 <div className="mt-9 flex flex-wrap gap-3">
                                     <a
@@ -254,7 +301,7 @@ export default function Home() {
                             <div
                                 className="flex shrink-0 flex-col items-center gap-5 will-change-transform md:items-end"
                                 style={{ transform: `translate3d(0,${heroCounter}px,0)` }}>
-                                <div className="rounded-3xl border border-white/40 bg-white/60 shadow-2xl shadow-black/30 ring-1 ring-white/60 backdrop-blur-sm sm:ring-0">
+                                <div className="rounded-3xl border border-white/40 bg-white/60 shadow-2xl shadow-black/30 ring-1 ring-white/60 backdrop-blur-sm sm:ring-0 gl-shimmer-border">
                                     <Image
                                         src={greenLedgerLogo}
                                         alt="GreenLedger"
@@ -263,6 +310,34 @@ export default function Home() {
                                         className="h-auto w-[min(100%,200px)] object-contain sm:w-[220px]"
                                         priority
                                     />
+                                </div>
+                                <div className="hidden w-88 max-w-full grid-cols-2 gap-3 md:grid">
+                                    {[
+                                        { src: esgAccountingImg, label: "ESG accounting" },
+                                        { src: sasbImg, label: "Framework-ready" },
+                                        { src: esgReportingImg, label: "Disclosure workflows" },
+                                        { src: sustainableFinanceImg, label: "Finance-grade" },
+                                    ].map((tile) => (
+                                        <div
+                                            key={tile.label}
+                                            className="card-hover relative overflow-hidden rounded-2xl border border-white/40 bg-white/20 shadow-lg backdrop-blur-md">
+                                            <Image
+                                                src={tile.src}
+                                                alt=""
+                                                className="h-28 w-full object-cover"
+                                                sizes="(min-width: 768px) 180px, 45vw"
+                                            />
+                                            <div
+                                                className="absolute inset-0 bg-linear-to-t from-black/55 via-black/10 to-transparent"
+                                                aria-hidden
+                                            />
+                                            <div className="absolute bottom-2 left-2 right-2">
+                                                <span className="inline-flex rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[0.68rem] font-semibold tracking-wide text-white backdrop-blur-md">
+                                                    {tile.label}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                                 <p className="max-w-xs text-center text-xs leading-relaxed text-emerald-100/85 md:text-right">
                                     Built for enterprises that need audit-ready numbers and consumer-trusted product
@@ -279,7 +354,7 @@ export default function Home() {
                         className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 lg:gap-5"
                         aria-label="Highlights">
                         {[
-                            { k: "CSRD / ESRS", v: "Aligned reporting flows" },
+                            { k: "CSRD / ESRS / BRSR", v: "Aligned reporting flows" },
                             { k: "Scopes 1–3", v: "Enterprise carbon ledger" },
                             { k: "PCAF-ready", v: "Financed emissions views" },
                             { k: "QR to origin", v: "Consumer traceability" },
@@ -292,6 +367,10 @@ export default function Home() {
                             </div>
                         ))}
                     </section>
+                </ScrollReveal>
+
+                <ScrollReveal className="mb-16" delay={25}>
+                    <DataVizShowcase />
                 </ScrollReveal>
 
                 {/* Slider */}
@@ -329,9 +408,261 @@ export default function Home() {
                     </section>
                 </ScrollReveal>
 
+                {/* Services spotlight (unique band) */}
+                <ScrollReveal className="mb-16" delay={35}>
+                    <section className="full-bleed overflow-hidden py-10 md:py-14">
+                        <div className="mx-auto w-full max-w-none px-4 sm:px-5 md:px-6 lg:px-7">
+                            <div className="grid gap-6 lg:grid-cols-2 lg:gap-10">
+                                {/* Finance-grade ESG reporting */}
+                                <div className="gl-shimmer-border relative overflow-hidden rounded-3xl bg-white/80 shadow-[0_28px_70px_-30px_rgba(15,80,40,0.35)] backdrop-blur-md">
+                                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_10%_20%,rgba(31,122,63,0.12),transparent_55%)]" />
+                                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_90%_10%,rgba(136,190,151,0.16),transparent_58%)]" />
+                                    <div className="relative grid gap-7 p-6 sm:p-8">
+                                        <div className="flex flex-wrap items-center gap-3">
+                                            <span className="inline-flex items-center gap-2 rounded-full bg-white/75 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-emerald-900/80 shadow-sm">
+                                                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-700/10 text-emerald-800">
+                                                    <LuChartBar className="h-3.5 w-3.5" />
+                                                </span>
+                                                Finance‑grade ESG reporting
+                                            </span>
+                                            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50/80 px-3 py-1.5 text-xs font-semibold text-emerald-950 shadow-sm">
+                                                CSRD / ESRS aligned
+                                            </span>
+                                        </div>
+
+                                        <div>
+                                            <h3 className="text-balance text-2xl font-bold tracking-tight text-emerald-950 sm:text-3xl">
+                                                Board‑ready disclosures with audit‑defensible lineage
+                                            </h3>
+                                            <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-700 sm:text-base">
+                                                Build ESG reports like financial statements: controlled inputs, validations,
+                                                versioned narratives, and outputs you can stand behind in assurance cycles.
+                                            </p>
+                                        </div>
+
+                                        <div className="grid gap-3 sm:grid-cols-3">
+                                            {[
+                                                {
+                                                    k: "Quality gates",
+                                                    v: "Checks that fail fast",
+                                                    icon: <LuScanLine className="h-4 w-4" />,
+                                                },
+                                                {
+                                                    k: "Roll‑forwards",
+                                                    v: "Quarterly continuity",
+                                                    icon: <LuBolt className="h-4 w-4" />,
+                                                },
+                                                {
+                                                    k: "Evidence links",
+                                                    v: "Every number traced",
+                                                    icon: <LuShieldCheck className="h-4 w-4" />,
+                                                },
+                                            ].map((it) => (
+                                                <div
+                                                    key={it.k}
+                                                    className="card-hover rounded-2xl bg-white/70 p-4 shadow-sm backdrop-blur-sm">
+                                                    <div className="flex items-center gap-2 text-emerald-900/80">
+                                                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-700/10">
+                                                            {it.icon}
+                                                        </span>
+                                                        <p className="text-xs font-bold uppercase tracking-wide">{it.k}</p>
+                                                    </div>
+                                                    <p className="mt-2 text-sm font-semibold text-slate-800">{it.v}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="relative overflow-hidden rounded-2xl bg-white/70 shadow-sm">
+                                            <div className="flex items-center justify-between px-4 py-3">
+                                                <p className="text-xs font-bold uppercase tracking-wide text-emerald-900/70">
+                                                    Disclosure pack preview
+                                                </p>
+                                                <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-900/80 shadow-sm">
+                                                    <span className="h-2 w-2 rounded-full bg-emerald-600 animate-pulse" />
+                                                    Ready
+                                                </span>
+                                            </div>
+                                            <div className="grid gap-3 px-4 pb-4 sm:grid-cols-2">
+                                                {[
+                                                    { k: "Material topics", v: "12 mapped" },
+                                                    { k: "Data checks", v: "48 passed" },
+                                                    { k: "Narratives", v: "Versioned" },
+                                                    { k: "Exports", v: "XBRL / PDF" },
+                                                ].map((tile) => (
+                                                    <div
+                                                        key={tile.k}
+                                                        className="relative overflow-hidden rounded-2xl bg-white/85 p-4 shadow-sm">
+                                                        <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-emerald-400/10 blur-2xl" />
+                                                        <p className="relative text-xs font-bold uppercase tracking-wide text-emerald-900/60">
+                                                            {tile.k}
+                                                        </p>
+                                                        <p className="relative mt-2 text-sm font-semibold text-slate-800">
+                                                            {tile.v}
+                                                        </p>
+                                                        <div className="relative mt-3 h-1.5 overflow-hidden rounded-full bg-emerald-900/10">
+                                                            <div className="h-full w-2/3 rounded-full bg-linear-to-r from-emerald-600/70 via-emerald-500/60 to-teal-400/60" />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Audit compliance */}
+                                <div className="relative overflow-hidden rounded-3xl bg-white/80 shadow-[0_28px_70px_-30px_rgba(15,80,40,0.32)] backdrop-blur-md">
+                                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_85%_15%,rgba(31,122,63,0.10),transparent_55%)]" />
+                                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_10%_80%,rgba(136,190,151,0.14),transparent_60%)]" />
+                                    <div className="relative grid gap-7 p-6 sm:p-8">
+                                        <div className="flex flex-wrap items-center gap-3">
+                                            <span className="inline-flex items-center gap-2 rounded-full bg-white/75 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-emerald-900/80 shadow-sm">
+                                                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-700/10 text-emerald-800">
+                                                    <LuShieldCheck className="h-3.5 w-3.5" />
+                                                </span>
+                                                Audit compliance (logs, traits)
+                                            </span>
+                                            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50/80 px-3 py-1.5 text-xs font-semibold text-emerald-950 shadow-sm">
+                                                Assurance‑ready
+                                            </span>
+                                        </div>
+
+                                        <div>
+                                            <h3 className="text-balance text-2xl font-bold tracking-tight text-emerald-950 sm:text-3xl">
+                                                Built‑in audit trails for every decision, factor, and override
+                                            </h3>
+                                            <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-700 sm:text-base">
+                                                Capture “who changed what, when, and why” with structured traits so reviewers
+                                                can replay methodology—without hunting through email threads.
+                                            </p>
+                                        </div>
+
+                                        <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+                                            <div className="relative overflow-hidden rounded-2xl bg-white/70 shadow-sm">
+                                                <div className="flex items-center justify-between gap-3 px-4 py-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-700/10">
+                                                            <LuFactory className="h-4 w-4 text-emerald-900/80" />
+                                                        </span>
+                                                        <div className="leading-tight">
+                                                            <p className="text-xs font-bold uppercase tracking-wide text-emerald-900/70">
+                                                                Audit log
+                                                            </p>
+                                                            <p className="text-sm font-semibold text-slate-800">
+                                                                Evidence timeline
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-900/80 shadow-sm">
+                                                        <span className="h-2 w-2 rounded-full bg-emerald-600 animate-pulse" />
+                                                        Live
+                                                    </span>
+                                                </div>
+                                                <div className="grid gap-3 px-4 py-4">
+                                                    {[
+                                                        {
+                                                            t: "Emission factor updated",
+                                                            d: "Supplier‑provided CO₂e factor supersedes default",
+                                                            meta: "Scope‑3 · Category 1",
+                                                        },
+                                                        {
+                                                            t: "Methodology note added",
+                                                            d: "Allocation rule documented for shared utilities",
+                                                            meta: "Scope‑2 · Facilities",
+                                                        },
+                                                        {
+                                                            t: "Approval recorded",
+                                                            d: "Finance reviewer sign‑off captured",
+                                                            meta: "Reporting · Disclosure pack",
+                                                        },
+                                                    ].map((row) => (
+                                                        <div
+                                                            key={row.t}
+                                                            className="group relative overflow-hidden rounded-2xl bg-white/85 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                                                            <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-emerald-400/15 blur-2xl transition duration-500 group-hover:scale-110 group-hover:bg-emerald-500/20" />
+                                                            <p className="relative text-sm font-semibold text-emerald-950">
+                                                                {row.t}
+                                                            </p>
+                                                            <p className="relative mt-1 text-sm text-slate-700">
+                                                                {row.d}
+                                                            </p>
+                                                            <p className="relative mt-2 text-xs font-semibold uppercase tracking-wide text-emerald-900/60">
+                                                                {row.meta}
+                                                            </p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="relative overflow-hidden rounded-2xl bg-white/70 shadow-sm">
+                                                <div className="flex items-center justify-between px-4 py-3">
+                                                    <p className="text-xs font-bold uppercase tracking-wide text-emerald-900/70">
+                                                        Traits &amp; controls
+                                                    </p>
+                                                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-900/80 shadow-sm">
+                                                        Policy‑driven
+                                                    </span>
+                                                </div>
+                                                <div className="grid gap-3 p-4">
+                                                    {[
+                                                        { k: "Trait", v: "Methodology: Market-based Scope‑2" },
+                                                        { k: "Evidence", v: "Utility invoice · File link" },
+                                                        { k: "Control", v: "Approval required: Finance reviewer" },
+                                                    ].map((row) => (
+                                                        <div
+                                                            key={row.k}
+                                                            className="rounded-2xl bg-white/85 p-4 shadow-sm">
+                                                            <p className="text-xs font-bold uppercase tracking-wide text-emerald-900/60">
+                                                                {row.k}
+                                                            </p>
+                                                            <p className="mt-2 text-sm font-semibold text-slate-800">
+                                                                {row.v}
+                                                            </p>
+                                                            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-emerald-900/10">
+                                                                <div className="h-full w-3/5 rounded-full bg-linear-to-r from-emerald-600/70 via-emerald-500/60 to-teal-400/60" />
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    <div className="flex flex-wrap gap-2 pt-1">
+                                                        {["Traits", "Evidence links", "Approvals"].map((chip) => (
+                                                            <span
+                                                                key={chip}
+                                                                className="rounded-full bg-emerald-50/70 px-3 py-1 text-xs font-semibold text-emerald-950 shadow-sm">
+                                                                {chip}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid gap-3 sm:grid-cols-3">
+                                            {[
+                                                { k: "CO₂e signals", icon: <LuCloud className="h-4 w-4" /> },
+                                                { k: "Energy trails", icon: <LuBolt className="h-4 w-4" /> },
+                                                { k: "Review‑ready", icon: <LuShieldCheck className="h-4 w-4" /> },
+                                            ].map((it) => (
+                                                <div
+                                                    key={it.k}
+                                                    className="rounded-2xl bg-white/70 p-4 shadow-sm">
+                                                    <div className="flex items-center gap-2 text-emerald-900/80">
+                                                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-700/10">
+                                                            {it.icon}
+                                                        </span>
+                                                        <p className="text-xs font-bold uppercase tracking-wide">{it.k}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </ScrollReveal>
+
                 {/* Narrative band */}
                 <ScrollReveal className="mb-16">
-                    <section className="full-bleed bg-gradient-to-b from-white/40 via-emerald-50/30 to-transparent py-12 md:py-14">
+                    <section className="full-bleed bg-linear-to-b from-white/40 via-emerald-50/30 to-transparent py-12 md:py-14">
                         <div className="mx-auto w-full max-w-none px-4 sm:px-5 md:px-6 lg:px-7">
                             <div className="grid gap-10 lg:grid-cols-3">
                                 <div className="rounded-2xl border border-white/60 bg-white/80 p-5 shadow-md backdrop-blur-sm lg:p-6">
@@ -442,7 +773,7 @@ export default function Home() {
                                 ].map((step, i) => (
                                     <div
                                         key={step.t}
-                                        className="card-hover flex gap-4 rounded-2xl border border-white/70 bg-gradient-to-r from-emerald-50/90 to-white/90 p-5 shadow-md">
+                                        className="card-hover flex gap-4 rounded-2xl border border-white/70 bg-linear-to-r from-emerald-50/90 to-white/90 p-5 shadow-md">
                                         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">
                                             {i + 1}
                                         </span>
@@ -572,7 +903,7 @@ export default function Home() {
                 <ScrollReveal className="scroll-mt-24" threshold={0.2}>
                     <section
                         id="cta"
-                        className="full-bleed border-y border-emerald-200/60 bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-900 py-12 text-white shadow-2xl md:py-14">
+                        className="full-bleed border-y border-emerald-200/60 bg-linear-to-r from-emerald-900 via-emerald-800 to-emerald-900 py-12 text-white shadow-2xl md:py-14">
                         <div className="mx-auto flex w-full max-w-none flex-col gap-6 px-4 sm:px-5 md:flex-row md:items-center md:justify-between md:px-6 lg:px-7 lg:py-2">
                             <div className="min-w-0">
                                 <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">

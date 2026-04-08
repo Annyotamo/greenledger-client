@@ -11,6 +11,8 @@ type ScrollRevealProps = {
     rootMargin?: string;
     /** 0–1, fraction of element visible to trigger */
     threshold?: number;
+    /** If true, reveal only once. If false, replays on re-enter. */
+    once?: boolean;
 };
 
 export function ScrollReveal({
@@ -19,6 +21,7 @@ export function ScrollReveal({
     delay = 0,
     rootMargin = "0px 0px -8% 0px",
     threshold = 0.12,
+    once = false,
 }: ScrollRevealProps) {
     const ref = useRef<HTMLDivElement>(null);
     const [visible, setVisible] = useState(false);
@@ -37,27 +40,29 @@ export function ScrollReveal({
             ([entry]) => {
                 if (entry.isIntersecting) {
                     setVisible(true);
-                    obs.unobserve(el);
+                    if (once) obs.unobserve(el);
+                } else if (!once) {
+                    setVisible(false);
                 }
             },
             { threshold, rootMargin }
         );
         obs.observe(el);
         return () => obs.disconnect();
-    }, [threshold, rootMargin]);
+    }, [threshold, rootMargin, once]);
 
     return (
         <div
             ref={ref}
             className={[
-                "motion-safe:transition-[opacity,transform] motion-safe:duration-[850ms] motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]",
+                "motion-safe:transition-[opacity,transform] motion-safe:duration-850 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]",
                 visible
                     ? "motion-safe:translate-y-0 motion-safe:opacity-100"
                     : "motion-safe:translate-y-9 motion-safe:opacity-0",
                 "motion-reduce:translate-y-0 motion-reduce:opacity-100",
                 className,
             ].join(" ")}
-            style={visible && delay > 0 ? { transitionDelay: `${delay}ms` } : undefined}>
+            style={visible && delay > 0 ? { transitionDelay: `${delay}ms` } : { transitionDelay: "0ms" }}>
             {children}
         </div>
     );

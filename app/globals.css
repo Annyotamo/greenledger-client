@@ -79,6 +79,108 @@ body {
     }
 }
 
+.gl-orb {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(28px);
+    opacity: 0.55;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+}
+
+@keyframes glDrift {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+        transform: translate3d(18px, -22px, 0) scale(1.06);
+    }
+    100% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes glDrift2 {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+        transform: translate3d(-22px, 14px, 0) scale(1.04);
+    }
+    100% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+.gl-drift {
+    animation: glDrift 9.5s ease-in-out infinite;
+}
+
+.gl-drift-2 {
+    animation: glDrift2 12.5s ease-in-out infinite;
+}
+
+.gl-grain {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+    opacity: 0.18;
+}
+
+.gl-shimmer-border {
+    position: relative;
+}
+
+.gl-shimmer-border::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+        110deg,
+        rgba(31, 122, 63, 0.22),
+        rgba(136, 190, 151, 0.18),
+        rgba(31, 122, 63, 0.12)
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.9;
+}
+
+.gl-float {
+    opacity: 0.45;
+    animation: glFloat 7.5s ease-in-out infinite;
+}
+
+@keyframes glFloat {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    50% {
+        transform: translate3d(0, -12px, 0);
+    }
+    100% {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.gl-spin-slow {
+    animation: glSpin 22s linear infinite;
+}
+
+@keyframes glSpin {
+    from {
+        rotate: 0deg;
+    }
+    to {
+        rotate: 360deg;
+    }
+}
+
 .animate-fade-up {
     animation: fadeInUp var(--anim-smooth) ease-out both;
 }

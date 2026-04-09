@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 import { useSidebarStore } from "@/lib/sidebarStore";
 import {
@@ -51,6 +52,8 @@ function SidebarItem({ label, icon, isActive, onClick, compact }: SidebarItemPro
 
 export function Sidebar() {
     const { isOpen, toggle, activeSection, setActiveSection, ghgExpanded, toggleGhg } = useSidebarStore();
+    const router = useRouter();
+    const pathname = usePathname();
 
     const [isMobile, setIsMobile] = useState(false);
 
@@ -62,6 +65,7 @@ export function Sidebar() {
     }, []);
 
     const compact = !isOpen && !isMobile;
+    const scopeRouteActive = pathname === "/scope-1" || pathname.startsWith("/scope-1/");
 
     return (
         <>
@@ -160,9 +164,12 @@ export function Sidebar() {
                             <div className="pl-4 space-y-1">
                                 <button
                                     type="button"
-                                    onClick={() => setActiveSection("scope-1")}
+                                    onClick={() => {
+                                        setActiveSection("scope-1");
+                                        router.push("/scope-1");
+                                    }}
                                     className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-xs font-medium tracking-tight transition-all duration-200 ${
-                                        activeSection === "scope-1"
+                                        activeSection === "scope-1" || scopeRouteActive
                                             ? "bg-white/20 text-white ring-1 ring-emerald-200/35"
                                             : "text-emerald-100/70 hover:bg-white/12 hover:text-white"
                                     }`}>

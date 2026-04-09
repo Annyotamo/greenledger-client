@@ -3,6 +3,7 @@ import { ScrollReveal } from "./landing/ScrollReveal";
 import startupIndia from "@/assets/startupIndia.png";
 import entrepreneurCafe from "@/assets/entrepreneurCafe.jpg";
 import isoCertifaction from "@/assets/isoCertifaction.png";
+import IMKKolkata from "@/assets/IMIKolkata.jpg";
 
 export default function Footer() {
     return (
@@ -31,14 +32,14 @@ export default function Footer() {
                         </a>
                     </nav>
                     <div
-                        className="group w-full rounded-2xl bg-white/75 p-4 text-slate-700 shadow-sm transition hover:bg-white/90 hover:shadow-md sm:p-5"
+                        className="group w-full rounded-none sm:rounded-2xl bg-white/75 p-4 text-slate-700 shadow-none sm:shadow-sm transition hover:bg-white/90 hover:shadow-md sm:p-5"
                         aria-label="Supported by Startup India (opens in new tab)">
                         <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-emerald-900/65">
                                     Supported by
                                 </p>
-                                <p className="mt-1 text-base font-bold tracking-tight text-emerald-950 sm:text-lg">
+                                <p className="mt-1 text-base font-bold tracking-tight hidden sm:block text-emerald-950 sm:text-lg">
                                     <a
                                         href="https://www.startupindia.gov.in/"
                                         target="_blank"
@@ -51,6 +52,10 @@ export default function Footer() {
                                         target="_blank"
                                         rel="noopener noreferrer">
                                         Entrepreneur Cafe
+                                    </a>{" "}
+                                    |{" "}
+                                    <a href="https://imik.edu.in" target="_blank" rel="noopener noreferrer">
+                                        IMI Kolkata
                                     </a>
                                 </p>
                             </div>
@@ -69,16 +74,23 @@ export default function Footer() {
                                         className="h-12 w-auto object-contain opacity-95 sm:h-14"
                                     />
                                 </a>
+                                <a href="https://imik.edu.in" target="_blank" rel="noopener noreferrer">
+                                    <Image
+                                        src={IMKKolkata}
+                                        alt="IMI Kolkata"
+                                        className="h-12 w-auto object-contain opacity-95 sm:h-14"
+                                    />
+                                </a>
                             </div>
                         </div>
                     </div>
-                    <div className="group w-full rounded-2xl bg-white/75 p-4 text-slate-700 shadow-sm transition hover:bg-white/90 hover:shadow-md sm:p-5">
+                    <div className="group w-full rounded-none sm:rounded-2xl shadow-none bg-white/75 p-4 text-slate-700 sm:shadow-sm transition hover:bg-white/90 hover:shadow-md sm:p-5">
                         <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <a href="https://www.iso.org/standard/27001" target="_blank" rel="noopener noreferrer">
                                 <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-emerald-900/65">
                                     Certification
                                 </p>
-                                <p className="mt-1 text-base font-bold tracking-tight text-emerald-950 sm:text-lg">
+                                <p className="mt-1 text-base font-bold tracking-tight hidden sm:block text-emerald-950 sm:text-lg">
                                     ISO 27001
                                 </p>
                             </a>

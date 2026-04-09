@@ -38,9 +38,7 @@ function SidebarItem({ label, icon, isActive, onClick, compact }: SidebarItemPro
             type="button"
             onClick={onClick}
             className={`${baseItemClasses} ${
-                isActive
-                    ? "bg-white/22 text-white border-emerald-200/45 shadow-md"
-                    : "text-emerald-50/85"
+                isActive ? "bg-white/22 text-white border-emerald-200/45 shadow-md" : "text-emerald-50/85"
             }`}>
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/14 text-emerald-50 ring-1 ring-white/15 group-hover:bg-white/20 group-hover:text-white">
                 {icon}
@@ -176,9 +174,6 @@ export function Sidebar() {
                                     <span className="flex items-center gap-2">
                                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 ring-1 ring-emerald-100/30" />
                                         <span>Scope-1 (direct emissions)</span>
-                                    </span>
-                                    <span className="text-[0.65rem] uppercase tracking-[0.2em] text-emerald-100/60">
-                                        Real-time
                                     </span>
                                 </button>
                             </div>

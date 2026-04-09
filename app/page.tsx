@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { LuBolt, LuChartBar, LuCloud, LuFactory, LuScanLine, LuShieldCheck } from "react-icons/lu";
 import greenLedgerLogo from "@/assets/GLLogo.png";
 import startupIndia from "@/assets/startupIndia.png";
+import IMKKolkata from "@/assets/IMIKolkata.jpg";
 import entrepreneurCafe from "@/assets/entrepreneurCafe.jpg";
 import isoCertifaction from "@/assets/isoCertifaction.png";
 import heroMosaic from "@/assets/landing-images/esg_main.960_0_1.jpg";
@@ -307,23 +308,41 @@ export default function Home() {
                                             Supported by
                                         </span>
                                         <span className="h-5 w-px bg-white/20" aria-hidden />
-                                        <Image
-                                            src={startupIndia}
-                                            alt="Startup India"
-                                            className="h-7 w-auto object-contain opacity-95"
-                                        />
+                                        <a
+                                            href="https://www.startupindia.gov.in/"
+                                            target="_blank"
+                                            rel="noopener noreferrer">
+                                            <Image
+                                                src={startupIndia}
+                                                alt="Startup India"
+                                                className="h-7 w-auto object-contain opacity-95"
+                                            />
+                                        </a>
                                         <span className="h-5 w-px bg-white/20" aria-hidden />
-                                        <Image
-                                            src={entrepreneurCafe}
-                                            alt="ISO 27001 certification"
-                                            className="h-7 w-auto object-contain opacity-95"
-                                        />
+                                        <a
+                                            href="https://www.entrepreneurcafe.org/"
+                                            target="_blank"
+                                            rel="noopener noreferrer">
+                                            <Image
+                                                src={entrepreneurCafe}
+                                                alt="Entrepreneur Cafe"
+                                                className="h-7 w-auto object-contain opacity-95"
+                                            />
+                                        </a>
+                                        <span className="h-5 w-px bg-white/20" aria-hidden />
+                                        <a href="https://imik.edu.in" target="_blank" rel="noopener noreferrer">
+                                            <Image
+                                                src={IMKKolkata}
+                                                alt="IMKKolkata"
+                                                className="h-7 w-auto object-contain opacity-95"
+                                            />
+                                        </a>
                                     </div>
-                                    <div className="inline-flex items-center gap-3 rounded-2xl border border-white/25 bg-white/10 px-4 py-2 shadow-sm backdrop-blur-md">
+                                    <div className="inline-flex items-center gap-3 rounded-2xl border border-white/25 bg-white/10 px-4 py-2 shadow-sm backdrop-blur-md h-12">
                                         <Image
                                             src={isoCertifaction}
                                             alt="ISO 27001 certification"
-                                            className="h-8 w-auto object-contain opacity-95"
+                                            className="h-12 w-12 object-contain opacity-95 sm:h-12"
                                         />
                                         <span className="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-emerald-50/85">
                                             ISO 27001

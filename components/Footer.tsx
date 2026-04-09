@@ -47,7 +47,7 @@ export default function Footer() {
                                     </a>{" "}
                                     |{" "}
                                     <a
-                                        href="https://www.entrepreneurcafe.com/"
+                                        href="https://www.entrepreneurcafe.org/"
                                         target="_blank"
                                         rel="noopener noreferrer">
                                         Entrepreneur Cafe
@@ -62,7 +62,7 @@ export default function Footer() {
                                         className="h-12 w-auto object-contain opacity-95 sm:h-14"
                                     />
                                 </a>
-                                <a href="https://www.entrepreneurcafe.com/" target="_blank" rel="noopener noreferrer">
+                                <a href="https://www.entrepreneurcafe.org/" target="_blank" rel="noopener noreferrer">
                                     <Image
                                         src={entrepreneurCafe}
                                         alt="Entrepreneur Cafe"
@@ -72,28 +72,25 @@ export default function Footer() {
                             </div>
                         </div>
                     </div>
-                    <a
-                        href="https://www.iso.org/isoiec-27001-information-security.html"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group w-full rounded-2xl bg-white/75 p-4 text-slate-700 shadow-sm transition hover:bg-white/90 hover:shadow-md sm:p-5"
-                        aria-label="ISO 27001 information (opens in new tab)">
+                    <div className="group w-full rounded-2xl bg-white/75 p-4 text-slate-700 shadow-sm transition hover:bg-white/90 hover:shadow-md sm:p-5">
                         <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
+                            <a href="https://www.iso.org/standard/27001" target="_blank" rel="noopener noreferrer">
                                 <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-emerald-900/65">
                                     Certification
                                 </p>
                                 <p className="mt-1 text-base font-bold tracking-tight text-emerald-950 sm:text-lg">
                                     ISO 27001
                                 </p>
-                            </div>
-                            <Image
-                                src={isoCertifaction}
-                                alt="ISO 27001 certification"
-                                className="h-20 w-auto object-contain opacity-95 sm:h-12"
-                            />
+                            </a>
+                            <a href="https://www.iso.org/standard/27001" target="_blank" rel="noopener noreferrer">
+                                <Image
+                                    src={isoCertifaction}
+                                    alt="ISO 27001 certification"
+                                    className="h-20 w-auto object-contain opacity-95 sm:h-12"
+                                />
+                            </a>
                         </div>
-                    </a>
+                    </div>
                     <p className="text-xs text-slate-500 sm:w-full sm:text-center">
                         © {new Date().getFullYear()} GreenLedger. All rights reserved.
                     </p>

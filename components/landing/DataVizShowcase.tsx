@@ -10,6 +10,7 @@ import {
     Cell,
     Pie,
     PieChart,
+    ResponsiveContainer,
     Tooltip,
     XAxis,
     YAxis,
@@ -31,8 +32,8 @@ function useInView(opts: InViewOptions = {}) {
 
         const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
         if (mq.matches) {
-            setInView(true);
-            return;
+            const t = window.setTimeout(() => setInView(true), 0);
+            return () => window.clearTimeout(t);
         }
 
         const obs = new IntersectionObserver(
@@ -49,34 +50,6 @@ function useInView(opts: InViewOptions = {}) {
     return { ref, inView };
 }
 
-function useElementSize<T extends HTMLElement>() {
-    const ref = useRef<T | null>(null);
-    const [size, setSize] = useState({ width: 0, height: 0 });
-
-    useEffect(() => {
-        const el = ref.current;
-        if (!el) return;
-
-        const update = () => {
-            const rect = el.getBoundingClientRect();
-            const width = Math.max(0, Math.floor(rect.width));
-            const height = Math.max(0, Math.floor(rect.height));
-            setSize({ width, height });
-        };
-
-        update();
-        const ro = new ResizeObserver(update);
-        ro.observe(el);
-        window.addEventListener("resize", update, { passive: true });
-        return () => {
-            ro.disconnect();
-            window.removeEventListener("resize", update);
-        };
-    }, []);
-
-    return { ref, ...size };
-}
-
 function GlowCard({
     title,
     subtitle,
@@ -89,7 +62,7 @@ function GlowCard({
     children: React.ReactNode;
 }) {
     return (
-        <div className="group relative overflow-hidden rounded-3xl bg-white/78 shadow-[0_28px_70px_-32px_rgba(15,80,40,0.28)] backdrop-blur-md">
+        <div className="group relative min-w-0 overflow-hidden rounded-3xl bg-white/78 shadow-[0_28px_70px_-32px_rgba(15,80,40,0.28)] backdrop-blur-md">
             <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-emerald-400/12 blur-3xl transition duration-700 group-hover:scale-110 group-hover:bg-emerald-500/16" />
             <div className="pointer-events-none absolute -left-24 -bottom-24 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl transition duration-700 group-hover:scale-110" />
             <div className="relative px-6 pb-6 pt-6 sm:px-7 sm:pb-7">
@@ -145,19 +118,6 @@ function ChartTooltip({
 
 export function DataVizShowcase() {
     const { ref, inView } = useInView();
-    const [mounted, setMounted] = useState(false);
-    const [animKey, setAnimKey] = useState(0);
-    const barsSize = useElementSize<HTMLDivElement>();
-    const areaSize = useElementSize<HTMLDivElement>();
-    const pieSize = useElementSize<HTMLDivElement>();
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    useEffect(() => {
-        if (inView) setAnimKey((k) => k + 1);
-    }, [inView]);
 
     const scopeBars = useMemo(
         () => [
@@ -214,15 +174,9 @@ export function DataVizShowcase() {
                         subtitle="Carbon accounting"
                         icon={<LuFactory className="h-5 w-5" aria-hidden />}
                     >
-                        <div ref={barsSize.ref} className="h-56 sm:h-60">
-                            {mounted && barsSize.width > 0 && barsSize.height > 0 ? (
-                                <BarChart
-                                    key={`bar-${animKey}`}
-                                    width={barsSize.width}
-                                    height={barsSize.height}
-                                    data={scopeBars}
-                                    barCategoryGap={16}
-                                >
+                        <div className="h-56 min-w-0 sm:h-60">
+                            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={220} debounce={120}>
+                                <BarChart data={scopeBars} barCategoryGap={16}>
                                         <CartesianGrid stroke="rgba(15,47,20,0.08)" vertical={false} />
                                         <XAxis dataKey="month" tickLine={false} axisLine={false} />
                                         <YAxis tickLine={false} axisLine={false} />
@@ -232,7 +186,7 @@ export function DataVizShowcase() {
                                             dataKey="scope1"
                                             fill="rgba(31,122,63,0.78)"
                                             radius={[10, 10, 10, 10]}
-                                            isAnimationActive
+                                            isAnimationActive={inView}
                                             animationDuration={900}
                                         />
                                         <Bar
@@ -240,7 +194,7 @@ export function DataVizShowcase() {
                                             dataKey="scope2"
                                             fill="rgba(78,165,108,0.72)"
                                             radius={[10, 10, 10, 10]}
-                                            isAnimationActive
+                                            isAnimationActive={inView}
                                             animationDuration={1100}
                                         />
                                         <Bar
@@ -248,13 +202,11 @@ export function DataVizShowcase() {
                                             dataKey="scope3"
                                             fill="rgba(49,90,67,0.55)"
                                             radius={[10, 10, 10, 10]}
-                                            isAnimationActive
+                                            isAnimationActive={inView}
                                             animationDuration={1300}
                                         />
                                 </BarChart>
-                            ) : (
-                                <div className="h-full w-full animate-pulse rounded-2xl bg-linear-to-r from-emerald-50/80 via-white/80 to-emerald-50/80 shadow-sm" />
-                            )}
+                            </ResponsiveContainer>
                         </div>
                         <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-emerald-950/80">
                             <span className="rounded-full bg-emerald-50 px-3 py-1 shadow-sm">Facility view</span>
@@ -268,12 +220,9 @@ export function DataVizShowcase() {
                         subtitle="Performance"
                         icon={<LuCloud className="h-5 w-5" aria-hidden />}
                     >
-                        <div ref={areaSize.ref} className="h-56 sm:h-60">
-                            {mounted && areaSize.width > 0 && areaSize.height > 0 ? (
+                        <div className="h-56 min-w-0 sm:h-60">
+                            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={220} debounce={120}>
                                 <AreaChart
-                                    key={`area-${animKey}`}
-                                    width={areaSize.width}
-                                    height={areaSize.height}
                                     data={intensity}
                                     margin={{ left: 0, right: 6, top: 8, bottom: 0 }}
                                 >
@@ -288,7 +237,7 @@ export function DataVizShowcase() {
                                             stroke="rgba(31,122,63,0.9)"
                                             strokeWidth={2.5}
                                             fill="rgba(31,122,63,0.18)"
-                                            isAnimationActive
+                                            isAnimationActive={inView}
                                             animationDuration={1000}
                                         />
                                         <Area
@@ -299,13 +248,11 @@ export function DataVizShowcase() {
                                             strokeDasharray="5 6"
                                             strokeWidth={2}
                                             fill="rgba(0,0,0,0)"
-                                            isAnimationActive
+                                            isAnimationActive={inView}
                                             animationDuration={1200}
                                         />
                                 </AreaChart>
-                            ) : (
-                                <div className="h-full w-full animate-pulse rounded-2xl bg-linear-to-r from-emerald-50/80 via-white/80 to-emerald-50/80 shadow-sm" />
-                            )}
+                            </ResponsiveContainer>
                         </div>
                         <p className="mt-4 text-sm text-slate-700">
                             Track intensity vs target with confidence intervals and methodology traits.
@@ -317,13 +264,9 @@ export function DataVizShowcase() {
                         subtitle="Audit‑ready reporting"
                         icon={<LuShieldCheck className="h-5 w-5" aria-hidden />}
                     >
-                        <div ref={pieSize.ref} className="h-56 sm:h-60">
-                            {mounted && pieSize.width > 0 && pieSize.height > 0 ? (
-                                <PieChart
-                                    key={`pie-${animKey}`}
-                                    width={pieSize.width}
-                                    height={pieSize.height}
-                                >
+                        <div className="h-56 min-w-0 sm:h-60">
+                            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={220} debounce={120}>
+                                <PieChart>
                                         <Tooltip content={<ChartTooltip />} />
                                         <Pie
                                             data={pie}
@@ -332,7 +275,7 @@ export function DataVizShowcase() {
                                             innerRadius={52}
                                             outerRadius={88}
                                             paddingAngle={3}
-                                            isAnimationActive
+                                            isAnimationActive={inView}
                                             animationDuration={1100}
                                         >
                                             {pie.map((p) => (
@@ -340,9 +283,7 @@ export function DataVizShowcase() {
                                             ))}
                                         </Pie>
                                 </PieChart>
-                            ) : (
-                                <div className="h-full w-full animate-pulse rounded-2xl bg-linear-to-r from-emerald-50/80 via-white/80 to-emerald-50/80 shadow-sm" />
-                            )}
+                            </ResponsiveContainer>
                         </div>
                         <div className="mt-4 grid gap-2 text-xs text-slate-700">
                             {pie.slice(0, 3).map((row) => (

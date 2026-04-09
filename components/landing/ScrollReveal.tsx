@@ -32,8 +32,8 @@ export function ScrollReveal({
 
         const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
         if (mq.matches) {
-            setVisible(true);
-            return;
+            const t = window.setTimeout(() => setVisible(true), 0);
+            return () => window.clearTimeout(t);
         }
 
         const obs = new IntersectionObserver(

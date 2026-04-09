@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect } from "react";
 import { LuBolt, LuChartBar, LuCloud, LuFactory, LuScanLine, LuShieldCheck } from "react-icons/lu";
 import greenLedgerLogo from "@/assets/GLLogo.png";
@@ -301,6 +302,11 @@ export default function Home() {
                                         className="rounded-xl px-5 py-3 text-sm font-semibold text-white underline decoration-emerald-300/80 decoration-2 underline-offset-[6px] transition hover:decoration-emerald-200">
                                         Request a demo
                                     </a>
+                                    <Link
+                                        href="/login"
+                                        className="rounded-xl border border-white/30 bg-white/8 px-5 py-3 text-sm font-medium text-emerald-50/95 shadow-sm backdrop-blur-md transition hover:bg-white/16">
+                                        Login
+                                    </Link>
                                 </div>
                                 <div className="mt-7 flex flex-wrap items-center gap-3">
                                     <div className="inline-flex items-center gap-3 rounded-2xl border border-white/25 bg-white/10 px-4 py-2 shadow-sm backdrop-blur-md transition hover:bg-white/15">

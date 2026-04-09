@@ -15,11 +15,16 @@ const navLinks = [
 const Navbar = () => {
     const pathname = usePathname();
     const isDashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+    const isLogin = pathname === "/login" || pathname.startsWith("/login/");
+
+    if (isDashboard) {
+        return null;
+    }
 
     return (
         <header className="sticky top-0 z-50 w-full border-b border-white/40 bg-[#f6fff8]/85 backdrop-blur-md">
             <nav
-                className={`mx-auto flex w-full max-w-[100rem] items-center justify-between gap-4 px-4 py-3 sm:px-5 md:px-6 lg:px-7 ${
+                className={`mx-auto flex w-full max-w-400 items-center justify-between gap-4 px-4 py-3 sm:px-5 md:px-6 lg:px-7 ${
                     isDashboard ? "md:pl-72" : ""
                 }`}>
                 <Link href="/" className="flex min-w-0 items-center gap-2 sm:gap-3">
@@ -50,6 +55,13 @@ const Navbar = () => {
                     className="shrink-0 rounded-full bg-emerald-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700 sm:px-4 sm:text-sm">
                     Book demo
                 </a>
+                {!isLogin ? (
+                    <Link
+                        href="/login"
+                        className="hidden shrink-0 rounded-full border border-emerald-900/15 bg-white/70 px-3 py-2 text-xs font-semibold text-emerald-900 shadow-sm transition hover:border-emerald-700/25 hover:bg-white sm:inline-flex sm:px-4 sm:text-sm">
+                        Client login
+                    </Link>
+                ) : null}
             </nav>
         </header>
     );

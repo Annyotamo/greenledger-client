@@ -3,9 +3,11 @@ import { create } from "zustand";
 type SectionKey =
   | "esg-accounting"
   | "ghg-accounting"
+  | "traceability"
   | "finance-esg-reporting"
   | "audit-compliance"
-  | "scope-1";
+  | "scope-1"
+  | "settings";
 
 type SidebarState = {
   isOpen: boolean;

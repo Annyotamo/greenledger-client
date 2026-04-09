@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Raleway } from "next/font/google";
-import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 const RalewayFont = Raleway({
@@ -27,7 +26,6 @@ export default function RootLayout({
     return (
         <html lang="en" className={`${RalewayFont.variable} h-full antialiased`}>
             <body className="flex min-h-screen flex-col overflow-x-hidden font-[family-name:var(--font-raleway),system-ui,sans-serif]">
-                <Navbar />
                 {children}
             </body>
         </html>

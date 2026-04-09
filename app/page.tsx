@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect } from "react";
 import { LuBolt, LuChartBar, LuCloud, LuFactory, LuScanLine, LuShieldCheck } from "react-icons/lu";
 import greenLedgerLogo from "@/assets/GLLogo.png";
@@ -22,6 +21,7 @@ import { ScrollProgress } from "@/components/landing/ScrollProgress";
 import { ScrollReveal, useParallaxScroll } from "@/components/landing/ScrollReveal";
 import { SolutionsAccordion, type AccordionItem } from "@/components/landing/SolutionsAccordion";
 import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 
 const sliderCards: SliderCard[] = [
     {
@@ -210,6 +210,7 @@ export default function Home() {
 
     return (
         <div className="min-h-screen w-full text-slate-900">
+            <Navbar />
             <ScrollProgress />
             <main className="mx-auto w-full max-w-400 px-4 sm:px-5 md:px-6 lg:px-7">
                 {/* Hero */}

@@ -8,7 +8,7 @@ const RalewayFont = Raleway({
 });
 
 export const metadata: Metadata = {
-    title: "GreenLedger — ESG reporting, carbon accounting & supply chain traceability",
+    title: "GreenLedger ESG reporting, carbon accounting & supply chain traceability",
     description:
         "Collect sustainability data, auto-generate CSRD, ESRS and BRSR-aligned reports, run carbon accounting across Scopes 1–3, and prove supply chain origin with consumer-ready traceability.",
     icons: {

@@ -30,7 +30,7 @@ const sliderCards: SliderCard[] = [
         eyebrow: "ESG reporting",
         title: "From raw data to audit-ready disclosures",
         description:
-            "Regulators—especially in Europe—expect consistent, evidence-backed reporting on environmental and social impact. GreenLedger centralizes collection, validation, and narrative so teams ship CSRD- and ESRS-aligned outputs without spreadsheet chaos.",
+            "Regulators especially in Europe expect consistent, evidence-backed reporting on environmental and social impact. GreenLedger centralizes collection, validation, and narrative so teams ship CSRD- and ESRS-aligned outputs without spreadsheet chaos.",
         bullets: [
             "Structured data capture mapped to international disclosure frameworks",
             "Automated report generation with version history for auditors",
@@ -45,7 +45,7 @@ const sliderCards: SliderCard[] = [
         eyebrow: "Carbon accounting",
         title: "A finance-grade footprint across Scopes 1–3",
         description:
-            "Treat carbon like a ledger: every activity rolls up to totals you can defend in the boardroom. Built-in GHG Protocol thinking, activity data imports, and uncertainty flags help you improve data quality over time—not just once a year.",
+            "Treat carbon like a ledger: every activity rolls up to totals you can defend in the boardroom. Built-in GHG Protocol thinking, activity data imports, and uncertainty flags help you improve data quality over time not just once a year.",
         bullets: [
             "Scope 1 & 2 operational emissions with facility and energy views",
             "Scope 3 categories with supplier and spend-based starting points",
@@ -58,7 +58,7 @@ const sliderCards: SliderCard[] = [
     {
         id: "trace",
         eyebrow: "Supply chain traceability",
-        title: "From supplier to QR—proof consumers can trust",
+        title: "From supplier to QR proof consumers can trust",
         description:
             "Modern buyers want to know where things come from and whether production met sustainability expectations. Map ingredients and components across tiers, attach evidence, and publish consumer-facing journeys that start with a scan.",
         bullets: [
@@ -75,7 +75,7 @@ const sliderCards: SliderCard[] = [
         eyebrow: "One operating system",
         title: "Finance, ops, and sustainability on one timeline",
         description:
-            "Reporting, accounting, and traceability share the same master data. When a supplier updates a factor or a loan book shifts, every dependent view updates—so your ESG story stays coherent end to end.",
+            "Reporting, accounting, and traceability share the same master data. When a supplier updates a factor or a loan book shifts, every dependent view updates so your ESG story stays coherent end to end.",
         bullets: [
             "Role-based access for sustainability, finance, and procurement",
             "API-friendly exports for data warehouses and BI tools",
@@ -93,7 +93,7 @@ const hoverInsights: HoverInsight[] = [
         stat: "50%",
         headline: "Less time in disclosure assembly",
         teaser: "Automations replace manual reconciliation across entities.",
-        detail: "Templates, validations, and roll-forward logic mean your team spends time on narrative and strategy—not hunting for the right emission factor in row 400 of a spreadsheet.",
+        detail: "Templates, validations, and roll-forward logic mean your team spends time on narrative and strategy not hunting for the right emission factor in row 400 of a spreadsheet.",
     },
     {
         id: "i2",
@@ -117,19 +117,19 @@ const hoverInsights: HoverInsight[] = [
         stat: "360°",
         headline: "Traceable numbers, not one-off estimates",
         teaser: "Every total links to sources you can show an auditor.",
-        detail: "Activity logs, methodology notes, and data lineage make it easier to defend figures under scrutiny—whether from regulators, lenders, or large customers.",
+        detail: "Activity logs, methodology notes, and data lineage make it easier to defend figures under scrutiny whether from regulators, lenders, or large customers.",
     },
 ];
 
 const accordionItems: AccordionItem[] = [
     {
         id: "c1",
-        title: "Why ESG reporting is now a board-level program",
+        title: "Why ESG reporting is now a board level program",
         subtitle: "Legal expectations, CSRD, ESRS, and what “good” looks like",
         body: (
             <>
                 <p>
-                    Companies—particularly those exposed to European rules—face mandatory reporting on climate and
+                    Companies particularly those exposed to European rules face mandatory reporting on climate and
                     social topics. Frameworks like CSRD and the ESRS set expectations for granularity, comparability,
                     and assurance readiness.
                 </p>
@@ -150,7 +150,7 @@ const accordionItems: AccordionItem[] = [
             <>
                 <p>
                     A credible footprint is more than a single annual number. It is a living model of energy, travel,
-                    purchased goods, logistics, and—where relevant—customer use and end-of-life impacts.
+                    purchased goods, logistics, and where relevant customer use and end-of-life impacts.
                 </p>
                 <p className="mt-3">
                     GreenLedger combines calculators, import paths for utility and ERP extracts, and supplier-sourced
@@ -175,7 +175,7 @@ const accordionItems: AccordionItem[] = [
                 <p className="mt-3">
                     GreenLedger links internal BOMs and supplier graphs to consumer-safe narratives. Procurement teams
                     keep the detailed evidence; marketing and product teams publish what is accurate, approved, and
-                    localized—without maintaining a separate shadow spreadsheet.
+                    localized without maintaining a separate shadow spreadsheet.
                 </p>
             </>
         ),
@@ -192,7 +192,7 @@ const accordionItems: AccordionItem[] = [
                     traceability on hero SKUs or regions.
                 </p>
                 <p className="mt-3">
-                    GreenLedger’s modules share reference data—suppliers, sites, factors, and products—so each phase
+                    GreenLedger’s modules share reference data suppliers, sites, factors, and products so each phase
                     compounds instead of creating another silo. Our team helps map your entities, chart of accounts
                     touchpoints, and supplier tiers to a staged plan with measurable milestones.
                 </p>
@@ -286,7 +286,7 @@ export default function Home() {
                                     GreenLedger helps organizations collect environmental and social data, auto-generate
                                     standards-aligned reports (including CSRD / ESRS / BRSR), run rigorous carbon
                                     accounting across Scopes 1–3, and prove product stories with supply chain
-                                    traceability—from factory floor to QR code in a shopper’s hand.
+                                    traceability from factory floor to QR code in a shopper’s hand.
                                 </p>
                                 <div className="mt-9 flex flex-wrap gap-3">
                                     <a
@@ -399,7 +399,7 @@ export default function Home() {
                                 </div>
                                 <p className="max-w-xs text-center text-xs leading-relaxed text-emerald-100/85 md:text-right">
                                     Built for enterprises that need audit-ready numbers and consumer-trusted product
-                                    stories—not slide-deck estimates.
+                                    stories not slide-deck estimates.
                                 </p>
                             </div>
                         </div>
@@ -440,7 +440,7 @@ export default function Home() {
                             </h2>
                             <p className="mt-3 text-sm leading-relaxed text-slate-700 sm:text-base">
                                 Slide through how reporting, carbon accounting, and traceability reinforce each other.
-                                The same suppliers, sites, and products feed every surface—so you are never reconciling
+                                The same suppliers, sites, and products feed every surface so you are never reconciling
                                 three different “versions of the truth.”
                             </p>
                         </div>
@@ -457,7 +457,7 @@ export default function Home() {
                             Outcomes teams feel in the first two quarters
                         </h2>
                         <p className="mt-2 max-w-3xl text-sm text-slate-700 sm:text-base">
-                            Hover each card for a fuller picture—numbers here are illustrative of the operational
+                            Hover each card for a fuller picture numbers here are illustrative of the operational
                             improvements customers target.
                         </p>
                         <div className="mt-8">
@@ -481,7 +481,7 @@ export default function Home() {
                                                 <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-700/10 text-emerald-800">
                                                     <LuChartBar className="h-3.5 w-3.5" />
                                                 </span>
-                                                Finance‑grade ESG reporting
+                                                Finance grade ESG reporting
                                             </span>
                                             <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50/80 px-3 py-1.5 text-xs font-semibold text-emerald-950 shadow-sm">
                                                 CSRD / ESRS aligned
@@ -593,7 +593,7 @@ export default function Home() {
                                             </h3>
                                             <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-700 sm:text-base">
                                                 Capture “who changed what, when, and why” with structured traits so
-                                                reviewers can replay methodology—without hunting through email threads.
+                                                reviewers can replay methodology without hunting through email threads.
                                             </p>
                                         </div>
 
@@ -747,7 +747,7 @@ export default function Home() {
                                         For brand &amp; product teams
                                     </h3>
                                     <p className="mt-3 text-sm leading-relaxed text-slate-700">
-                                        Ship QR-led transparency that matches what compliance actually knows—so
+                                        Ship QR-led transparency that matches what compliance actually knows so
                                         marketing claims and regulatory filings tell the same story.
                                     </p>
                                 </div>
@@ -761,7 +761,7 @@ export default function Home() {
                     <section id="deep-dive" className="scroll-mt-24">
                         <div className="mb-6 max-w-3xl">
                             <h2 className="text-2xl font-bold tracking-tight text-emerald-950 sm:text-3xl">
-                                The longer read—how we think about the problem
+                                The longer read how we think about the problem
                             </h2>
                             <p className="mt-3 text-sm leading-relaxed text-slate-700 sm:text-base">
                                 Expand any topic for plain-language context. This is the layer executives share with
@@ -791,7 +791,7 @@ export default function Home() {
                                 <p className="mt-4 text-sm leading-relaxed text-slate-700 sm:text-base">
                                     GreenLedger connects operational procurement data with customer-facing storytelling.
                                     You decide what is public, what stays internal, and how much detail each market
-                                    requires—while preserving a single governed record underneath.
+                                    requires while preserving a single governed record underneath.
                                 </p>
                                 <ul className="mt-6 space-y-3 text-sm text-slate-700">
                                     <li className="flex gap-3">
@@ -811,7 +811,7 @@ export default function Home() {
                                     <li className="flex gap-3">
                                         <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-600" />
                                         <span>
-                                            Publish localized QR pages that reflect the latest approved facts—no manual
+                                            Publish localized QR pages that reflect the latest approved facts no manual
                                             website updates per change.
                                         </span>
                                     </li>
@@ -829,7 +829,7 @@ export default function Home() {
                                     },
                                     {
                                         t: "Improve",
-                                        d: "Procurement sees gaps instantly—where data is missing or certifications lapse.",
+                                        d: "Procurement sees gaps instantly where data is missing or certifications lapse.",
                                     },
                                 ].map((step, i) => (
                                     <div
@@ -913,7 +913,7 @@ export default function Home() {
                         <p className="mt-5 max-w-4xl text-sm leading-relaxed text-slate-700 sm:text-base">
                             Sustainability officers use GreenLedger for auditable metrics; finance teams align ledgers
                             with climate data; procurement leads run structured supplier programs. When disclosure
-                            season arrives, everyone is looking at the same numbers—and when a customer scans a code,
+                            season arrives, everyone is looking at the same numbers and when a customer scans a code,
                             that story still holds.
                         </p>
                         <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -973,7 +973,7 @@ export default function Home() {
                                 <p className="mt-3 max-w-2xl text-sm leading-relaxed text-emerald-50 sm:text-base">
                                     Walk through reporting templates, carbon inventory setup, and a traceability example
                                     tailored to your sector. Leave with a 30-day rollout sketch your steering committee
-                                    can debate with facts—not assumptions.
+                                    can debate with facts not assumptions.
                                 </p>
                             </div>
                             <Link

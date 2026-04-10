@@ -51,7 +51,7 @@ export function FeatureSlider({ cards }: FeatureSliderProps) {
         if (reduced.matches) return;
 
         // scroll-behavior: smooth (e.g. Tailwind scroll-smooth) breaks tiny programmatic
-        // scrollLeft updates in a rAF loop — force instant scrolling for the marquee.
+        // scrollLeft updates in a rAF loop force instant scrolling for the marquee.
         el.style.scrollBehavior = "auto";
 
         const pxPerMs = 0.05;

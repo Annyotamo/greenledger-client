@@ -213,7 +213,7 @@ export default function GetStartedPage() {
                     </div>
                 </section>
 
-                <section className="mt-14 rounded-3xl border border-emerald-900/10 bg-linear-to-r from-emerald-900 via-emerald-800 to-emerald-900 p-6 text-white shadow-2xl sm:p-8 md:p-10">
+                <section className="mt-14 rounded-3xl border border-emerald-900/10 bg-linear-to-r from-emerald-900 via-emerald-800 to-emerald-900 p-6 text-white shadow-2xl sm:p-8 md:p-10 mb-6">
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div className="max-w-3xl">
                             <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-50">

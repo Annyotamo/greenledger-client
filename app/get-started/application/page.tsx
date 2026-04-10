@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { LuArrowLeft, LuCircleCheck, LuLeaf, LuSend } from "react-icons/lu";
-import greenLedgerLogo from "@/assets/GLLogo.png";
 
 const needs = [
     "CSRD / ESRS Reporting",
@@ -49,7 +48,7 @@ export default function CompanyIntakePage() {
                     </div>
                 </section>
 
-                <section className="mt-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+                <section className="mt-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] mb-6">
                     <form
                         onSubmit={onSubmit}
                         className="rounded-3xl border border-white/80 bg-white/85 p-5 shadow-xl backdrop-blur-md sm:p-7 md:p-8">

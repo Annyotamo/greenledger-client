@@ -36,13 +36,10 @@ function useInView(opts: InViewOptions = {}) {
             return () => window.clearTimeout(t);
         }
 
-        const obs = new IntersectionObserver(
-            ([entry]) => setInView(entry.isIntersecting),
-            {
-                rootMargin: opts.rootMargin ?? "0px 0px -15% 0px",
-                threshold: opts.threshold ?? 0.15,
-            }
-        );
+        const obs = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
+            rootMargin: opts.rootMargin ?? "0px 0px -15% 0px",
+            threshold: opts.threshold ?? 0.15,
+        });
         obs.observe(el);
         return () => obs.disconnect();
     }, [opts.rootMargin, opts.threshold]);
@@ -68,12 +65,8 @@ function GlowCard({
             <div className="relative px-6 pb-6 pt-6 sm:px-7 sm:pb-7">
                 <div className="flex items-start justify-between gap-4">
                     <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-900/60">
-                            {subtitle}
-                        </p>
-                        <h3 className="mt-2 text-lg font-bold tracking-tight text-emerald-950 sm:text-xl">
-                            {title}
-                        </h3>
+                        <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-900/60">{subtitle}</p>
+                        <h3 className="mt-2 text-lg font-bold tracking-tight text-emerald-950 sm:text-xl">{title}</h3>
                     </div>
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-700/10 text-emerald-900/70 shadow-sm">
                         {icon}
@@ -97,11 +90,7 @@ function ChartTooltip({
     if (!active || !payload?.length) return null;
     return (
         <div className="rounded-2xl bg-white/95 px-4 py-3 text-xs shadow-xl ring-1 ring-emerald-900/10 backdrop-blur-md">
-            {label ? (
-                <p className="font-bold uppercase tracking-wide text-emerald-900/60">
-                    {label}
-                </p>
-            ) : null}
+            {label ? <p className="font-bold uppercase tracking-wide text-emerald-900/60">{label}</p> : null}
             <div className="mt-2 space-y-1">
                 {payload.map((p, i) => (
                     <div key={i} className="flex items-center justify-between gap-6">
@@ -128,7 +117,7 @@ export function DataVizShowcase() {
             { month: "May", scope1: 2.0, scope2: 1.4, scope3: 5.1 },
             { month: "Jun", scope1: 1.9, scope2: 1.3, scope3: 4.9 },
         ],
-        []
+        [],
     );
 
     const intensity = useMemo(
@@ -138,7 +127,7 @@ export function DataVizShowcase() {
             { q: "Q3", intensity: 54, target: 54 },
             { q: "Q4", intensity: 49, target: 50 },
         ],
-        []
+        [],
     );
 
     const pie = useMemo(
@@ -149,7 +138,7 @@ export function DataVizShowcase() {
             { name: "Travel", value: 12, color: "rgba(136,190,151,0.8)" },
             { name: "Other", value: 15, color: "rgba(49,90,67,0.55)" },
         ],
-        []
+        [],
     );
 
     return (
@@ -160,11 +149,11 @@ export function DataVizShowcase() {
                         Live-looking visuals
                     </p>
                     <h2 className="mt-2 text-2xl font-bold tracking-tight text-emerald-950 sm:text-3xl">
-                        Finance‑grade ESG dashboards, even before data is connected
+                        Finance grade ESG dashboards, even before data is connected
                     </h2>
                     <p className="mt-3 text-sm leading-relaxed text-slate-700 sm:text-base">
-                        These are illustrative examples of the kinds of views you’ll get for Scopes 1–3,
-                        reporting readiness, and audit compliance. Scroll away and back—animations replay.
+                        These are illustrative examples of the kinds of views you’ll get for Scopes 1–3, reporting
+                        readiness, and audit compliance. Scroll away and back animations replay.
                     </p>
                 </div>
 
@@ -172,39 +161,38 @@ export function DataVizShowcase() {
                     <GlowCard
                         title="Scopes 1–3 rollup"
                         subtitle="Carbon accounting"
-                        icon={<LuFactory className="h-5 w-5" aria-hidden />}
-                    >
+                        icon={<LuFactory className="h-5 w-5" aria-hidden />}>
                         <div className="h-56 min-w-0 sm:h-60">
                             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={220} debounce={120}>
                                 <BarChart data={scopeBars} barCategoryGap={16}>
-                                        <CartesianGrid stroke="rgba(15,47,20,0.08)" vertical={false} />
-                                        <XAxis dataKey="month" tickLine={false} axisLine={false} />
-                                        <YAxis tickLine={false} axisLine={false} />
-                                        <Tooltip content={<ChartTooltip />} />
-                                        <Bar
-                                            name="Scope 1"
-                                            dataKey="scope1"
-                                            fill="rgba(31,122,63,0.78)"
-                                            radius={[10, 10, 10, 10]}
-                                            isAnimationActive={inView}
-                                            animationDuration={900}
-                                        />
-                                        <Bar
-                                            name="Scope 2"
-                                            dataKey="scope2"
-                                            fill="rgba(78,165,108,0.72)"
-                                            radius={[10, 10, 10, 10]}
-                                            isAnimationActive={inView}
-                                            animationDuration={1100}
-                                        />
-                                        <Bar
-                                            name="Scope 3"
-                                            dataKey="scope3"
-                                            fill="rgba(49,90,67,0.55)"
-                                            radius={[10, 10, 10, 10]}
-                                            isAnimationActive={inView}
-                                            animationDuration={1300}
-                                        />
+                                    <CartesianGrid stroke="rgba(15,47,20,0.08)" vertical={false} />
+                                    <XAxis dataKey="month" tickLine={false} axisLine={false} />
+                                    <YAxis tickLine={false} axisLine={false} />
+                                    <Tooltip content={<ChartTooltip />} />
+                                    <Bar
+                                        name="Scope 1"
+                                        dataKey="scope1"
+                                        fill="rgba(31,122,63,0.78)"
+                                        radius={[10, 10, 10, 10]}
+                                        isAnimationActive={inView}
+                                        animationDuration={900}
+                                    />
+                                    <Bar
+                                        name="Scope 2"
+                                        dataKey="scope2"
+                                        fill="rgba(78,165,108,0.72)"
+                                        radius={[10, 10, 10, 10]}
+                                        isAnimationActive={inView}
+                                        animationDuration={1100}
+                                    />
+                                    <Bar
+                                        name="Scope 3"
+                                        dataKey="scope3"
+                                        fill="rgba(49,90,67,0.55)"
+                                        radius={[10, 10, 10, 10]}
+                                        isAnimationActive={inView}
+                                        animationDuration={1300}
+                                    />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
@@ -218,39 +206,35 @@ export function DataVizShowcase() {
                     <GlowCard
                         title="Emissions intensity trend"
                         subtitle="Performance"
-                        icon={<LuCloud className="h-5 w-5" aria-hidden />}
-                    >
+                        icon={<LuCloud className="h-5 w-5" aria-hidden />}>
                         <div className="h-56 min-w-0 sm:h-60">
                             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={220} debounce={120}>
-                                <AreaChart
-                                    data={intensity}
-                                    margin={{ left: 0, right: 6, top: 8, bottom: 0 }}
-                                >
-                                        <CartesianGrid stroke="rgba(15,47,20,0.08)" vertical={false} />
-                                        <XAxis dataKey="q" tickLine={false} axisLine={false} />
-                                        <YAxis tickLine={false} axisLine={false} />
-                                        <Tooltip content={<ChartTooltip />} />
-                                        <Area
-                                            type="monotone"
-                                            name="Intensity"
-                                            dataKey="intensity"
-                                            stroke="rgba(31,122,63,0.9)"
-                                            strokeWidth={2.5}
-                                            fill="rgba(31,122,63,0.18)"
-                                            isAnimationActive={inView}
-                                            animationDuration={1000}
-                                        />
-                                        <Area
-                                            type="monotone"
-                                            name="Target"
-                                            dataKey="target"
-                                            stroke="rgba(78,165,108,0.75)"
-                                            strokeDasharray="5 6"
-                                            strokeWidth={2}
-                                            fill="rgba(0,0,0,0)"
-                                            isAnimationActive={inView}
-                                            animationDuration={1200}
-                                        />
+                                <AreaChart data={intensity} margin={{ left: 0, right: 6, top: 8, bottom: 0 }}>
+                                    <CartesianGrid stroke="rgba(15,47,20,0.08)" vertical={false} />
+                                    <XAxis dataKey="q" tickLine={false} axisLine={false} />
+                                    <YAxis tickLine={false} axisLine={false} />
+                                    <Tooltip content={<ChartTooltip />} />
+                                    <Area
+                                        type="monotone"
+                                        name="Intensity"
+                                        dataKey="intensity"
+                                        stroke="rgba(31,122,63,0.9)"
+                                        strokeWidth={2.5}
+                                        fill="rgba(31,122,63,0.18)"
+                                        isAnimationActive={inView}
+                                        animationDuration={1000}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        name="Target"
+                                        dataKey="target"
+                                        stroke="rgba(78,165,108,0.75)"
+                                        strokeDasharray="5 6"
+                                        strokeWidth={2}
+                                        fill="rgba(0,0,0,0)"
+                                        isAnimationActive={inView}
+                                        animationDuration={1200}
+                                    />
                                 </AreaChart>
                             </ResponsiveContainer>
                         </div>
@@ -262,26 +246,24 @@ export function DataVizShowcase() {
                     <GlowCard
                         title="Scope‑3 category mix"
                         subtitle="Audit‑ready reporting"
-                        icon={<LuShieldCheck className="h-5 w-5" aria-hidden />}
-                    >
+                        icon={<LuShieldCheck className="h-5 w-5" aria-hidden />}>
                         <div className="h-56 min-w-0 sm:h-60">
                             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={220} debounce={120}>
                                 <PieChart>
-                                        <Tooltip content={<ChartTooltip />} />
-                                        <Pie
-                                            data={pie}
-                                            dataKey="value"
-                                            nameKey="name"
-                                            innerRadius={52}
-                                            outerRadius={88}
-                                            paddingAngle={3}
-                                            isAnimationActive={inView}
-                                            animationDuration={1100}
-                                        >
-                                            {pie.map((p) => (
-                                                <Cell key={p.name} fill={p.color} />
-                                            ))}
-                                        </Pie>
+                                    <Tooltip content={<ChartTooltip />} />
+                                    <Pie
+                                        data={pie}
+                                        dataKey="value"
+                                        nameKey="name"
+                                        innerRadius={52}
+                                        outerRadius={88}
+                                        paddingAngle={3}
+                                        isAnimationActive={inView}
+                                        animationDuration={1100}>
+                                        {pie.map((p) => (
+                                            <Cell key={p.name} fill={p.color} />
+                                        ))}
+                                    </Pie>
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
@@ -289,10 +271,7 @@ export function DataVizShowcase() {
                             {pie.slice(0, 3).map((row) => (
                                 <div key={row.name} className="flex items-center justify-between">
                                     <span className="inline-flex items-center gap-2">
-                                        <span
-                                            className="h-2.5 w-2.5 rounded-full"
-                                            style={{ background: row.color }}
-                                        />
+                                        <span className="h-2.5 w-2.5 rounded-full" style={{ background: row.color }} />
                                         <span className="font-semibold">{row.name}</span>
                                     </span>
                                     <span className="font-bold text-emerald-950">{row.value}%</span>
@@ -305,4 +284,3 @@ export function DataVizShowcase() {
         </section>
     );
 }
-

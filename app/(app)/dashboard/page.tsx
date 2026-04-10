@@ -13,8 +13,49 @@ import {
     LuShieldCheck,
     LuSparkles,
 } from "react-icons/lu";
+import {
+    Area,
+    AreaChart,
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from "recharts";
 import { Sidebar } from "@/components/dashboard/SidebarShell";
 import { useSidebarStore } from "@/lib/sidebarStore";
+
+function DashboardTooltip({
+    active,
+    payload,
+    label,
+}: {
+    active?: boolean;
+    payload?: Array<{ name?: string; value?: number }>;
+    label?: string;
+}) {
+    if (!active || !payload?.length) return null;
+    return (
+        <div className="rounded-2xl bg-white/95 px-4 py-3 text-xs shadow-xl ring-1 ring-emerald-900/10 backdrop-blur-md">
+            {label ? <p className="font-bold uppercase tracking-wide text-emerald-900/60">{label}</p> : null}
+            <div className="mt-2 space-y-1.5">
+                {payload.map((p, i) => (
+                    <div key={`${p.name ?? "metric"}-${i}`} className="flex items-center justify-between gap-5">
+                        <span className="font-semibold text-slate-700">{p.name}</span>
+                        <span className="font-bold text-emerald-950">
+                            {typeof p.value === "number" ? p.value.toFixed(1) : "-"}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
 
 export default function DashboardPage() {
     const activeSection = useSidebarStore((s) => s.activeSection);
@@ -32,6 +73,39 @@ export default function DashboardPage() {
         return labels[activeSection ?? "esg-accounting"] ?? "Dashboard";
     }, [activeSection]);
 
+    const fluidSeries = useMemo(
+        () => [
+            { month: "Jan", reporting: -12, finance: -32, traceability: 95, advisory: 58 },
+            { month: "Feb", reporting: -28, finance: -86, traceability: 18, advisory: 110 },
+            { month: "Mar", reporting: -8, finance: 18, traceability: 82, advisory: -48 },
+            { month: "Apr", reporting: -18, finance: -20, traceability: -62, advisory: 82 },
+            { month: "May", reporting: -30, finance: -36, traceability: 64, advisory: -82 },
+            { month: "Jun", reporting: -92, finance: 28, traceability: 118, advisory: 42 },
+            { month: "Jul", reporting: 24, finance: -44, traceability: 168, advisory: 32 },
+        ],
+        [],
+    );
+
+    const supplierSegments = useMemo(
+        () => [
+            { name: "Low risk", value: 46, color: "rgba(31,122,63,0.82)" },
+            { name: "Medium risk", value: 33, color: "rgba(45,107,78,0.72)" },
+            { name: "High risk", value: 14, color: "rgba(78,165,108,0.72)" },
+            { name: "Watchlist", value: 7, color: "rgba(136,190,151,0.85)" },
+        ],
+        [],
+    );
+
+    const regionalProgress = useMemo(
+        () => [
+            { region: "EU", completion: 92 },
+            { region: "India", completion: 84 },
+            { region: "APAC", completion: 76 },
+            { region: "Americas", completion: 71 },
+        ],
+        [],
+    );
+
     return (
         <div className="relative min-h-screen w-full overflow-hidden text-slate-900">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_85%_70%_at_10%_10%,rgba(31,122,63,0.12),transparent_60%)]" />
@@ -40,7 +114,7 @@ export default function DashboardPage() {
 
             <main
                 className={[
-                    "px-4 pb-8 pt-16 sm:px-5 md:pr-8 md:pt-7 lg:pr-10",
+                    "px-4 pb-2 pt-16 sm:px-5 md:pr-8 md:pt-4 lg:pr-10",
                     sidebarOpen ? "md:pl-80" : "md:pl-28",
                     "transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
                 ].join(" ")}>
@@ -96,46 +170,190 @@ export default function DashboardPage() {
                         <section className="rounded-2xl border border-white/70 bg-white/78 p-4 shadow-sm sm:p-5">
                             <div className="mb-4 flex items-center justify-between">
                                 <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-900/65">
-                                    Performance timeline
+                                    Fluid intelligence graph
                                 </h2>
                                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-900">
                                     <LuActivity className="h-3.5 w-3.5" />
                                     Live
                                 </span>
                             </div>
-                            <div className="grid gap-3 sm:grid-cols-2">
-                                {[
-                                    {
-                                        t: "CSRD package v3 approved",
-                                        m: "Finance reviewer signoff completed",
-                                    },
-                                    {
-                                        t: "Scope-3 supplier factors updated",
-                                        m: "28 tier-1 suppliers synced",
-                                    },
-                                    {
-                                        t: "Evidence trails enriched",
-                                        m: "New controls linked to 52 entries",
-                                    },
-                                    {
-                                        t: "Traceability storyboard published",
-                                        m: "Consumer QR flow in staging",
-                                    },
-                                ].map((item) => (
+                            <div className="h-78 min-w-0 rounded-2xl border border-emerald-900/10 bg-white/75 p-2 sm:p-3">
+                                <ResponsiveContainer
+                                    width="100%"
+                                    height="100%"
+                                    minWidth={0}
+                                    minHeight={300}
+                                    debounce={120}>
+                                    <AreaChart data={fluidSeries} margin={{ left: 4, right: 4, top: 10, bottom: 0 }}>
+                                        <defs>
+                                            <linearGradient id="fluid-a" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="rgba(255,99,132,0.78)" />
+                                                <stop offset="95%" stopColor="rgba(255,99,132,0.28)" />
+                                            </linearGradient>
+                                            <linearGradient id="fluid-b" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="rgba(33,150,243,0.75)" />
+                                                <stop offset="95%" stopColor="rgba(33,150,243,0.24)" />
+                                            </linearGradient>
+                                            <linearGradient id="fluid-c" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="rgba(31,122,63,0.78)" />
+                                                <stop offset="95%" stopColor="rgba(31,122,63,0.22)" />
+                                            </linearGradient>
+                                            <linearGradient id="fluid-d" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="rgba(245,195,76,0.8)" />
+                                                <stop offset="95%" stopColor="rgba(245,195,76,0.24)" />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid stroke="rgba(15,47,20,0.08)" />
+                                        <XAxis dataKey="month" tickLine={false} axisLine={false} />
+                                        <YAxis tickLine={false} axisLine={false} />
+                                        <Tooltip content={<DashboardTooltip />} />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="reporting"
+                                            name="ESG reporting"
+                                            stackId="1"
+                                            stroke="rgba(255,99,132,0.95)"
+                                            fill="url(#fluid-a)"
+                                            fillOpacity={1}
+                                            isAnimationActive
+                                            animationDuration={900}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="finance"
+                                            name="Financed emissions"
+                                            stackId="1"
+                                            stroke="rgba(33,150,243,0.9)"
+                                            fill="url(#fluid-b)"
+                                            fillOpacity={1}
+                                            isAnimationActive
+                                            animationDuration={1100}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="traceability"
+                                            name="Traceability"
+                                            stackId="1"
+                                            stroke="rgba(31,122,63,0.95)"
+                                            fill="url(#fluid-c)"
+                                            fillOpacity={1}
+                                            isAnimationActive
+                                            animationDuration={1250}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="advisory"
+                                            name="Advisory"
+                                            stackId="1"
+                                            stroke="rgba(245,195,76,0.95)"
+                                            fill="url(#fluid-d)"
+                                            fillOpacity={1}
+                                            isAnimationActive
+                                            animationDuration={1400}
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
+                            <p className="mt-3 text-xs text-slate-600">
+                                Illustrative stacked-flow visualization for ESG reporting, financed emissions,
+                                traceability, and advisory pipelines.
+                            </p>
+                        </section>
+
+                        <section className="rounded-2xl border border-white/70 bg-white/78 p-4 shadow-sm sm:p-5">
+                            <div className="mb-4 flex items-center justify-between">
+                                <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-900/65">
+                                    Demographics
+                                </h2>
+                                <LuSettings2 className="h-4 w-4 text-emerald-800/80" />
+                            </div>
+                            <div className="h-48 min-w-0 rounded-2xl border border-emerald-900/10 bg-white/85 p-2">
+                                <ResponsiveContainer
+                                    width="100%"
+                                    height="100%"
+                                    minWidth={0}
+                                    minHeight={170}
+                                    debounce={120}>
+                                    <PieChart>
+                                        <Tooltip content={<DashboardTooltip />} />
+                                        <Pie
+                                            data={supplierSegments}
+                                            dataKey="value"
+                                            nameKey="name"
+                                            innerRadius={42}
+                                            outerRadius={72}
+                                            paddingAngle={3}
+                                            isAnimationActive
+                                            animationDuration={1150}>
+                                            {supplierSegments.map((p) => (
+                                                <Cell key={p.name} fill={p.color} />
+                                            ))}
+                                        </Pie>
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                            <div className="mt-4 space-y-2">
+                                {supplierSegments.map((row) => (
                                     <div
-                                        key={item.t}
-                                        className="rounded-2xl border border-emerald-900/10 bg-white/85 p-4 transition hover:-translate-y-0.5 hover:shadow-md">
-                                        <p className="text-sm font-semibold text-emerald-950">{item.t}</p>
-                                        <p className="mt-1 text-xs text-slate-700">{item.m}</p>
+                                        key={row.name}
+                                        className="flex items-center justify-between rounded-xl bg-white/85 px-3 py-2">
+                                        <span className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-900/75">
+                                            <span
+                                                className="h-2.5 w-2.5 rounded-full"
+                                                style={{ background: row.color }}
+                                            />
+                                            {row.name}
+                                        </span>
+                                        <span className="text-sm font-bold text-slate-800">{row.value}%</span>
                                     </div>
                                 ))}
+                            </div>
+                        </section>
+                    </div>
+
+                    <div className="relative mt-5 grid gap-5 xl:grid-cols-[1.1fr_1fr]">
+                        <section className="rounded-2xl border border-white/70 bg-white/78 p-4 shadow-sm sm:p-5">
+                            <div className="mb-4 flex items-center justify-between">
+                                <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-900/65">
+                                    Regional readiness
+                                </h2>
+                                <LuArrowUpRight className="h-4 w-4 text-emerald-800/80" />
+                            </div>
+                            <div className="h-56 min-w-0 rounded-2xl border border-emerald-900/10 bg-white/85 p-2">
+                                <ResponsiveContainer
+                                    width="100%"
+                                    height="100%"
+                                    minWidth={0}
+                                    minHeight={190}
+                                    debounce={120}>
+                                    <BarChart data={regionalProgress} layout="vertical" margin={{ left: 20, right: 8 }}>
+                                        <CartesianGrid stroke="rgba(15,47,20,0.08)" horizontal={false} />
+                                        <XAxis type="number" domain={[0, 100]} tickLine={false} axisLine={false} />
+                                        <YAxis
+                                            dataKey="region"
+                                            type="category"
+                                            tickLine={false}
+                                            axisLine={false}
+                                            width={72}
+                                        />
+                                        <Tooltip content={<DashboardTooltip />} />
+                                        <Bar
+                                            dataKey="completion"
+                                            name="Readiness"
+                                            fill="rgba(31,122,63,0.8)"
+                                            radius={[8, 8, 8, 8]}
+                                            isAnimationActive
+                                            animationDuration={900}
+                                        />
+                                    </BarChart>
+                                </ResponsiveContainer>
                             </div>
                         </section>
 
                         <section className="rounded-2xl border border-white/70 bg-white/78 p-4 shadow-sm sm:p-5">
                             <div className="mb-4 flex items-center justify-between">
                                 <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-900/65">
-                                    Settings
+                                    Settings snapshot
                                 </h2>
                                 <LuSettings2 className="h-4 w-4 text-emerald-800/80" />
                             </div>
@@ -184,4 +402,3 @@ export default function DashboardPage() {
         </div>
     );
 }
-

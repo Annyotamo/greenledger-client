@@ -47,7 +47,7 @@ export default function LoginPage() {
                                 Sign in to GreenLedger
                             </h1>
                             <p className="mt-4 max-w-xl text-pretty text-sm leading-relaxed text-emerald-50/90 sm:text-base">
-                                Your workspace for ESG reporting, carbon accounting, and traceability—presented with
+                                Your workspace for ESG reporting, carbon accounting, and traceability presented with
                                 finance-grade controls and clarity.
                             </p>
                         </div>
@@ -85,4 +85,3 @@ export default function LoginPage() {
         </main>
     );
 }
-

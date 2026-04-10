@@ -9,12 +9,12 @@ import IMKKolkata from "@/assets/IMIKolkata.jpg";
 export default function Footer() {
     return (
         <ScrollReveal threshold={0.05}>
-            <footer className="mt-14 rounded-2xl border border-white/70 bg-white/80 p-6 text-sm text-slate-600 section-bg backdrop-blur-sm sm:p-7">
+            <footer className="mt-14 rounded-2xl border border-white/70 bg-white/80 p-6 text-sm text-slate-600 section-bg backdrop-blur-sm sm:p-7 mb-6">
                 <div className="flex flex-col gap-6 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
                     <div className="max-w-md">
                         <p className="text-xs font-semibold uppercase tracking-wide text-emerald-900">GreenLedger</p>
                         <p className="mt-2 text-xs leading-relaxed">
-                            ESG reporting, carbon accounting, and supply chain traceability on one platform—designed for
+                            ESG reporting, carbon accounting, and supply chain traceability on one platform designed for
                             audit-ready enterprises and consumer-trusted brands.
                         </p>
                     </div>

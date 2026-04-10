@@ -5,10 +5,10 @@ import Link from "next/link";
 import greenLedgerLogo from "@/assets/GLLogo.png";
 
 const navLinks = [
-    { href: "#pillars", label: "Platform" },
-    { href: "#deep-dive", label: "Solutions" },
-    { href: "#traceability", label: "Traceability" },
-    { href: "#cta", label: "Demo" },
+    { href: "/#pillars", label: "Platform" },
+    { href: "/#deep-dive", label: "Solutions" },
+    { href: "/#traceability", label: "Traceability" },
+    { href: "/#cta", label: "Demo" },
 ];
 
 const Navbar = () => {
@@ -30,20 +30,20 @@ const Navbar = () => {
                 <ul className="hidden items-center gap-1 text-sm font-medium text-slate-700 md:flex md:gap-2">
                     {navLinks.map((l) => (
                         <li key={l.href}>
-                            <a
+                            <Link
                                 href={l.href}
                                 className="rounded-full px-3 py-2 transition hover:bg-emerald-100/80 hover:text-emerald-950">
                                 {l.label}
-                            </a>
+                            </Link>
                         </li>
                     ))}
                 </ul>
                 <div className="flex items-center gap-2">
-                    <a
-                        href="#cta"
+                    <Link
+                        href="/get-started"
                         className="shrink-0 rounded-full bg-emerald-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700 sm:px-4 sm:text-sm">
                         Book demo
-                    </a>
+                    </Link>
                     <Link
                         href="/login"
                         className="hidden shrink-0 rounded-full border border-emerald-900/15 bg-white/70 px-3 py-2 text-xs font-semibold text-emerald-900 shadow-sm transition hover:border-emerald-700/25 hover:bg-white sm:inline-flex sm:px-4 sm:text-sm">

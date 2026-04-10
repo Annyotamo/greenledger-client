@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect } from "react";
 import { LuBolt, LuChartBar, LuCloud, LuFactory, LuScanLine, LuShieldCheck } from "react-icons/lu";
 import greenLedgerLogo from "@/assets/GLLogo.png";
@@ -298,11 +299,11 @@ export default function Home() {
                                         className="rounded-xl border border-white/35 bg-white/10 px-5 py-3 text-sm font-semibold text-white shadow-sm backdrop-blur-md transition hover:bg-white/20">
                                         Read how it works
                                     </a>
-                                    <a
-                                        href="#cta"
+                                    <Link
+                                        href="/get-started"
                                         className="rounded-xl px-5 py-3 text-sm font-semibold text-white underline decoration-emerald-300/80 decoration-2 underline-offset-[6px] transition hover:decoration-emerald-200">
                                         Request a demo
-                                    </a>
+                                    </Link>
                                 </div>
                                 <div className="mt-7 flex flex-wrap items-center gap-3">
                                     <div className="inline-flex items-center gap-3 rounded-2xl border border-white/25 bg-white/10 px-4 py-2 shadow-sm backdrop-blur-md transition hover:bg-white/15">
@@ -975,11 +976,11 @@ export default function Home() {
                                     can debate with facts—not assumptions.
                                 </p>
                             </div>
-                            <a
-                                href="#"
+                            <Link
+                                href="/get-started"
                                 className="animate-pulse-strong inline-flex shrink-0 items-center justify-center rounded-xl bg-white px-8 py-3.5 text-center text-sm font-bold text-emerald-900 shadow-lg transition hover:bg-emerald-50">
                                 Book a free demo
-                            </a>
+                            </Link>
                         </div>
                     </section>
                 </ScrollReveal>

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ScrollReveal } from "./landing/ScrollReveal";
 import startupIndia from "@/assets/startupIndia.png";
 import entrepreneurCafe from "@/assets/entrepreneurCafe.jpg";
@@ -27,9 +28,9 @@ export default function Footer() {
                         <a href="#" className="hover:text-emerald-700">
                             Security
                         </a>
-                        <a href="#" className="hover:text-emerald-700">
+                        <Link href="/get-started" className="hover:text-emerald-700">
                             Contact
-                        </a>
+                        </Link>
                     </nav>
                     <div
                         className="group w-full rounded-none sm:rounded-2xl bg-white/75 p-4 text-slate-700 shadow-none sm:shadow-sm transition hover:bg-white/90 hover:shadow-md sm:p-5"

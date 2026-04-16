@@ -406,6 +406,61 @@ export default function Home() {
                     </section>
                 </ScrollReveal>
 
+                {/* Cinematic video band */}
+                <ScrollReveal className="mb-16" delay={10}>
+                    <section className="full-bleed relative isolate overflow-hidden border-y border-white/35 py-14 md:py-52">
+                        <video
+                            src="/api/media/green-earth"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            preload="auto"
+                            controls={false}
+                            disablePictureInPicture
+                            controlsList="nodownload nofullscreen noremoteplayback"
+                            aria-label="Animated rotating earth background"
+                            className="absolute inset-0 h-full w-full object-cover"
+                        />
+                        <div
+                            className="pointer-events-none absolute inset-0 bg-linear-to-br from-emerald-950/82 via-emerald-900/70 to-teal-950/82"
+                            aria-hidden
+                        />
+                        <div
+                            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_100%_68%_at_50%_15%,rgba(255,255,255,0.22),transparent_58%)]"
+                            aria-hidden
+                        />
+                        <div className="pointer-events-none absolute inset-0 gl-grain" aria-hidden />
+                        <div className="relative mx-auto grid w-full max-w-none gap-6 px-4 sm:px-5 md:grid-cols-[1.2fr_0.8fr] md:items-center md:px-6 lg:px-7">
+                            <div>
+                                <p className="inline-flex rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-50 backdrop-blur-md">
+                                    Planet-scale clarity
+                                </p>
+                                <h2 className="mt-4 max-w-3xl text-balance text-2xl font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">
+                                    Sustainability intelligence designed to feel alive, trusted, and board-ready
+                                </h2>
+                                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-emerald-50/90 sm:text-base">
+                                    One ambient data story across reporting, carbon accounting, and traceability where
+                                    every insight is visual, auditable, and ready for action.
+                                </p>
+                            </div>
+                            <div className="grid gap-3">
+                                {[
+                                    "Immersive visual narrative",
+                                    "Enterprise-grade disclosure confidence",
+                                    "High-fidelity scope and supply-chain signals",
+                                ].map((item) => (
+                                    <div
+                                        key={item}
+                                        className="rounded-2xl border border-white/30 bg-white/10 px-4 py-3 text-sm font-semibold text-white shadow-lg backdrop-blur-md">
+                                        {item}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+                </ScrollReveal>
+
                 {/* Metrics strip */}
                 <ScrollReveal className="mb-14" delay={40}>
                     <section

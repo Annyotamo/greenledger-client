@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type SyntheticEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, type SyntheticEvent } from "react";
 
 export type SliderCard = {
     id: string;
@@ -21,8 +21,6 @@ export function FeatureSlider({ cards }: FeatureSliderProps) {
     const loopWidthRef = useRef(0);
     const rafRef = useRef(0);
     const lastTsRef = useRef(0);
-    const [paused, setPaused] = useState(false);
-    const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
     const extended = cards.length > 0 ? [...cards, ...cards] : [];
 
@@ -61,26 +59,24 @@ export function FeatureSlider({ cards }: FeatureSliderProps) {
             const dt = Math.min(48, now - lastTsRef.current);
             lastTsRef.current = now;
 
-            if (!paused) {
-                let loopW = loopWidthRef.current;
-                if (loopW <= 0) {
-                    measureLoop();
-                    loopW = loopWidthRef.current;
-                }
-                const max = el.scrollWidth - el.clientWidth;
-                if (max <= 1) {
-                    rafRef.current = requestAnimationFrame(tick);
-                    return;
-                }
+            let loopW = loopWidthRef.current;
+            if (loopW <= 0) {
+                measureLoop();
+                loopW = loopWidthRef.current;
+            }
+            const max = el.scrollWidth - el.clientWidth;
+            if (max <= 1) {
+                rafRef.current = requestAnimationFrame(tick);
+                return;
+            }
 
-                el.scrollLeft += pxPerMs * dt;
+            el.scrollLeft += pxPerMs * dt;
 
-                if (loopW > 1 && el.scrollLeft >= loopW - 0.5) {
-                    el.scrollLeft -= loopW;
-                }
-                if (el.scrollLeft > max) {
-                    el.scrollLeft = max;
-                }
+            if (loopW > 1 && el.scrollLeft >= loopW - 0.5) {
+                el.scrollLeft -= loopW;
+            }
+            if (el.scrollLeft > max) {
+                el.scrollLeft = max;
             }
 
             rafRef.current = requestAnimationFrame(tick);
@@ -91,7 +87,7 @@ export function FeatureSlider({ cards }: FeatureSliderProps) {
             cancelAnimationFrame(rafRef.current);
             lastTsRef.current = 0;
         };
-    }, [paused, cards.length, measureLoop]);
+    }, [cards.length, measureLoop]);
 
     const scrollByDir = useCallback((dir: -1 | 1) => {
         const el = scrollerRef.current;
@@ -157,30 +153,16 @@ export function FeatureSlider({ cards }: FeatureSliderProps) {
             </div>
             <div
                 ref={scrollerRef}
-                onMouseEnter={() => setPaused(true)}
-                onMouseLeave={() => {
-                    setPaused(false);
-                    setHoveredKey(null);
-                }}
                 className="scrollbar-hide isolate flex gap-6 overflow-x-auto overflow-y-clip pb-6 pl-0.5 pr-1 pt-10 [-webkit-overflow-scrolling:touch]"
                 style={{ scrollPaddingInline: "0.75rem", scrollBehavior: "auto" }}>
                 {extended.map((card, i) => {
                     const key = `${card.id}-${i}`;
-                    const isDimmed = hoveredKey !== null && hoveredKey !== key;
-                    const isFocused = hoveredKey === key;
 
                     return (
                         <article
                             key={key}
                             data-slider-card
-                            onMouseEnter={() => setHoveredKey(key)}
-                            className={`relative flex min-h-[min(52vh,480px)] w-[min(calc(100vw-2.75rem),26rem)] shrink-0 flex-col rounded-[1.35rem] border bg-white/95 p-7 shadow-[0_20px_50px_-24px_rgba(15,80,40,0.35)] backdrop-blur-md transition-[opacity,transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] sm:w-[min(calc(100vw-3.5rem),28rem)] sm:min-h-[500px] sm:p-8 md:w-lg lg:w-136 lg:max-w-xl lg:p-9 ${
-                                isDimmed ? "pointer-events-auto z-0 scale-[0.97] opacity-[0.38]" : ""
-                            } ${
-                                isFocused
-                                    ? "z-200 scale-[1.04] border-white/90 opacity-100 shadow-[0_28px_70px_-20px_rgba(15,60,35,0.55)] ring-2 ring-emerald-400/50"
-                                    : ""
-                            } ${!hoveredKey ? "z-1 scale-100 border-white/75 opacity-100" : ""}`}>
+                            className="relative z-1 flex min-h-[min(52vh,480px)] w-[min(calc(100vw-2.75rem),26rem)] shrink-0 flex-col rounded-[1.35rem] border border-white/75 bg-white/95 p-7 shadow-[0_20px_50px_-24px_rgba(15,80,40,0.35)] backdrop-blur-md sm:w-[min(calc(100vw-3.5rem),28rem)] sm:min-h-[500px] sm:p-8 md:w-lg lg:w-136 lg:max-w-xl lg:p-9">
                             {card.imageSrc ? (
                                 <div className="relative -mx-7 -mt-7 mb-6 overflow-hidden rounded-t-[1.35rem] border-b border-emerald-900/10 bg-emerald-950/5 sm:-mx-8 sm:-mt-8 lg:-mx-9 lg:-mt-9">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}

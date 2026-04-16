@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import {
     LuActivity,
     LuArrowUpRight,
@@ -58,6 +59,7 @@ function DashboardTooltip({
 }
 
 export default function DashboardPage() {
+    const router = useRouter();
     const activeSection = useSidebarStore((s) => s.activeSection);
     const sidebarOpen = useSidebarStore((s) => s.isOpen);
     const heading = useMemo(() => {
@@ -376,6 +378,10 @@ export default function DashboardPage() {
                             </div>
                             <button
                                 type="button"
+                                onClick={() => {
+                                    useSidebarStore.getState().setActiveSection("settings");
+                                    router.push("/dashboard/settings");
+                                }}
                                 className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700">
                                 Open full settings
                                 <LuArrowUpRight className="h-4 w-4" />

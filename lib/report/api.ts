@@ -14,3 +14,12 @@ export async function getScope1Reports(): Promise<Scope1ReportRecord[]> {
 export async function ingestScope1Emission(payload: Scope1IngestRequest): Promise<void> {
     await privateApi.post<Scope1IngestResponse>("/scope1Ingest/ingestEmission", payload);
 }
+
+export async function downloadScope1ReportCsv(startMonth: string, endMonth: string): Promise<Blob> {
+    const { data } = await privateApi.get("/report/GenerateReport/scope1", {
+        params: { startMonth, endMonth },
+        responseType: "blob",
+    });
+
+    return data;
+}

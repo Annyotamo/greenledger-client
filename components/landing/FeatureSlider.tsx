@@ -89,68 +89,12 @@ export function FeatureSlider({ cards }: FeatureSliderProps) {
         };
     }, [cards.length, measureLoop]);
 
-    const scrollByDir = useCallback((dir: -1 | 1) => {
-        const el = scrollerRef.current;
-        if (!el) return;
-        const card = el.querySelector<HTMLElement>("[data-slider-card]");
-        const styles = getComputedStyle(el);
-        const gap = parseFloat(styles.columnGap || styles.gap || "24") || 24;
-        const width = (card?.offsetWidth ?? el.clientWidth * 0.88) + gap;
-        el.scrollBy({ left: dir * width, behavior: "smooth" });
-    }, []);
-
     const stop = (e: SyntheticEvent) => {
         e.stopPropagation();
     };
 
     return (
         <div className="relative z-0 w-full overflow-visible py-2">
-            <div className="mb-5 flex justify-end gap-2 pr-0.5">
-                <button
-                    type="button"
-                    onMouseDown={stop}
-                    onClick={(e) => {
-                        stop(e);
-                        scrollByDir(-1);
-                    }}
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-800/20 bg-white/95 text-emerald-900 shadow-sm transition hover:border-emerald-600/40 hover:bg-emerald-50"
-                    aria-label="Previous cards">
-                    <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden>
-                        <path d="M15 18l-6-6 6-6" />
-                    </svg>
-                </button>
-                <button
-                    type="button"
-                    onMouseDown={stop}
-                    onClick={(e) => {
-                        stop(e);
-                        scrollByDir(1);
-                    }}
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-800/20 bg-white/95 text-emerald-900 shadow-sm transition hover:border-emerald-600/40 hover:bg-emerald-50"
-                    aria-label="Next cards">
-                    <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden>
-                        <path d="M9 18l6-6-6-6" />
-                    </svg>
-                </button>
-            </div>
             <div
                 ref={scrollerRef}
                 className="scrollbar-hide isolate flex gap-6 overflow-x-auto overflow-y-clip pb-6 pl-0.5 pr-1 pt-10 [-webkit-overflow-scrolling:touch]"

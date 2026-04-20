@@ -503,24 +503,6 @@ export default function Home() {
                     </section>
                 </ScrollReveal>
 
-                {/* Hover cards */}
-                <ScrollReveal className="mb-16" delay={50}>
-                    <section
-                        className="section-bg rounded-2xl border border-white/50 p-5 shadow-lg sm:p-7 md:p-9"
-                        aria-label="Outcomes">
-                        <h2 className="text-xl font-bold text-emerald-950 sm:text-2xl">
-                            Outcomes teams feel in the first two quarters
-                        </h2>
-                        <p className="mt-2 max-w-3xl text-sm text-slate-700 sm:text-base">
-                            Hover each card for a fuller picture numbers here are illustrative of the operational
-                            improvements customers target.
-                        </p>
-                        <div className="mt-8">
-                            <HoverInsightGrid insights={hoverInsights} />
-                        </div>
-                    </section>
-                </ScrollReveal>
-
                 {/* Services spotlight (unique band) */}
                 <ScrollReveal className="mb-16" delay={35}>
                     <section className="full-bleed overflow-hidden py-10 md:py-14">
@@ -588,7 +570,7 @@ export default function Home() {
                                             ))}
                                         </div>
 
-                                        <div className="relative overflow-hidden rounded-2xl bg-white/70 shadow-sm">
+                                        <div className="relative overflow-hidden">
                                             <div className="flex items-center justify-between px-4 py-3">
                                                 <p className="text-xs font-bold uppercase tracking-wide text-emerald-900/70">
                                                     Disclosure pack preview
@@ -653,7 +635,7 @@ export default function Home() {
                                         </div>
 
                                         <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-                                            <div className="relative overflow-hidden rounded-2xl bg-white/70 shadow-sm">
+                                            <div className="relative overflow-hidden">
                                                 <div className="flex items-center justify-between gap-3 px-4 py-3">
                                                     <div className="flex items-center gap-2">
                                                         <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-700/10">
@@ -708,47 +690,6 @@ export default function Home() {
                                                     ))}
                                                 </div>
                                             </div>
-
-                                            <div className="relative overflow-hidden rounded-2xl bg-white/70 shadow-sm">
-                                                <div className="flex items-center justify-between px-4 py-3">
-                                                    <p className="text-xs font-bold uppercase tracking-wide text-emerald-900/70">
-                                                        Traits &amp; controls
-                                                    </p>
-                                                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-900/80 shadow-sm">
-                                                        Policy‑driven
-                                                    </span>
-                                                </div>
-                                                <div className="grid gap-3 p-4">
-                                                    {[
-                                                        { k: "Trait", v: "Methodology: Market-based Scope‑2" },
-                                                        { k: "Evidence", v: "Utility invoice · File link" },
-                                                        { k: "Control", v: "Approval required: Finance reviewer" },
-                                                    ].map((row) => (
-                                                        <div
-                                                            key={row.k}
-                                                            className="rounded-2xl bg-white/85 p-4 shadow-sm">
-                                                            <p className="text-xs font-bold uppercase tracking-wide text-emerald-900/60">
-                                                                {row.k}
-                                                            </p>
-                                                            <p className="mt-2 text-sm font-semibold text-slate-800">
-                                                                {row.v}
-                                                            </p>
-                                                            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-emerald-900/10">
-                                                                <div className="h-full w-3/5 rounded-full bg-linear-to-r from-emerald-600/70 via-emerald-500/60 to-teal-400/60" />
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    <div className="flex flex-wrap gap-2 pt-1">
-                                                        {["Traits", "Evidence links", "Approvals"].map((chip) => (
-                                                            <span
-                                                                key={chip}
-                                                                className="rounded-full bg-emerald-50/70 px-3 py-1 text-xs font-semibold text-emerald-950 shadow-sm">
-                                                                {chip}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
                                         </div>
 
                                         <div className="grid gap-3 sm:grid-cols-3">
@@ -770,41 +711,6 @@ export default function Home() {
                                             ))}
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </ScrollReveal>
-
-                {/* Narrative band */}
-                <ScrollReveal className="mb-16">
-                    <section className="full-bleed bg-linear-to-b from-white/40 via-emerald-50/30 to-transparent py-12 md:py-14">
-                        <div className="mx-auto w-full max-w-none px-4 sm:px-5 md:px-6 lg:px-7">
-                            <div className="grid gap-10 lg:grid-cols-3">
-                                <div className="rounded-2xl border border-white/60 bg-white/80 p-5 shadow-md backdrop-blur-sm lg:p-6">
-                                    <h3 className="text-lg font-semibold text-emerald-950">
-                                        For sustainability &amp; legal owners
-                                    </h3>
-                                    <p className="mt-3 text-sm leading-relaxed text-slate-700">
-                                        Package evidence, control narrative, and manage assurance cycles without losing
-                                        the thread between source transactions and published disclosures.
-                                    </p>
-                                </div>
-                                <div className="rounded-2xl border border-white/60 bg-white/80 p-5 shadow-md backdrop-blur-sm lg:p-6">
-                                    <h3 className="text-lg font-semibold text-emerald-950">For finance &amp; risk</h3>
-                                    <p className="mt-3 text-sm leading-relaxed text-slate-700">
-                                        Tie emissions to books: loans, investments, and counterparty exposures roll up
-                                        into financed-emissions views that stand up to internal and external scrutiny.
-                                    </p>
-                                </div>
-                                <div className="rounded-2xl border border-white/60 bg-white/80 p-5 shadow-md backdrop-blur-sm lg:p-6">
-                                    <h3 className="text-lg font-semibold text-emerald-950">
-                                        For brand &amp; product teams
-                                    </h3>
-                                    <p className="mt-3 text-sm leading-relaxed text-slate-700">
-                                        Ship QR-led transparency that matches what compliance actually knows so
-                                        marketing claims and regulatory filings tell the same story.
-                                    </p>
                                 </div>
                             </div>
                         </div>

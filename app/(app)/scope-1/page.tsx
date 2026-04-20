@@ -6,6 +6,7 @@ import {
     LuActivity,
     LuBuilding2,
     LuCircleDollarSign,
+    LuDownload,
     LuDroplets,
     LuFactory,
     LuFuel,
@@ -30,6 +31,7 @@ import {
     YAxis,
 } from "recharts";
 import { Sidebar } from "@/components/dashboard/SidebarShell";
+import { downloadScope1ReportCsv } from "@/lib/report/api";
 import { useIngestScope1EmissionMutation, useScope1ReportsQuery } from "@/lib/report/hooks";
 import { useSidebarStore } from "@/lib/sidebarStore";
 import type { ApiErrorBody } from "@/types/api/common";
@@ -101,6 +103,10 @@ export default function Scope1Page() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+    const [startMonth, setStartMonth] = useState("2026-01");
+    const [endMonth, setEndMonth] = useState("2026-05");
+    const [isDownloading, setIsDownloading] = useState(false);
+    const [downloadError, setDownloadError] = useState<string | null>(null);
     const [ingestForm, setIngestForm] = useState<Scope1IngestRequest>({
         fuelName: "LPG",
         fuelType: "Gaseous Fuel",
@@ -164,6 +170,47 @@ export default function Scope1Page() {
             .slice(0, 5);
     }, [records]);
 
+    async function handleDownloadCsv() {
+        if (!startMonth || !endMonth) {
+            setDownloadError("Please select both start and end month.");
+            return;
+        }
+
+        if (startMonth > endMonth) {
+            setDownloadError("Start month must be earlier than or equal to end month.");
+            return;
+        }
+
+        setDownloadError(null);
+        setIsDownloading(true);
+
+        try {
+            const blob = await downloadScope1ReportCsv(startMonth, endMonth);
+            const objectUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = objectUrl;
+            link.download = `scope1-report-${startMonth}-to-${endMonth}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(objectUrl);
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                const responseData = error.response?.data;
+                const message =
+                    responseData && typeof responseData === "object" && "response" in responseData
+                        ? String(responseData.response)
+                        : "Unable to download report CSV.";
+                setDownloadError(message);
+                return;
+            }
+
+            setDownloadError("Unable to download report CSV.");
+        } finally {
+            setIsDownloading(false);
+        }
+    }
+
     async function onSubmitIngest(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
         setSubmitError(null);
@@ -191,8 +238,8 @@ export default function Scope1Page() {
 
             <main
                 className={[
-                    "px-4 pb-8 pt-16 sm:px-5 md:pr-8 md:pt-7 lg:pr-10",
-                    sidebarOpen ? "md:pl-80" : "md:pl-28",
+                    "px-4 pb-8 pt-16 sm:px-5 lg:pr-10 lg:pt-7",
+                    sidebarOpen ? "lg:pl-80" : "lg:pl-28",
                     "transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
                 ].join(" ")}>
                 <section className="section-bg relative overflow-hidden rounded-3xl border border-white/60 p-5 shadow-[0_30px_90px_-45px_rgba(0,40,25,0.6)] backdrop-blur-md sm:p-6 md:p-7">
@@ -209,17 +256,10 @@ export default function Scope1Page() {
                                 Scope-1 Emissions Intelligence
                             </h1>
                             <p className="mt-2 max-w-2xl text-sm text-slate-700 sm:text-base">
-                                Live report view from backend with professional metrics, trend analytics, and fuel/facility
-                                level breakdowns.
+                                Live report view from backend with professional metrics, trend analytics, and
+                                fuel/facility level breakdowns.
                             </p>
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => refetch()}
-                            className="inline-flex h-11 items-center gap-2 rounded-2xl border border-emerald-900/15 bg-white/80 px-4 text-sm font-semibold text-emerald-950 shadow-sm transition hover:bg-white">
-                            <LuActivity className="h-4 w-4 text-emerald-800" />
-                            Refresh data
-                        </button>
                         <button
                             type="button"
                             onClick={() => {
@@ -285,12 +325,14 @@ export default function Scope1Page() {
                                                 {stat.icon}
                                             </span>
                                         </p>
-                                        <p className="mt-3 text-xl font-bold tracking-tight text-emerald-950">{stat.value}</p>
+                                        <p className="mt-3 text-xl font-bold tracking-tight text-emerald-950">
+                                            {stat.value}
+                                        </p>
                                     </article>
                                 ))}
                             </div>
 
-                            <div className="relative mt-5 grid gap-5 xl:grid-cols-[1.45fr_1fr]">
+                            <div className="relative mt-5 grid gap-5 lg:grid-cols-[1.45fr_1fr]">
                                 <section className="rounded-2xl border border-white/70 bg-white/78 p-4 shadow-sm sm:p-5">
                                     <div className="mb-4 flex items-center justify-between">
                                         <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-900/65">
@@ -302,8 +344,15 @@ export default function Scope1Page() {
                                         </span>
                                     </div>
                                     <div className="h-78 min-w-0 rounded-2xl border border-emerald-900/10 bg-white/75 p-2 sm:p-3">
-                                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300} debounce={120}>
-                                            <AreaChart data={monthlySeries} margin={{ left: 4, right: 4, top: 10, bottom: 0 }}>
+                                        <ResponsiveContainer
+                                            width="100%"
+                                            height="100%"
+                                            minWidth={0}
+                                            minHeight={300}
+                                            debounce={120}>
+                                            <AreaChart
+                                                data={monthlySeries}
+                                                margin={{ left: 4, right: 4, top: 10, bottom: 0 }}>
                                                 <defs>
                                                     <linearGradient id="scope1-a" x1="0" y1="0" x2="0" y2="1">
                                                         <stop offset="5%" stopColor="rgba(31,122,63,0.8)" />
@@ -337,7 +386,12 @@ export default function Scope1Page() {
                                         <LuFactory className="h-4 w-4 text-emerald-800/80" />
                                     </div>
                                     <div className="h-56 min-w-0 rounded-2xl border border-emerald-900/10 bg-white/85 p-2">
-                                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={190} debounce={120}>
+                                        <ResponsiveContainer
+                                            width="100%"
+                                            height="100%"
+                                            minWidth={0}
+                                            minHeight={190}
+                                            debounce={120}>
                                             <PieChart>
                                                 <Tooltip content={<DashboardTooltip />} />
                                                 <Pie
@@ -362,17 +416,22 @@ export default function Scope1Page() {
                                                 key={row.name}
                                                 className="flex items-center justify-between rounded-xl bg-white/85 px-3 py-2">
                                                 <span className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-900/75">
-                                                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: row.color }} />
+                                                    <span
+                                                        className="h-2.5 w-2.5 rounded-full"
+                                                        style={{ background: row.color }}
+                                                    />
                                                     {row.name}
                                                 </span>
-                                                <span className="text-sm font-bold text-slate-800">{formatNumber(row.value)}</span>
+                                                <span className="text-sm font-bold text-slate-800">
+                                                    {formatNumber(row.value)}
+                                                </span>
                                             </div>
                                         ))}
                                     </div>
                                 </section>
                             </div>
 
-                            <div className="relative mt-5 grid gap-5 xl:grid-cols-[1.1fr_1fr]">
+                            <div className="relative mt-5 grid gap-5 lg:grid-cols-[1.1fr_1fr]">
                                 <section className="rounded-2xl border border-white/70 bg-white/78 p-4 shadow-sm sm:p-5">
                                     <div className="mb-4 flex items-center justify-between">
                                         <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-900/65">
@@ -381,11 +440,25 @@ export default function Scope1Page() {
                                         <LuBuilding2 className="h-4 w-4 text-emerald-800/80" />
                                     </div>
                                     <div className="h-56 min-w-0 rounded-2xl border border-emerald-900/10 bg-white/85 p-2">
-                                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={190} debounce={120}>
-                                            <BarChart data={facilitySeries} layout="vertical" margin={{ left: 20, right: 8 }}>
+                                        <ResponsiveContainer
+                                            width="100%"
+                                            height="100%"
+                                            minWidth={0}
+                                            minHeight={190}
+                                            debounce={120}>
+                                            <BarChart
+                                                data={facilitySeries}
+                                                layout="vertical"
+                                                margin={{ left: 20, right: 8 }}>
                                                 <CartesianGrid stroke="rgba(15,47,20,0.08)" horizontal={false} />
                                                 <XAxis type="number" tickLine={false} axisLine={false} />
-                                                <YAxis dataKey="facility" type="category" tickLine={false} axisLine={false} width={112} />
+                                                <YAxis
+                                                    dataKey="facility"
+                                                    type="category"
+                                                    tickLine={false}
+                                                    axisLine={false}
+                                                    width={112}
+                                                />
                                                 <Tooltip content={<DashboardTooltip />} />
                                                 <Bar
                                                     dataKey="co2e"
@@ -409,7 +482,10 @@ export default function Scope1Page() {
                                     </div>
                                     <div className="space-y-3">
                                         {[
-                                            { k: "Records with facility", v: `${totals.withFacility}/${records.length}` },
+                                            {
+                                                k: "Records with facility",
+                                                v: `${totals.withFacility}/${records.length}`,
+                                            },
                                             {
                                                 k: "Records with report month",
                                                 v: `${records.filter((r) => Boolean(r.reportDate)).length}/${records.length}`,
@@ -437,9 +513,44 @@ export default function Scope1Page() {
                             </div>
 
                             <section className="mt-5 rounded-2xl border border-white/70 bg-white/82 p-4 shadow-sm sm:p-5">
-                                <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-900/65">
-                                    Scope-1 report records
-                                </h2>
+                                <div className="flex flex-wrap items-end justify-between gap-3">
+                                    <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-900/65">
+                                        Scope-1 report records
+                                    </h2>
+                                    <div className="flex flex-wrap items-end gap-2">
+                                        <label className="grid gap-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-emerald-900/65">
+                                            Start month
+                                            <input
+                                                type="month"
+                                                value={startMonth}
+                                                onChange={(e) => setStartMonth(e.target.value)}
+                                                className="h-11 rounded-2xl border border-emerald-900/15 bg-white/85 px-3 text-sm font-medium text-emerald-950 shadow-sm outline-none transition focus:border-emerald-400/60 focus:ring-4 focus:ring-emerald-200/45"
+                                            />
+                                        </label>
+                                        <label className="grid gap-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-emerald-900/65">
+                                            End month
+                                            <input
+                                                type="month"
+                                                value={endMonth}
+                                                onChange={(e) => setEndMonth(e.target.value)}
+                                                className="h-11 rounded-2xl border border-emerald-900/15 bg-white/85 px-3 text-sm font-medium text-emerald-950 shadow-sm outline-none transition focus:border-emerald-400/60 focus:ring-4 focus:ring-emerald-200/45"
+                                            />
+                                        </label>
+                                        <button
+                                            type="button"
+                                            onClick={handleDownloadCsv}
+                                            disabled={isDownloading}
+                                            className="inline-flex h-11 items-center gap-2 rounded-2xl border border-emerald-900/15 bg-white/85 px-4 text-sm font-semibold text-emerald-950 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-70">
+                                            <LuDownload className="h-4 w-4 text-emerald-800" />
+                                            {isDownloading ? "Downloading..." : "Download CSV"}
+                                        </button>
+                                    </div>
+                                </div>
+                                {downloadError ? (
+                                    <div className="mt-3 rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+                                        {downloadError}
+                                    </div>
+                                ) : null}
                                 <div className="mt-3 overflow-x-auto">
                                     <table className="min-w-full text-left text-xs">
                                         <thead>
@@ -454,10 +565,16 @@ export default function Scope1Page() {
                                         </thead>
                                         <tbody>
                                             {records.map((row) => (
-                                                <tr key={row.id} className="border-b border-emerald-900/7 text-slate-700 hover:bg-emerald-50/45">
-                                                    <td className="px-3 py-2 font-semibold text-slate-900">{row.fuelName ?? "-"}</td>
+                                                <tr
+                                                    key={row.id}
+                                                    className="border-b border-emerald-900/7 text-slate-700 hover:bg-emerald-50/45">
+                                                    <td className="px-3 py-2 font-semibold text-slate-900">
+                                                        {row.fuelName ?? "-"}
+                                                    </td>
                                                     <td className="px-3 py-2">{row.fuelType ?? "-"}</td>
-                                                    <td className="px-3 py-2">{row.facilityName ?? "Unmapped facility"}</td>
+                                                    <td className="px-3 py-2">
+                                                        {row.facilityName ?? "Unmapped facility"}
+                                                    </td>
                                                     <td className="px-3 py-2">{row.reportDate ?? "-"}</td>
                                                     <td className="px-3 py-2 font-semibold text-emerald-900">
                                                         {formatNumber(row.co2eTotal ?? 0)}
@@ -477,7 +594,9 @@ export default function Scope1Page() {
             <div
                 className={[
                     "fixed inset-0 z-50 flex items-center justify-center px-4 transition-all duration-300",
-                    isModalOpen ? "pointer-events-auto bg-black/45 backdrop-blur-sm opacity-100" : "pointer-events-none opacity-0",
+                    isModalOpen
+                        ? "pointer-events-auto bg-black/45 backdrop-blur-sm opacity-100"
+                        : "pointer-events-none opacity-0",
                 ].join(" ")}>
                 <div
                     className={[
@@ -525,7 +644,9 @@ export default function Scope1Page() {
                                 type="number"
                                 step="0.01"
                                 value={ingestForm.quantity}
-                                onChange={(e) => setIngestForm((p) => ({ ...p, quantity: Number(e.target.value || 0) }))}
+                                onChange={(e) =>
+                                    setIngestForm((p) => ({ ...p, quantity: Number(e.target.value || 0) }))
+                                }
                                 className={inputClass}
                             />
                         </Field>

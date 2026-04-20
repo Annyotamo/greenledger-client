@@ -3,13 +3,17 @@
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { AxiosError } from "axios";
 
+import { logout } from "@/lib/auth/api";
+import { clearAuthToken } from "@/lib/auth/token";
 import { useSidebarStore } from "@/lib/sidebarStore";
 import {
     LuChevronDown,
     LuChevronRight,
     LuFactory,
     LuLeaf,
+    LuLogOut,
     LuMenu,
     LuScanLine,
     LuSettings2,
@@ -26,11 +30,10 @@ type SidebarItemProps = {
 };
 
 const baseItemClasses =
-    "group flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-medium transition-all duration-300 cursor-pointer" +
-    " hover:bg-white/16 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/35" +
-    " border border-white/20 hover:border-emerald-200/35" +
-    " shadow-sm hover:shadow-[0_14px_28px_rgba(0,0,0,0.35)]" +
-    " backdrop-blur-sm bg-white/10";
+    "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition cursor-pointer" +
+    " border border-transparent" +
+    " hover:bg-white/10 hover:text-white" +
+    " focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/40";
 
 function SidebarItem({ label, icon, isActive, onClick, compact }: SidebarItemProps) {
     return (
@@ -38,7 +41,7 @@ function SidebarItem({ label, icon, isActive, onClick, compact }: SidebarItemPro
             type="button"
             onClick={onClick}
             className={`${baseItemClasses} ${
-                isActive ? "bg-white/22 text-white border-emerald-200/45 shadow-md" : "text-emerald-50/85"
+                isActive ? "bg-white/14 text-white border-emerald-200/25" : "text-emerald-50/80"
             }`}>
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/14 text-emerald-50 ring-1 ring-white/15 group-hover:bg-white/20 group-hover:text-white">
                 {icon}
@@ -54,9 +57,11 @@ export function Sidebar() {
     const pathname = usePathname();
 
     const [isMobile, setIsMobile] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        // Drawer mode for semi-medium screens too (prevents sidebar covering content).
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
         handleResize();
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
@@ -66,10 +71,27 @@ export function Sidebar() {
     const scopeRouteActive = pathname === "/scope-1" || pathname.startsWith("/scope-1/");
     const settingsRouteActive = pathname === "/dashboard/settings" || pathname.startsWith("/dashboard/settings/");
 
+    async function handleLogout() {
+        if (isLoggingOut) return;
+        setIsLoggingOut(true);
+
+        try {
+            await logout();
+        } catch (error) {
+            if (!(error instanceof AxiosError)) {
+                console.error("Logout failed:", error);
+            }
+        } finally {
+            clearAuthToken();
+            router.push("/login");
+            setIsLoggingOut(false);
+        }
+    }
+
     return (
         <>
             {/* Mobile top bar */}
-            <div className="md:hidden fixed top-0 inset-x-0 z-40 flex items-center justify-between px-4 py-3 bg-[#f6fff8]/80 border-b border-emerald-900/10 backdrop-blur-xl">
+            <div className="lg:hidden fixed top-0 inset-x-0 z-40 flex items-center justify-between px-4 py-3 bg-[#f6fff8]/80 border-b border-emerald-900/10 backdrop-blur-xl">
                 <div className="flex items-center gap-2">
                     <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-700/10 text-emerald-800 ring-1 ring-emerald-900/10">
                         <LuScanLine className="h-4 w-4" />
@@ -91,14 +113,14 @@ export function Sidebar() {
 
             {/* Sidebar */}
             <aside
-                className={`fixed z-30 flex flex-col overflow-hidden border border-white/20 bg-linear-to-b from-[#16362c]/62 via-[#112b23]/55 to-[#0d221c]/58 text-white backdrop-blur-2xl shadow-[0_30px_70px_-30px_rgba(0,0,0,0.65)] transition-[width,transform,opacity,left,right,top,bottom] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform ${
+                className={`fixed z-30 flex flex-col overflow-hidden border border-white/15 bg-linear-to-b from-[#16362c]/52 via-[#112b23]/48 to-[#0d221c]/52 text-white backdrop-blur-2xl shadow-[0_22px_60px_-32px_rgba(0,0,0,0.7)] transition-[width,transform,opacity,left,right,top,bottom] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform ${
                     isMobile
                         ? isOpen
-                            ? "left-3 right-3 top-3 bottom-3 translate-x-0 rounded-3xl opacity-100"
-                            : "-translate-x-[110%] left-3 right-3 top-3 bottom-3 rounded-3xl opacity-0 pointer-events-none"
+                            ? "left-3 top-3 bottom-3 w-[min(20rem,calc(100vw-1.5rem))] translate-x-0 rounded-3xl opacity-100"
+                            : "-translate-x-[110%] left-3 top-3 bottom-3 w-[min(20rem,calc(100vw-1.5rem))] rounded-3xl opacity-0 pointer-events-none"
                         : isOpen
-                          ? "left-4 top-4 bottom-4 w-72 rounded-3xl"
-                          : "left-4 top-4 bottom-4 w-22 rounded-3xl"
+                          ? "left-4 top-4 bottom-4 w-64 rounded-3xl"
+                          : "left-4 top-4 bottom-4 w-16 rounded-3xl"
                 }`}>
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_120%_70%_at_0%_0%,rgba(255,255,255,0.24),transparent_55%)]" />
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_100%_0%,rgba(110,231,183,0.16),transparent_60%)]" />
@@ -123,14 +145,6 @@ export function Sidebar() {
 
                 {/* Nav */}
                 <nav className="relative flex-1 overflow-y-scroll px-3 pt-4 pb-5 space-y-3 scrollbar-thin scrollbar-thumb-white/35 scrollbar-track-white/8">
-                    <SidebarItem
-                        label="ESG Accounting"
-                        icon={<LuLeaf className="h-4 w-4" />}
-                        compact={compact}
-                        isActive={activeSection === "esg-accounting"}
-                        onClick={() => setActiveSection("esg-accounting")}
-                    />
-
                     {/* GHG group */}
                     <div className="space-y-1">
                         <button
@@ -138,8 +152,8 @@ export function Sidebar() {
                             onClick={toggleGhg}
                             className={`${baseItemClasses} ${
                                 activeSection === "ghg-accounting" || activeSection === "scope-1"
-                                    ? "bg-white/22 text-white border-emerald-200/45 shadow-md"
-                                    : "text-emerald-50/85"
+                                    ? "bg-white/14 text-white border-emerald-200/25"
+                                    : "text-emerald-50/80"
                             } w-full`}>
                             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/14 text-emerald-50 ring-1 ring-white/15 group-hover:bg-white/20 group-hover:text-white">
                                 <LuFactory className="h-4 w-4" />
@@ -182,30 +196,6 @@ export function Sidebar() {
                     </div>
 
                     <SidebarItem
-                        label="Finance-grade ESG reporting"
-                        icon={<LuShieldCheck className="h-4 w-4" />}
-                        compact={compact}
-                        isActive={activeSection === "finance-esg-reporting"}
-                        onClick={() => setActiveSection("finance-esg-reporting")}
-                    />
-
-                    <SidebarItem
-                        label="Audit compliance (logs, traits)"
-                        icon={<LuShieldCheck className="h-4 w-4 rotate-12" />}
-                        compact={compact}
-                        isActive={activeSection === "audit-compliance"}
-                        onClick={() => setActiveSection("audit-compliance")}
-                    />
-
-                    <SidebarItem
-                        label="Traceability studio"
-                        icon={<LuSparkles className="h-4 w-4" />}
-                        compact={compact}
-                        isActive={activeSection === "traceability"}
-                        onClick={() => setActiveSection("traceability")}
-                    />
-
-                    <SidebarItem
                         label="Settings"
                         icon={<LuSettings2 className="h-4 w-4" />}
                         compact={compact}
@@ -233,10 +223,17 @@ export function Sidebar() {
                             </button>
                         </div>
                     )}
+
+                    <SidebarItem
+                        label={isLoggingOut ? "Logging out..." : "Logout"}
+                        icon={<LuLogOut className="h-4 w-4" />}
+                        compact={compact}
+                        onClick={handleLogout}
+                    />
                 </nav>
 
                 {/* Collapse control (desktop) */}
-                <div className="relative hidden md:flex items-center justify-between px-3 pb-4 pt-3 border-t border-white/12">
+                <div className="relative hidden lg:flex items-center justify-between px-3 pb-4 pt-3 border-t border-white/12">
                     {!compact && (
                         <div className="flex flex-col text-[0.7rem] text-emerald-100/65 leading-tight">
                             <span className="font-semibold uppercase tracking-[0.18em] text-emerald-100/80">

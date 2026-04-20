@@ -1,4 +1,4 @@
-import { publicApi } from "@/lib/http/client";
+import { privateApi, publicApi } from "@/lib/http/client";
 import type { LoginInput, LoginPayload, LoginResponse } from "@/types/auth";
 export type { LoginInput, LoginMode } from "@/types/auth";
 
@@ -25,4 +25,8 @@ export async function login(input: LoginInput): Promise<string> {
     }
 
     return data.data;
+}
+
+export async function logout(): Promise<void> {
+    await privateApi.post("/user/logout");
 }

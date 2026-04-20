@@ -45,7 +45,7 @@ export function ScrollReveal({
                     setVisible(false);
                 }
             },
-            { threshold, rootMargin }
+            { threshold, rootMargin },
         );
         obs.observe(el);
         return () => obs.disconnect();
@@ -88,6 +88,5 @@ export function useParallaxScroll(factor = 0.06) {
             window.removeEventListener("scroll", onScroll);
         };
     }, [factor]);
-
     return y;
 }

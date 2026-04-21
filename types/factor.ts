@@ -2,6 +2,13 @@ import type { ApiEnvelope } from "@/types/api/common";
 
 export type EmissionScope = "scope-1" | "scope-2" | "scope-3";
 
+export interface EmissionStandard {
+    name: string;
+    version: string;
+    sourceType: string;
+    year: number;
+}
+
 export interface AddFactorRequest {
     fuelName: string;
     fuelType: string;
@@ -11,6 +18,7 @@ export interface AddFactorRequest {
     ch4Factor: number;
     n2oFactor: number;
     convertTo: string;
+    emissionStandard?: EmissionStandard;
 }
 
 export interface FactorRecord extends AddFactorRequest {

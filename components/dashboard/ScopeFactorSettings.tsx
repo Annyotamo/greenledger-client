@@ -22,6 +22,12 @@ const initialForm: AddFactorRequest = {
     ch4Factor: 11.0432,
     n2oFactor: 8.03893,
     convertTo: "kg",
+    emissionStandard: {
+        name: "DEFRA",
+        version: "AR5",
+        sourceType: "IPCC",
+        year: 2025,
+    },
 };
 
 export function ScopeFactorSettings() {
@@ -125,6 +131,84 @@ export function ScopeFactorSettings() {
                         <Field label="N2O factor">
                             <input type="number" step="0.00001" value={form.n2oFactor} onChange={(e) => setForm((p) => ({ ...p, n2oFactor: Number(e.target.value || 0) }))} className={inputClass} />
                         </Field>
+                    </div>
+
+                    <div className="mt-4 rounded-2xl border border-emerald-900/10 bg-emerald-50/60 p-3">
+                        <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-emerald-900/70">
+                            Emission standard
+                        </p>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <Field label="Standard name">
+                                <input
+                                    value={form.emissionStandard?.name ?? ""}
+                                    onChange={(e) =>
+                                        setForm((p) => ({
+                                            ...p,
+                                            emissionStandard: {
+                                                name: e.target.value,
+                                                version: p.emissionStandard?.version ?? "",
+                                                sourceType: p.emissionStandard?.sourceType ?? "",
+                                                year: p.emissionStandard?.year ?? 0,
+                                            },
+                                        }))
+                                    }
+                                    className={inputClass}
+                                />
+                            </Field>
+                            <Field label="Version">
+                                <input
+                                    value={form.emissionStandard?.version ?? ""}
+                                    onChange={(e) =>
+                                        setForm((p) => ({
+                                            ...p,
+                                            emissionStandard: {
+                                                name: p.emissionStandard?.name ?? "",
+                                                version: e.target.value,
+                                                sourceType: p.emissionStandard?.sourceType ?? "",
+                                                year: p.emissionStandard?.year ?? 0,
+                                            },
+                                        }))
+                                    }
+                                    className={inputClass}
+                                />
+                            </Field>
+                            <Field label="Source type">
+                                <input
+                                    value={form.emissionStandard?.sourceType ?? ""}
+                                    onChange={(e) =>
+                                        setForm((p) => ({
+                                            ...p,
+                                            emissionStandard: {
+                                                name: p.emissionStandard?.name ?? "",
+                                                version: p.emissionStandard?.version ?? "",
+                                                sourceType: e.target.value,
+                                                year: p.emissionStandard?.year ?? 0,
+                                            },
+                                        }))
+                                    }
+                                    className={inputClass}
+                                />
+                            </Field>
+                            <Field label="Year">
+                                <input
+                                    type="number"
+                                    step="1"
+                                    value={form.emissionStandard?.year ?? 0}
+                                    onChange={(e) =>
+                                        setForm((p) => ({
+                                            ...p,
+                                            emissionStandard: {
+                                                name: p.emissionStandard?.name ?? "",
+                                                version: p.emissionStandard?.version ?? "",
+                                                sourceType: p.emissionStandard?.sourceType ?? "",
+                                                year: Number(e.target.value || 0),
+                                            },
+                                        }))
+                                    }
+                                    className={inputClass}
+                                />
+                            </Field>
+                        </div>
                     </div>
 
                     <button

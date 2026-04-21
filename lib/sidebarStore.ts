@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 type SectionKey =
+  | "dashboard"
   | "esg-accounting"
   | "ghg-accounting"
   | "traceability"
@@ -14,6 +15,7 @@ type SidebarState = {
   activeSection: SectionKey | null;
   ghgExpanded: boolean;
   toggle: () => void;
+  setOpen: (open: boolean) => void;
   setActiveSection: (section: SectionKey) => void;
   toggleGhg: () => void;
 };
@@ -25,6 +27,10 @@ export const useSidebarStore = create<SidebarState>((set) => ({
   toggle: () =>
     set((state) => ({
       isOpen: !state.isOpen,
+    })),
+  setOpen: (open) =>
+    set(() => ({
+      isOpen: open,
     })),
   setActiveSection: (section) =>
     set(() => ({

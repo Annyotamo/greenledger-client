@@ -5,7 +5,6 @@ export type LoginMode = "identity" | "email";
 export interface LoginInput {
     identity: string;
     password: string;
-    mode: LoginMode;
 }
 
 export interface LoginByEmailPayload {
@@ -14,7 +13,7 @@ export interface LoginByEmailPayload {
 }
 
 export interface LoginByUsernamePayload {
-    username: string;
+    userName: string;
     password: string;
 }
 

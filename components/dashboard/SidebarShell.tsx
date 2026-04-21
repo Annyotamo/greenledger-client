@@ -4,22 +4,12 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AxiosError } from "axios";
+import Image from "next/image";
 
 import { logout } from "@/lib/auth/api";
 import { clearAuthToken } from "@/lib/auth/token";
 import { useSidebarStore } from "@/lib/sidebarStore";
-import {
-    LuChevronDown,
-    LuChevronRight,
-    LuFactory,
-    LuLeaf,
-    LuLogOut,
-    LuMenu,
-    LuScanLine,
-    LuSettings2,
-    LuShieldCheck,
-    LuSparkles,
-} from "react-icons/lu";
+import { LuChevronDown, LuChevronRight, LuFactory, LuLeaf, LuLogOut, LuMenu, LuSettings2 } from "react-icons/lu";
 
 type SidebarItemProps = {
     label: string;
@@ -30,7 +20,7 @@ type SidebarItemProps = {
 };
 
 const baseItemClasses =
-    "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition cursor-pointer" +
+    "group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition cursor-pointer" +
     " border border-transparent" +
     " hover:bg-white/10 hover:text-white" +
     " focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/40";
@@ -40,9 +30,11 @@ function SidebarItem({ label, icon, isActive, onClick, compact }: SidebarItemPro
         <button
             type="button"
             onClick={onClick}
-            className={`${baseItemClasses} ${
-                isActive ? "bg-white/14 text-white border-emerald-200/25" : "text-emerald-50/80"
-            }`}>
+            className={[
+                baseItemClasses,
+                compact ? "justify-center px-2" : "",
+                isActive ? "bg-white/14 text-white border-emerald-200/25" : "text-emerald-50/80",
+            ].join(" ")}>
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/14 text-emerald-50 ring-1 ring-white/15 group-hover:bg-white/20 group-hover:text-white">
                 {icon}
             </span>
@@ -52,7 +44,7 @@ function SidebarItem({ label, icon, isActive, onClick, compact }: SidebarItemPro
 }
 
 export function Sidebar() {
-    const { isOpen, toggle, activeSection, setActiveSection, ghgExpanded, toggleGhg } = useSidebarStore();
+    const { isOpen, toggle, setOpen, activeSection, setActiveSection, ghgExpanded, toggleGhg } = useSidebarStore();
     const router = useRouter();
     const pathname = usePathname();
 
@@ -61,11 +53,15 @@ export function Sidebar() {
 
     useEffect(() => {
         // Drawer mode for semi-medium screens too (prevents sidebar covering content).
-        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        const handleResize = () => {
+            const mobile = window.innerWidth < 1024;
+            setIsMobile(mobile);
+            if (mobile) setOpen(false);
+        };
         handleResize();
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
-    }, []);
+    }, [setOpen]);
 
     const compact = !isOpen && !isMobile;
     const scopeRouteActive = pathname === "/scope-1" || pathname.startsWith("/scope-1/");
@@ -93,14 +89,12 @@ export function Sidebar() {
             {/* Mobile top bar */}
             <div className="lg:hidden fixed top-0 inset-x-0 z-40 flex items-center justify-between px-4 py-3 bg-[#f6fff8]/80 border-b border-emerald-900/10 backdrop-blur-xl">
                 <div className="flex items-center gap-2">
-                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-700/10 text-emerald-800 ring-1 ring-emerald-900/10">
-                        <LuScanLine className="h-4 w-4" />
-                    </span>
+                    <Image src="/GLLogo.png" alt="Green Ledger" width={50} height={50} className="h-5 w-5" />
                     <div className="flex flex-col">
                         <span className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-800/80">
-                            ESG CONTROL TOWER
+                            GREEN LEDGER
                         </span>
-                        <span className="text-sm font-medium text-slate-900/90">Finance-grade ESG &amp; GHG</span>
+                        <span className="text-sm font-medium text-slate-900/90">Control tower</span>
                     </div>
                 </div>
                 <button
@@ -111,13 +105,23 @@ export function Sidebar() {
                 </button>
             </div>
 
+            {/* Mobile backdrop */}
+            {isMobile && isOpen ? (
+                <button
+                    type="button"
+                    aria-label="Close sidebar"
+                    onClick={() => setOpen(false)}
+                    className="fixed inset-0 z-20 bg-black/30 backdrop-blur-[2px] lg:hidden"
+                />
+            ) : null}
+
             {/* Sidebar */}
             <aside
                 className={`fixed z-30 flex flex-col overflow-hidden border border-white/15 bg-linear-to-b from-[#16362c]/52 via-[#112b23]/48 to-[#0d221c]/52 text-white backdrop-blur-2xl shadow-[0_22px_60px_-32px_rgba(0,0,0,0.7)] transition-[width,transform,opacity,left,right,top,bottom] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform ${
                     isMobile
                         ? isOpen
-                            ? "left-3 top-3 bottom-3 w-[min(20rem,calc(100vw-1.5rem))] translate-x-0 rounded-3xl opacity-100"
-                            : "-translate-x-[110%] left-3 top-3 bottom-3 w-[min(20rem,calc(100vw-1.5rem))] rounded-3xl opacity-0 pointer-events-none"
+                            ? "left-3 top-16 bottom-3 w-[min(20rem,calc(100vw-1.5rem))] translate-x-0 rounded-3xl opacity-100"
+                            : "-translate-x-[110%] left-3 top-16 bottom-3 w-[min(20rem,calc(100vw-1.5rem))] rounded-3xl opacity-0 pointer-events-none"
                         : isOpen
                           ? "left-4 top-4 bottom-4 w-64 rounded-3xl"
                           : "left-4 top-4 bottom-4 w-16 rounded-3xl"
@@ -127,34 +131,46 @@ export function Sidebar() {
                 <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-white/10 via-transparent to-black/20" />
                 {/* Brand */}
                 <div className="relative hidden md:flex items-center gap-3 px-4 pt-5 pb-4 border-b border-white/12">
-                    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/14 text-emerald-50 ring-1 ring-white/20 overflow-hidden">
-                        <span className="absolute inset-[-40%] bg-[conic-gradient(from_220deg,rgba(16,185,129,0.22)_0deg,transparent_120deg,transparent_240deg,rgba(110,231,183,0.3)_360deg)] opacity-90" />
-                        <LuScanLine className="relative h-5 w-5" aria-hidden />
-                    </div>
+                    <Image src="/GLLogo.png" alt="Green Ledger" width={50} height={50} className="h-7 w-7" />
                     {!compact && (
                         <div className="flex flex-col">
                             <span className="text-[0.68rem] font-semibold uppercase tracking-[0.3em] text-emerald-100/75">
-                                ESG CONTROL TOWER
+                                GREEN LEDGER
                             </span>
-                            <span className="text-sm font-medium tracking-tight text-white/90">
-                                Finance-grade climate ledger
-                            </span>
+                            <span className="text-sm font-medium tracking-tight text-white/90">Control tower</span>
                         </div>
                     )}
                 </div>
 
                 {/* Nav */}
-                <nav className="relative flex-1 overflow-y-scroll px-3 pt-4 pb-5 space-y-3 scrollbar-thin scrollbar-thumb-white/35 scrollbar-track-white/8">
+                <nav
+                    className={[
+                        "relative flex-1 overflow-y-auto pt-4 pb-5 space-y-3 scrollbar-thin scrollbar-thumb-white/35 scrollbar-track-white/8",
+                        compact ? "px-2" : "px-3",
+                    ].join(" ")}>
+                    <SidebarItem
+                        label="Dashboard"
+                        icon={<LuLeaf className="h-4 w-4" />}
+                        compact={compact}
+                        isActive={pathname === "/dashboard"}
+                        onClick={() => {
+                            setActiveSection("dashboard");
+                            router.push("/dashboard");
+                            if (isMobile) setOpen(false);
+                        }}
+                    />
                     {/* GHG group */}
                     <div className="space-y-1">
                         <button
                             type="button"
                             onClick={toggleGhg}
-                            className={`${baseItemClasses} ${
+                            className={[
+                                baseItemClasses,
+                                compact ? "justify-center px-2" : "",
                                 activeSection === "ghg-accounting" || activeSection === "scope-1"
                                     ? "bg-white/14 text-white border-emerald-200/25"
-                                    : "text-emerald-50/80"
-                            } w-full`}>
+                                    : "text-emerald-50/80",
+                            ].join(" ")}>
                             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/14 text-emerald-50 ring-1 ring-white/15 group-hover:bg-white/20 group-hover:text-white">
                                 <LuFactory className="h-4 w-4" />
                             </span>
@@ -180,6 +196,7 @@ export function Sidebar() {
                                     onClick={() => {
                                         setActiveSection("scope-1");
                                         router.push("/scope-1");
+                                        if (isMobile) setOpen(false);
                                     }}
                                     className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-xs font-medium tracking-tight transition-all duration-200 ${
                                         activeSection === "scope-1" || scopeRouteActive
@@ -203,6 +220,7 @@ export function Sidebar() {
                         onClick={() => {
                             setActiveSection("settings");
                             router.push("/dashboard/settings");
+                            if (isMobile) setOpen(false);
                         }}
                     />
 

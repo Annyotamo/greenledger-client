@@ -276,17 +276,14 @@ export default function Home() {
                             <div
                                 className="min-w-0 flex-1 will-change-transform"
                                 style={{ transform: `translate3d(0,${heroShift}px,0)` }}>
-                                <p className="mb-4 inline-flex rounded-full border border-white/25 bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-50 shadow-sm backdrop-blur-md">
-                                    ESG reporting · Carbon accounting · Traceability
-                                </p>
                                 <h1 className="text-balance text-3xl font-extrabold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_28px_rgba(0,0,0,0.35)] sm:text-4xl lg:text-5xl xl:text-6xl">
-                                    Turn sustainability obligations into a clear, defensible operating rhythm
+                                    GHG accounting and ESG reporting built for Indian businesses
                                 </h1>
                                 <p className="mt-6 max-w-3xl text-pretty text-base leading-relaxed text-emerald-50/95 sm:text-lg">
                                     GreenLedger helps organizations collect environmental and social data, auto-generate
-                                    standards-aligned reports (including CSRD / ESRS / BRSR), run rigorous carbon
-                                    accounting across Scopes 1–3, and prove product stories with supply chain
-                                    traceability from factory floor to QR code in a shopper’s hand.
+                                    standards aligned reports (BRSR), run rigorous carbon accounting across Scopes 1 to
+                                    3, and prove product stories with supply chain traceability from factory floor to QR
+                                    code in a shopper’s hand.
                                 </p>
                                 <div className="mt-9 flex flex-wrap gap-3">
                                     <a
@@ -299,11 +296,6 @@ export default function Home() {
                                         className="rounded-xl border border-white/35 bg-white/10 px-5 py-3 text-sm font-semibold text-white shadow-sm backdrop-blur-md transition hover:bg-white/20">
                                         Read how it works
                                     </a>
-                                    <Link
-                                        href="/get-started"
-                                        className="rounded-xl px-5 py-3 text-sm font-semibold text-white underline decoration-emerald-300/80 decoration-2 underline-offset-[6px] transition hover:decoration-emerald-200">
-                                        Request a demo
-                                    </Link>
                                 </div>
                                 <div className="mt-7 flex flex-wrap items-center gap-3">
                                     <div className="inline-flex items-center gap-3 rounded-2xl border border-white/25 bg-white/10 px-4 py-2 shadow-sm backdrop-blur-md transition hover:bg-white/15">
@@ -351,9 +343,6 @@ export default function Home() {
                                             ISO 27001
                                         </span>
                                     </div>
-                                    <span className="text-xs font-medium text-emerald-50/80">
-                                        Startup India ecosystem recognition · ISO 27001 aligned
-                                    </span>
                                 </div>
                             </div>
                             <div
@@ -433,22 +422,19 @@ export default function Home() {
                         <div className="pointer-events-none absolute inset-0 gl-grain" aria-hidden />
                         <div className="relative mx-auto grid w-full max-w-none gap-6 px-4 sm:px-5 md:grid-cols-[1.2fr_0.8fr] md:items-center md:px-6 lg:px-7">
                             <div>
-                                <p className="inline-flex rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-50 backdrop-blur-md">
-                                    Planet-scale clarity
-                                </p>
                                 <h2 className="mt-4 max-w-3xl text-balance text-2xl font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">
                                     Sustainability intelligence designed to feel alive, trusted, and board-ready
                                 </h2>
                                 <p className="mt-4 max-w-2xl text-sm leading-relaxed text-emerald-50/90 sm:text-base">
-                                    One ambient data story across reporting, carbon accounting, and traceability where
-                                    every insight is visual, auditable, and ready for action.
+                                    Listed companies and growing MSMEs. Audit-ready numbers. Annual reports filed on
+                                    time.
                                 </p>
                             </div>
                             <div className="grid gap-3">
                                 {[
-                                    "Immersive visual narrative",
-                                    "Enterprise-grade disclosure confidence",
-                                    "High-fidelity scope and supply-chain signals",
+                                    "Track all three scopes with guided data entry and automatic calculations.",
+                                    "Your sustainability report is ready when you need it no last-minute scrambles.",
+                                    "Simple data collection that works for everyone in your value chain.",
                                 ].map((item) => (
                                     <div
                                         key={item}

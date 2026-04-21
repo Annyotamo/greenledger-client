@@ -1,4 +1,5 @@
 import LoginForm from "@/components/auth/LoginForm";
+import Image from "next/image";
 
 export default function LoginPage() {
     return (
@@ -21,10 +22,9 @@ export default function LoginPage() {
             />
             <div className="full-bleed pointer-events-none absolute inset-0 gl-grain" aria-hidden />
 
-            <div className="relative mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
+            <div className="relative mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-2 lg:gap-10 lg:items-stretch">
                 <section className="relative overflow-hidden rounded-3xl border border-white/25 bg-white/10 p-7 shadow-2xl shadow-black/25 backdrop-blur-md lg:p-10">
                     <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/55 via-black/20 to-transparent" />
-
                     <div
                         className="gl-orb gl-drift pointer-events-none absolute -left-10 -top-10 h-44 w-44 bg-emerald-400/35"
                         aria-hidden
@@ -38,7 +38,7 @@ export default function LoginPage() {
                         aria-hidden
                     />
 
-                    <div className="relative flex h-full flex-col justify-between gap-10">
+                    <div className="relative flex h-full flex-col">
                         <div className="animate-fade-up">
                             <p className="inline-flex rounded-full border border-white/25 bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-50 shadow-sm backdrop-blur-md">
                                 Secure access · Audit-ready by design
@@ -51,35 +51,25 @@ export default function LoginPage() {
                                 finance-grade controls and clarity.
                             </p>
                         </div>
-
-                        <dl className="relative grid gap-3 sm:grid-cols-3">
-                            {[
-                                { k: "SOC 2-ready posture", v: "Controls aligned with enterprise expectations" },
-                                { k: "ISO 27001 aligned", v: "Security-first operational design" },
-                                { k: "Fast onboarding", v: "Start with a template, tailor in days" },
-                            ].map((it) => (
-                                <div
-                                    key={it.k}
-                                    className="animate-fade-up rounded-2xl border border-white/20 bg-white/10 p-4 shadow-sm backdrop-blur-md">
-                                    <dt className="text-[0.7rem] font-bold uppercase tracking-[0.22em] text-emerald-50/80">
-                                        {it.k}
-                                    </dt>
-                                    <dd className="mt-2 text-sm font-semibold leading-snug text-white/90">{it.v}</dd>
-                                </div>
-                            ))}
-                        </dl>
+                        <div className="mt-8 flex flex-1 items-center justify-center">
+                            <Image
+                                src="/GLLogo.png"
+                                alt="GreenLedger Logo"
+                                width={520}
+                                height={520}
+                                priority
+                                className="h-auto w-[min(22rem,90%)] max-w-full object-contain drop-shadow-[0_20px_70px_rgba(0,0,0,0.45)]"
+                            />
+                        </div>
                     </div>
                 </section>
 
                 <section className="relative">
-                    <div className="gl-shimmer-border rounded-3xl border border-white/35 bg-white/80 shadow-2xl shadow-black/20 backdrop-blur-md">
-                        <div className="rounded-3xl p-6 sm:p-8">
+                    <div className="gl-shimmer-border h-full rounded-3xl border border-white/35 bg-white/80 shadow-2xl shadow-black/20 backdrop-blur-md">
+                        <div className="flex h-full flex-col rounded-3xl p-6 sm:p-8">
                             <LoginForm />
                         </div>
                     </div>
-                    <p className="mt-4 text-center text-xs font-medium text-emerald-50/75">
-                        By continuing you agree to the Terms and acknowledge the Privacy Policy.
-                    </p>
                 </section>
             </div>
         </main>

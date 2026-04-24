@@ -9,7 +9,7 @@ import Image from "next/image";
 import { logout } from "@/lib/auth/api";
 import { clearAuthToken } from "@/lib/auth/token";
 import { useSidebarStore } from "@/lib/sidebarStore";
-import { LuChevronDown, LuChevronRight, LuFactory, LuLeaf, LuLogOut, LuMenu, LuSettings2 } from "react-icons/lu";
+import { LuChevronDown, LuChevronRight, LuFactory, LuLeaf, LuLogOut, LuMenu } from "react-icons/lu";
 
 type SidebarItemProps = {
     label: string;
@@ -65,7 +65,6 @@ export function Sidebar() {
 
     const compact = !isOpen && !isMobile;
     const scopeRouteActive = pathname === "/scope-1" || pathname.startsWith("/scope-1/");
-    const settingsRouteActive = pathname === "/dashboard/settings" || pathname.startsWith("/dashboard/settings/");
 
     async function handleLogout() {
         if (isLoggingOut) return;
@@ -211,36 +210,6 @@ export function Sidebar() {
                             </div>
                         )}
                     </div>
-
-                    <SidebarItem
-                        label="Settings"
-                        icon={<LuSettings2 className="h-4 w-4" />}
-                        compact={compact}
-                        isActive={activeSection === "settings" || settingsRouteActive}
-                        onClick={() => {
-                            setActiveSection("settings");
-                            router.push("/dashboard/settings");
-                            if (isMobile) setOpen(false);
-                        }}
-                    />
-
-                    {!compact && (activeSection === "settings" || settingsRouteActive) && (
-                        <div className="pl-4">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setActiveSection("settings");
-                                    router.push("/dashboard/settings");
-                                }}
-                                className="flex w-full items-center justify-between rounded-lg bg-white/18 px-3 py-1.5 text-xs font-medium tracking-tight text-white ring-1 ring-emerald-200/35 transition-all duration-200">
-                                <span className="flex items-center gap-2">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 ring-1 ring-emerald-100/30" />
-                                    <span>Scope factors</span>
-                                </span>
-                                <LuChevronRight className="h-4 w-4 text-emerald-100/80" />
-                            </button>
-                        </div>
-                    )}
 
                     <SidebarItem
                         label={isLoggingOut ? "Logging out..." : "Logout"}

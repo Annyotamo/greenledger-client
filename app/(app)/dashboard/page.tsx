@@ -70,7 +70,6 @@ export default function DashboardPage() {
             "audit-compliance": "Audit compliance center",
             "scope-1": "Scope-1 emissions",
             traceability: "Traceability studio",
-            settings: "Workspace settings",
         };
         return labels[activeSection ?? "esg-accounting"] ?? "Dashboard";
     }, [activeSection]);
@@ -379,11 +378,11 @@ export default function DashboardPage() {
                             <button
                                 type="button"
                                 onClick={() => {
-                                    useSidebarStore.getState().setActiveSection("settings");
-                                    router.push("/dashboard/settings");
+                                    // Settings page removed.
+                                    router.push("/dashboard");
                                 }}
                                 className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700">
-                                Open full settings
+                                Back to dashboard
                                 <LuArrowUpRight className="h-4 w-4" />
                             </button>
                         </section>

@@ -78,10 +78,10 @@ export function AddFactorForm() {
   const [factorsResult, setFactorsResult] = useState<SubmitResult>(null);
   const [factors, setFactors] = useState<FactorRow[]>([]);
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<FactorRow | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [csvFile, setCsvFile] = useState<File | null>(null);
-  const [csvPreview, setCsvPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<SubmitResult>(null);
 
@@ -129,6 +129,20 @@ export function AddFactorForm() {
     });
   }, [factors, query]);
 
+  const totalPages = useMemo(() => {
+    const total = filtered.length;
+    const size = Math.max(1, pageSize);
+    return Math.max(1, Math.ceil(total / size));
+  }, [filtered.length, pageSize]);
+
+  const pageSafe = Math.min(Math.max(1, page), totalPages);
+
+  const paged = useMemo(() => {
+    const size = Math.max(1, pageSize);
+    const start = (pageSafe - 1) * size;
+    return filtered.slice(start, start + size);
+  }, [filtered, pageSafe, pageSize]);
+
   function set<K extends keyof FactorFormState>(key: K, value: FactorFormState[K]) {
     setForm((cur) => ({ ...cur, [key]: value }));
   }
@@ -148,6 +162,7 @@ export function AddFactorForm() {
       const body = await res.json().catch(() => null);
       const next = Array.isArray(body?.data) ? (body.data as FactorRow[]) : [];
       setFactors(next);
+      setPage(1);
       setFactorsResult({ ok: res.ok, status: res.status, body, message: body?.message });
     } catch (e) {
       setFactorsResult({ ok: false, message: e instanceof Error ? e.message : "Request failed" });
@@ -186,12 +201,7 @@ export function AddFactorForm() {
 
   async function onPickFile(file: File | null) {
     setCsvFile(file);
-    setCsvPreview(null);
     setUploadResult(null);
-    if (!file) return;
-    const text = await file.text().catch(() => "");
-    const lines = text.split(/\r?\n/).slice(0, 8).join("\n");
-    setCsvPreview(lines);
   }
 
   async function uploadCsv() {
@@ -231,12 +241,12 @@ export function AddFactorForm() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex rounded-2xl border border-black/10 bg-white p-1">
+          <div className="inline-flex rounded-full bg-white/70 p-1 ring-1 ring-black/5 shadow-[0_18px_50px_-45px_rgba(15,23,42,0.35)]">
             <button
               type="button"
               className={[
-                "px-3 py-2 text-sm rounded-2xl transition",
-                tab === "add" ? "bg-black/5 text-black" : "text-black/70 hover:bg-black/5",
+                "px-3 py-2 text-sm rounded-full transition font-medium",
+                tab === "add" ? "bg-black/6 text-black" : "text-black/70 hover:bg-black/5",
               ].join(" ")}
               onClick={() => setTab("add")}
               disabled={submitting || loadingFactors || uploading}
@@ -246,8 +256,8 @@ export function AddFactorForm() {
             <button
               type="button"
               className={[
-                "px-3 py-2 text-sm rounded-2xl transition",
-                tab === "view" ? "bg-black/5 text-black" : "text-black/70 hover:bg-black/5",
+                "px-3 py-2 text-sm rounded-full transition font-medium",
+                tab === "view" ? "bg-black/6 text-black" : "text-black/70 hover:bg-black/5",
               ].join(" ")}
               onClick={() => {
                 setTab("view");
@@ -260,8 +270,8 @@ export function AddFactorForm() {
             <button
               type="button"
               className={[
-                "px-3 py-2 text-sm rounded-2xl transition",
-                tab === "upload" ? "bg-black/5 text-black" : "text-black/70 hover:bg-black/5",
+                "px-3 py-2 text-sm rounded-full transition font-medium",
+                tab === "upload" ? "bg-black/6 text-black" : "text-black/70 hover:bg-black/5",
               ].join(" ")}
               onClick={() => setTab("upload")}
               disabled={submitting || loadingFactors || uploading}
@@ -272,7 +282,7 @@ export function AddFactorForm() {
 
           <button
             type="button"
-            className="px-3 py-2 rounded-xl border border-black/10 bg-white text-sm hover:bg-black/5 transition disabled:opacity-60"
+            className="px-3 py-2 rounded-xl bg-white/70 text-sm font-medium ring-1 ring-black/5 hover:bg-white/90 transition disabled:opacity-60"
             onClick={() => {
               setForm(TEMPLATE);
               setResult(null);
@@ -292,10 +302,30 @@ export function AddFactorForm() {
         </div>
       </div>
 
+      {result ? (
+        <div
+          className={[
+            "mt-5 rounded-2xl px-4 py-3 text-sm ring-1",
+            result.ok
+              ? "bg-emerald-50/60 ring-emerald-200/70 text-emerald-950"
+              : "bg-red-50/60 ring-red-200/70 text-red-900",
+          ].join(" ")}
+        >
+          <div className="font-semibold">
+            {result.ok ? "Saved successfully." : "Couldn’t save."}
+            {typeof result.status === "number" ? (
+              <span className="font-medium text-black/40"> (HTTP {result.status})</span>
+            ) : null}
+          </div>
+          {result.ok ? null : (
+            <div className="mt-1 text-black/60">{result.message ?? "Please check your inputs and try again."}</div>
+          )}
+        </div>
+      ) : null}
+
       {tab === "add" ? (
-        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-8">
-          <div className="rounded-2xl border border-black/5 bg-white/60 p-4">
+        <div className="mt-6 min-w-0">
+          <div className="rounded-2xl bg-white/60 p-4 ring-1 ring-black/5 shadow-[0_18px_50px_-45px_rgba(15,23,42,0.28)]">
             <div className={sectionTitleClass()}>Basic details</div>
             <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
@@ -369,7 +399,7 @@ export function AddFactorForm() {
             </div>
           </div>
 
-          <div className="mt-6 rounded-2xl border border-black/5 bg-white/60 p-4">
+          <div className="mt-6 rounded-2xl bg-white/60 p-4 ring-1 ring-black/5 shadow-[0_18px_50px_-45px_rgba(15,23,42,0.28)]">
             <div className={sectionTitleClass()}>Emission factors</div>
             <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
@@ -434,7 +464,7 @@ export function AddFactorForm() {
             </div>
           </div>
 
-          <div className="mt-6 rounded-2xl border border-black/5 bg-white/60 p-4">
+          <div className="mt-6 rounded-2xl bg-white/60 p-4 ring-1 ring-black/5 shadow-[0_18px_50px_-45px_rgba(15,23,42,0.28)]">
             <div className={sectionTitleClass()}>Emission standard</div>
             <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div>
@@ -470,38 +500,8 @@ export function AddFactorForm() {
             </div>
           </div>
         </div>
-
-          <div className="lg:col-span-4">
-          <div className="rounded-2xl border border-black/5 bg-white/60 p-4">
-            <div className={sectionTitleClass()}>Preview</div>
-            <p className={["mt-1", helpTextClass()].join(" ")}>
-              This is what will be sent to the API.
-            </p>
-            <pre className="mt-3 max-h-[420px] overflow-auto rounded-xl border border-black/10 bg-white p-3 text-[12px] leading-5 text-(--muted)">
-              {JSON.stringify(form, null, 2)}
-            </pre>
-          </div>
-
-          {result ? (
-            <div
-              className={[
-                "mt-4 rounded-2xl border p-4 text-sm",
-                result.ok ? "border-emerald-200 bg-emerald-50/40" : "border-red-200 bg-red-50/40",
-              ].join(" ")}
-            >
-              <div className="font-medium">
-                {result.ok ? "Saved" : "Couldn’t save"}
-                {typeof result.status === "number" ? <span className="text-(--muted)"> (HTTP {result.status})</span> : null}
-              </div>
-              <pre className="mt-2 whitespace-pre-wrap text-[12px] leading-5 text-(--muted)">
-                {JSON.stringify(result.body ?? { message: result.message }, null, 2)}
-              </pre>
-            </div>
-          ) : null}
-        </div>
-      </div>
       ) : tab === "view" ? (
-        <div className="mt-6 rounded-2xl border border-black/5 bg-white/60 p-4">
+        <div className="mt-6 rounded-2xl bg-white/60 p-4 ring-1 ring-black/5 shadow-[0_18px_50px_-45px_rgba(15,23,42,0.28)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className={sectionTitleClass()}>All factors</div>
@@ -514,14 +514,31 @@ export function AddFactorForm() {
               <div className="relative">
                 <input
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setPage(1);
+                  }}
                   placeholder="Search fuel, year, unit, source…"
-                  className="w-72 max-w-[75vw] rounded-xl border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-black/20 focus:ring-4 focus:ring-black/5"
+                  className="w-72 max-w-[75vw] rounded-xl bg-white/90 px-3 py-2 text-sm outline-none ring-1 ring-black/10 focus:ring-4 focus:ring-black/5"
                 />
               </div>
+              <select
+                value={String(pageSize)}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setPage(1);
+                }}
+                className="rounded-xl bg-white/90 px-3 py-2 text-sm font-medium text-black/70 outline-none ring-1 ring-black/10 focus:ring-4 focus:ring-black/5"
+              >
+                {[10, 20, 50].map((n) => (
+                  <option key={n} value={n}>
+                    {n}/page
+                  </option>
+                ))}
+              </select>
               <button
                 type="button"
-                className="px-3 py-2 rounded-xl border border-black/10 bg-white text-sm hover:bg-black/5 transition disabled:opacity-60"
+                className="px-3 py-2 rounded-xl bg-white/90 text-sm font-medium ring-1 ring-black/10 hover:bg-white transition disabled:opacity-60"
                 onClick={fetchFactors}
                 disabled={loadingFactors}
               >
@@ -539,11 +556,9 @@ export function AddFactorForm() {
             </div>
           ) : null}
 
-          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
-            <div className="lg:col-span-8">
-              <div className="overflow-hidden rounded-2xl border border-black/10 bg-white">
-                <div className="overflow-auto">
-                  <table className="min-w-[860px] w-full text-sm">
+          <div className="mt-4 overflow-hidden rounded-2xl bg-white/90 ring-1 ring-black/10">
+            <div className="overflow-auto">
+              <table className="min-w-[920px] w-full text-sm">
                     <thead className="bg-black/2">
                       <tr className="text-left text-[12px] text-black/60">
                         <th className="px-4 py-3 font-medium">Fuel</th>
@@ -555,16 +570,11 @@ export function AddFactorForm() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filtered.map((f) => {
-                        const active = selected?.id === f.id;
+                      {paged.map((f) => {
                         return (
                           <tr
                             key={f.id}
-                            className={[
-                              "border-t border-black/5 cursor-pointer hover:bg-black/2",
-                              active ? "bg-black/3" : "",
-                            ].join(" ")}
-                            onClick={() => setSelected(f)}
+                            className="border-t border-black/5 hover:bg-black/2"
                           >
                             <td className="px-4 py-3">
                               <div className="font-medium text-black/80">{f.fuelName}</div>
@@ -580,7 +590,7 @@ export function AddFactorForm() {
                           </tr>
                         );
                       })}
-                      {!loadingFactors && filtered.length === 0 ? (
+                      {!loadingFactors && paged.length === 0 ? (
                         <tr className="border-t border-black/5">
                           <td className="px-4 py-8 text-(--muted)" colSpan={6}>
                             No factors found.
@@ -589,35 +599,57 @@ export function AddFactorForm() {
                       ) : null}
                     </tbody>
                   </table>
-                </div>
-              </div>
             </div>
+          </div>
 
-            <div className="lg:col-span-4">
-              <div className="rounded-2xl border border-black/10 bg-white p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="font-semibold text-sm">Details</div>
-                  {selected ? (
-                    <button
-                      type="button"
-                      className="text-[12px] text-black/60 hover:text-black"
-                      onClick={() => setSelected(null)}
-                    >
-                      Clear
-                    </button>
-                  ) : null}
-                </div>
-
-                {!selected ? (
-                  <div className={["mt-2", helpTextClass()].join(" ")}>
-                    Select a row to see full payload.
-                  </div>
-                ) : (
-                  <pre className="mt-3 max-h-[460px] overflow-auto rounded-xl border border-black/10 bg-white p-3 text-[12px] leading-5 text-(--muted)">
-                    {JSON.stringify(selected, null, 2)}
-                  </pre>
-                )}
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="text-[12px] text-black/50">
+              Showing{" "}
+              <span className="font-medium text-black/70">
+                {filtered.length ? (pageSafe - 1) * pageSize + 1 : 0}
+              </span>
+              {" – "}
+              <span className="font-medium text-black/70">
+                {Math.min(pageSafe * pageSize, filtered.length)}
+              </span>{" "}
+              of <span className="font-medium text-black/70">{filtered.length}</span>
+            </div>
+            <div className="inline-flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPage(1)}
+                disabled={pageSafe <= 1}
+                className="px-3 py-2 rounded-xl bg-white/90 text-sm font-medium ring-1 ring-black/10 hover:bg-white transition disabled:opacity-50"
+              >
+                First
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={pageSafe <= 1}
+                className="px-3 py-2 rounded-xl bg-white/90 text-sm font-medium ring-1 ring-black/10 hover:bg-white transition disabled:opacity-50"
+              >
+                Prev
+              </button>
+              <div className="text-sm font-semibold text-black/70">
+                Page {pageSafe} / {totalPages}
               </div>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={pageSafe >= totalPages}
+                className="px-3 py-2 rounded-xl bg-white/90 text-sm font-medium ring-1 ring-black/10 hover:bg-white transition disabled:opacity-50"
+              >
+                Next
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage(totalPages)}
+                disabled={pageSafe >= totalPages}
+                className="px-3 py-2 rounded-xl bg-white/90 text-sm font-medium ring-1 ring-black/10 hover:bg-white transition disabled:opacity-50"
+              >
+                Last
+              </button>
             </div>
           </div>
         </div>
@@ -680,14 +712,7 @@ export function AddFactorForm() {
                 </label>
               </div>
 
-              {csvPreview ? (
-                <div className="mt-4">
-                  <div className={labelClass()}>Preview (first lines)</div>
-                  <pre className="mt-2 max-h-56 overflow-auto rounded-xl border border-black/10 bg-white p-3 text-[12px] leading-5 text-(--muted)">
-                    {csvPreview}
-                  </pre>
-                </div>
-              ) : null}
+              {null}
             </div>
           </div>
 

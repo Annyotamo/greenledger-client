@@ -7,7 +7,7 @@ import type {
 } from "@/types/report";
 
 export async function getScope1Reports(): Promise<Scope1ReportRecord[]> {
-    const { data } = await privateApi.get<Scope1ReportResponse>("/report/getAllReport/reportType=scope1");
+    const { data } = await privateApi.get<Scope1ReportResponse>("/report/getAllReport/scope1");
     return data.data ?? [];
 }
 

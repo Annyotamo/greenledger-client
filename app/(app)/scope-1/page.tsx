@@ -13,6 +13,7 @@ import {
     LuFactory,
     LuFuel,
     LuLeaf,
+    LuMaximize2,
     LuPlus,
     LuSparkles,
     LuTriangleAlert,
@@ -134,6 +135,7 @@ export default function Scope1Page() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+    const [isMounted, setIsMounted] = useState(false);
     const [factors, setFactors] = useState<FactorRow[]>([]);
     const [isLoadingFactors, setIsLoadingFactors] = useState(false);
     const [factorError, setFactorError] = useState<string | null>(null);
@@ -144,21 +146,47 @@ export default function Scope1Page() {
     const [endMonth, setEndMonth] = useState("2026-05");
     const [isDownloading, setIsDownloading] = useState(false);
     const [downloadError, setDownloadError] = useState<string | null>(null);
-    const [ingestForm, setIngestForm] = useState<Scope1IngestRequest>({
-        fuelName: "LPG",
-        fuelType: "Gaseous Fuel",
-        quantity: 45.5,
-        cost: 6844.25,
-        unit: "tonnes",
-        orgName: "greenledger",
-        facilityName: "kolkata",
-        yearMonth: "2026-04",
+    const [recordsPage, setRecordsPage] = useState(1);
+    const recordsPageSize = 10;
+    const [ingestForm, setIngestForm] = useState<{
+        fuelName: string;
+        fuelType: string;
+        quantity: string;
+        cost: string;
+        unit: string;
+        orgName: string;
+        facilityName: string;
+        yearMonth: string;
+    }>({
+        fuelName: "",
+        fuelType: "",
+        quantity: "",
+        cost: "",
+        unit: "",
+        orgName: "",
+        facilityName: "",
+        yearMonth: "",
     });
     const records = data ?? [];
 
     useEffect(() => {
         setActiveSection("scope-1");
     }, [setActiveSection]);
+
+    useEffect(() => {
+        setRecordsPage(1);
+    }, [records.length]);
+
+    const recordsTotalPages = useMemo(() => Math.max(1, Math.ceil(records.length / recordsPageSize)), [records.length]);
+    const recordsPageSafe = Math.min(Math.max(1, recordsPage), recordsTotalPages);
+    const pagedRecords = useMemo(() => {
+        const start = (recordsPageSafe - 1) * recordsPageSize;
+        return records.slice(start, start + recordsPageSize);
+    }, [records, recordsPageSafe]);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const standardOptions = useMemo(() => {
         const byKey = new Map<string, FactorStandard>();
@@ -319,6 +347,30 @@ export default function Scope1Page() {
             .slice(0, 5);
     }, [records]);
 
+    const sourceSeries = useMemo(() => {
+        const map = new Map<string, number>();
+        for (const row of records) {
+            // Some environments may have slightly stale generated types; the API payload includes emissionStandard.
+            const src = (row.scope1FactorData as any)?.emissionStandard?.source ?? "Unknown";
+            map.set(src, (map.get(src) ?? 0) + (row.co2eTotal ?? 0));
+        }
+        return Array.from(map.entries())
+            .map(([source, co2e]) => ({ source, co2e }))
+            .sort((a, b) => b.co2e - a.co2e)
+            .slice(0, 5);
+    }, [records]);
+
+    const completeness = useMemo(() => {
+        const total = records.length || 1;
+        return {
+            total,
+            withFacility: records.filter((r) => Boolean(r.facilityName)).length,
+            withReportMonth: records.filter((r) => Boolean(r.reportDate)).length,
+            withFactor: records.filter((r) => Boolean(r.scope1FactorData)).length,
+            withActivity: records.filter((r) => Boolean(r.activityData)).length,
+        };
+    }, [records]);
+
     async function handleDownloadCsv() {
         if (!startMonth || !endMonth) {
             setDownloadError("Please select both start and end month.");
@@ -366,7 +418,17 @@ export default function Scope1Page() {
         setSubmitSuccess(null);
 
         try {
-            await ingestMutation.mutateAsync(ingestForm);
+            const payload: Scope1IngestRequest = {
+                fuelName: ingestForm.fuelName,
+                fuelType: ingestForm.fuelType,
+                quantity: Number(ingestForm.quantity || 0),
+                cost: Number(ingestForm.cost || 0),
+                unit: ingestForm.unit,
+                orgName: ingestForm.orgName,
+                facilityName: ingestForm.facilityName,
+                yearMonth: ingestForm.yearMonth,
+            };
+            await ingestMutation.mutateAsync(payload);
             setSubmitSuccess("New emission record added successfully.");
             setIsModalOpen(false);
         } catch (error) {
@@ -415,6 +477,19 @@ export default function Scope1Page() {
                                 setSubmitError(null);
                                 setSubmitSuccess(null);
                                 setFactorError(null);
+                                setSelectedStandardKey(null);
+                                setSelectedFuelType(null);
+                                setSelectedFactor(null);
+                                setIngestForm({
+                                    fuelName: "",
+                                    fuelType: "",
+                                    quantity: "",
+                                    cost: "",
+                                    unit: "",
+                                    orgName: "",
+                                    facilityName: "",
+                                    yearMonth: "",
+                                });
                                 setIsModalOpen(true);
                             }}
                             className="inline-flex h-11 items-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700">
@@ -659,8 +734,62 @@ export default function Scope1Page() {
                                             </div>
                                         ))}
                                     </div>
+
+                                    <div className="mt-4 space-y-2 rounded-2xl border border-emerald-900/10 bg-white/80 p-3">
+                                        {[
+                                            { k: "Facility", v: completeness.withFacility, total: completeness.total },
+                                            { k: "Report month", v: completeness.withReportMonth, total: completeness.total },
+                                            { k: "Factor linked", v: completeness.withFactor, total: completeness.total },
+                                            { k: "Activity linked", v: completeness.withActivity, total: completeness.total },
+                                        ].map((m) => {
+                                            const pct = Math.round((m.v / m.total) * 100);
+                                            return (
+                                                <div key={m.k} className="grid gap-1">
+                                                    <div className="flex items-center justify-between text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-emerald-900/60">
+                                                        <span>{m.k}</span>
+                                                        <span className="text-slate-700">{pct}%</span>
+                                                    </div>
+                                                    <div className="h-2 w-full overflow-hidden rounded-full bg-emerald-900/8">
+                                                        <div
+                                                            className="h-full rounded-full bg-emerald-600"
+                                                            style={{ width: `${pct}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </section>
                             </div>
+
+                            <section className="mt-5 rounded-2xl border border-white/70 bg-white/78 p-4 shadow-sm sm:p-5">
+                                <div className="mb-4 flex items-center justify-between">
+                                    <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-900/65">
+                                        Emissions by standard source
+                                    </h2>
+                                    <LuDroplets className="h-4 w-4 text-emerald-800/80" />
+                                </div>
+                                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+                                    {sourceSeries.map((s) => (
+                                        <div
+                                            key={s.source}
+                                            className="rounded-2xl border border-emerald-900/10 bg-white/85 px-4 py-3">
+                                            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-emerald-900/60">
+                                                {s.source}
+                                            </p>
+                                            <p className="mt-2 text-lg font-bold tracking-tight text-emerald-950">
+                                                {formatNumber(s.co2e)}
+                                            </p>
+                                            <p className="text-xs font-semibold text-slate-600">kgCO2e</p>
+                                        </div>
+                                    ))}
+                                    {!sourceSeries.length ? (
+                                        <div className="sm:col-span-2 lg:col-span-5 rounded-2xl border border-emerald-900/10 bg-white/85 px-4 py-4 text-sm font-semibold text-slate-600">
+                                            No standard source information available yet.
+                                        </div>
+                                    ) : null}
+                                </div>
+                            </section>
 
                             <section className="mt-5 rounded-2xl border border-white/70 bg-white/82 p-4 shadow-sm sm:p-5">
                                 <div className="flex flex-wrap items-end justify-between gap-3">
@@ -694,6 +823,12 @@ export default function Scope1Page() {
                                             <LuDownload className="h-4 w-4 text-emerald-800" />
                                             {isDownloading ? "Downloading..." : "Download CSV"}
                                         </button>
+                                        <a
+                                            href="/scope-1/records"
+                                            className="inline-flex h-11 items-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700">
+                                            <LuMaximize2 className="h-4 w-4" />
+                                            View all
+                                        </a>
                                     </div>
                                 </div>
                                 {downloadError ? (
@@ -702,21 +837,25 @@ export default function Scope1Page() {
                                     </div>
                                 ) : null}
                                 <div className="mt-3 overflow-x-auto">
-                                    <table className="min-w-full text-left text-xs">
+                                    <table className="min-w-[1100px] text-left text-xs">
                                         <thead>
                                             <tr className="border-b border-emerald-900/10 text-[0.68rem] uppercase tracking-[0.16em] text-emerald-900/60">
                                                 <th className="px-3 py-2">Fuel</th>
                                                 <th className="px-3 py-2">Fuel type</th>
                                                 <th className="px-3 py-2">Facility</th>
+                                                <th className="px-3 py-2">Org</th>
                                                 <th className="px-3 py-2">Report month</th>
+                                                <th className="px-3 py-2">Quantity</th>
+                                                <th className="px-3 py-2">Input unit</th>
+                                                <th className="px-3 py-2">Output unit</th>
                                                 <th className="px-3 py-2">CO2e</th>
                                                 <th className="px-3 py-2">Cost</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {records.map((row) => (
+                                            {pagedRecords.map((row, idx) => (
                                                 <tr
-                                                    key={row.id}
+                                                    key={`${row.id}-${idx}`}
                                                     className="border-b border-emerald-900/7 text-slate-700 hover:bg-emerald-50/45">
                                                     <td className="px-3 py-2 font-semibold text-slate-900">
                                                         {row.fuelName ?? "-"}
@@ -725,7 +864,15 @@ export default function Scope1Page() {
                                                     <td className="px-3 py-2">
                                                         {row.facilityName ?? "Unmapped facility"}
                                                     </td>
+                                                    <td className="px-3 py-2">{row.orgName ?? "-"}</td>
                                                     <td className="px-3 py-2">{row.reportDate ?? "-"}</td>
+                                                    <td className="px-3 py-2">
+                                                        {typeof row.activityData?.quantity === "number"
+                                                            ? formatNumber(row.activityData.quantity)
+                                                            : "-"}
+                                                    </td>
+                                                    <td className="px-3 py-2">{row.inputUnit ?? row.activityData?.unit ?? "-"}</td>
+                                                    <td className="px-3 py-2">{row.outputUnit ?? row.scope1FactorData?.convertTo ?? "-"}</td>
                                                     <td className="px-3 py-2 font-semibold text-emerald-900">
                                                         {formatNumber(row.co2eTotal ?? 0)}
                                                     </td>
@@ -734,6 +881,53 @@ export default function Scope1Page() {
                                             ))}
                                         </tbody>
                                     </table>
+                                </div>
+
+                                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                                    <p className="text-xs font-semibold text-slate-600">
+                                        Showing{" "}
+                                        <span className="text-slate-900">
+                                            {records.length ? (recordsPageSafe - 1) * recordsPageSize + 1 : 0}
+                                        </span>
+                                        {"–"}
+                                        <span className="text-slate-900">
+                                            {Math.min(recordsPageSafe * recordsPageSize, records.length)}
+                                        </span>{" "}
+                                        of <span className="text-slate-900">{records.length}</span>
+                                    </p>
+                                    <div className="inline-flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setRecordsPage(1)}
+                                            disabled={recordsPageSafe <= 1}
+                                            className="inline-flex h-10 items-center rounded-xl border border-emerald-900/15 bg-white/85 px-3 text-xs font-semibold text-emerald-950 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60">
+                                            First
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setRecordsPage((p) => Math.max(1, p - 1))}
+                                            disabled={recordsPageSafe <= 1}
+                                            className="inline-flex h-10 items-center rounded-xl border border-emerald-900/15 bg-white/85 px-3 text-xs font-semibold text-emerald-950 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60">
+                                            Prev
+                                        </button>
+                                        <span className="text-xs font-semibold text-slate-700">
+                                            Page {recordsPageSafe}/{recordsTotalPages}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setRecordsPage((p) => Math.min(recordsTotalPages, p + 1))}
+                                            disabled={recordsPageSafe >= recordsTotalPages}
+                                            className="inline-flex h-10 items-center rounded-xl border border-emerald-900/15 bg-white/85 px-3 text-xs font-semibold text-emerald-950 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60">
+                                            Next
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setRecordsPage(recordsTotalPages)}
+                                            disabled={recordsPageSafe >= recordsTotalPages}
+                                            className="inline-flex h-10 items-center rounded-xl border border-emerald-900/15 bg-white/85 px-3 text-xs font-semibold text-emerald-950 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60">
+                                            Last
+                                        </button>
+                                    </div>
                                 </div>
                             </section>
                         </>
@@ -777,69 +971,94 @@ export default function Scope1Page() {
                     <form onSubmit={onSubmitIngest} className="grid gap-3 sm:grid-cols-2">
                         <div className="sm:col-span-2 grid gap-3 sm:grid-cols-3">
                             <Field label="Standard">
-                                <Select
-                                    inputId="scope1-standard"
-                                    isLoading={isLoadingFactors}
-                                    isDisabled={!standardOptions.length}
-                                    value={selectedStandardOption}
-                                    onChange={(opt) => {
-                                        const key = opt?.value ?? null;
-                                        setSelectedStandardKey(key);
-                                        setSelectedFuelType(null);
-                                        setSelectedFactor(null);
-                                        setIngestForm((p) => ({ ...p, fuelName: "", fuelType: "" }));
-                                    }}
-                                    options={standardOptions.map((o) => ({ label: o.label, value: o.value }))}
-                                    placeholder={isLoadingFactors ? "Loading standards..." : "Select standard (e.g. DEFRA)"}
-                                    classNamePrefix="gl-select"
-                                    styles={selectStyles}
-                                />
+                                {isMounted ? (
+                                    <Select
+                                        inputId="scope1-standard"
+                                        instanceId="scope1-standard"
+                                        isLoading={isLoadingFactors}
+                                        isDisabled={!standardOptions.length}
+                                        value={selectedStandardOption}
+                                        onChange={(opt) => {
+                                            const key = opt?.value ?? null;
+                                            setSelectedStandardKey(key);
+                                            setSelectedFuelType(null);
+                                            setSelectedFactor(null);
+                                            setIngestForm((p) => ({ ...p, fuelName: "", fuelType: "", unit: "" }));
+                                        }}
+                                        options={standardOptions.map((o) => ({ label: o.label, value: o.value }))}
+                                        placeholder={isLoadingFactors ? "Loading standards..." : "Select standard (e.g. DEFRA)"}
+                                        classNamePrefix="gl-select"
+                                        styles={selectStyles}
+                                    />
+                                ) : (
+                                    <input
+                                        disabled
+                                        value=""
+                                        placeholder="Select standard (e.g. DEFRA)"
+                                        className={inputClass}
+                                    />
+                                )}
                             </Field>
 
                             <Field label="Fuel type">
-                                <Select
-                                    inputId="scope1-fueltype"
-                                    isDisabled={!fuelTypeOptions.length}
-                                    value={selectedFuelTypeOption}
-                                    onChange={(opt) => {
-                                        const ft = opt?.value ?? null;
-                                        setSelectedFuelType(ft);
-                                        setSelectedFactor(null);
-                                        setIngestForm((p) => ({ ...p, fuelType: ft ?? "", fuelName: "" }));
-                                    }}
-                                    options={fuelTypeOptions}
-                                    placeholder="Select fuel type"
-                                    classNamePrefix="gl-select"
-                                    styles={selectStyles}
-                                />
+                                {isMounted ? (
+                                    <Select
+                                        inputId="scope1-fueltype"
+                                        instanceId="scope1-fueltype"
+                                        isDisabled={!fuelTypeOptions.length}
+                                        value={selectedFuelTypeOption}
+                                        onChange={(opt) => {
+                                            const ft = opt?.value ?? null;
+                                            setSelectedFuelType(ft);
+                                            setSelectedFactor(null);
+                                            setIngestForm((p) => ({ ...p, fuelType: ft ?? "", fuelName: "", unit: "" }));
+                                        }}
+                                        options={fuelTypeOptions}
+                                        placeholder="Select fuel type"
+                                        classNamePrefix="gl-select"
+                                        styles={selectStyles}
+                                    />
+                                ) : (
+                                    <input disabled value="" placeholder="Select fuel type" className={inputClass} />
+                                )}
                             </Field>
 
                             <Field label="Fuel name">
-                                <Select
-                                    inputId="scope1-fuelname"
-                                    isDisabled={!fuelNameOptions.length}
-                                    value={ingestForm.fuelName ? { label: ingestForm.fuelName, value: ingestForm.fuelName } : null}
-                                    onChange={(opt) => {
-                                        const fuelName = opt?.value ?? "";
-                                        const match = filteredByStandard.find((f) => {
-                                            const fn = (f.fuelName ?? "").trim();
-                                            const ft = (f.fuelType ?? "").trim();
-                                            return fn === fuelName && (!selectedFuelType || ft === selectedFuelType);
-                                        }) ?? null;
+                                {isMounted ? (
+                                    <Select
+                                        inputId="scope1-fuelname"
+                                        instanceId="scope1-fuelname"
+                                        isDisabled={!fuelNameOptions.length}
+                                        value={
+                                            ingestForm.fuelName
+                                                ? { label: ingestForm.fuelName, value: ingestForm.fuelName }
+                                                : null
+                                        }
+                                        onChange={(opt) => {
+                                            const fuelName = opt?.value ?? "";
+                                            const match =
+                                                filteredByStandard.find((f) => {
+                                                    const fn = (f.fuelName ?? "").trim();
+                                                    const ft = (f.fuelType ?? "").trim();
+                                                    return fn === fuelName && (!selectedFuelType || ft === selectedFuelType);
+                                                }) ?? null;
 
-                                        setSelectedFactor(match);
-                                        setIngestForm((p) => ({
-                                            ...p,
-                                            fuelName,
-                                            fuelType: match?.fuelType ?? p.fuelType,
-                                            unit: match?.unit ?? p.unit,
-                                        }));
-                                    }}
-                                    options={fuelNameOptions}
-                                    placeholder="Search fuel"
-                                    classNamePrefix="gl-select"
-                                    styles={selectStyles}
-                                />
+                                            setSelectedFactor(match);
+                                            setIngestForm((p) => ({
+                                                ...p,
+                                                fuelName,
+                                                fuelType: match?.fuelType ?? p.fuelType,
+                                                unit: match?.unit ?? p.unit ?? "",
+                                            }));
+                                        }}
+                                        options={fuelNameOptions}
+                                        placeholder="Search fuel"
+                                        classNamePrefix="gl-select"
+                                        styles={selectStyles}
+                                    />
+                                ) : (
+                                    <input disabled value="" placeholder="Search fuel" className={inputClass} />
+                                )}
                             </Field>
                         </div>
 
@@ -907,9 +1126,7 @@ export default function Scope1Page() {
                                 type="number"
                                 step="0.01"
                                 value={ingestForm.quantity}
-                                onChange={(e) =>
-                                    setIngestForm((p) => ({ ...p, quantity: Number(e.target.value || 0) }))
-                                }
+                                onChange={(e) => setIngestForm((p) => ({ ...p, quantity: e.target.value }))}
                                 className={inputClass}
                             />
                         </Field>
@@ -918,7 +1135,7 @@ export default function Scope1Page() {
                                 type="number"
                                 step="0.01"
                                 value={ingestForm.cost}
-                                onChange={(e) => setIngestForm((p) => ({ ...p, cost: Number(e.target.value || 0) }))}
+                                onChange={(e) => setIngestForm((p) => ({ ...p, cost: e.target.value }))}
                                 className={inputClass}
                             />
                         </Field>

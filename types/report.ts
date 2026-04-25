@@ -28,6 +28,12 @@ export interface Scope1FactorData {
     co2Factor: number | null;
     ch4Factor: number | null;
     n2oFactor: number | null;
+    emissionStandard?: {
+        gwpBasis: string | null;
+        source: string | null;
+        version: string | null;
+    } | null;
+    year?: string | null;
     facilityName: string | null;
     convertTo: string | null;
     creationDateString: string | null;

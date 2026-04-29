@@ -204,7 +204,11 @@ export default function Scope1Page() {
 
             const key = [source || "Unknown", gwpBasis || "Unknown", version || "Unknown"].join(" · ");
             if (!byKey.has(key)) {
-                byKey.set(key, { source: s?.source ?? null, gwpBasis: s?.gwpBasis ?? null, version: s?.version ?? null });
+                byKey.set(key, {
+                    source: s?.source ?? null,
+                    gwpBasis: s?.gwpBasis ?? null,
+                    version: s?.version ?? null,
+                });
             }
         }
 
@@ -282,13 +286,19 @@ export default function Scope1Page() {
             setIsLoadingFactors(true);
             setFactorError(null);
             try {
-                const res = await fetch("/api/factor/getFactor", { method: "GET" });
+                const res = await fetch("/api/factor/getScope1Factor", { method: "GET" });
                 const body = (await res.json()) as GetFactorResponse | { message?: string };
                 if (!res.ok) {
-                    const msg = "message" in body && typeof body.message === "string" ? body.message : "Failed to load factors.";
+                    const msg =
+                        "message" in body && typeof body.message === "string"
+                            ? body.message
+                            : "Failed to load factors.";
                     throw new Error(msg);
                 }
-                const rows = "data" in body && Array.isArray((body as GetFactorResponse).data) ? ((body as GetFactorResponse).data ?? []) : [];
+                const rows =
+                    "data" in body && Array.isArray((body as GetFactorResponse).data)
+                        ? ((body as GetFactorResponse).data ?? [])
+                        : [];
                 if (!cancelled) setFactors(rows);
             } catch (e) {
                 if (cancelled) return;
@@ -615,9 +625,13 @@ export default function Scope1Page() {
                                                 <tr
                                                     key={`${row.id}-${idx}`}
                                                     className="border-b border-emerald-900/7 text-slate-700 hover:bg-emerald-50/45">
-                                                    <td className="px-3 py-2 font-semibold text-slate-900">{row.fuelName ?? "-"}</td>
+                                                    <td className="px-3 py-2 font-semibold text-slate-900">
+                                                        {row.fuelName ?? "-"}
+                                                    </td>
                                                     <td className="px-3 py-2">{row.fuelType ?? "-"}</td>
-                                                    <td className="px-3 py-2">{row.facilityName ?? "Unmapped facility"}</td>
+                                                    <td className="px-3 py-2">
+                                                        {row.facilityName ?? "Unmapped facility"}
+                                                    </td>
                                                     <td className="px-3 py-2">{row.orgName ?? "-"}</td>
                                                     <td className="px-3 py-2">{row.reportDate ?? "-"}</td>
                                                     <td className="px-3 py-2">
@@ -625,8 +639,12 @@ export default function Scope1Page() {
                                                             ? formatNumber(row.activityData.quantity)
                                                             : "-"}
                                                     </td>
-                                                    <td className="px-3 py-2">{row.inputUnit ?? row.activityData?.unit ?? "-"}</td>
-                                                    <td className="px-3 py-2">{row.outputUnit ?? row.scope1FactorData?.convertTo ?? "-"}</td>
+                                                    <td className="px-3 py-2">
+                                                        {row.inputUnit ?? row.activityData?.unit ?? "-"}
+                                                    </td>
+                                                    <td className="px-3 py-2">
+                                                        {row.outputUnit ?? row.scope1FactorData?.convertTo ?? "-"}
+                                                    </td>
                                                     <td className="px-3 py-2 font-semibold text-emerald-900">
                                                         {formatNumber(row.co2eTotal ?? 0)}
                                                     </td>
@@ -831,7 +849,9 @@ export default function Scope1Page() {
                                                 <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-emerald-900/60">
                                                     {row.facility}
                                                 </p>
-                                                <p className="mt-1 text-sm font-bold text-emerald-950">{formatTonnesFromKg(row.co2e)} tCO2e</p>
+                                                <p className="mt-1 text-sm font-bold text-emerald-950">
+                                                    {formatTonnesFromKg(row.co2e)} tCO2e
+                                                </p>
                                             </div>
                                         ))}
                                     </div>
@@ -866,7 +886,6 @@ export default function Scope1Page() {
                                     ) : null}
                                 </div>
                             </section>
-
                         </>
                     ) : null}
                 </section>
@@ -923,7 +942,9 @@ export default function Scope1Page() {
                                             setIngestForm((p) => ({ ...p, fuelName: "", fuelType: "", unit: "" }));
                                         }}
                                         options={standardOptions.map((o) => ({ label: o.label, value: o.value }))}
-                                        placeholder={isLoadingFactors ? "Loading standards..." : "Select standard (e.g. DEFRA)"}
+                                        placeholder={
+                                            isLoadingFactors ? "Loading standards..." : "Select standard (e.g. DEFRA)"
+                                        }
                                         classNamePrefix="gl-select"
                                         styles={selectStyles}
                                     />
@@ -948,7 +969,12 @@ export default function Scope1Page() {
                                             const ft = opt?.value ?? null;
                                             setSelectedFuelType(ft);
                                             setSelectedFactor(null);
-                                            setIngestForm((p) => ({ ...p, fuelType: ft ?? "", fuelName: "", unit: "" }));
+                                            setIngestForm((p) => ({
+                                                ...p,
+                                                fuelType: ft ?? "",
+                                                fuelName: "",
+                                                unit: "",
+                                            }));
                                         }}
                                         options={fuelTypeOptions}
                                         placeholder="Select fuel type"
@@ -977,7 +1003,10 @@ export default function Scope1Page() {
                                                 filteredByStandard.find((f) => {
                                                     const fn = (f.fuelName ?? "").trim();
                                                     const ft = (f.fuelType ?? "").trim();
-                                                    return fn === fuelName && (!selectedFuelType || ft === selectedFuelType);
+                                                    return (
+                                                        fn === fuelName &&
+                                                        (!selectedFuelType || ft === selectedFuelType)
+                                                    );
                                                 }) ?? null;
 
                                             setSelectedFactor(match);
@@ -1006,7 +1035,9 @@ export default function Scope1Page() {
                                         Factor details
                                     </p>
                                     <p className="mt-1 text-sm font-semibold text-slate-900">
-                                        {selectedFactor?.fuelName ? selectedFactor.fuelName : "Select a factor to see unit and conversion info."}
+                                        {selectedFactor?.fuelName
+                                            ? selectedFactor.fuelName
+                                            : "Select a factor to see unit and conversion info."}
                                     </p>
                                 </div>
                                 {selectedFactor?.emissionStandard?.source ? (
@@ -1028,10 +1059,34 @@ export default function Scope1Page() {
                                     { k: "Input unit", v: selectedFactor?.unit ?? ingestForm.unit ?? "-" },
                                     { k: "Converted to", v: selectedFactor?.convertTo ?? "-" },
                                     { k: "Factor year", v: selectedFactor?.year ?? "-" },
-                                    { k: "CO2e total", v: typeof selectedFactor?.co2eTotal === "number" ? formatNumber(selectedFactor.co2eTotal) : "-" },
-                                    { k: "CO2 factor", v: typeof selectedFactor?.co2Factor === "number" ? formatNumber(selectedFactor.co2Factor) : "-" },
-                                    { k: "CH4 factor", v: typeof selectedFactor?.ch4Factor === "number" ? formatNumber(selectedFactor.ch4Factor) : "-" },
-                                    { k: "N2O factor", v: typeof selectedFactor?.n2oFactor === "number" ? formatNumber(selectedFactor.n2oFactor) : "-" },
+                                    {
+                                        k: "CO2e total",
+                                        v:
+                                            typeof selectedFactor?.co2eTotal === "number"
+                                                ? formatNumber(selectedFactor.co2eTotal)
+                                                : "-",
+                                    },
+                                    {
+                                        k: "CO2 factor",
+                                        v:
+                                            typeof selectedFactor?.co2Factor === "number"
+                                                ? formatNumber(selectedFactor.co2Factor)
+                                                : "-",
+                                    },
+                                    {
+                                        k: "CH4 factor",
+                                        v:
+                                            typeof selectedFactor?.ch4Factor === "number"
+                                                ? formatNumber(selectedFactor.ch4Factor)
+                                                : "-",
+                                    },
+                                    {
+                                        k: "N2O factor",
+                                        v:
+                                            typeof selectedFactor?.n2oFactor === "number"
+                                                ? formatNumber(selectedFactor.n2oFactor)
+                                                : "-",
+                                    },
                                     {
                                         k: "Conversion",
                                         v:

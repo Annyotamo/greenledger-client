@@ -17,7 +17,7 @@ export async function GET() {
             return NextResponse.json({ message: "Missing NEXT_PUBLIC_BASE_URL." }, { status: 500 });
         }
 
-        const res = await axios.get(`${baseUrl}/factor/getFactor`, {
+        const res = await axios.get(`${baseUrl}/factor/getScope1Factor`, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 Accept: "application/json",
@@ -49,4 +49,3 @@ export async function GET() {
         return NextResponse.json({ message }, { status: 500 });
     }
 }
-

@@ -64,7 +64,8 @@ export function Sidebar() {
     }, [setOpen]);
 
     const compact = !isOpen && !isMobile;
-    const scopeRouteActive = pathname === "/scope-1" || pathname.startsWith("/scope-1/");
+    const scope1RouteActive = pathname === "/scope-1" || pathname.startsWith("/scope-1/");
+    const scope2RouteActive = pathname === "/scope-2" || pathname.startsWith("/scope-2/");
 
     async function handleLogout() {
         if (isLoggingOut) return;
@@ -166,7 +167,7 @@ export function Sidebar() {
                             className={[
                                 baseItemClasses,
                                 compact ? "justify-center px-2" : "",
-                                activeSection === "ghg-accounting" || activeSection === "scope-1"
+                                activeSection === "ghg-accounting" || activeSection === "scope-1" || activeSection === "scope-2"
                                     ? "bg-white/14 text-white border-emerald-200/25"
                                     : "text-emerald-50/80",
                             ].join(" ")}>
@@ -198,13 +199,30 @@ export function Sidebar() {
                                         if (isMobile) setOpen(false);
                                     }}
                                     className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-xs font-medium tracking-tight transition-all duration-200 ${
-                                        activeSection === "scope-1" || scopeRouteActive
+                                        activeSection === "scope-1" || scope1RouteActive
                                             ? "bg-white/20 text-white ring-1 ring-emerald-200/35"
                                             : "text-emerald-100/70 hover:bg-white/12 hover:text-white"
                                     }`}>
                                     <span className="flex items-center gap-2">
                                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 ring-1 ring-emerald-100/30" />
                                         <span>Scope-1 (direct emissions)</span>
+                                    </span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setActiveSection("scope-2");
+                                        router.push("/scope-2");
+                                        if (isMobile) setOpen(false);
+                                    }}
+                                    className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-xs font-medium tracking-tight transition-all duration-200 ${
+                                        activeSection === "scope-2" || scope2RouteActive
+                                            ? "bg-white/20 text-white ring-1 ring-emerald-200/35"
+                                            : "text-emerald-100/70 hover:bg-white/12 hover:text-white"
+                                    }`}>
+                                    <span className="flex items-center gap-2">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 ring-1 ring-emerald-100/30" />
+                                        <span>Scope-2 (indirect emissions)</span>
                                     </span>
                                 </button>
                             </div>

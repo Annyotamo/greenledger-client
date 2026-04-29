@@ -74,3 +74,71 @@ export interface Scope1IngestRequest {
 }
 
 export type Scope1IngestResponse = ApiEnvelope<unknown>;
+
+export interface Scope2FactorData {
+    factorSource: string | null;
+    version: string | null;
+    year: number | null;
+    inputUnit: string | null;
+    factor: number | null;
+    email: string | null;
+    addedBy: string | null;
+    updatedBy: string | null;
+}
+
+export interface Scope2ActivityDataIngest {
+    id: string;
+    quantityConsume: number | null;
+    outPutQuantityConsume: number | null;
+    unit: string | null;
+    fuelName: string | null;
+    outputUnit: string | null;
+    cost: number | null;
+    facilityName: string | null;
+    orgName: string | null;
+    email: string | null;
+    yearMonth: string | null;
+    year: string | null;
+    status: number | null;
+    errorMsg: string | null;
+    createDate: string | null;
+    reportDate: string | null;
+    updateDate: string | null;
+    updatedby: string | null;
+}
+
+export interface Scope2ReportRecord {
+    emissionType: string | null;
+    quantityConsume: number | null;
+    cost: number | null;
+    unit: string | null;
+    fuelName: string | null;
+    outputUnit: string | null;
+    co2eTotal: number | null;
+    facilityName: string | null;
+    orgName: string | null;
+    scope2Factor: Scope2FactorData | null;
+    scope2ActivityDataIngest: Scope2ActivityDataIngest | null;
+    provider: string | null;
+    yearMonth: string | null;
+    ingest_reference_id: string | null;
+    year: string | null;
+    createDateString: string | null;
+    reportDate: string | null;
+}
+
+export type Scope2ReportResponse = ApiEnvelope<Scope2ReportRecord[]>;
+
+export interface Scope2IngestRequest {
+    quantityConsume: number;
+    unit: string;
+    fuelName: string;
+    outputUnit: string;
+    cost: number;
+    facilityName: string;
+    orgName: string;
+    yearMonth: string;
+    year: string;
+}
+
+export type Scope2IngestResponse = ApiEnvelope<unknown>;

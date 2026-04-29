@@ -16,7 +16,6 @@ import {
     LuMaximize2,
     LuPlus,
     LuSparkles,
-    LuTriangleAlert,
     LuX,
 } from "react-icons/lu";
 import {
@@ -101,6 +100,10 @@ function DashboardTooltip({
 
 function formatNumber(value: number): string {
     return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+}
+
+function formatTonnesFromKg(value: number): string {
+    return (value / 1000).toLocaleString(undefined, { maximumFractionDigits: 3 });
 }
 
 function getMonthLabel(value: string | null): string {
@@ -304,11 +307,7 @@ export default function Scope1Page() {
         const totalCo2e = records.reduce((acc, row) => acc + (row.co2eTotal ?? 0), 0);
         const totalCost = records.reduce((acc, row) => acc + (row.cost ?? 0), 0);
         const withFacility = records.filter((row) => row.facilityName).length;
-        const avgFactor = records.length
-            ? records.reduce((acc, row) => acc + (row.co2Factor ?? 0), 0) / records.length
-            : 0;
-
-        return { totalCo2e, totalCost, withFacility, avgFactor };
+        return { totalCo2e, totalCost, withFacility };
     }, [records]);
 
     const monthlySeries = useMemo(() => aggregateMonthly(records), [records]);
@@ -343,8 +342,7 @@ export default function Scope1Page() {
         }
         return Array.from(map.entries())
             .map(([facility, co2e]) => ({ facility, co2e }))
-            .sort((a, b) => b.co2e - a.co2e)
-            .slice(0, 5);
+            .sort((a, b) => b.co2e - a.co2e);
     }, [records]);
 
     const sourceSeries = useMemo(() => {
@@ -518,11 +516,11 @@ export default function Scope1Page() {
 
                     {!isLoading && !isError ? (
                         <>
-                            <div className="relative grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                            <div className="relative grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                                 {[
                                     {
                                         label: "Total emissions",
-                                        value: `${formatNumber(totals.totalCo2e)} kgCO2e`,
+                                        value: `${formatTonnesFromKg(totals.totalCo2e)} tCO2e`,
                                         icon: <LuLeaf />,
                                     },
                                     {
@@ -534,11 +532,6 @@ export default function Scope1Page() {
                                         label: "Total cost",
                                         value: `${formatNumber(totals.totalCost)}`,
                                         icon: <LuCircleDollarSign />,
-                                    },
-                                    {
-                                        label: "Average CO2 factor",
-                                        value: formatNumber(totals.avgFactor),
-                                        icon: <LuDroplets />,
                                     },
                                 ].map((stat) => (
                                     <article
@@ -556,6 +549,140 @@ export default function Scope1Page() {
                                     </article>
                                 ))}
                             </div>
+
+                            <section className="mt-5 rounded-2xl border border-white/70 bg-white/82 p-4 shadow-sm sm:p-5">
+                                <div className="flex flex-wrap items-end justify-between gap-3">
+                                    <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-900/65">
+                                        Scope-1 report records
+                                    </h2>
+                                    <div className="flex flex-wrap items-end gap-2">
+                                        <label className="grid gap-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-emerald-900/65">
+                                            Start month
+                                            <input
+                                                type="month"
+                                                value={startMonth}
+                                                onChange={(e) => setStartMonth(e.target.value)}
+                                                className="h-11 rounded-2xl border border-emerald-900/15 bg-white/85 px-3 text-sm font-medium text-emerald-950 shadow-sm outline-none transition focus:border-emerald-400/60 focus:ring-4 focus:ring-emerald-200/45"
+                                            />
+                                        </label>
+                                        <label className="grid gap-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-emerald-900/65">
+                                            End month
+                                            <input
+                                                type="month"
+                                                value={endMonth}
+                                                onChange={(e) => setEndMonth(e.target.value)}
+                                                className="h-11 rounded-2xl border border-emerald-900/15 bg-white/85 px-3 text-sm font-medium text-emerald-950 shadow-sm outline-none transition focus:border-emerald-400/60 focus:ring-4 focus:ring-emerald-200/45"
+                                            />
+                                        </label>
+                                        <button
+                                            type="button"
+                                            onClick={handleDownloadCsv}
+                                            disabled={isDownloading}
+                                            className="inline-flex h-11 items-center gap-2 rounded-2xl border border-emerald-900/15 bg-white/85 px-4 text-sm font-semibold text-emerald-950 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-70">
+                                            <LuDownload className="h-4 w-4 text-emerald-800" />
+                                            {isDownloading ? "Downloading..." : "Download CSV"}
+                                        </button>
+                                        <a
+                                            href="/scope-1/records"
+                                            className="inline-flex h-11 items-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700">
+                                            <LuMaximize2 className="h-4 w-4" />
+                                            View all
+                                        </a>
+                                    </div>
+                                </div>
+                                {downloadError ? (
+                                    <div className="mt-3 rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+                                        {downloadError}
+                                    </div>
+                                ) : null}
+                                <div className="mt-3 overflow-x-auto">
+                                    <table className="min-w-[1020px] text-left text-xs">
+                                        <thead>
+                                            <tr className="border-b border-emerald-900/10 text-[0.68rem] uppercase tracking-[0.16em] text-emerald-900/60">
+                                                <th className="px-3 py-2">Fuel</th>
+                                                <th className="px-3 py-2">Fuel type</th>
+                                                <th className="px-3 py-2">Facility</th>
+                                                <th className="px-3 py-2">Org</th>
+                                                <th className="px-3 py-2">Report month</th>
+                                                <th className="px-3 py-2">Quantity</th>
+                                                <th className="px-3 py-2">Input unit</th>
+                                                <th className="px-3 py-2">Output unit</th>
+                                                <th className="px-3 py-2">CO2e</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {pagedRecords.map((row, idx) => (
+                                                <tr
+                                                    key={`${row.id}-${idx}`}
+                                                    className="border-b border-emerald-900/7 text-slate-700 hover:bg-emerald-50/45">
+                                                    <td className="px-3 py-2 font-semibold text-slate-900">{row.fuelName ?? "-"}</td>
+                                                    <td className="px-3 py-2">{row.fuelType ?? "-"}</td>
+                                                    <td className="px-3 py-2">{row.facilityName ?? "Unmapped facility"}</td>
+                                                    <td className="px-3 py-2">{row.orgName ?? "-"}</td>
+                                                    <td className="px-3 py-2">{row.reportDate ?? "-"}</td>
+                                                    <td className="px-3 py-2">
+                                                        {typeof row.activityData?.quantity === "number"
+                                                            ? formatNumber(row.activityData.quantity)
+                                                            : "-"}
+                                                    </td>
+                                                    <td className="px-3 py-2">{row.inputUnit ?? row.activityData?.unit ?? "-"}</td>
+                                                    <td className="px-3 py-2">{row.outputUnit ?? row.scope1FactorData?.convertTo ?? "-"}</td>
+                                                    <td className="px-3 py-2 font-semibold text-emerald-900">
+                                                        {formatNumber(row.co2eTotal ?? 0)}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                                    <p className="text-xs font-semibold text-slate-600">
+                                        Showing{" "}
+                                        <span className="text-slate-900">
+                                            {records.length ? (recordsPageSafe - 1) * recordsPageSize + 1 : 0}
+                                        </span>
+                                        {"–"}
+                                        <span className="text-slate-900">
+                                            {Math.min(recordsPageSafe * recordsPageSize, records.length)}
+                                        </span>{" "}
+                                        of <span className="text-slate-900">{records.length}</span>
+                                    </p>
+                                    <div className="inline-flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setRecordsPage(1)}
+                                            disabled={recordsPageSafe <= 1}
+                                            className="inline-flex h-10 items-center rounded-xl border border-emerald-900/15 bg-white/85 px-3 text-xs font-semibold text-emerald-950 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60">
+                                            First
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setRecordsPage((p) => Math.max(1, p - 1))}
+                                            disabled={recordsPageSafe <= 1}
+                                            className="inline-flex h-10 items-center rounded-xl border border-emerald-900/15 bg-white/85 px-3 text-xs font-semibold text-emerald-950 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60">
+                                            Prev
+                                        </button>
+                                        <span className="text-xs font-semibold text-slate-700">
+                                            Page {recordsPageSafe}/{recordsTotalPages}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setRecordsPage((p) => Math.min(recordsTotalPages, p + 1))}
+                                            disabled={recordsPageSafe >= recordsTotalPages}
+                                            className="inline-flex h-10 items-center rounded-xl border border-emerald-900/15 bg-white/85 px-3 text-xs font-semibold text-emerald-950 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60">
+                                            Next
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setRecordsPage(recordsTotalPages)}
+                                            disabled={recordsPageSafe >= recordsTotalPages}
+                                            className="inline-flex h-10 items-center rounded-xl border border-emerald-900/15 bg-white/85 px-3 text-xs font-semibold text-emerald-950 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60">
+                                            Last
+                                        </button>
+                                    </div>
+                                </div>
+                            </section>
 
                             <div className="relative mt-5 grid gap-5 lg:grid-cols-[1.45fr_1fr]">
                                 <section className="rounded-2xl border border-white/70 bg-white/78 p-4 shadow-sm sm:p-5">
@@ -656,15 +783,15 @@ export default function Scope1Page() {
                                 </section>
                             </div>
 
-                            <div className="relative mt-5 grid gap-5 lg:grid-cols-[1.1fr_1fr]">
+                            <div className="relative mt-5 grid gap-5">
                                 <section className="rounded-2xl border border-white/70 bg-white/78 p-4 shadow-sm sm:p-5">
                                     <div className="mb-4 flex items-center justify-between">
                                         <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-900/65">
-                                            Top facilities by emissions
+                                            Facility emissions distribution
                                         </h2>
                                         <LuBuilding2 className="h-4 w-4 text-emerald-800/80" />
                                     </div>
-                                    <div className="h-56 min-w-0 rounded-2xl border border-emerald-900/10 bg-white/85 p-2">
+                                    <div className="h-[260px] min-w-0 rounded-2xl border border-emerald-900/10 bg-white/85 p-2">
                                         <ResponsiveContainer
                                             width="100%"
                                             height="100%"
@@ -674,7 +801,7 @@ export default function Scope1Page() {
                                             <BarChart
                                                 data={facilitySeries}
                                                 layout="vertical"
-                                                margin={{ left: 20, right: 8 }}>
+                                                margin={{ left: 0, right: 8, top: 0, bottom: 0 }}>
                                                 <CartesianGrid stroke="rgba(15,47,20,0.08)" horizontal={false} />
                                                 <XAxis type="number" tickLine={false} axisLine={false} />
                                                 <YAxis
@@ -682,7 +809,7 @@ export default function Scope1Page() {
                                                     type="category"
                                                     tickLine={false}
                                                     axisLine={false}
-                                                    width={112}
+                                                    width={68}
                                                 />
                                                 <Tooltip content={<DashboardTooltip />} />
                                                 <Bar
@@ -696,68 +823,17 @@ export default function Scope1Page() {
                                             </BarChart>
                                         </ResponsiveContainer>
                                     </div>
-                                </section>
-
-                                <section className="rounded-2xl border border-white/70 bg-white/78 p-4 shadow-sm sm:p-5">
-                                    <div className="mb-4 flex items-center justify-between">
-                                        <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-900/65">
-                                            Data quality snapshot
-                                        </h2>
-                                        <LuTriangleAlert className="h-4 w-4 text-emerald-800/80" />
-                                    </div>
-                                    <div className="space-y-3">
-                                        {[
-                                            {
-                                                k: "Records with facility",
-                                                v: `${totals.withFacility}/${records.length}`,
-                                            },
-                                            {
-                                                k: "Records with report month",
-                                                v: `${records.filter((r) => Boolean(r.reportDate)).length}/${records.length}`,
-                                            },
-                                            {
-                                                k: "Records with factor data",
-                                                v: `${records.filter((r) => Boolean(r.scope1FactorData)).length}/${records.length}`,
-                                            },
-                                            {
-                                                k: "Records with activity data",
-                                                v: `${records.filter((r) => Boolean(r.activityData)).length}/${records.length}`,
-                                            },
-                                        ].map((row) => (
+                                    <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                        {facilitySeries.map((row) => (
                                             <div
-                                                key={row.k}
-                                                className="flex items-center justify-between rounded-xl border border-emerald-900/10 bg-white/85 px-3 py-2.5">
-                                                <span className="text-xs font-semibold uppercase tracking-wide text-emerald-900/65">
-                                                    {row.k}
-                                                </span>
-                                                <span className="text-sm font-semibold text-slate-800">{row.v}</span>
+                                                key={row.facility}
+                                                className="rounded-xl border border-emerald-900/10 bg-white/85 px-3 py-2">
+                                                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-emerald-900/60">
+                                                    {row.facility}
+                                                </p>
+                                                <p className="mt-1 text-sm font-bold text-emerald-950">{formatTonnesFromKg(row.co2e)} tCO2e</p>
                                             </div>
                                         ))}
-                                    </div>
-
-                                    <div className="mt-4 space-y-2 rounded-2xl border border-emerald-900/10 bg-white/80 p-3">
-                                        {[
-                                            { k: "Facility", v: completeness.withFacility, total: completeness.total },
-                                            { k: "Report month", v: completeness.withReportMonth, total: completeness.total },
-                                            { k: "Factor linked", v: completeness.withFactor, total: completeness.total },
-                                            { k: "Activity linked", v: completeness.withActivity, total: completeness.total },
-                                        ].map((m) => {
-                                            const pct = Math.round((m.v / m.total) * 100);
-                                            return (
-                                                <div key={m.k} className="grid gap-1">
-                                                    <div className="flex items-center justify-between text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-emerald-900/60">
-                                                        <span>{m.k}</span>
-                                                        <span className="text-slate-700">{pct}%</span>
-                                                    </div>
-                                                    <div className="h-2 w-full overflow-hidden rounded-full bg-emerald-900/8">
-                                                        <div
-                                                            className="h-full rounded-full bg-emerald-600"
-                                                            style={{ width: `${pct}%` }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
                                     </div>
                                 </section>
                             </div>
@@ -778,9 +854,9 @@ export default function Scope1Page() {
                                                 {s.source}
                                             </p>
                                             <p className="mt-2 text-lg font-bold tracking-tight text-emerald-950">
-                                                {formatNumber(s.co2e)}
+                                                {formatTonnesFromKg(s.co2e)}
                                             </p>
-                                            <p className="text-xs font-semibold text-slate-600">kgCO2e</p>
+                                            <p className="text-xs font-semibold text-slate-600">tCO2e</p>
                                         </div>
                                     ))}
                                     {!sourceSeries.length ? (
@@ -791,145 +867,6 @@ export default function Scope1Page() {
                                 </div>
                             </section>
 
-                            <section className="mt-5 rounded-2xl border border-white/70 bg-white/82 p-4 shadow-sm sm:p-5">
-                                <div className="flex flex-wrap items-end justify-between gap-3">
-                                    <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-900/65">
-                                        Scope-1 report records
-                                    </h2>
-                                    <div className="flex flex-wrap items-end gap-2">
-                                        <label className="grid gap-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-emerald-900/65">
-                                            Start month
-                                            <input
-                                                type="month"
-                                                value={startMonth}
-                                                onChange={(e) => setStartMonth(e.target.value)}
-                                                className="h-11 rounded-2xl border border-emerald-900/15 bg-white/85 px-3 text-sm font-medium text-emerald-950 shadow-sm outline-none transition focus:border-emerald-400/60 focus:ring-4 focus:ring-emerald-200/45"
-                                            />
-                                        </label>
-                                        <label className="grid gap-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-emerald-900/65">
-                                            End month
-                                            <input
-                                                type="month"
-                                                value={endMonth}
-                                                onChange={(e) => setEndMonth(e.target.value)}
-                                                className="h-11 rounded-2xl border border-emerald-900/15 bg-white/85 px-3 text-sm font-medium text-emerald-950 shadow-sm outline-none transition focus:border-emerald-400/60 focus:ring-4 focus:ring-emerald-200/45"
-                                            />
-                                        </label>
-                                        <button
-                                            type="button"
-                                            onClick={handleDownloadCsv}
-                                            disabled={isDownloading}
-                                            className="inline-flex h-11 items-center gap-2 rounded-2xl border border-emerald-900/15 bg-white/85 px-4 text-sm font-semibold text-emerald-950 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-70">
-                                            <LuDownload className="h-4 w-4 text-emerald-800" />
-                                            {isDownloading ? "Downloading..." : "Download CSV"}
-                                        </button>
-                                        <a
-                                            href="/scope-1/records"
-                                            className="inline-flex h-11 items-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700">
-                                            <LuMaximize2 className="h-4 w-4" />
-                                            View all
-                                        </a>
-                                    </div>
-                                </div>
-                                {downloadError ? (
-                                    <div className="mt-3 rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
-                                        {downloadError}
-                                    </div>
-                                ) : null}
-                                <div className="mt-3 overflow-x-auto">
-                                    <table className="min-w-[1100px] text-left text-xs">
-                                        <thead>
-                                            <tr className="border-b border-emerald-900/10 text-[0.68rem] uppercase tracking-[0.16em] text-emerald-900/60">
-                                                <th className="px-3 py-2">Fuel</th>
-                                                <th className="px-3 py-2">Fuel type</th>
-                                                <th className="px-3 py-2">Facility</th>
-                                                <th className="px-3 py-2">Org</th>
-                                                <th className="px-3 py-2">Report month</th>
-                                                <th className="px-3 py-2">Quantity</th>
-                                                <th className="px-3 py-2">Input unit</th>
-                                                <th className="px-3 py-2">Output unit</th>
-                                                <th className="px-3 py-2">CO2e</th>
-                                                <th className="px-3 py-2">Cost</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {pagedRecords.map((row, idx) => (
-                                                <tr
-                                                    key={`${row.id}-${idx}`}
-                                                    className="border-b border-emerald-900/7 text-slate-700 hover:bg-emerald-50/45">
-                                                    <td className="px-3 py-2 font-semibold text-slate-900">
-                                                        {row.fuelName ?? "-"}
-                                                    </td>
-                                                    <td className="px-3 py-2">{row.fuelType ?? "-"}</td>
-                                                    <td className="px-3 py-2">
-                                                        {row.facilityName ?? "Unmapped facility"}
-                                                    </td>
-                                                    <td className="px-3 py-2">{row.orgName ?? "-"}</td>
-                                                    <td className="px-3 py-2">{row.reportDate ?? "-"}</td>
-                                                    <td className="px-3 py-2">
-                                                        {typeof row.activityData?.quantity === "number"
-                                                            ? formatNumber(row.activityData.quantity)
-                                                            : "-"}
-                                                    </td>
-                                                    <td className="px-3 py-2">{row.inputUnit ?? row.activityData?.unit ?? "-"}</td>
-                                                    <td className="px-3 py-2">{row.outputUnit ?? row.scope1FactorData?.convertTo ?? "-"}</td>
-                                                    <td className="px-3 py-2 font-semibold text-emerald-900">
-                                                        {formatNumber(row.co2eTotal ?? 0)}
-                                                    </td>
-                                                    <td className="px-3 py-2">{formatNumber(row.cost ?? 0)}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                                    <p className="text-xs font-semibold text-slate-600">
-                                        Showing{" "}
-                                        <span className="text-slate-900">
-                                            {records.length ? (recordsPageSafe - 1) * recordsPageSize + 1 : 0}
-                                        </span>
-                                        {"–"}
-                                        <span className="text-slate-900">
-                                            {Math.min(recordsPageSafe * recordsPageSize, records.length)}
-                                        </span>{" "}
-                                        of <span className="text-slate-900">{records.length}</span>
-                                    </p>
-                                    <div className="inline-flex items-center gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setRecordsPage(1)}
-                                            disabled={recordsPageSafe <= 1}
-                                            className="inline-flex h-10 items-center rounded-xl border border-emerald-900/15 bg-white/85 px-3 text-xs font-semibold text-emerald-950 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60">
-                                            First
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setRecordsPage((p) => Math.max(1, p - 1))}
-                                            disabled={recordsPageSafe <= 1}
-                                            className="inline-flex h-10 items-center rounded-xl border border-emerald-900/15 bg-white/85 px-3 text-xs font-semibold text-emerald-950 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60">
-                                            Prev
-                                        </button>
-                                        <span className="text-xs font-semibold text-slate-700">
-                                            Page {recordsPageSafe}/{recordsTotalPages}
-                                        </span>
-                                        <button
-                                            type="button"
-                                            onClick={() => setRecordsPage((p) => Math.min(recordsTotalPages, p + 1))}
-                                            disabled={recordsPageSafe >= recordsTotalPages}
-                                            className="inline-flex h-10 items-center rounded-xl border border-emerald-900/15 bg-white/85 px-3 text-xs font-semibold text-emerald-950 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60">
-                                            Next
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setRecordsPage(recordsTotalPages)}
-                                            disabled={recordsPageSafe >= recordsTotalPages}
-                                            className="inline-flex h-10 items-center rounded-xl border border-emerald-900/15 bg-white/85 px-3 text-xs font-semibold text-emerald-950 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60">
-                                            Last
-                                        </button>
-                                    </div>
-                                </div>
-                            </section>
                         </>
                     ) : null}
                 </section>
@@ -1141,8 +1078,7 @@ export default function Scope1Page() {
                         </Field>
                         <Field label="Unit">
                             <input
-                                value={selectedFactor?.unit ?? ingestForm.unit}
-                                readOnly={Boolean(selectedFactor?.unit)}
+                                value={ingestForm.unit}
                                 onChange={(e) => setIngestForm((p) => ({ ...p, unit: e.target.value }))}
                                 className={inputClass}
                             />

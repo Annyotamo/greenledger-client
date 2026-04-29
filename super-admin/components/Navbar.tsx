@@ -25,6 +25,11 @@ const NAV: NavItem[] = [
                 href: "/ghg/scope-1",
                 children: [{ label: "Factors", href: "/ghg/scope-1/factors" }],
             },
+            {
+                label: "Scope 2",
+                href: "/ghg/scope-2",
+                children: [{ label: "Factors", href: "/ghg/scope-2/factors" }],
+            },
         ],
     },
 ];

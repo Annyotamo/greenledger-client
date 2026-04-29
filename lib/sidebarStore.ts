@@ -8,6 +8,7 @@ type SectionKey =
   | "finance-esg-reporting"
   | "audit-compliance"
   | "scope-1"
+  | "scope-2"
   | "settings";
 
 type SidebarState = {

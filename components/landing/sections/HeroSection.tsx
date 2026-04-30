@@ -9,17 +9,12 @@ import esgAccountingImg from "@/assets/landing-images/14841_esgaccounting_572996
 import esgReportingImg from "@/assets/landing-images/esg-reporting.jpg";
 import sustainableFinanceImg from "@/assets/landing-images/ESG-Courses-Sustainable-Finance-1600x900-1.jpg";
 import sasbImg from "@/assets/landing-images/Navigating-SASB.webp";
+import sepcKolkata from "@/assets/sepc.png";
 
 export default function HeroSection() {
     return (
         <section className="full-bleed relative min-h-[min(90vh,820px)] overflow-hidden rounded-none shadow-[0_24px_80px_-30px_rgba(0,40,25,0.55)]">
-            <Image
-                src="/GreenLedger_Background.jpg"
-                alt=""
-                fill
-                priority
-                className="object-cover object-center"
-            />
+            <Image src="/GreenLedger_Background.jpg" alt="" fill priority className="object-cover object-center" />
             <div
                 className="absolute inset-0 bg-linear-to-br from-emerald-950/92 via-emerald-900/78 to-teal-950/88"
                 aria-hidden
@@ -76,7 +71,15 @@ export default function HeroSection() {
                             </a>
                             <span className="h-5 w-px bg-white/20" aria-hidden />
                             <a href="https://imik.edu.in" target="_blank" rel="noopener noreferrer">
-                                <Image src={IMKKolkata} alt="IMI Kolkata" className="h-7 w-auto object-contain opacity-95" />
+                                <Image
+                                    src={IMKKolkata}
+                                    alt="IMI Kolkata"
+                                    className="h-7 w-auto object-contain opacity-95"
+                                />
+                            </a>
+                            <span className="h-5 w-px bg-white/20" aria-hidden />
+                            <a href="https://www.servicesepc.org/" target="_blank" rel="noopener noreferrer">
+                                <Image src={sepcKolkata} alt="SEPC" className="h-7 w-auto object-contain opacity-95" />
                             </a>
                         </div>
                         <div className="inline-flex items-center gap-3 rounded-2xl border border-white/25 bg-white/10 px-4 py-2 shadow-sm backdrop-blur-md h-12">
@@ -113,7 +116,12 @@ export default function HeroSection() {
                             <div
                                 key={tile.label}
                                 className="card-hover relative overflow-hidden rounded-2xl border border-white/40 bg-white/20 shadow-lg backdrop-blur-md">
-                                <Image src={tile.src} alt="" className="h-28 w-full object-cover" sizes="(min-width: 768px) 180px, 45vw" />
+                                <Image
+                                    src={tile.src}
+                                    alt=""
+                                    className="h-28 w-full object-cover"
+                                    sizes="(min-width: 768px) 180px, 45vw"
+                                />
                                 <div
                                     className="absolute inset-0 bg-linear-to-t from-black/55 via-black/10 to-transparent"
                                     aria-hidden
@@ -135,4 +143,3 @@ export default function HeroSection() {
         </section>
     );
 }
-

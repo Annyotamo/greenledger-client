@@ -4,6 +4,7 @@ import startupIndia from "@/assets/startupIndia.png";
 import entrepreneurCafe from "@/assets/entrepreneurCafe.jpg";
 import isoCertifaction from "@/assets/isoCertifaction.png";
 import IMKKolkata from "@/assets/IMIKolkata.jpg";
+import sepcKolkata from "@/assets/sepc.png";
 
 export default function Footer() {
     return (
@@ -49,6 +50,10 @@ export default function Footer() {
                                 |{" "}
                                 <a href="https://imik.edu.in" target="_blank" rel="noopener noreferrer">
                                     IMI Kolkata
+                                </a>{" "}
+                                |{" "}
+                                <a href="https://www.servicesepc.org/" target="_blank" rel="noopener noreferrer">
+                                    SEPC Kolkata
                                 </a>
                             </p>
                         </div>
@@ -71,6 +76,13 @@ export default function Footer() {
                                 <Image
                                     src={IMKKolkata}
                                     alt="IMI Kolkata"
+                                    className="h-12 w-auto object-contain opacity-95 sm:h-14"
+                                />
+                            </a>
+                            <a href="https://www.servicesepc.org/" target="_blank" rel="noopener noreferrer">
+                                <Image
+                                    src={sepcKolkata}
+                                    alt="SEPC Kolkata"
                                     className="h-12 w-auto object-contain opacity-95 sm:h-14"
                                 />
                             </a>

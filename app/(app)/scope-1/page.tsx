@@ -893,14 +893,14 @@ export default function Scope1Page() {
 
             <div
                 className={[
-                    "fixed inset-0 z-50 flex items-center justify-center px-4 transition-all duration-300",
+                    "fixed inset-0 z-50 flex items-start justify-center px-3 py-3 transition-all duration-300 sm:items-center sm:px-4 sm:py-6",
                     isModalOpen
                         ? "pointer-events-auto bg-black/45 backdrop-blur-sm opacity-100"
                         : "pointer-events-none opacity-0",
                 ].join(" ")}>
                 <div
                     className={[
-                        "w-full max-w-2xl rounded-3xl border border-white/35 bg-white/90 p-5 shadow-2xl transition-all duration-300 sm:p-6",
+                        "w-full max-w-3xl max-h-[calc(100vh-3.5rem)] overflow-y-auto rounded-3xl border border-white/35 bg-white/90 p-5 shadow-2xl transition-all duration-300 sm:p-6",
                         isModalOpen ? "translate-y-0 scale-100" : "translate-y-3 scale-[0.98]",
                     ].join(" ")}>
                     <div className="mb-4 flex items-start justify-between gap-3">

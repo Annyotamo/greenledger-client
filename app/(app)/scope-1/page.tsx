@@ -286,7 +286,7 @@ export default function Scope1Page() {
             setIsLoadingFactors(true);
             setFactorError(null);
             try {
-                const res = await fetch("/api/factor/getScope1Factor", { method: "GET" });
+                const res = await fetch("/api/factor/getFactor", { method: "GET" });
                 const body = (await res.json()) as GetFactorResponse | { message?: string };
                 if (!res.ok) {
                     const msg =

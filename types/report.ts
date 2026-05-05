@@ -75,6 +75,19 @@ export interface Scope1IngestRequest {
 
 export type Scope1IngestResponse = ApiEnvelope<unknown>;
 
+export interface Scope1EmissionsOverlayDropdownData {
+    "Gaseous fuels"?: string[];
+    Biogas?: string[];
+    Biomass?: string[];
+    "Liquid fuels"?: string[];
+    "all units"?: string[];
+    FuelType?: string[];
+    "Solid fuels"?: string[];
+    [key: string]: string[] | undefined;
+}
+
+export type Scope1EmissionsOverlayResponse = ApiEnvelope<Scope1EmissionsOverlayDropdownData>;
+
 export interface Scope2FactorData {
     factorSource: string | null;
     version: string | null;

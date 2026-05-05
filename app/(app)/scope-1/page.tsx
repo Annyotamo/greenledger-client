@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Select from "react-select";
 import {
     LuActivity,
-    LuBadgeCheck,
     LuBuilding2,
     LuCircleDollarSign,
     LuDownload,
@@ -34,41 +33,16 @@ import {
 } from "recharts";
 import { Sidebar } from "@/components/dashboard/SidebarShell";
 import { downloadScope1ReportCsv } from "@/lib/report/api";
-import { useIngestScope1EmissionMutation, useScope1ReportsQuery } from "@/lib/report/hooks";
+import {
+    useIngestScope1EmissionMutation,
+    useScope1EmissionsOverlayDropdownQuery,
+    useScope1ReportsQuery,
+} from "@/lib/report/hooks";
 import { useSidebarStore } from "@/lib/sidebarStore";
 import type { ApiErrorBody } from "@/types/api/common";
 import type { Scope1IngestRequest, Scope1ReportRecord } from "@/types/report";
 
 type ChartTooltipPayload = Array<{ name?: string; value?: number | string }>;
-
-type FactorStandard = {
-    gwpBasis: string | null;
-    source: string | null;
-    version: string | null;
-};
-
-type FactorRow = {
-    id: string;
-    fuelName: string | null;
-    fuelType: string | null;
-    unit: string | null;
-    co2eTotal: number | null;
-    co2Factor: number | null;
-    ch4Factor: number | null;
-    n2oFactor: number | null;
-    emissionStandard?: FactorStandard | null;
-    year?: string | null;
-    convertTo?: string | null;
-    creationDateString?: string | null;
-    updateDateString?: string | null;
-};
-
-type GetFactorResponse = {
-    response?: string;
-    stsCode?: number;
-    data?: FactorRow[];
-    message?: string;
-};
 
 function DashboardTooltip({
     active,
@@ -133,18 +107,18 @@ function aggregateMonthly(records: Scope1ReportRecord[]) {
 export default function Scope1Page() {
     const sidebarOpen = useSidebarStore((s) => s.isOpen);
     const setActiveSection = useSidebarStore((s) => s.setActiveSection);
-    const { data, isLoading, isError, refetch } = useScope1ReportsQuery();
-    const ingestMutation = useIngestScope1EmissionMutation();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const { data, isLoading, isError, refetch } = useScope1ReportsQuery();
+    const {
+        data: overlayDropdownData,
+        isLoading: isLoadingOverlayData,
+        isError: isOverlayDataError,
+    } = useScope1EmissionsOverlayDropdownQuery(isModalOpen);
+    const ingestMutation = useIngestScope1EmissionMutation();
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
     const [isMounted, setIsMounted] = useState(false);
-    const [factors, setFactors] = useState<FactorRow[]>([]);
-    const [isLoadingFactors, setIsLoadingFactors] = useState(false);
-    const [factorError, setFactorError] = useState<string | null>(null);
-    const [selectedStandardKey, setSelectedStandardKey] = useState<string | null>(null);
     const [selectedFuelType, setSelectedFuelType] = useState<string | null>(null);
-    const [selectedFactor, setSelectedFactor] = useState<FactorRow | null>(null);
     const [startMonth, setStartMonth] = useState("2026-01");
     const [endMonth, setEndMonth] = useState("2026-05");
     const [isDownloading, setIsDownloading] = useState(false);
@@ -170,7 +144,7 @@ export default function Scope1Page() {
         facilityName: "",
         yearMonth: "",
     });
-    const records = data ?? [];
+    const records: Scope1ReportRecord[] = (data ?? []) as Scope1ReportRecord[];
 
     useEffect(() => {
         setActiveSection("scope-1");
@@ -191,127 +165,32 @@ export default function Scope1Page() {
         setIsMounted(true);
     }, []);
 
-    const standardOptions = useMemo(() => {
-        const byKey = new Map<string, FactorStandard>();
-
-        for (const row of factors) {
-            const s = row.emissionStandard;
-            const source = (s?.source ?? "").trim();
-            const gwpBasis = (s?.gwpBasis ?? "").trim();
-            const version = (s?.version ?? "").trim();
-
-            if (!source && !gwpBasis && !version) continue;
-
-            const key = [source || "Unknown", gwpBasis || "Unknown", version || "Unknown"].join(" · ");
-            if (!byKey.has(key)) {
-                byKey.set(key, {
-                    source: s?.source ?? null,
-                    gwpBasis: s?.gwpBasis ?? null,
-                    version: s?.version ?? null,
-                });
-            }
-        }
-
-        return Array.from(byKey.entries())
-            .map(([key, s]) => ({
-                key,
-                label: key,
-                value: key,
-                meta: s,
-            }))
-            .sort((a, b) => a.label.localeCompare(b.label));
-    }, [factors]);
-
-    useEffect(() => {
-        if (!standardOptions.length) return;
-        if (selectedStandardKey) return;
-        if (standardOptions.length === 1) {
-            setSelectedStandardKey(standardOptions[0]?.key ?? null);
-        }
-    }, [selectedStandardKey, standardOptions]);
-
-    const filteredByStandard = useMemo(() => {
-        if (!selectedStandardKey) return factors;
-        return factors.filter((f) => {
-            const s = f.emissionStandard;
-            const source = (s?.source ?? "").trim() || "Unknown";
-            const gwpBasis = (s?.gwpBasis ?? "").trim() || "Unknown";
-            const version = (s?.version ?? "").trim() || "Unknown";
-            const key = [source, gwpBasis, version].join(" · ");
-            return key === selectedStandardKey;
-        });
-    }, [factors, selectedStandardKey]);
-
     const fuelTypeOptions = useMemo(() => {
-        const set = new Set<string>();
-        for (const row of filteredByStandard) {
-            const ft = (row.fuelType ?? "").trim();
-            if (ft) set.add(ft);
-        }
-        return Array.from(set)
+        const fuelTypes = overlayDropdownData?.FuelType ?? [];
+        return Array.from(new Set(fuelTypes))
             .sort((a, b) => a.localeCompare(b))
             .map((ft) => ({ label: ft, value: ft }));
-    }, [filteredByStandard]);
+    }, [overlayDropdownData]);
 
     const fuelNameOptions = useMemo(() => {
-        const set = new Set<string>();
-        for (const row of filteredByStandard) {
-            const ft = (row.fuelType ?? "").trim();
-            if (selectedFuelType && ft !== selectedFuelType) continue;
-            const fn = (row.fuelName ?? "").trim();
-            if (fn) set.add(fn);
-        }
-        return Array.from(set)
+        if (!overlayDropdownData || !selectedFuelType) return [];
+        const rows = overlayDropdownData[selectedFuelType] ?? [];
+        return Array.from(new Set(rows))
             .sort((a, b) => a.localeCompare(b))
             .map((fn) => ({ label: fn, value: fn }));
-    }, [filteredByStandard, selectedFuelType]);
-
-    const selectedStandardOption = useMemo(() => {
-        if (!selectedStandardKey) return null;
-        const found = standardOptions.find((o) => o.key === selectedStandardKey);
-        return found ? { label: found.label, value: found.value } : null;
-    }, [selectedStandardKey, standardOptions]);
+    }, [overlayDropdownData, selectedFuelType]);
 
     const selectedFuelTypeOption = useMemo(() => {
         if (!selectedFuelType) return null;
         return { label: selectedFuelType, value: selectedFuelType };
     }, [selectedFuelType]);
 
-    useEffect(() => {
-        if (!isModalOpen) return;
-        if (factors.length) return;
-
-        let cancelled = false;
-        async function run() {
-            setIsLoadingFactors(true);
-            setFactorError(null);
-            try {
-                const res = await fetch("/api/factor/getFactor", { method: "GET" });
-                const body = (await res.json()) as GetFactorResponse | { message?: string };
-                if (!res.ok) {
-                    const msg =
-                        "message" in body && typeof body.message === "string"
-                            ? body.message
-                            : "Failed to load factors.";
-                    throw new Error(msg);
-                }
-                const rows =
-                    "data" in body && Array.isArray((body as GetFactorResponse).data)
-                        ? ((body as GetFactorResponse).data ?? [])
-                        : [];
-                if (!cancelled) setFactors(rows);
-            } catch (e) {
-                if (cancelled) return;
-                setFactorError(e instanceof Error ? e.message : "Failed to load factors.");
-            } finally {
-                if (!cancelled) setIsLoadingFactors(false);
-            }
-        }
-        void run();
-        return () => {
-            cancelled = true;
-        };
-    }, [factors.length, isModalOpen]);
+    const unitOptions = useMemo(() => {
+        const units = overlayDropdownData?.["all units"] ?? [];
+        return Array.from(new Set(units))
+            .sort((a, b) => a.localeCompare(b))
+            .map((unit) => ({ label: unit, value: unit }));
+    }, [overlayDropdownData]);
 
     const totals = useMemo(() => {
         const totalCo2e = records.reduce((acc, row) => acc + (row.co2eTotal ?? 0), 0);
@@ -405,6 +284,9 @@ export default function Scope1Page() {
             window.URL.revokeObjectURL(objectUrl);
         } catch (error) {
             if (error instanceof AxiosError) {
+                if (error.response?.status === 401) {
+                    return;
+                }
                 const responseData = error.response?.data;
                 const message =
                     responseData && typeof responseData === "object" && "response" in responseData
@@ -441,6 +323,9 @@ export default function Scope1Page() {
             setIsModalOpen(false);
         } catch (error) {
             if (error instanceof AxiosError) {
+                if (error.response?.status === 401) {
+                    return;
+                }
                 const body = error.response?.data as ApiErrorBody | undefined;
                 setSubmitError(body?.response ?? body?.message ?? "Failed to add emission record.");
                 return;
@@ -474,20 +359,13 @@ export default function Scope1Page() {
                             <h1 className="mt-3 text-2xl font-bold tracking-tight text-emerald-950 sm:text-3xl">
                                 Scope-1 Emissions Intelligence
                             </h1>
-                            <p className="mt-2 max-w-2xl text-sm text-slate-700 sm:text-base">
-                                Live report view from backend with professional metrics, trend analytics, and
-                                fuel/facility level breakdowns.
-                            </p>
                         </div>
                         <button
                             type="button"
                             onClick={() => {
                                 setSubmitError(null);
                                 setSubmitSuccess(null);
-                                setFactorError(null);
-                                setSelectedStandardKey(null);
                                 setSelectedFuelType(null);
-                                setSelectedFactor(null);
                                 setIngestForm({
                                     fuelName: "",
                                     fuelType: "",
@@ -926,58 +804,27 @@ export default function Scope1Page() {
 
                     <form onSubmit={onSubmitIngest} className="grid gap-3 sm:grid-cols-2">
                         <div className="sm:col-span-2 grid gap-3 sm:grid-cols-3">
-                            <Field label="Standard">
-                                {isMounted ? (
-                                    <Select
-                                        inputId="scope1-standard"
-                                        instanceId="scope1-standard"
-                                        isLoading={isLoadingFactors}
-                                        isDisabled={!standardOptions.length}
-                                        value={selectedStandardOption}
-                                        onChange={(opt) => {
-                                            const key = opt?.value ?? null;
-                                            setSelectedStandardKey(key);
-                                            setSelectedFuelType(null);
-                                            setSelectedFactor(null);
-                                            setIngestForm((p) => ({ ...p, fuelName: "", fuelType: "", unit: "" }));
-                                        }}
-                                        options={standardOptions.map((o) => ({ label: o.label, value: o.value }))}
-                                        placeholder={
-                                            isLoadingFactors ? "Loading standards..." : "Select standard (e.g. DEFRA)"
-                                        }
-                                        classNamePrefix="gl-select"
-                                        styles={selectStyles}
-                                    />
-                                ) : (
-                                    <input
-                                        disabled
-                                        value=""
-                                        placeholder="Select standard (e.g. DEFRA)"
-                                        className={inputClass}
-                                    />
-                                )}
-                            </Field>
-
                             <Field label="Fuel type">
                                 {isMounted ? (
                                     <Select
                                         inputId="scope1-fueltype"
                                         instanceId="scope1-fueltype"
+                                        isLoading={isLoadingOverlayData}
                                         isDisabled={!fuelTypeOptions.length}
                                         value={selectedFuelTypeOption}
                                         onChange={(opt) => {
                                             const ft = opt?.value ?? null;
                                             setSelectedFuelType(ft);
-                                            setSelectedFactor(null);
                                             setIngestForm((p) => ({
                                                 ...p,
                                                 fuelType: ft ?? "",
                                                 fuelName: "",
-                                                unit: "",
                                             }));
                                         }}
                                         options={fuelTypeOptions}
-                                        placeholder="Select fuel type"
+                                        placeholder={
+                                            isLoadingOverlayData ? "Loading fuel types..." : "Select fuel type"
+                                        }
                                         classNamePrefix="gl-select"
                                         styles={selectStyles}
                                     />
@@ -999,22 +846,9 @@ export default function Scope1Page() {
                                         }
                                         onChange={(opt) => {
                                             const fuelName = opt?.value ?? "";
-                                            const match =
-                                                filteredByStandard.find((f) => {
-                                                    const fn = (f.fuelName ?? "").trim();
-                                                    const ft = (f.fuelType ?? "").trim();
-                                                    return (
-                                                        fn === fuelName &&
-                                                        (!selectedFuelType || ft === selectedFuelType)
-                                                    );
-                                                }) ?? null;
-
-                                            setSelectedFactor(match);
                                             setIngestForm((p) => ({
                                                 ...p,
                                                 fuelName,
-                                                fuelType: match?.fuelType ?? p.fuelType,
-                                                unit: match?.unit ?? p.unit ?? "",
                                             }));
                                         }}
                                         options={fuelNameOptions}
@@ -1026,92 +860,34 @@ export default function Scope1Page() {
                                     <input disabled value="" placeholder="Search fuel" className={inputClass} />
                                 )}
                             </Field>
+                            <Field label="Unit">
+                                {isMounted ? (
+                                    <Select
+                                        inputId="scope1-unit"
+                                        instanceId="scope1-unit"
+                                        isLoading={isLoadingOverlayData}
+                                        isDisabled={!unitOptions.length}
+                                        value={
+                                            ingestForm.unit ? { label: ingestForm.unit, value: ingestForm.unit } : null
+                                        }
+                                        onChange={(opt) => {
+                                            setIngestForm((p) => ({ ...p, unit: opt?.value ?? "" }));
+                                        }}
+                                        options={unitOptions}
+                                        placeholder={isLoadingOverlayData ? "Loading units..." : "Select unit"}
+                                        classNamePrefix="gl-select"
+                                        styles={selectStyles}
+                                    />
+                                ) : (
+                                    <input disabled value="" placeholder="Select unit" className={inputClass} />
+                                )}
+                            </Field>
                         </div>
-
-                        <div className="sm:col-span-2 rounded-2xl border border-emerald-900/10 bg-white/85 p-4 shadow-sm">
-                            <div className="flex flex-wrap items-start justify-between gap-3">
-                                <div>
-                                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-900/60">
-                                        Factor details
-                                    </p>
-                                    <p className="mt-1 text-sm font-semibold text-slate-900">
-                                        {selectedFactor?.fuelName
-                                            ? selectedFactor.fuelName
-                                            : "Select a factor to see unit and conversion info."}
-                                    </p>
-                                </div>
-                                {selectedFactor?.emissionStandard?.source ? (
-                                    <span className="inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-emerald-50 px-3 py-1 text-[0.72rem] font-semibold text-emerald-900/85">
-                                        <LuBadgeCheck className="h-4 w-4" />
-                                        {[
-                                            selectedFactor.emissionStandard.source,
-                                            selectedFactor.emissionStandard.gwpBasis,
-                                            selectedFactor.emissionStandard.version,
-                                        ]
-                                            .filter(Boolean)
-                                            .join(" · ")}
-                                    </span>
-                                ) : null}
+                        {isOverlayDataError ? (
+                            <div className="sm:col-span-2 rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+                                Unable to load emissions overlay dropdown data.
                             </div>
-
-                            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                                {[
-                                    { k: "Input unit", v: selectedFactor?.unit ?? ingestForm.unit ?? "-" },
-                                    { k: "Converted to", v: selectedFactor?.convertTo ?? "-" },
-                                    { k: "Factor year", v: selectedFactor?.year ?? "-" },
-                                    {
-                                        k: "CO2e total",
-                                        v:
-                                            typeof selectedFactor?.co2eTotal === "number"
-                                                ? formatNumber(selectedFactor.co2eTotal)
-                                                : "-",
-                                    },
-                                    {
-                                        k: "CO2 factor",
-                                        v:
-                                            typeof selectedFactor?.co2Factor === "number"
-                                                ? formatNumber(selectedFactor.co2Factor)
-                                                : "-",
-                                    },
-                                    {
-                                        k: "CH4 factor",
-                                        v:
-                                            typeof selectedFactor?.ch4Factor === "number"
-                                                ? formatNumber(selectedFactor.ch4Factor)
-                                                : "-",
-                                    },
-                                    {
-                                        k: "N2O factor",
-                                        v:
-                                            typeof selectedFactor?.n2oFactor === "number"
-                                                ? formatNumber(selectedFactor.n2oFactor)
-                                                : "-",
-                                    },
-                                    {
-                                        k: "Conversion",
-                                        v:
-                                            selectedFactor?.unit && selectedFactor?.convertTo
-                                                ? `${selectedFactor.unit} → ${selectedFactor.convertTo}`
-                                                : "-",
-                                    },
-                                ].map((row) => (
-                                    <div
-                                        key={row.k}
-                                        className="rounded-xl border border-emerald-900/10 bg-white/90 px-3 py-2">
-                                        <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-emerald-900/55">
-                                            {row.k}
-                                        </p>
-                                        <p className="mt-1 text-sm font-bold text-slate-900">{row.v}</p>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {factorError ? (
-                                <div className="mt-3 rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
-                                    {factorError}
-                                </div>
-                            ) : null}
-                        </div>
+                        ) : null}
 
                         <Field label="Quantity">
                             <input
@@ -1128,13 +904,6 @@ export default function Scope1Page() {
                                 step="0.01"
                                 value={ingestForm.cost}
                                 onChange={(e) => setIngestForm((p) => ({ ...p, cost: e.target.value }))}
-                                className={inputClass}
-                            />
-                        </Field>
-                        <Field label="Unit">
-                            <input
-                                value={ingestForm.unit}
-                                onChange={(e) => setIngestForm((p) => ({ ...p, unit: e.target.value }))}
                                 className={inputClass}
                             />
                         </Field>

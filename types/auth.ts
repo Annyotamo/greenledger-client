@@ -1,5 +1,3 @@
-import type { ApiEnvelope } from "@/types/api/common";
-
 export type LoginMode = "identity" | "email";
 
 export interface LoginInput {
@@ -19,4 +17,24 @@ export interface LoginByUsernamePayload {
 
 export type LoginPayload = LoginByEmailPayload | LoginByUsernamePayload;
 
-export type LoginResponse = ApiEnvelope<string>;
+export type AuthUser = {
+    role: string;
+    name: string;
+    id: string;
+    userName: string;
+    email: string;
+};
+
+export type LoginResponse = {
+    // new format
+    data?: AuthUser;
+    token?: string;
+    success?: boolean;
+    status?: number;
+    message?: string;
+    timestamp?: string;
+
+    // backward compat (older format used `data` as token)
+    response?: string;
+    stsCode?: number;
+};

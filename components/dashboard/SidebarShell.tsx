@@ -8,8 +8,9 @@ import Image from "next/image";
 
 import { logout } from "@/lib/auth/api";
 import { clearAuthToken } from "@/lib/auth/token";
+import { clearAuthUser, getAuthUser } from "@/lib/auth/user";
 import { useSidebarStore } from "@/lib/sidebarStore";
-import { LuChevronDown, LuChevronRight, LuFactory, LuLeaf, LuLogOut, LuMenu } from "react-icons/lu";
+import { LuChevronDown, LuChevronRight, LuFactory, LuLeaf, LuLogOut, LuMenu, LuUser } from "react-icons/lu";
 
 type SidebarItemProps = {
     label: string;
@@ -50,6 +51,11 @@ export function Sidebar() {
 
     const [isMobile, setIsMobile] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [userName, setUserName] = useState<string | null>(null);
+
+    useEffect(() => {
+        setUserName(getAuthUser()?.name ?? null);
+    }, [pathname]);
 
     useEffect(() => {
         // Drawer mode for semi-medium screens too (prevents sidebar covering content).
@@ -79,6 +85,7 @@ export function Sidebar() {
             }
         } finally {
             clearAuthToken();
+            clearAuthUser();
             router.push("/login");
             setIsLoggingOut(false);
         }
@@ -237,26 +244,50 @@ export function Sidebar() {
                     />
                 </nav>
 
-                {/* Collapse control (desktop) */}
-                <div className="relative hidden lg:flex items-center justify-between px-3 pb-4 pt-3 border-t border-white/12">
-                    {!compact && (
-                        <div className="flex flex-col text-[0.7rem] text-emerald-100/65 leading-tight">
-                            <span className="font-semibold uppercase tracking-[0.18em] text-emerald-100/80">
-                                Assurance ready
-                            </span>
-                            <span className="text-emerald-100/65">Audit trails, evidence links, traits</span>
-                        </div>
-                    )}
-                    <button
-                        type="button"
-                        onClick={toggle}
-                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/12 text-emerald-100 shadow-sm hover:border-emerald-200/40 hover:bg-white/18 hover:text-white transition-all duration-200">
-                        {isOpen ? (
-                            <span className="text-xs font-medium">⟨</span>
+                {/* Footer: user + collapse control (desktop) */}
+                <div className="relative hidden lg:flex flex-col border-t border-white/12 px-3 pb-4 pt-3">
+                    <div
+                        className={[
+                            "flex items-center gap-3 rounded-2xl border border-white/12 bg-white/8",
+                            compact ? "justify-center px-2 py-2" : "px-3 py-2.5",
+                        ].join(" ")}>
+                        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/12 text-emerald-50 ring-1 ring-white/12">
+                            <LuUser className="h-4 w-4" />
+                        </span>
+                        {!compact ? (
+                            <div className="min-w-0">
+                                <div className="truncate text-sm font-semibold text-white/90">
+                                    {userName ?? "User"}
+                                </div>
+                                <div className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-emerald-100/60">
+                                    Signed in
+                                </div>
+                            </div>
+                        ) : null}
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between">
+                        {!compact ? (
+                            <div className="flex flex-col text-[0.7rem] text-emerald-100/65 leading-tight">
+                                <span className="font-semibold uppercase tracking-[0.18em] text-emerald-100/80">
+                                    Assurance ready
+                                </span>
+                                <span className="text-emerald-100/65">Audit trails, evidence links, traits</span>
+                            </div>
                         ) : (
-                            <span className="text-xs font-medium">⟩</span>
+                            <span />
                         )}
-                    </button>
+                        <button
+                            type="button"
+                            onClick={toggle}
+                            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/12 text-emerald-100 shadow-sm hover:border-emerald-200/40 hover:bg-white/18 hover:text-white transition-all duration-200">
+                            {isOpen ? (
+                                <span className="text-xs font-medium">⟨</span>
+                            ) : (
+                                <span className="text-xs font-medium">⟩</span>
+                            )}
+                        </button>
+                    </div>
                 </div>
             </aside>
         </>

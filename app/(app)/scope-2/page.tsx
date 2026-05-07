@@ -65,7 +65,7 @@ function DashboardTooltip({
     if (!active || !payload?.length) return null;
 
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="rounded-xl bg-white/90 px-4 py-3 text-xs shadow-2xl ring-1 ring-emerald-900/10 backdrop-blur-xl"
@@ -285,7 +285,7 @@ export default function Scope2Page() {
                 <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-teal-300/20 blur-[150px] gl-drift-2" />
                 <div className="absolute top-[40%] left-[60%] w-[30%] h-[30%] rounded-full bg-green-400/10 blur-[100px] gl-spin-slow" />
             </div>
-            
+
             <Sidebar />
 
             <main
@@ -294,10 +294,10 @@ export default function Scope2Page() {
                     sidebarOpen ? "lg:pl-80" : "lg:pl-28",
                     "transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
                 ].join(" ")}>
-                
+
                 <div className="mx-auto max-w-7xl">
                     <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.5, ease: "easeOut" }}
@@ -317,7 +317,7 @@ export default function Scope2Page() {
                                 Analytics and comprehensive reporting for purchased energy and electricity.
                             </p>
                         </motion.div>
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
@@ -349,7 +349,7 @@ export default function Scope2Page() {
 
                     <AnimatePresence>
                         {submitSuccess && (
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
@@ -390,14 +390,14 @@ export default function Scope2Page() {
                                     },
                                     {
                                         label: "Total Cost",
-                                        value: `$${formatNumber(totals.totalCost)}`,
+                                        value: `${formatNumber(totals.totalCost)}`,
                                         unit: "",
                                         icon: <LuCircleDollarSign />,
                                     },
                                     {
                                         label: "Energy Consumed",
                                         value: formatNumber(totals.totalConsumed),
-                                        unit: "kWh",
+                                        unit: "MWh",
                                         icon: <LuActivity />,
                                     },
                                 ].map((stat, idx) => (
@@ -411,13 +411,13 @@ export default function Scope2Page() {
                                         className="relative overflow-hidden rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
                                     >
                                         <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-gradient-to-br from-emerald-100 to-teal-50 opacity-50 blur-2xl" />
-                                        
+
                                         <div className="relative flex items-start justify-between">
                                             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20">
                                                 {stat.icon}
                                             </div>
                                         </div>
-                                        
+
                                         <div className="mt-6">
                                             <p className="text-[0.7rem] font-bold uppercase tracking-widest text-slate-500">
                                                 {stat.label}
@@ -435,7 +435,7 @@ export default function Scope2Page() {
                                 ))}
                             </div>
 
-                            <motion.section 
+                            <motion.section
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.3 }}
@@ -480,7 +480,7 @@ export default function Scope2Page() {
                                         {downloadError}
                                     </div>
                                 )}
-                                
+
                                 <div className="overflow-hidden rounded-2xl border border-white/40 bg-white/60 shadow-inner">
                                     <div className="overflow-x-auto scrollbar-thin">
                                         <table className="min-w-[1020px] w-full text-left text-sm">
@@ -580,7 +580,7 @@ export default function Scope2Page() {
                             </motion.section>
 
                             <div className="mt-8 grid gap-8 lg:grid-cols-[1.45fr_1fr]">
-                                <motion.section 
+                                <motion.section
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.4 }}
@@ -628,7 +628,7 @@ export default function Scope2Page() {
                                     </div>
                                 </motion.section>
 
-                                <motion.section 
+                                <motion.section
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.5 }}
@@ -683,7 +683,7 @@ export default function Scope2Page() {
                                 </motion.section>
                             </div>
 
-                            <motion.section 
+                            <motion.section
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.6 }}
@@ -773,7 +773,7 @@ export default function Scope2Page() {
                             </div>
 
                             <form onSubmit={onSubmit} className="grid gap-5 sm:grid-cols-2">
-                                <Field label="Quantity consume">
+                                <Field label="Quantity">
                                     <input
                                         type="number"
                                         step="0.01"
@@ -789,7 +789,7 @@ export default function Scope2Page() {
                                         className={inputClass}
                                     />
                                 </Field>
-                                <Field label="Fuel name">
+                                <Field label="Energy Source">
                                     <input
                                         value={form.fuelName}
                                         onChange={(e) => setForm((p) => ({ ...p, fuelName: e.target.value }))}

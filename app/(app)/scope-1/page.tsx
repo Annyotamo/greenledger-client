@@ -54,7 +54,7 @@ function ChartTooltip({
 }) {
     if (!active || !payload?.length) return null;
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="rounded-xl bg-white/90 px-4 py-3 text-xs shadow-2xl ring-1 ring-emerald-900/10 backdrop-blur-xl"
@@ -171,10 +171,10 @@ export default function Scope1DashboardPage() {
                     sidebarOpen ? "lg:pl-80" : "lg:pl-28",
                     "transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
                 ].join(" ")}>
-                
+
                 <div className="mx-auto max-w-7xl">
                     <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.5, ease: "easeOut" }}
@@ -187,15 +187,15 @@ export default function Scope1DashboardPage() {
                                 </span>
                                 Scope-1 Analytics
                             </div>
-                            <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-                                Operational Dashboard
+                            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+                                Scope One Dashboard
                             </h1>
                             <p className="max-w-xl text-sm font-medium text-slate-500 sm:text-base">
                                 Real-time monitoring of fuel consumption and facility emissions. Adjust your reporting period below to filter data.
                             </p>
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
@@ -224,7 +224,7 @@ export default function Scope1DashboardPage() {
 
                     <AnimatePresence>
                         {!rangeValid && (
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
@@ -261,7 +261,7 @@ export default function Scope1DashboardPage() {
                                     },
                                     {
                                         label: "Total Cost",
-                                        value: `$${formatNumber(total.cost)}`,
+                                        value: formatNumber(total.cost),
                                         unit: "",
                                         icon: <LuCircleDollarSign />,
                                         trend: "-1.2%",
@@ -283,7 +283,7 @@ export default function Scope1DashboardPage() {
                                     },
                                     {
                                         label: "Avg Cost Efficiency",
-                                        value: `$${formatNumber(avgCostPerTonne)}`,
+                                        value: formatNumber(avgCostPerTonne),
                                         unit: "/ tCO₂e",
                                         icon: <LuFlame />,
                                     },
@@ -295,10 +295,10 @@ export default function Scope1DashboardPage() {
                                         whileHover="hover"
                                         variants={cardVariants}
                                         key={stat.label}
-                                        className="relative overflow-hidden rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
+                                        className="relative overflow-hidden rounded-2xl border border-white/60 bg-white/50 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
                                     >
                                         <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-gradient-to-br from-emerald-100 to-teal-50 opacity-50 blur-2xl" />
-                                        
+
                                         <div className="relative flex items-start justify-between">
                                             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20">
                                                 {stat.icon}
@@ -309,13 +309,13 @@ export default function Scope1DashboardPage() {
                                                 </span>
                                             )}
                                         </div>
-                                        
+
                                         <div className="mt-6">
                                             <p className="text-[0.7rem] font-bold uppercase tracking-widest text-slate-500">
                                                 {stat.label}
                                             </p>
                                             <div className="mt-1 flex items-baseline gap-1">
-                                                <h3 className="text-3xl font-black text-slate-800 tracking-tight">
+                                                <h3 className="text-2xl font-bold text-slate-800 tracking-tight">
                                                     {stat.value}
                                                 </h3>
                                                 {stat.unit && (
@@ -332,7 +332,7 @@ export default function Scope1DashboardPage() {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.3 }}
-                                    className="rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
+                                    className="rounded-2xl border border-white/60 bg-white/50 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
                                 >
                                     <div className="mb-6 flex items-center justify-between">
                                         <div>
@@ -343,8 +343,8 @@ export default function Scope1DashboardPage() {
                                             <LuActivity className="h-5 w-5" />
                                         </div>
                                     </div>
-                                    
-                                    <div className="h-[360px] w-full">
+
+                                    <div className="h-[280px] w-full">
                                         <ResponsiveContainer width="100%" height="100%">
                                             <BarChart
                                                 data={fuelChartData}
@@ -398,7 +398,7 @@ export default function Scope1DashboardPage() {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.4 }}
-                                    className="flex flex-col rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
+                                className="flex flex-col rounded-2xl border border-white/60 bg-white/50 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
                                 >
                                     <div className="mb-4 flex items-center justify-between">
                                         <div>
@@ -409,7 +409,7 @@ export default function Scope1DashboardPage() {
                                             <LuBuilding2 className="h-5 w-5" />
                                         </div>
                                     </div>
-                                    
+
                                     <div className="relative flex-1 min-h-[220px]">
                                         <ResponsiveContainer width="100%" height="100%">
                                             <PieChart>
@@ -456,21 +456,21 @@ export default function Scope1DashboardPage() {
                                 </motion.div>
                             </div>
 
-                            <motion.section 
+                            <motion.section
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.5 }}
-                                className="mt-8 rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
+                                className="mt-8 rounded-2xl border border-white/60 bg-white/50 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
                             >
                                 <div className="mb-6 flex items-center justify-between border-b border-slate-200/50 pb-4">
                                     <h2 className="text-lg font-bold text-slate-800">Detailed Facility Performance</h2>
                                 </div>
-                                
+
                                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                     {facilityChartData.map((row) => (
                                         <div key={row.facility} className="group relative overflow-hidden rounded-2xl bg-white/60 p-5 border border-white/40 transition-all hover:shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-1">
                                             <div className="absolute top-0 right-0 h-16 w-16 -translate-y-8 translate-x-8 rounded-full bg-emerald-500/10 blur-xl transition-all group-hover:bg-emerald-500/20" />
-                                            
+
                                             <div className="flex items-center justify-between mb-4">
                                                 <p className="text-[0.75rem] font-bold uppercase tracking-wider text-slate-600">
                                                     {row.facility}
@@ -479,22 +479,22 @@ export default function Scope1DashboardPage() {
                                                     {Math.round(row.share)}%
                                                 </span>
                                             </div>
-                                            
+
                                             <div className="space-y-1">
                                                 <div className="flex items-end gap-1.5">
-                                                    <span className="text-2xl font-black text-slate-800">{formatTonnesFromKg(row.co2e)}</span>
+                                                    <span className="text-xl font-bold text-slate-800">{formatTonnesFromKg(row.co2e)}</span>
                                                     <span className="text-xs font-semibold text-slate-500 mb-1">tCO₂e</span>
                                                 </div>
                                                 <div className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
                                                     <LuCircleDollarSign className="h-4 w-4 text-emerald-500/70" />
-                                                    ${formatNumber(row.cost)} total cost
+                                                    {formatNumber(row.cost)} total cost
                                                 </div>
                                             </div>
-                                            
+
                                             {/* Progress bar */}
                                             <div className="mt-4 h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
-                                                <div 
-                                                    className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-500" 
+                                                <div
+                                                    className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-500"
                                                     style={{ width: `${Math.max(5, row.share)}%` }}
                                                 />
                                             </div>

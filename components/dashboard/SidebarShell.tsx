@@ -195,14 +195,13 @@ export function Sidebar() {
                               width: "min(20rem, calc(100vw - 1.5rem))",
                           }
                         : {
-                              width: isOpen ? 260 : 72,
+                              width: isOpen ? 240 : 72,
                           }
                 }
                 transition={{
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 30,
-                    mass: 0.8,
+                    type: "tween",
+                    duration: 0.3,
+                    ease: [0.22, 1, 0.36, 1],
                 }}>
                 
                 {/* Background lighting effects for dark theme */}
@@ -211,15 +210,28 @@ export function Sidebar() {
                 <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-white/5 via-transparent to-black/20 border-r border-white/10" />
                 
                 {/* Brand */}
-                <div className="relative hidden lg:flex items-center justify-center px-4 pt-6 pb-5 border-b border-white/10">
+                <div className={`relative hidden lg:flex items-center ${compact ? "justify-center" : "justify-start gap-3"} px-4 pt-6 pb-5 border-b border-white/10 overflow-hidden`}>
                     <Image
                         src="/GLLogo.png"
                         alt="Green Ledger"
                         width={64}
                         height={64}
-                        className={compact ? "h-10 w-10 transition-transform duration-300" : "h-12 w-12 transition-transform duration-300 hover:scale-105"}
+                        className={compact ? "h-9 w-9 transition-transform duration-300" : "h-10 w-10 transition-transform duration-300 hover:scale-105"}
                         priority
                     />
+                    <AnimatePresence>
+                        {!compact && (
+                            <motion.span
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -10 }}
+                                transition={{ duration: 0.2 }}
+                                className="text-lg font-black tracking-tight text-white whitespace-nowrap"
+                            >
+                                GreenLedger
+                            </motion.span>
+                        )}
+                    </AnimatePresence>
                 </div>
 
                 {/* Nav */}

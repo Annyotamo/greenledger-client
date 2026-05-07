@@ -88,6 +88,64 @@ export interface Scope1EmissionsOverlayDropdownData {
 
 export type Scope1EmissionsOverlayResponse = ApiEnvelope<Scope1EmissionsOverlayDropdownData>;
 
+export interface Scope1DashboardFuelSummary {
+    total_co2e: number;
+    fuel: string;
+}
+
+export interface Scope1DashboardFacilitySummary {
+    total_co2e: number;
+    total_cost: number;
+    facility: string;
+}
+
+export interface Scope1DashboardTotals {
+    co2e: number;
+    cost: number;
+    current_totalCo2: number;
+}
+
+export interface Scope1DashboardData {
+    fuel_summary: Scope1DashboardFuelSummary[];
+    facility_summary: Scope1DashboardFacilitySummary[];
+    current_month_total_emission: Scope1DashboardTotals;
+    total_emission: Scope1DashboardTotals;
+}
+
+export type Scope1DashboardResponse = {
+    data?: Scope1DashboardData;
+    success?: boolean;
+    status?: number;
+    message?: string;
+    timestamp?: string;
+};
+
+export interface Scope1IngestRecord {
+    id: string;
+    fuelName: string | null;
+    fuelType: string | null;
+    quantity: number | null;
+    cost: number | null;
+    facilityName: string | null;
+    orgName: string | null;
+    unit: string | null;
+    email: string | null;
+    yearMonth: string | null;
+    status: number | null;
+    errorMsg: string | null;
+    year: string | null;
+    createDate: string | null;
+    updateDate: string | null;
+}
+
+export type Scope1IngestListResponse = {
+    data?: Scope1IngestRecord[];
+    success?: boolean;
+    status?: number;
+    message?: string;
+    timestamp?: string;
+};
+
 export interface Scope2FactorData {
     factorSource: string | null;
     version: string | null;

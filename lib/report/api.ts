@@ -1,7 +1,11 @@
 import { privateApi } from "@/lib/http/client";
 import type {
+    Scope1DashboardData,
+    Scope1DashboardResponse,
     Scope1EmissionsOverlayDropdownData,
     Scope1EmissionsOverlayResponse,
+    Scope1IngestListResponse,
+    Scope1IngestRecord,
     Scope1IngestRequest,
     Scope1IngestResponse,
     Scope1ReportRecord,
@@ -33,6 +37,18 @@ export async function downloadScope1ReportCsv(startMonth: string, endMonth: stri
 export async function getScope1EmissionsOverlayDropdownData(): Promise<Scope1EmissionsOverlayDropdownData> {
     const { data } = await privateApi.get<Scope1EmissionsOverlayResponse>("/fuel/getAllFuel");
     return data.data ?? {};
+}
+
+export async function getScope1Dashboard(startMonth: string, endMonth: string): Promise<Scope1DashboardData | null> {
+    const { data } = await privateApi.get<Scope1DashboardResponse>(
+        `/scope1Ingest/dashBoard/${encodeURIComponent(startMonth)}/${encodeURIComponent(endMonth)}`,
+    );
+    return data.data ?? null;
+}
+
+export async function getScope1IngestedRecords(): Promise<Scope1IngestRecord[]> {
+    const { data } = await privateApi.get<Scope1IngestListResponse>("/scope1Ingest/getAllIngest");
+    return data.data ?? [];
 }
 
 export async function getScope2Reports(): Promise<Scope2ReportRecord[]> {

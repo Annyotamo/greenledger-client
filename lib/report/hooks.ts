@@ -2,14 +2,18 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+    getScope1Dashboard,
     getScope1EmissionsOverlayDropdownData,
+    getScope1IngestedRecords,
     getScope1Reports,
     getScope2Reports,
     ingestScope1Emission,
     ingestScope2Emission,
 } from "@/lib/report/api";
 import type {
+    Scope1DashboardData,
     Scope1EmissionsOverlayDropdownData,
+    Scope1IngestRecord,
     Scope1IngestRequest,
     Scope1ReportRecord,
     Scope2IngestRequest,
@@ -41,6 +45,23 @@ export function useScope1EmissionsOverlayDropdownQuery(enabled = true) {
         queryFn: getScope1EmissionsOverlayDropdownData,
         staleTime: 5 * 60_000,
         enabled,
+    });
+}
+
+export function useScope1DashboardQuery(startMonth: string, endMonth: string, enabled = true) {
+    return useQuery<Scope1DashboardData | null, unknown, Scope1DashboardData | null>({
+        queryKey: ["scope1", "dashboard", startMonth, endMonth],
+        queryFn: () => getScope1Dashboard(startMonth, endMonth),
+        staleTime: 60_000,
+        enabled,
+    });
+}
+
+export function useScope1IngestedRecordsQuery() {
+    return useQuery<Scope1IngestRecord[], unknown, Scope1IngestRecord[]>({
+        queryKey: ["scope1", "ingested-records"],
+        queryFn: getScope1IngestedRecords,
+        staleTime: 60_000,
     });
 }
 

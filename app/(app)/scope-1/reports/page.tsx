@@ -3,6 +3,22 @@
 import { AxiosError } from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import Select from "react-select";
+import {
+    LuActivity,
+    LuBuilding2,
+    LuCircleDollarSign,
+    LuDownload,
+    LuDroplets,
+    LuFactory,
+    LuFuel,
+    LuLeaf,
+    LuMaximize2,
+    LuPlus,
+    LuSparkles,
+    LuX,
+    LuCalendarDays,
+} from "react-icons/lu";
 import {
     Area,
     AreaChart,
@@ -17,39 +33,16 @@ import {
     XAxis,
     YAxis,
 } from "recharts";
-import {
-    LuActivity,
-    LuBolt,
-    LuBuilding2,
-    LuCircleDollarSign,
-    LuDownload,
-    LuFactory,
-    LuPlus,
-    LuSparkles,
-    LuX,
-    LuCalendarDays,
-} from "react-icons/lu";
 import { Sidebar } from "@/components/dashboard/SidebarShell";
-import { downloadScope2ReportCsv } from "@/lib/report/api";
-import { useIngestScope2EmissionMutation, useScope2ReportsQuery } from "@/lib/report/hooks";
+import { downloadScope1ReportCsv } from "@/lib/report/api";
+import {
+    useIngestScope1EmissionMutation,
+    useScope1EmissionsOverlayDropdownQuery,
+    useScope1ReportsQuery,
+} from "@/lib/report/hooks";
 import { useSidebarStore } from "@/lib/sidebarStore";
 import type { ApiErrorBody } from "@/types/api/common";
-import type { Scope2IngestRequest } from "@/types/report";
-
-function formatNumber(value: number): string {
-    return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
-}
-
-function getMonthLabel(value: string | null): string {
-    if (!value) return "N/A";
-    const [year, month] = value.split("-");
-    if (!year || !month) return value;
-    return `${month}/${year.slice(-2)}`;
-}
-
-function toTonne(value: number): number {
-    return value / 1000;
-}
+import type { Scope1IngestRequest, Scope1ReportRecord } from "@/types/report";
 
 type ChartTooltipPayload = Array<{ name?: string; value?: number | string; payload?: any }>;
 
@@ -79,13 +72,45 @@ function DashboardTooltip({
                             <span className="font-medium text-slate-600">{p.name}</span>
                         </div>
                         <span className="font-bold text-emerald-950">
-                            {typeof p.value === "number" ? formatNumber(p.value) : (p.value ?? "-")}
+                            {typeof p.value === "number" ? p.value.toLocaleString() : (p.value ?? "-")}
                         </span>
                     </div>
                 ))}
             </div>
         </motion.div>
     );
+}
+
+function formatNumber(value: number): string {
+    return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+}
+
+function formatTonnesFromKg(value: number): string {
+    return (value / 1000).toLocaleString(undefined, { maximumFractionDigits: 3 });
+}
+
+function getMonthLabel(value: string | null): string {
+    if (!value) return "N/A";
+    const [year, month] = value.split("-");
+    if (!year || !month) return value;
+    return `${month}/${year.slice(-2)}`;
+}
+
+function aggregateMonthly(records: Scope1ReportRecord[]) {
+    const byMonth = new Map<string, { co2e: number; cost: number }>();
+
+    for (const row of records) {
+        const month = row.reportDate ?? "Unknown";
+        const previous = byMonth.get(month) ?? { co2e: 0, cost: 0 };
+        byMonth.set(month, {
+            co2e: previous.co2e + (row.co2eTotal ?? 0),
+            cost: previous.cost + (row.cost ?? 0),
+        });
+    }
+
+    return Array.from(byMonth.entries())
+        .map(([month, values]) => ({ month, monthLabel: getMonthLabel(month), ...values }))
+        .sort((a, b) => a.month.localeCompare(b.month));
 }
 
 const cardVariants = {
@@ -106,36 +131,155 @@ const cardVariants = {
     }
 };
 
-export default function Scope2Page() {
+export default function Scope1Page() {
     const sidebarOpen = useSidebarStore((s) => s.isOpen);
     const setActiveSection = useSidebarStore((s) => s.setActiveSection);
-    const { data, isLoading, isError } = useScope2ReportsQuery();
-    const ingestMutation = useIngestScope2EmissionMutation();
-
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const { data, isLoading, isError, refetch } = useScope1ReportsQuery();
+    const {
+        data: overlayDropdownData,
+        isLoading: isLoadingOverlayData,
+        isError: isOverlayDataError,
+    } = useScope1EmissionsOverlayDropdownQuery(isModalOpen);
+    const ingestMutation = useIngestScope1EmissionMutation();
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+    const [isMounted, setIsMounted] = useState(false);
+    const [selectedFuelType, setSelectedFuelType] = useState<string | null>(null);
     const [startMonth, setStartMonth] = useState("2026-01");
     const [endMonth, setEndMonth] = useState("2026-06");
     const [isDownloading, setIsDownloading] = useState(false);
     const [downloadError, setDownloadError] = useState<string | null>(null);
-    const [form, setForm] = useState({
-        quantityConsume: "",
-        unit: "kwh",
-        fuelName: "electricity",
-        outputUnit: "MWh",
+    const [recordsPage, setRecordsPage] = useState(1);
+    const recordsPageSize = 10;
+    const [ingestForm, setIngestForm] = useState<{
+        fuelName: string;
+        fuelType: string;
+        quantity: string;
+        cost: string;
+        unit: string;
+        orgName: string;
+        facilityName: string;
+        yearMonth: string;
+    }>({
+        fuelName: "",
+        fuelType: "",
+        quantity: "",
         cost: "",
-        facilityName: "",
+        unit: "",
         orgName: "",
+        facilityName: "",
         yearMonth: "",
-        year: "",
     });
+    const records: Scope1ReportRecord[] = (data ?? []) as Scope1ReportRecord[];
+
+    useEffect(() => {
+        setActiveSection("scope-1");
+    }, [setActiveSection]);
+
+    useEffect(() => {
+        setRecordsPage(1);
+    }, [records.length]);
+
+    const recordsTotalPages = useMemo(() => Math.max(1, Math.ceil(records.length / recordsPageSize)), [records.length]);
+    const recordsPageSafe = Math.min(Math.max(1, recordsPage), recordsTotalPages);
+    const pagedRecords = useMemo(() => {
+        const start = (recordsPageSafe - 1) * recordsPageSize;
+        return records.slice(start, start + recordsPageSize);
+    }, [records, recordsPageSafe]);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    const fuelTypeOptions = useMemo(() => {
+        const fuelTypes = overlayDropdownData?.FuelType ?? [];
+        return Array.from(new Set(fuelTypes))
+            .sort((a, b) => a.localeCompare(b))
+            .map((ft) => ({ label: ft, value: ft }));
+    }, [overlayDropdownData]);
+
+    const fuelNameOptions = useMemo(() => {
+        if (!overlayDropdownData || !selectedFuelType) return [];
+        const rows = overlayDropdownData[selectedFuelType] ?? [];
+        return Array.from(new Set(rows))
+            .sort((a, b) => a.localeCompare(b))
+            .map((fn) => ({ label: fn, value: fn }));
+    }, [overlayDropdownData, selectedFuelType]);
+
+    const selectedFuelTypeOption = useMemo(() => {
+        if (!selectedFuelType) return null;
+        return { label: selectedFuelType, value: selectedFuelType };
+    }, [selectedFuelType]);
+
+    const unitOptions = useMemo(() => {
+        const units = overlayDropdownData?.["all units"] ?? [];
+        return Array.from(new Set(units))
+            .sort((a, b) => a.localeCompare(b))
+            .map((unit) => ({ label: unit, value: unit }));
+    }, [overlayDropdownData]);
+
+    const totals = useMemo(() => {
+        const totalCo2e = records.reduce((acc, row) => acc + (row.co2eTotal ?? 0), 0);
+        const totalCost = records.reduce((acc, row) => acc + (row.cost ?? 0), 0);
+        const withFacility = records.filter((row) => row.facilityName).length;
+        return { totalCo2e, totalCost, withFacility };
+    }, [records]);
+
+    const monthlySeries = useMemo(() => aggregateMonthly(records), [records]);
+
+    const fuelBreakdown = useMemo(() => {
+        const map = new Map<string, number>();
+        for (const row of records) {
+            const key = row.fuelType ?? "Unknown";
+            map.set(key, (map.get(key) ?? 0) + (row.co2eTotal ?? 0));
+        }
+
+        const palette = [
+            "#059669",
+            "#10b981",
+            "#34d399",
+            "#6ee7b7",
+            "#a7f3d0"
+        ];
+
+        return Array.from(map.entries()).map(([name, value], idx) => ({
+            name,
+            value,
+            color: palette[idx % palette.length],
+        }));
+    }, [records]);
+
+    const facilitySeries = useMemo(() => {
+        const map = new Map<string, number>();
+        for (const row of records) {
+            const key = row.facilityName ?? "Unmapped facility";
+            map.set(key, (map.get(key) ?? 0) + (row.co2eTotal ?? 0));
+        }
+        return Array.from(map.entries())
+            .map(([facility, co2e]) => ({ facility, co2e }))
+            .sort((a, b) => b.co2e - a.co2e);
+    }, [records]);
+
+    const sourceSeries = useMemo(() => {
+        const map = new Map<string, number>();
+        for (const row of records) {
+            // Some environments may have slightly stale generated types; the API payload includes emissionStandard.
+            const src = (row.scope1FactorData as any)?.emissionStandard?.source ?? "Unknown";
+            map.set(src, (map.get(src) ?? 0) + (row.co2eTotal ?? 0));
+        }
+        return Array.from(map.entries())
+            .map(([source, co2e]) => ({ source, co2e }))
+            .sort((a, b) => b.co2e - a.co2e)
+            .slice(0, 5);
+    }, [records]);
 
     async function handleDownloadCsv() {
         if (!startMonth || !endMonth) {
             setDownloadError("Please select both start and end month.");
             return;
         }
+
         if (startMonth > endMonth) {
             setDownloadError("Start month must be earlier than or equal to end month.");
             return;
@@ -145,11 +289,11 @@ export default function Scope2Page() {
         setIsDownloading(true);
 
         try {
-            const blob = await downloadScope2ReportCsv(startMonth, endMonth);
+            const blob = await downloadScope1ReportCsv(startMonth, endMonth);
             const objectUrl = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = objectUrl;
-            link.download = `scope2-report-${startMonth}-to-${endMonth}.csv`;
+            link.download = `scope1-report-${startMonth}-to-${endMonth}.csv`;
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -167,102 +311,31 @@ export default function Scope2Page() {
                 setDownloadError(message);
                 return;
             }
+
             setDownloadError("Unable to download report CSV.");
         } finally {
             setIsDownloading(false);
         }
     }
 
-    const records = data ?? [];
-    const [recordsPage, setRecordsPage] = useState(1);
-    const recordsPageSize = 10;
-
-    useEffect(() => {
-        setActiveSection("scope-2");
-    }, [setActiveSection]);
-
-    useEffect(() => {
-        setRecordsPage(1);
-    }, [records.length]);
-
-    const recordsTotalPages = useMemo(() => Math.max(1, Math.ceil(records.length / recordsPageSize)), [records.length]);
-    const recordsPageSafe = Math.min(Math.max(1, recordsPage), recordsTotalPages);
-    const pagedRecords = useMemo(() => {
-        const start = (recordsPageSafe - 1) * recordsPageSize;
-        return records.slice(start, start + recordsPageSize);
-    }, [records, recordsPageSafe]);
-
-    const totals = useMemo(() => {
-        const totalEmissions = records.reduce((acc, row) => acc + (row.co2eTotal ?? 0), 0);
-        const totalCost = records.reduce((acc, row) => acc + (row.cost ?? 0), 0);
-        const totalConsumed = records.reduce((acc, row) => acc + (row.quantityConsume ?? 0), 0);
-        return { totalEmissions, totalCost, totalConsumed };
-    }, [records]);
-
-    const monthlySeries = useMemo(() => {
-        const map = new Map<string, { emissions: number; cost: number }>();
-        for (const row of records) {
-            const month = row.yearMonth ?? "Unknown";
-            const prev = map.get(month) ?? { emissions: 0, cost: 0 };
-            map.set(month, { emissions: prev.emissions + (row.co2eTotal ?? 0), cost: prev.cost + (row.cost ?? 0) });
-        }
-        return Array.from(map.entries())
-            .map(([month, v]) => ({
-                month,
-                monthLabel: getMonthLabel(month),
-                emissions: toTonne(v.emissions),
-                cost: v.cost,
-            }))
-            .sort((a, b) => a.month.localeCompare(b.month));
-    }, [records]);
-
-    const facilitySeries = useMemo(() => {
-        const map = new Map<string, number>();
-        for (const row of records) {
-            const facility = row.facilityName ?? "Unknown facility";
-            map.set(facility, (map.get(facility) ?? 0) + (row.co2eTotal ?? 0));
-        }
-        return Array.from(map.entries())
-            .map(([facility, co2e]) => ({ facility, co2e: toTonne(co2e) }))
-            .sort((a, b) => b.co2e - a.co2e);
-    }, [records]);
-
-    const sourceSeries = useMemo(() => {
-        const map = new Map<string, number>();
-        for (const row of records) {
-            const source = row.scope2Factor?.factorSource ?? "Unknown";
-            map.set(source, (map.get(source) ?? 0) + (row.co2eTotal ?? 0));
-        }
-        const palette = [
-            "#059669",
-            "#10b981",
-            "#34d399",
-            "#6ee7b7",
-            "#a7f3d0"
-        ];
-        return Array.from(map.entries())
-            .map(([source, co2e], idx) => ({ source, co2e: toTonne(co2e), color: palette[idx % palette.length] }))
-            .sort((a, b) => b.co2e - a.co2e);
-    }, [records]);
-
-    async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    async function onSubmitIngest(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
         setSubmitError(null);
         setSubmitSuccess(null);
+
         try {
-            const payload: Scope2IngestRequest = {
-                quantityConsume: Number(form.quantityConsume || 0),
-                unit: form.unit,
-                fuelName: form.fuelName,
-                outputUnit: form.outputUnit,
-                cost: Number(form.cost || 0),
-                facilityName: form.facilityName,
-                orgName: form.orgName,
-                yearMonth: form.yearMonth,
-                year: form.year,
+            const payload: Scope1IngestRequest = {
+                fuelName: ingestForm.fuelName,
+                fuelType: ingestForm.fuelType,
+                quantity: Number(ingestForm.quantity || 0),
+                cost: Number(ingestForm.cost || 0),
+                unit: ingestForm.unit,
+                orgName: ingestForm.orgName,
+                facilityName: ingestForm.facilityName,
+                yearMonth: ingestForm.yearMonth,
             };
             await ingestMutation.mutateAsync(payload);
-            setSubmitSuccess("Scope-2 emission record added successfully.");
+            setSubmitSuccess("New emission record added successfully.");
             setIsModalOpen(false);
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -270,10 +343,10 @@ export default function Scope2Page() {
                     return;
                 }
                 const body = error.response?.data as ApiErrorBody | undefined;
-                setSubmitError(body?.response ?? body?.message ?? "Failed to add Scope-2 emission record.");
+                setSubmitError(body?.response ?? body?.message ?? "Failed to add emission record.");
                 return;
             }
-            setSubmitError("Failed to add Scope-2 emission record.");
+            setSubmitError("Failed to add emission record.");
         }
     }
 
@@ -308,13 +381,13 @@ export default function Scope2Page() {
                                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                                 </span>
-                                Scope-2 Analytics
+                                Scope-1 Analytics
                             </div>
                             <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-                                Indirect Emissions
+                                Emissions Intelligence
                             </h1>
                             <p className="max-w-xl text-sm font-medium text-slate-500 sm:text-base">
-                                Analytics and comprehensive reporting for purchased energy and electricity.
+                                Comprehensive reporting data and detailed metric analysis.
                             </p>
                         </motion.div>
                         <motion.div 
@@ -327,16 +400,16 @@ export default function Scope2Page() {
                                 onClick={() => {
                                     setSubmitError(null);
                                     setSubmitSuccess(null);
-                                    setForm({
-                                        quantityConsume: "",
-                                        unit: "kwh",
-                                        fuelName: "electricity",
-                                        outputUnit: "MWh",
+                                    setSelectedFuelType(null);
+                                    setIngestForm({
+                                        fuelName: "",
+                                        fuelType: "",
+                                        quantity: "",
                                         cost: "",
-                                        facilityName: "",
+                                        unit: "",
                                         orgName: "",
+                                        facilityName: "",
                                         yearMonth: "",
-                                        year: "",
                                     });
                                     setIsModalOpen(true);
                                 }}
@@ -363,42 +436,36 @@ export default function Scope2Page() {
                     </AnimatePresence>
 
                     {isLoading ? (
-                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                            {[...Array(4)].map((_, i) => (
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            {[...Array(3)].map((_, i) => (
                                 <div key={i} className="h-32 rounded-3xl bg-white/40 animate-pulse backdrop-blur-md" />
                             ))}
                         </div>
                     ) : isError ? (
                         <div className="rounded-3xl border border-red-200/50 bg-red-50/80 p-8 text-center backdrop-blur-md">
-                            <p className="text-lg font-semibold text-red-600">Failed to load Scope-2 report data. Please try again.</p>
+                            <p className="text-lg font-semibold text-red-600">Failed to load report data. Please try again.</p>
                         </div>
                     ) : (
                         <>
-                            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                                 {[
                                     {
                                         label: "Total Emissions",
-                                        value: `${formatNumber(toTonne(totals.totalEmissions))}`,
+                                        value: `${formatTonnesFromKg(totals.totalCo2e)}`,
                                         unit: "tCO₂e",
-                                        icon: <LuBolt />,
+                                        icon: <LuLeaf />,
                                     },
                                     {
                                         label: "Total Records",
                                         value: records.length.toString(),
                                         unit: "Entries",
-                                        icon: <LuFactory />,
+                                        icon: <LuFuel />,
                                     },
                                     {
                                         label: "Total Cost",
                                         value: `$${formatNumber(totals.totalCost)}`,
                                         unit: "",
                                         icon: <LuCircleDollarSign />,
-                                    },
-                                    {
-                                        label: "Energy Consumed",
-                                        value: formatNumber(totals.totalConsumed),
-                                        unit: "kWh",
-                                        icon: <LuActivity />,
                                     },
                                 ].map((stat, idx) => (
                                     <motion.div
@@ -443,8 +510,8 @@ export default function Scope2Page() {
                             >
                                 <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                                     <div>
-                                        <h2 className="text-lg font-bold text-slate-800">Scope-2 Report Records</h2>
-                                        <p className="text-xs font-medium text-slate-500 mt-1">Detailed view of indirect emissions data</p>
+                                        <h2 className="text-lg font-bold text-slate-800">Scope-1 Report Records</h2>
+                                        <p className="text-xs font-medium text-slate-500 mt-1">Detailed view of all generated reporting data</p>
                                     </div>
                                     <div className="flex flex-wrap items-center gap-3">
                                         <div className="flex items-center gap-2 rounded-xl bg-white/60 px-3 py-1.5 border border-white/40">
@@ -473,6 +540,12 @@ export default function Scope2Page() {
                                             <LuDownload className="h-4 w-4" />
                                             {isDownloading ? "Downloading..." : "Download CSV"}
                                         </button>
+                                        <a
+                                            href="/scope-1/records"
+                                            className="inline-flex h-9 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50">
+                                            <LuMaximize2 className="h-4 w-4" />
+                                            Expand
+                                        </a>
                                     </div>
                                 </div>
                                 {downloadError && (
@@ -486,42 +559,52 @@ export default function Scope2Page() {
                                         <table className="min-w-[1020px] w-full text-left text-sm">
                                             <thead className="bg-slate-50/50">
                                                 <tr className="border-b border-slate-200/60 text-[0.7rem] uppercase tracking-wider text-slate-500 font-bold">
+                                                    <th className="px-4 py-3 whitespace-nowrap">Fuel</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap">Fuel type</th>
                                                     <th className="px-4 py-3 whitespace-nowrap">Facility</th>
                                                     <th className="px-4 py-3 whitespace-nowrap">Org</th>
-                                                    <th className="px-4 py-3 whitespace-nowrap">Fuel</th>
-                                                    <th className="px-4 py-3 whitespace-nowrap">Year Month</th>
-                                                    <th className="px-4 py-3 whitespace-nowrap">Consumption</th>
-                                                    <th className="px-4 py-3 whitespace-nowrap">Unit</th>
-                                                    <th className="px-4 py-3 whitespace-nowrap">Output Unit</th>
-                                                    <th className="px-4 py-3 whitespace-nowrap">tCO₂e</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap">Report month</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap">Quantity</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap">Input unit</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap">Output unit</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap">CO₂e</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-slate-100">
                                                 {pagedRecords.map((row, idx) => (
                                                     <tr
-                                                        key={`${row.ingest_reference_id ?? "r"}-${idx}`}
+                                                        key={`${row.id}-${idx}`}
                                                         className="transition-colors hover:bg-white/80">
                                                         <td className="px-4 py-3 font-semibold text-slate-800">
+                                                            {row.fuelName ?? "-"}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-slate-600">{row.fuelType ?? "-"}</td>
+                                                        <td className="px-4 py-3 text-slate-600">
                                                             <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">
                                                                 {row.facilityName ?? "Unmapped"}
                                                             </span>
                                                         </td>
                                                         <td className="px-4 py-3 text-slate-600">{row.orgName ?? "-"}</td>
-                                                        <td className="px-4 py-3 text-slate-600 font-medium">{row.fuelName ?? "-"}</td>
-                                                        <td className="px-4 py-3 text-slate-600">{row.yearMonth ?? "-"}</td>
+                                                        <td className="px-4 py-3 text-slate-600 font-medium">{row.reportDate ?? "-"}</td>
                                                         <td className="px-4 py-3 text-slate-600">
-                                                            {formatNumber(row.quantityConsume ?? 0)}
+                                                            {typeof row.activityData?.quantity === "number"
+                                                                ? formatNumber(row.activityData.quantity)
+                                                                : "-"}
                                                         </td>
-                                                        <td className="px-4 py-3 text-slate-500 text-xs">{row.unit ?? "-"}</td>
-                                                        <td className="px-4 py-3 text-slate-500 text-xs">{row.outputUnit ?? "-"}</td>
+                                                        <td className="px-4 py-3 text-slate-500 text-xs">
+                                                            {row.inputUnit ?? row.activityData?.unit ?? "-"}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-slate-500 text-xs">
+                                                            {row.outputUnit ?? row.scope1FactorData?.convertTo ?? "-"}
+                                                        </td>
                                                         <td className="px-4 py-3 font-bold text-emerald-600">
-                                                            {formatNumber(toTonne(row.co2eTotal ?? 0))}
+                                                            {formatNumber(row.co2eTotal ?? 0)}
                                                         </td>
                                                     </tr>
                                                 ))}
                                                 {pagedRecords.length === 0 && (
                                                     <tr>
-                                                        <td colSpan={8} className="px-4 py-8 text-center text-sm text-slate-500">
+                                                        <td colSpan={9} className="px-4 py-8 text-center text-sm text-slate-500">
                                                             No reporting records found for this period.
                                                         </td>
                                                     </tr>
@@ -605,7 +688,7 @@ export default function Scope2Page() {
                                                 data={monthlySeries}
                                                 margin={{ left: -20, right: 0, top: 10, bottom: 0 }}>
                                                 <defs>
-                                                    <linearGradient id="scope2-a" x1="0" y1="0" x2="0" y2="1">
+                                                    <linearGradient id="scope1-a" x1="0" y1="0" x2="0" y2="1">
                                                         <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
                                                         <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                                                     </linearGradient>
@@ -616,11 +699,11 @@ export default function Scope2Page() {
                                                 <Tooltip content={<DashboardTooltip />} cursor={{ stroke: 'rgba(16,185,129,0.2)', strokeWidth: 2 }} />
                                                 <Area
                                                     type="monotone"
-                                                    dataKey="emissions"
-                                                    name="tCO₂e"
+                                                    dataKey="co2e"
+                                                    name="CO₂e"
                                                     stroke="#10b981"
                                                     strokeWidth={3}
-                                                    fill="url(#scope2-a)"
+                                                    fill="url(#scope1-a)"
                                                     isAnimationActive
                                                 />
                                             </AreaChart>
@@ -636,7 +719,7 @@ export default function Scope2Page() {
                                 >
                                     <div className="mb-4 flex items-center justify-between">
                                         <div>
-                                            <h2 className="text-lg font-bold text-slate-800">Emissions By Source</h2>
+                                            <h2 className="text-lg font-bold text-slate-800">Fuel Mix</h2>
                                             <p className="text-xs font-medium text-slate-500 mt-1">Total distribution</p>
                                         </div>
                                         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
@@ -648,9 +731,9 @@ export default function Scope2Page() {
                                             <PieChart>
                                                 <Tooltip content={<DashboardTooltip />} />
                                                 <Pie
-                                                    data={sourceSeries}
-                                                    dataKey="co2e"
-                                                    nameKey="source"
+                                                    data={fuelBreakdown}
+                                                    dataKey="value"
+                                                    nameKey="name"
                                                     cx="50%"
                                                     cy="50%"
                                                     innerRadius={65}
@@ -658,23 +741,23 @@ export default function Scope2Page() {
                                                     paddingAngle={4}
                                                     stroke="none"
                                                 >
-                                                    {sourceSeries.map((row) => (
-                                                        <Cell key={row.source} fill={row.color} />
+                                                    {fuelBreakdown.map((row) => (
+                                                        <Cell key={row.name} fill={row.color} />
                                                     ))}
                                                 </Pie>
                                             </PieChart>
                                         </ResponsiveContainer>
                                     </div>
                                     <div className="mt-4 grid grid-cols-2 gap-3">
-                                        {sourceSeries.slice(0, 4).map((row) => (
-                                            <div key={row.source} className="flex items-center gap-3 rounded-2xl bg-white/60 px-4 py-3 border border-white/40">
+                                        {fuelBreakdown.slice(0, 4).map((row) => (
+                                            <div key={row.name} className="flex items-center gap-3 rounded-2xl bg-white/60 px-4 py-3 border border-white/40">
                                                 <div className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: row.color }} />
                                                 <div className="min-w-0">
                                                     <p className="truncate text-[0.65rem] font-bold uppercase tracking-wider text-slate-500">
-                                                        {row.source}
+                                                        {row.name}
                                                     </p>
                                                     <p className="text-sm font-bold text-slate-800">
-                                                        {formatNumber(row.co2e)}
+                                                        {formatNumber(row.value)}
                                                     </p>
                                                 </div>
                                             </div>
@@ -683,55 +766,96 @@ export default function Scope2Page() {
                                 </motion.section>
                             </div>
 
-                            <motion.section 
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.6 }}
-                                className="mt-8 rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
-                            >
-                                <div className="mb-6 flex items-center justify-between">
-                                    <div>
-                                        <h2 className="text-lg font-bold text-slate-800">Facility Distribution</h2>
-                                        <p className="text-xs font-medium text-slate-500 mt-1">Emissions mapped by location</p>
+                            <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_1fr]">
+                                <motion.section 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.6 }}
+                                    className="rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
+                                >
+                                    <div className="mb-6 flex items-center justify-between">
+                                        <div>
+                                            <h2 className="text-lg font-bold text-slate-800">Facility Distribution</h2>
+                                            <p className="text-xs font-medium text-slate-500 mt-1">Emissions mapped by location</p>
+                                        </div>
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
+                                            <LuBuilding2 className="h-5 w-5" />
+                                        </div>
                                     </div>
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
-                                        <LuBuilding2 className="h-5 w-5" />
+                                    <div className="h-[280px] w-full">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart
+                                                data={facilitySeries}
+                                                layout="vertical"
+                                                margin={{ left: 0, right: 20, top: 0, bottom: 0 }}>
+                                                <defs>
+                                                    <linearGradient id="emeraldGradientBar" x1="0" y1="0" x2="1" y2="0">
+                                                        <stop offset="0%" stopColor="#059669" />
+                                                        <stop offset="100%" stopColor="#10b981" />
+                                                    </linearGradient>
+                                                </defs>
+                                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(0,0,0,0.05)" />
+                                                <XAxis type="number" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }} />
+                                                <YAxis
+                                                    dataKey="facility"
+                                                    type="category"
+                                                    tickLine={false}
+                                                    axisLine={false}
+                                                    width={100}
+                                                    tick={{ fontSize: 12, fill: "#475569", fontWeight: 600 }}
+                                                />
+                                                <Tooltip content={<DashboardTooltip />} cursor={{ fill: 'rgba(0,0,0,0.02)' }} />
+                                                <Bar
+                                                    dataKey="co2e"
+                                                    name="CO₂e"
+                                                    fill="url(#emeraldGradientBar)"
+                                                    radius={[0, 8, 8, 0]}
+                                                    barSize={24}
+                                                />
+                                            </BarChart>
+                                        </ResponsiveContainer>
                                     </div>
-                                </div>
-                                <div className="h-[280px] w-full">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart
-                                            data={facilitySeries}
-                                            layout="vertical"
-                                            margin={{ left: 0, right: 20, top: 0, bottom: 0 }}>
-                                            <defs>
-                                                <linearGradient id="emeraldGradientBar" x1="0" y1="0" x2="1" y2="0">
-                                                    <stop offset="0%" stopColor="#059669" />
-                                                    <stop offset="100%" stopColor="#10b981" />
-                                                </linearGradient>
-                                            </defs>
-                                            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(0,0,0,0.05)" />
-                                            <XAxis type="number" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }} />
-                                            <YAxis
-                                                dataKey="facility"
-                                                type="category"
-                                                tickLine={false}
-                                                axisLine={false}
-                                                width={100}
-                                                tick={{ fontSize: 12, fill: "#475569", fontWeight: 600 }}
-                                            />
-                                            <Tooltip content={<DashboardTooltip />} cursor={{ fill: 'rgba(0,0,0,0.02)' }} />
-                                            <Bar
-                                                dataKey="co2e"
-                                                name="tCO₂e"
-                                                fill="url(#emeraldGradientBar)"
-                                                radius={[0, 8, 8, 0]}
-                                                barSize={24}
-                                            />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            </motion.section>
+                                </motion.section>
+
+                                <motion.section 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.7 }}
+                                    className="rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
+                                >
+                                    <div className="mb-6 flex items-center justify-between">
+                                        <div>
+                                            <h2 className="text-lg font-bold text-slate-800">By Standard Source</h2>
+                                            <p className="text-xs font-medium text-slate-500 mt-1">Emission factor categories</p>
+                                        </div>
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
+                                            <LuDroplets className="h-5 w-5" />
+                                        </div>
+                                    </div>
+                                    <div className="grid gap-4">
+                                        {sourceSeries.map((s) => (
+                                            <div
+                                                key={s.source}
+                                                className="flex items-center justify-between rounded-2xl bg-white/60 px-5 py-4 border border-white/40 transition hover:bg-white/80">
+                                                <p className="text-sm font-bold tracking-tight text-slate-700">
+                                                    {s.source}
+                                                </p>
+                                                <div className="text-right">
+                                                    <p className="text-lg font-black tracking-tight text-emerald-600">
+                                                        {formatTonnesFromKg(s.co2e)}
+                                                    </p>
+                                                    <p className="text-[0.65rem] font-bold uppercase text-slate-400">tCO₂e</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {!sourceSeries.length ? (
+                                            <div className="rounded-2xl border border-dashed border-slate-300 bg-white/40 p-8 text-center text-sm font-medium text-slate-500">
+                                                No standard source information available.
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                </motion.section>
+                            </div>
                         </>
                     )}
                 </div>
@@ -758,10 +882,10 @@ export default function Scope2Page() {
                                         Manual Ingestion
                                     </div>
                                     <h3 className="mt-4 text-2xl font-black tracking-tight text-slate-900">
-                                        Add New Scope-2 Record
+                                        Add New Emission Record
                                     </h3>
                                     <p className="mt-1 text-sm font-medium text-slate-500">
-                                        Enter activity details to directly ingest indirect emissions data.
+                                        Enter activity details to directly ingest Scope-1 data.
                                     </p>
                                 </div>
                                 <button
@@ -772,34 +896,94 @@ export default function Scope2Page() {
                                 </button>
                             </div>
 
-                            <form onSubmit={onSubmit} className="grid gap-5 sm:grid-cols-2">
-                                <Field label="Quantity consume">
+                            <form onSubmit={onSubmitIngest} className="grid gap-5 sm:grid-cols-2">
+                                <div className="sm:col-span-2 grid gap-5 sm:grid-cols-3">
+                                    <Field label="Fuel type">
+                                        {isMounted ? (
+                                            <Select
+                                                inputId="scope1-fueltype"
+                                                instanceId="scope1-fueltype"
+                                                isLoading={isLoadingOverlayData}
+                                                isDisabled={!fuelTypeOptions.length}
+                                                value={selectedFuelTypeOption}
+                                                onChange={(opt) => {
+                                                    const ft = opt?.value ?? null;
+                                                    setSelectedFuelType(ft);
+                                                    setIngestForm((p) => ({
+                                                        ...p,
+                                                        fuelType: ft ?? "",
+                                                        fuelName: "",
+                                                    }));
+                                                }}
+                                                options={fuelTypeOptions}
+                                                placeholder={isLoadingOverlayData ? "Loading..." : "Select type"}
+                                                classNamePrefix="gl-select"
+                                                styles={selectStyles}
+                                            />
+                                        ) : (
+                                            <input disabled value="" placeholder="Select type" className={inputClass} />
+                                        )}
+                                    </Field>
+
+                                    <Field label="Fuel name">
+                                        {isMounted ? (
+                                            <Select
+                                                inputId="scope1-fuelname"
+                                                instanceId="scope1-fuelname"
+                                                isDisabled={!fuelNameOptions.length}
+                                                value={
+                                                    ingestForm.fuelName
+                                                        ? { label: ingestForm.fuelName, value: ingestForm.fuelName }
+                                                        : null
+                                                }
+                                                onChange={(opt) => {
+                                                    const fuelName = opt?.value ?? "";
+                                                    setIngestForm((p) => ({ ...p, fuelName }));
+                                                }}
+                                                options={fuelNameOptions}
+                                                placeholder="Search fuel"
+                                                classNamePrefix="gl-select"
+                                                styles={selectStyles}
+                                            />
+                                        ) : (
+                                            <input disabled value="" placeholder="Search fuel" className={inputClass} />
+                                        )}
+                                    </Field>
+                                    <Field label="Unit">
+                                        {isMounted ? (
+                                            <Select
+                                                inputId="scope1-unit"
+                                                instanceId="scope1-unit"
+                                                isLoading={isLoadingOverlayData}
+                                                isDisabled={!unitOptions.length}
+                                                value={
+                                                    ingestForm.unit ? { label: ingestForm.unit, value: ingestForm.unit } : null
+                                                }
+                                                onChange={(opt) => {
+                                                    setIngestForm((p) => ({ ...p, unit: opt?.value ?? "" }));
+                                                }}
+                                                options={unitOptions}
+                                                placeholder={isLoadingOverlayData ? "Loading..." : "Select unit"}
+                                                classNamePrefix="gl-select"
+                                                styles={selectStyles}
+                                            />
+                                        ) : (
+                                            <input disabled value="" placeholder="Select unit" className={inputClass} />
+                                        )}
+                                    </Field>
+                                </div>
+                                {isOverlayDataError && (
+                                    <div className="sm:col-span-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+                                        Unable to load emissions overlay dropdown data.
+                                    </div>
+                                )}
+
+                                <Field label="Quantity">
                                     <input
                                         type="number"
                                         step="0.01"
-                                        value={form.quantityConsume}
-                                        onChange={(e) => setForm((p) => ({ ...p, quantityConsume: e.target.value }))}
-                                        className={inputClass}
-                                    />
-                                </Field>
-                                <Field label="Unit">
-                                    <input
-                                        value={form.unit}
-                                        onChange={(e) => setForm((p) => ({ ...p, unit: e.target.value }))}
-                                        className={inputClass}
-                                    />
-                                </Field>
-                                <Field label="Fuel name">
-                                    <input
-                                        value={form.fuelName}
-                                        onChange={(e) => setForm((p) => ({ ...p, fuelName: e.target.value }))}
-                                        className={inputClass}
-                                    />
-                                </Field>
-                                <Field label="Output unit">
-                                    <input
-                                        value={form.outputUnit}
-                                        onChange={(e) => setForm((p) => ({ ...p, outputUnit: e.target.value }))}
+                                        value={ingestForm.quantity}
+                                        onChange={(e) => setIngestForm((p) => ({ ...p, quantity: e.target.value }))}
                                         className={inputClass}
                                     />
                                 </Field>
@@ -807,37 +991,30 @@ export default function Scope2Page() {
                                     <input
                                         type="number"
                                         step="0.01"
-                                        value={form.cost}
-                                        onChange={(e) => setForm((p) => ({ ...p, cost: e.target.value }))}
+                                        value={ingestForm.cost}
+                                        onChange={(e) => setIngestForm((p) => ({ ...p, cost: e.target.value }))}
                                         className={inputClass}
                                     />
                                 </Field>
-                                <Field label="Facility">
+                                <Field label="Year Month">
                                     <input
-                                        value={form.facilityName}
-                                        onChange={(e) => setForm((p) => ({ ...p, facilityName: e.target.value }))}
+                                        value={ingestForm.yearMonth}
+                                        onChange={(e) => setIngestForm((p) => ({ ...p, yearMonth: e.target.value }))}
+                                        placeholder="YYYY-MM"
                                         className={inputClass}
                                     />
                                 </Field>
                                 <Field label="Organization">
                                     <input
-                                        value={form.orgName}
-                                        onChange={(e) => setForm((p) => ({ ...p, orgName: e.target.value }))}
+                                        value={ingestForm.orgName}
+                                        onChange={(e) => setIngestForm((p) => ({ ...p, orgName: e.target.value }))}
                                         className={inputClass}
                                     />
                                 </Field>
-                                <Field label="Year month">
+                                <Field label="Facility">
                                     <input
-                                        value={form.yearMonth}
-                                        onChange={(e) => setForm((p) => ({ ...p, yearMonth: e.target.value }))}
-                                        placeholder="YYYY-MM"
-                                        className={inputClass}
-                                    />
-                                </Field>
-                                <Field label="Year">
-                                    <input
-                                        value={form.year}
-                                        onChange={(e) => setForm((p) => ({ ...p, year: e.target.value }))}
+                                        value={ingestForm.facilityName}
+                                        onChange={(e) => setIngestForm((p) => ({ ...p, facilityName: e.target.value }))}
                                         className={inputClass}
                                     />
                                 </Field>
@@ -873,6 +1050,49 @@ export default function Scope2Page() {
 
 const inputClass =
     "h-11 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-medium text-slate-800 outline-none transition-all hover:bg-white focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10";
+
+const selectStyles = {
+    control: (base: any, state: any) => ({
+        ...base,
+        minHeight: 44,
+        borderRadius: 12,
+        borderColor: state.isFocused ? "#10b981" : "#e2e8f0",
+        boxShadow: state.isFocused ? "0 0 0 4px rgba(16,185,129,0.1)" : "none",
+        backgroundColor: state.isFocused ? "#ffffff" : "rgba(248,250,252,0.5)",
+        transition: "all 0.2s ease",
+        ":hover": {
+            borderColor: state.isFocused ? "#10b981" : "#cbd5e1",
+            backgroundColor: "#ffffff"
+        },
+    }),
+    valueContainer: (base: any) => ({ ...base, padding: "0 12px" }),
+    placeholder: (base: any) => ({ ...base, color: "#94a3b8", fontSize: "14px", fontWeight: 500 }),
+    singleValue: (base: any) => ({ ...base, color: "#1e293b", fontSize: "14px", fontWeight: 600 }),
+    menu: (base: any) => ({
+        ...base,
+        borderRadius: 16,
+        overflow: "hidden",
+        boxShadow: "0 20px 40px -15px rgba(0,0,0,0.1)",
+        border: "1px solid #e2e8f0",
+        padding: "4px"
+    }),
+    option: (base: any, state: any) => ({
+        ...base,
+        fontSize: "13px",
+        fontWeight: 600,
+        borderRadius: 8,
+        color: state.isSelected ? "#065f46" : "#334155",
+        backgroundColor: state.isSelected
+            ? "#d1fae5"
+            : state.isFocused
+              ? "#f1f5f9"
+              : "transparent",
+        ":active": { backgroundColor: "#d1fae5" },
+        cursor: "pointer",
+        padding: "8px 12px"
+    }),
+    indicatorSeparator: () => ({ display: "none" }),
+};
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
     return (

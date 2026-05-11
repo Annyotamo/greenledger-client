@@ -50,5 +50,12 @@ export type OtpVerifyResponse = {
 
 export interface OtpVerifyInput {
     email: string;
+    tenantId: string;
     otp: string;
+}
+
+/** Returned by initiateLogin — carries both values needed for OTP step */
+export interface LoginInitResult {
+    email: string;
+    tenantId: string;
 }

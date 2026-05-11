@@ -14,7 +14,7 @@ const OTP_LENGTH = 6;
 function CredentialsStep({
     onSuccess,
 }: {
-    onSuccess: (email: string) => void;
+    onSuccess: (result: { email: string; tenantId: string }) => void;
 }) {
     const formId = useId();
     const [email, setEmail] = useState("");
@@ -33,8 +33,8 @@ function CredentialsStep({
             return;
         }
         try {
-            const usedEmail = await initiateMutation.mutateAsync({ identity: trimmed, password });
-            onSuccess(usedEmail);
+            const result = await initiateMutation.mutateAsync({ identity: trimmed, password });
+            onSuccess(result);
         } catch (err) {
             if (err instanceof AxiosError) {
                 const body = err.response?.data as ApiError | undefined;
@@ -147,10 +147,12 @@ function CredentialsStep({
 // ─── Step 2: OTP Verification ─────────────────────────────────────────────────
 function OtpStep({
     email,
+    tenantId,
     onBack,
     onSuccess,
 }: {
     email: string;
+    tenantId: string;
     onBack: () => void;
     onSuccess: () => void;
 }) {
@@ -229,7 +231,7 @@ function OtpStep({
             return;
         }
         try {
-            await verifyMutation.mutateAsync({ email, otp: finalOtp });
+            await verifyMutation.mutateAsync({ email, tenantId, otp: finalOtp });
             onSuccess();
         } catch (err) {
             if (err instanceof AxiosError) {
@@ -351,9 +353,11 @@ export default function LoginForm() {
     const router = useRouter();
     const [step, setStep] = useState<"credentials" | "otp">("credentials");
     const [pendingEmail, setPendingEmail] = useState("");
+    const [pendingTenantId, setPendingTenantId] = useState("");
 
-    function handleCredentialsSuccess(email: string) {
-        setPendingEmail(email);
+    function handleCredentialsSuccess(result: { email: string; tenantId: string }) {
+        setPendingEmail(result.email);
+        setPendingTenantId(result.tenantId);
         setStep("otp");
     }
 
@@ -364,6 +368,7 @@ export default function LoginForm() {
     function handleBack() {
         setStep("credentials");
         setPendingEmail("");
+        setPendingTenantId("");
     }
 
     return (
@@ -373,6 +378,7 @@ export default function LoginForm() {
             ) : (
                 <OtpStep
                     email={pendingEmail}
+                    tenantId={pendingTenantId}
                     onBack={handleBack}
                     onSuccess={handleOtpSuccess}
                 />

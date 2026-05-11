@@ -4,11 +4,11 @@ import { useMutation } from "@tanstack/react-query";
 import { initiateLogin, verifyOtp, type LoginInput } from "@/lib/auth/api";
 import { setAuthToken } from "@/lib/auth/token";
 import { clearAuthUser, setAuthUser } from "@/lib/auth/user";
-import type { OtpVerifyInput } from "@/types/auth";
+import type { OtpVerifyInput, LoginInitResult } from "@/types/auth";
 
-/** Step 1: send credentials, get OTP emailed. Returns the email string. */
+/** Step 1: send credentials, get OTP emailed. Returns { email, tenantId }. */
 export function useInitiateLoginMutation() {
-    return useMutation<string, Error, LoginInput>({
+    return useMutation<LoginInitResult, Error, LoginInput>({
         mutationFn: (input) => initiateLogin(input),
     });
 }

@@ -4,6 +4,7 @@ import type {
     LoginInput,
     LoginPayload,
     LoginResponse,
+    LoginInitResult,
     OtpVerifyInput,
     OtpVerifyResponse,
 } from "@/types/auth";
@@ -26,23 +27,38 @@ function extractEmail(input: LoginInput): string {
 }
 
 /**
- * Step 1 of 2FA: send credentials, server sends OTP to email.
- * Returns the email used (needed for step 2).
+ * Step 1 of 2FA: send credentials.
+ * Server returns the tenantId in `data` and sends OTP to user's email.
+ * Returns { email, tenantId } needed for step 2.
  */
-export async function initiateLogin(input: LoginInput): Promise<string> {
+export async function initiateLogin(input: LoginInput): Promise<LoginInitResult> {
     const payload = getLoginPayload(input);
-    await publicApi.post<LoginResponse>("/user/login", payload);
-    return extractEmail(input);
+    const res = await publicApi.post<LoginResponse>("/user/login", payload);
+
+    // The login response now returns the tenantId as the `data` string
+    const tenantId =
+        typeof (res.data as any)?.data === "string"
+            ? String((res.data as any).data)
+            : null;
+
+    if (!tenantId) throw new Error("Login failed: tenantId missing in response.");
+
+    return {
+        email: extractEmail(input),
+        tenantId,
+    };
 }
 
 /**
- * Step 2 of 2FA: verify OTP, server returns token + user.
+ * Step 2 of 2FA: verify OTP with email + tenantId + otp.
+ * Server returns token + user on success.
  */
 export async function verifyOtp(
     input: OtpVerifyInput
 ): Promise<{ token: string; user: AuthUser | null }> {
     const { data } = await publicApi.post<OtpVerifyResponse>("/user/verifyOtp", {
         email: input.email,
+        tenantId: input.tenantId,
         otp: input.otp,
     });
 

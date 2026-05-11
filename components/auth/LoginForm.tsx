@@ -11,11 +11,7 @@ type ApiError = { response?: string; message?: string };
 const OTP_LENGTH = 6;
 
 // ─── Step 1: Credentials ─────────────────────────────────────────────────────
-function CredentialsStep({
-    onSuccess,
-}: {
-    onSuccess: (result: { email: string; tenantId: string }) => void;
-}) {
+function CredentialsStep({ onSuccess }: { onSuccess: (result: { email: string; tenantId: string }) => void }) {
     const formId = useId();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -52,16 +48,14 @@ function CredentialsStep({
                     <LuShieldCheck className="h-3 w-3" />
                     Secure Sign-in
                 </p>
-                <h2 className="mt-4 text-2xl font-bold tracking-tight text-emerald-950">
-                    Welcome back
-                </h2>
-                <p className="mt-1.5 text-sm text-slate-600">
-                    Enter your credentials to receive a one-time code.
-                </p>
+                <h2 className="mt-4 text-2xl font-bold tracking-tight text-emerald-950">Welcome back</h2>
+                <p className="mt-1.5 text-sm text-slate-600">Enter your credentials to receive a one-time code.</p>
             </header>
 
             <form className="grid gap-5" onSubmit={handleSubmit} aria-labelledby={`${formId}-title`}>
-                <span id={`${formId}-title`} className="sr-only">Sign-in form</span>
+                <span id={`${formId}-title`} className="sr-only">
+                    Sign-in form
+                </span>
 
                 {/* Email */}
                 <div className="grid gap-2">
@@ -130,8 +124,19 @@ function CredentialsStep({
                     {isSubmitting ? (
                         <span className="inline-flex items-center gap-2">
                             <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                                <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                />
+                                <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                />
                             </svg>
                             Sending code…
                         </span>
@@ -269,12 +274,9 @@ function OtpStep({
                     <LuShieldCheck className="h-7 w-7 text-emerald-700" />
                 </div>
 
-                <h2 className="mt-4 text-2xl font-bold tracking-tight text-emerald-950">
-                    Check your email
-                </h2>
+                <h2 className="mt-4 text-2xl font-bold tracking-tight text-emerald-950">Check your email</h2>
                 <p className="mt-1.5 text-sm text-slate-600">
-                    We sent a 6-digit code to{" "}
-                    <span className="font-semibold text-slate-800">{maskEmail(email)}</span>
+                    We sent a 6-digit code to <span className="font-semibold text-slate-800">{maskEmail(email)}</span>
                 </p>
             </header>
 
@@ -283,7 +285,9 @@ function OtpStep({
                 {digits.map((digit, i) => (
                     <input
                         key={i}
-                        ref={(el) => { inputRefs.current[i] = el; }}
+                        ref={(el) => {
+                            inputRefs.current[i] = el;
+                        }}
                         type="text"
                         inputMode="numeric"
                         maxLength={1}
@@ -297,9 +301,7 @@ function OtpStep({
                         className={[
                             "h-14 w-full max-w-[3rem] rounded-2xl border text-center text-xl font-bold tabular-nums text-emerald-950 shadow-sm outline-none transition",
                             "focus:ring-4 focus:ring-emerald-100 disabled:opacity-60",
-                            digit
-                                ? "border-emerald-500/60 bg-emerald-50/60"
-                                : "border-emerald-900/12 bg-white/90",
+                            digit ? "border-emerald-500/60 bg-emerald-50/60" : "border-emerald-900/12 bg-white/90",
                         ].join(" ")}
                     />
                 ))}
@@ -319,7 +321,14 @@ function OtpStep({
                 {isSubmitting ? (
                     <span className="inline-flex items-center gap-2">
                         <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                            />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                         </svg>
                         Verifying…
@@ -332,9 +341,7 @@ function OtpStep({
             <p className="mt-5 text-center text-xs text-slate-600">
                 Didn't receive it?{" "}
                 {resendCooldown > 0 ? (
-                    <span className="font-semibold text-slate-400">
-                        Resend in {resendCooldown}s
-                    </span>
+                    <span className="font-semibold text-slate-400">Resend in {resendCooldown}s</span>
                 ) : (
                     <button
                         type="button"
@@ -385,9 +392,8 @@ export default function LoginForm() {
             )}
 
             <p className="mt-8 text-center text-xs text-slate-500">
-                By signing in you agree to our{" "}
-                <span className="font-semibold text-emerald-800">Terms of Service</span> and{" "}
-                <span className="font-semibold text-emerald-800">Privacy Policy</span>.
+                By signing in you agree to our <span className="font-semibold text-emerald-800">Terms of Service</span>{" "}
+                and <span className="font-semibold text-emerald-800">Privacy Policy</span>.
             </p>
         </div>
     );

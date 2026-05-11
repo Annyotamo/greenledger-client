@@ -27,7 +27,7 @@ export type AuthUser = {
 
 export type LoginResponse = {
     // new format
-    data?: AuthUser;
+    data?: AuthUser | string;
     token?: string;
     success?: boolean;
     status?: number;
@@ -38,3 +38,17 @@ export type LoginResponse = {
     response?: string;
     stsCode?: number;
 };
+
+export type OtpVerifyResponse = {
+    data?: AuthUser;
+    token?: string;
+    success?: boolean;
+    status?: number;
+    message?: string;
+    timestamp?: string;
+};
+
+export interface OtpVerifyInput {
+    email: string;
+    otp: string;
+}

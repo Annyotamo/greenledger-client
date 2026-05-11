@@ -630,7 +630,7 @@ export default function Scope1IngestedDataPage() {
     </tr>
 </thead>
 
-                                            <tbody className="divide-y divide-slate-100">
+    <tbody className="divide-y divide-slate-100">
     {paged.map((row) => {
         return (
             <tr

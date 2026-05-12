@@ -14,6 +14,8 @@ import type {
     Scope2IngestResponse,
     Scope2ReportRecord,
     Scope2ReportResponse,
+    CompanyDetails,
+    CompanyDetailsResponse,
 } from "@/types/report";
 
 export async function getScope1Reports(): Promise<Scope1ReportRecord[]> {
@@ -67,4 +69,9 @@ export async function downloadScope2ReportCsv(startMonth: string, endMonth: stri
     });
 
     return data;
+}
+
+export async function getCompanyDetails(): Promise<CompanyDetails | null> {
+    const { data } = await privateApi.get<CompanyDetailsResponse>("/company/getDetails");
+    return data.data?.[0] ?? null;
 }

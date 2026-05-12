@@ -21,6 +21,7 @@ import {
     LuUser,
     LuLayoutDashboard,
     LuActivity,
+    LuBuilding2,
 } from "react-icons/lu";
 
 type SidebarItemProps = {
@@ -203,20 +204,24 @@ export function Sidebar() {
                     duration: 0.3,
                     ease: [0.22, 1, 0.36, 1],
                 }}>
-                
                 {/* Background lighting effects for dark theme */}
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_120%_70%_at_0%_0%,rgba(255,255,255,0.12),transparent_55%)]" />
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_100%_0%,rgba(16,185,129,0.1),transparent_60%)]" />
                 <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-white/5 via-transparent to-black/20 border-r border-white/10" />
-                
+
                 {/* Brand */}
-                <div className={`relative hidden lg:flex items-center ${compact ? "justify-center" : "justify-start gap-3"} px-4 pt-6 pb-5 border-b border-white/10 overflow-hidden`}>
+                <div
+                    className={`relative hidden lg:flex items-center ${compact ? "justify-center" : "justify-start gap-3"} px-4 pt-6 pb-5 border-b border-white/10 overflow-hidden`}>
                     <Image
                         src="/GLLogo.png"
                         alt="Green Ledger"
                         width={64}
                         height={64}
-                        className={compact ? "h-9 w-9 transition-transform duration-300" : "h-10 w-10 transition-transform duration-300 hover:scale-105"}
+                        className={
+                            compact
+                                ? "h-9 w-9 transition-transform duration-300"
+                                : "h-10 w-10 transition-transform duration-300 hover:scale-105"
+                        }
                         priority
                     />
                     <AnimatePresence>
@@ -226,8 +231,7 @@ export function Sidebar() {
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -10 }}
                                 transition={{ duration: 0.2 }}
-                                className="text-lg font-black tracking-tight text-white whitespace-nowrap"
-                            >
+                                className="text-lg font-black tracking-tight text-white whitespace-nowrap">
                                 GreenLedger
                             </motion.span>
                         )}
@@ -251,7 +255,7 @@ export function Sidebar() {
                             if (isMobile) setOpen(false);
                         }}
                     />
-                    
+
                     {/* GHG group */}
                     <div className="pt-2">
                         {!compact && (
@@ -279,26 +283,24 @@ export function Sidebar() {
                                     </span>
                                 )}
                             </div>
-                            {!compact && (
-                                ghgExpanded ? (
+                            {!compact &&
+                                (ghgExpanded ? (
                                     <LuChevronDown className="h-4 w-4 text-emerald-100/50 transition-transform" />
                                 ) : (
                                     <LuChevronRight className="h-4 w-4 text-emerald-100/50 transition-transform" />
-                                )
-                            )}
+                                ))}
                         </button>
 
                         {/* Sub-menu items */}
                         <AnimatePresence>
                             {ghgExpanded && !compact && (
-                                <motion.div 
+                                <motion.div
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: "auto" }}
                                     exit={{ opacity: 0, height: 0 }}
-                                    className="relative ml-5 mt-1 space-y-1 pl-4"
-                                >
+                                    className="relative ml-5 mt-1 space-y-1 pl-4">
                                     <div className="pointer-events-none absolute left-[11px] top-0 h-full w-[2px] bg-gradient-to-b from-white/10 to-transparent rounded-full" />
-                                    
+
                                     <button
                                         type="button"
                                         ref={scope1ButtonRef}
@@ -325,7 +327,9 @@ export function Sidebar() {
                                             if (isMobile) return;
                                             scheduleScope1Close();
                                         }}>
-                                        <div className={`absolute left-[-17px] top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full border-2 bg-emerald-900 transition-colors ${activeSection === "scope-1" || scope1RouteActive ? "border-emerald-400" : "border-white/30 group-hover:border-emerald-400"}`} />
+                                        <div
+                                            className={`absolute left-[-17px] top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full border-2 bg-emerald-900 transition-colors ${activeSection === "scope-1" || scope1RouteActive ? "border-emerald-400" : "border-white/30 group-hover:border-emerald-400"}`}
+                                        />
                                         <span className="whitespace-nowrap">Scope-1 (Direct)</span>
                                     </button>
 
@@ -343,7 +347,9 @@ export function Sidebar() {
                                                 ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10"
                                                 : "text-emerald-100/60 hover:bg-white/10 hover:text-white",
                                         ].join(" ")}>
-                                        <div className={`absolute left-[-17px] top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full border-2 bg-emerald-900 transition-colors ${activeSection === "scope-2" || scope2RouteActive ? "border-emerald-400" : "border-white/30 group-hover:border-emerald-400"}`} />
+                                        <div
+                                            className={`absolute left-[-17px] top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full border-2 bg-emerald-900 transition-colors ${activeSection === "scope-2" || scope2RouteActive ? "border-emerald-400" : "border-white/30 group-hover:border-emerald-400"}`}
+                                        />
                                         <span className="whitespace-nowrap">Scope-2 (Indirect)</span>
                                     </button>
                                 </motion.div>
@@ -358,6 +364,19 @@ export function Sidebar() {
                         icon={<LuLogOut className="h-[1.15rem] w-[1.15rem]" />}
                         compact={compact}
                         onClick={handleLogout}
+                    />
+                </div>
+
+                <div className="px-4 pb-4">
+                    <SidebarItem
+                        label="Company"
+                        icon={<LuBuilding2 className="h-[1.15rem] w-[1.15rem]" />}
+                        compact={compact}
+                        onClick={() => {
+                            setActiveSection("company");
+                            router.push("/company");
+                            if (isMobile) setOpen(false);
+                        }}
                     />
                 </div>
 
@@ -421,13 +440,12 @@ export function Sidebar() {
                         onMouseEnter={!isMobile ? cancelScope1Close : undefined}
                         onMouseLeave={!isMobile ? scheduleScope1Close : undefined}
                         className="z-50 w-[240px] overflow-hidden rounded-3xl bg-white/80 backdrop-blur-2xl ring-1 ring-white/60 shadow-[0_20px_45px_-10px_rgba(0,0,0,0.1)] p-2">
-                        
                         <div className="px-3 py-2 mb-1">
                             <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400">
                                 Scope-1 Analytics
                             </p>
                         </div>
-                        
+
                         <div className="space-y-1">
                             <button
                                 type="button"
@@ -443,7 +461,9 @@ export function Sidebar() {
                                         ? "bg-gradient-to-r from-emerald-50 to-teal-50/50 text-emerald-800 shadow-sm ring-1 ring-emerald-500/20"
                                         : "text-slate-600 hover:bg-white hover:text-slate-900 shadow-sm ring-1 ring-transparent hover:ring-slate-200/50",
                                 ].join(" ")}>
-                                <LuLayoutDashboard className={`h-4 w-4 ${scope1DashboardRouteActive ? "text-emerald-600" : "text-slate-400 group-hover:text-emerald-500"}`} />
+                                <LuLayoutDashboard
+                                    className={`h-4 w-4 ${scope1DashboardRouteActive ? "text-emerald-600" : "text-slate-400 group-hover:text-emerald-500"}`}
+                                />
                                 Dashboard
                             </button>
                             <button
@@ -460,7 +480,9 @@ export function Sidebar() {
                                         ? "bg-gradient-to-r from-emerald-50 to-teal-50/50 text-emerald-800 shadow-sm ring-1 ring-emerald-500/20"
                                         : "text-slate-600 hover:bg-white hover:text-slate-900 shadow-sm ring-1 ring-transparent hover:ring-slate-200/50",
                                 ].join(" ")}>
-                                <LuActivity className={`h-4 w-4 ${scope1ReportRouteActive ? "text-emerald-600" : "text-slate-400 group-hover:text-emerald-500"}`} />
+                                <LuActivity
+                                    className={`h-4 w-4 ${scope1ReportRouteActive ? "text-emerald-600" : "text-slate-400 group-hover:text-emerald-500"}`}
+                                />
                                 Reports
                             </button>
                             <button
@@ -477,7 +499,9 @@ export function Sidebar() {
                                         ? "bg-gradient-to-r from-emerald-50 to-teal-50/50 text-emerald-800 shadow-sm ring-1 ring-emerald-500/20"
                                         : "text-slate-600 hover:bg-white hover:text-slate-900 shadow-sm ring-1 ring-transparent hover:ring-slate-200/50",
                                 ].join(" ")}>
-                                <LuFactory className={`h-4 w-4 ${scope1IngestedRouteActive ? "text-emerald-600" : "text-slate-400 group-hover:text-emerald-500"}`} />
+                                <LuFactory
+                                    className={`h-4 w-4 ${scope1IngestedRouteActive ? "text-emerald-600" : "text-slate-400 group-hover:text-emerald-500"}`}
+                                />
                                 Ingested Data
                             </button>
                         </div>

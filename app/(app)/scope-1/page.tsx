@@ -10,7 +10,7 @@ import {
     LuFuel,
     LuLeaf,
     LuTrendingUp,
-    LuCalendarDays
+    LuCalendarDays,
 } from "react-icons/lu";
 import {
     Bar,
@@ -43,28 +43,22 @@ function truncateLabel(value: string, max = 20): string {
 
 type ChartTooltipPayload = Array<{ name?: string; value?: number | string; payload?: any }>;
 
-function ChartTooltip({
-    active,
-    payload,
-    label,
-}: {
-    active?: boolean;
-    payload?: ChartTooltipPayload;
-    label?: string;
-}) {
+function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: ChartTooltipPayload; label?: string }) {
     if (!active || !payload?.length) return null;
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="rounded-xl bg-white/90 px-4 py-3 text-xs shadow-2xl ring-1 ring-emerald-900/10 backdrop-blur-xl"
-        >
+            className="rounded-xl bg-white/90 px-4 py-3 text-xs shadow-2xl ring-1 ring-emerald-900/10 backdrop-blur-xl">
             {label ? <p className="mb-2 font-bold uppercase tracking-widest text-emerald-900/50">{label}</p> : null}
             <div className="space-y-2">
                 {payload.map((p, i) => (
                     <div key={`${p.name ?? "metric"}-${i}`} className="flex items-center justify-between gap-6">
                         <div className="flex items-center gap-2">
-                            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: p.payload?.color || '#059669' }} />
+                            <span
+                                className="h-2 w-2 rounded-full"
+                                style={{ backgroundColor: p.payload?.color || "#059669" }}
+                            />
                             <span className="font-medium text-slate-600">{p.name}</span>
                         </div>
                         <span className="font-bold text-emerald-950">
@@ -85,14 +79,14 @@ const cardVariants = {
         transition: {
             delay: i * 0.05,
             duration: 0.4,
-            ease: [0.22, 1, 0.36, 1] as [number, number, number, number]
-        }
+            ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+        },
     }),
     hover: {
         y: -4,
         scale: 1.01,
-        transition: { duration: 0.2, ease: "easeOut" as const }
-    }
+        transition: { duration: 0.2, ease: "easeOut" as const },
+    },
 };
 
 export default function Scope1DashboardPage() {
@@ -130,18 +124,12 @@ export default function Scope1DashboardPage() {
                 fuelLabel: truncateLabel(row.fuel, 24),
                 co2e: row.total_co2e,
                 color: palette[i % palette.length],
-                rawColor: i % 2 === 0 ? "#10b981" : "#34d399"
+                rawColor: i % 2 === 0 ? "#10b981" : "#34d399",
             }));
     }, [fuelSummary]);
 
     const facilityChartData = useMemo(() => {
-        const palette = [
-            "#059669",
-            "#10b981",
-            "#34d399",
-            "#6ee7b7",
-            "#a7f3d0"
-        ];
+        const palette = ["#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0"];
         const grandTotal = facilitySummary.reduce((acc, row) => acc + (row.total_co2e ?? 0), 0) || 1;
         return facilitySummary.map((row, i) => ({
             facility: row.facility,
@@ -171,19 +159,17 @@ export default function Scope1DashboardPage() {
                     sidebarOpen ? "lg:pl-80" : "lg:pl-28",
                     "transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
                 ].join(" ")}>
-
                 <div className="mx-auto max-w-7xl">
                     <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.5, ease: "easeOut" }}
-                            className="space-y-4"
-                        >
+                            className="space-y-4">
                             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-white/60 px-4 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.25em] text-emerald-800 shadow-sm backdrop-blur-md">
                                 <span className="relative flex h-2 w-2">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                                 </span>
                                 Scope-1 Analytics
                             </div>
@@ -191,7 +177,8 @@ export default function Scope1DashboardPage() {
                                 Scope One Dashboard
                             </h1>
                             <p className="max-w-xl text-sm font-medium text-slate-500 sm:text-base">
-                                Real-time monitoring of fuel consumption and facility emissions. Adjust your reporting period below to filter data.
+                                Real-time monitoring of fuel consumption and facility emissions. Adjust your reporting
+                                period below to filter data.
                             </p>
                         </motion.div>
 
@@ -199,8 +186,7 @@ export default function Scope1DashboardPage() {
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-                            className="flex flex-wrap items-center gap-3 rounded-2xl border border-white/40 bg-white/40 p-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
-                        >
+                            className="flex flex-wrap items-center gap-3 rounded-2xl border border-white/40 bg-white/40 p-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
                             <div className="flex items-center gap-2 px-3 py-2">
                                 <LuCalendarDays className="h-5 w-5 text-emerald-600" />
                                 <div className="flex items-center gap-2">
@@ -226,12 +212,12 @@ export default function Scope1DashboardPage() {
                         {!rangeValid && (
                             <motion.div
                                 initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
+                                animate={{ opacity: 1, height: "auto" }}
                                 exit={{ opacity: 0, height: 0 }}
-                                className="mb-6 overflow-hidden"
-                            >
+                                className="mb-6 overflow-hidden">
                                 <div className="rounded-2xl border border-amber-200/50 bg-amber-50/80 px-5 py-4 text-sm font-medium text-amber-800 backdrop-blur-md">
-                                    <span className="font-bold">Invalid Date Range:</span> End month must be the same as or later than start month.
+                                    <span className="font-bold">Invalid Date Range:</span> End month must be the same as
+                                    or later than start month.
                                 </div>
                             </motion.div>
                         )}
@@ -245,11 +231,13 @@ export default function Scope1DashboardPage() {
                         </div>
                     ) : isError ? (
                         <div className="rounded-3xl border border-red-200/50 bg-red-50/80 p-8 text-center backdrop-blur-md">
-                            <p className="text-lg font-semibold text-red-600">Failed to load dashboard data. Please try again.</p>
+                            <p className="text-lg font-semibold text-red-600">
+                                Failed to load dashboard data. Please try again.
+                            </p>
                         </div>
                     ) : (
                         <>
-                            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+                            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                                 {[
                                     {
                                         label: "Total Emissions",
@@ -257,7 +245,7 @@ export default function Scope1DashboardPage() {
                                         unit: "tCO₂e",
                                         icon: <LuLeaf />,
                                         trend: "+2.4%",
-                                        trendUp: false
+                                        trendUp: false,
                                     },
                                     {
                                         label: "Total Cost",
@@ -265,7 +253,7 @@ export default function Scope1DashboardPage() {
                                         unit: "",
                                         icon: <LuCircleDollarSign />,
                                         trend: "-1.2%",
-                                        trendUp: true
+                                        trendUp: true,
                                     },
                                     {
                                         label: "Monthly Emissions",
@@ -273,19 +261,13 @@ export default function Scope1DashboardPage() {
                                         unit: "tCO₂e",
                                         icon: <LuTrendingUp />,
                                         trend: "+5.1%",
-                                        trendUp: false
+                                        trendUp: false,
                                     },
                                     {
                                         label: "Fuel Categories",
                                         value: fuelSummary.length.toString(),
                                         unit: "Sources",
                                         icon: <LuFuel />,
-                                    },
-                                    {
-                                        label: "Avg Cost Efficiency",
-                                        value: formatNumber(avgCostPerTonne),
-                                        unit: "/ tCO₂e",
-                                        icon: <LuFlame />,
                                     },
                                 ].map((stat, idx) => (
                                     <motion.div
@@ -295,8 +277,7 @@ export default function Scope1DashboardPage() {
                                         whileHover="hover"
                                         variants={cardVariants}
                                         key={stat.label}
-                                        className="relative overflow-hidden rounded-2xl border border-white/60 bg-white/50 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
-                                    >
+                                        className="relative overflow-hidden rounded-2xl border border-white/60 bg-white/50 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
                                         <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-gradient-to-br from-emerald-100 to-teal-50 opacity-50 blur-2xl" />
 
                                         <div className="relative flex items-start justify-between">
@@ -304,7 +285,8 @@ export default function Scope1DashboardPage() {
                                                 {stat.icon}
                                             </div>
                                             {stat.trend && (
-                                                <span className={`inline-flex items-center rounded-full px-2 py-1 text-[0.65rem] font-bold ${stat.trendUp ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                                                <span
+                                                    className={`inline-flex items-center rounded-full px-2 py-1 text-[0.65rem] font-bold ${stat.trendUp ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>
                                                     {stat.trend}
                                                 </span>
                                             )}
@@ -319,7 +301,9 @@ export default function Scope1DashboardPage() {
                                                     {stat.value}
                                                 </h3>
                                                 {stat.unit && (
-                                                    <span className="text-sm font-semibold text-slate-500">{stat.unit}</span>
+                                                    <span className="text-sm font-semibold text-slate-500">
+                                                        {stat.unit}
+                                                    </span>
                                                 )}
                                             </div>
                                         </div>
@@ -332,12 +316,15 @@ export default function Scope1DashboardPage() {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.3 }}
-                                    className="rounded-2xl border border-white/60 bg-white/50 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
-                                >
+                                    className="rounded-2xl border border-white/60 bg-white/50 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
                                     <div className="mb-6 flex items-center justify-between">
                                         <div>
-                                            <h2 className="text-lg font-bold text-slate-800">Fuel Emissions Breakdown</h2>
-                                            <p className="text-xs font-medium text-slate-500 mt-1">Top emission sources by fuel type</p>
+                                            <h2 className="text-lg font-bold text-slate-800">
+                                                Fuel Emissions Breakdown
+                                            </h2>
+                                            <p className="text-xs font-medium text-slate-500 mt-1">
+                                                Top emission sources by fuel type
+                                            </p>
                                         </div>
                                         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
                                             <LuActivity className="h-5 w-5" />
@@ -349,8 +336,7 @@ export default function Scope1DashboardPage() {
                                             <BarChart
                                                 data={fuelChartData}
                                                 layout="vertical"
-                                                margin={{ left: 0, right: 20, top: 0, bottom: 0 }}
-                                            >
+                                                margin={{ left: 0, right: 20, top: 0, bottom: 0 }}>
                                                 <defs>
                                                     <linearGradient id="emeraldGradient1" x1="0" y1="0" x2="1" y2="0">
                                                         <stop offset="0%" stopColor="#059669" />
@@ -373,8 +359,17 @@ export default function Scope1DashboardPage() {
                                                         <stop offset="100%" stopColor="#0f766e" />
                                                     </linearGradient>
                                                 </defs>
-                                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(0,0,0,0.05)" />
-                                                <XAxis type="number" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }} />
+                                                <CartesianGrid
+                                                    strokeDasharray="3 3"
+                                                    horizontal={false}
+                                                    stroke="rgba(0,0,0,0.05)"
+                                                />
+                                                <XAxis
+                                                    type="number"
+                                                    tickLine={false}
+                                                    axisLine={false}
+                                                    tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }}
+                                                />
                                                 <YAxis
                                                     type="category"
                                                     dataKey="fuelLabel"
@@ -383,7 +378,10 @@ export default function Scope1DashboardPage() {
                                                     width={150}
                                                     tick={{ fontSize: 12, fill: "#475569", fontWeight: 600 }}
                                                 />
-                                                <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(0,0,0,0.02)' }} />
+                                                <Tooltip
+                                                    content={<ChartTooltip />}
+                                                    cursor={{ fill: "rgba(0,0,0,0.02)" }}
+                                                />
                                                 <Bar dataKey="co2e" name="CO₂e (kg)" radius={[0, 8, 8, 0]} barSize={24}>
                                                     {fuelChartData.map((row) => (
                                                         <Cell key={row.fuel} fill={row.color} />
@@ -398,12 +396,13 @@ export default function Scope1DashboardPage() {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.4 }}
-                                className="flex flex-col rounded-2xl border border-white/60 bg-white/50 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
-                                >
+                                    className="flex flex-col rounded-2xl border border-white/60 bg-white/50 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
                                     <div className="mb-4 flex items-center justify-between">
                                         <div>
                                             <h2 className="text-lg font-bold text-slate-800">Facility Contribution</h2>
-                                            <p className="text-xs font-medium text-slate-500 mt-1">Distribution across locations</p>
+                                            <p className="text-xs font-medium text-slate-500 mt-1">
+                                                Distribution across locations
+                                            </p>
                                         </div>
                                         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
                                             <LuBuilding2 className="h-5 w-5" />
@@ -423,8 +422,7 @@ export default function Scope1DashboardPage() {
                                                     innerRadius={65}
                                                     outerRadius={95}
                                                     paddingAngle={4}
-                                                    stroke="none"
-                                                >
+                                                    stroke="none">
                                                     {facilityChartData.map((row) => (
                                                         <Cell key={row.facility} fill={row.color} />
                                                     ))}
@@ -433,21 +431,33 @@ export default function Scope1DashboardPage() {
                                         </ResponsiveContainer>
                                         {/* Center Label */}
                                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                            <span className="text-3xl font-black text-slate-800">{facilitySummary.length}</span>
-                                            <span className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400">Facilities</span>
+                                            <span className="text-3xl font-black text-slate-800">
+                                                {facilitySummary.length}
+                                            </span>
+                                            <span className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400">
+                                                Facilities
+                                            </span>
                                         </div>
                                     </div>
 
                                     <div className="mt-4 grid grid-cols-2 gap-3">
                                         {facilityChartData.slice(0, 4).map((row, i) => (
-                                            <div key={row.facility} className="flex items-center gap-3 rounded-2xl bg-white/60 px-4 py-3 border border-white/40">
-                                                <div className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: row.color }} />
+                                            <div
+                                                key={row.facility}
+                                                className="flex items-center gap-3 rounded-2xl bg-white/60 px-4 py-3 border border-white/40">
+                                                <div
+                                                    className="h-3 w-3 rounded-full shrink-0"
+                                                    style={{ backgroundColor: row.color }}
+                                                />
                                                 <div className="min-w-0">
                                                     <p className="truncate text-[0.65rem] font-bold uppercase tracking-wider text-slate-500">
                                                         {row.facility}
                                                     </p>
                                                     <p className="text-sm font-bold text-slate-800">
-                                                        {formatTonnesFromKg(row.co2e)} <span className="text-[0.65rem] font-medium text-slate-400">tCO₂e</span>
+                                                        {formatTonnesFromKg(row.co2e)}{" "}
+                                                        <span className="text-[0.65rem] font-medium text-slate-400">
+                                                            tCO₂e
+                                                        </span>
                                                     </p>
                                                 </div>
                                             </div>
@@ -460,15 +470,16 @@ export default function Scope1DashboardPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.5 }}
-                                className="mt-8 rounded-2xl border border-white/60 bg-white/50 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
-                            >
+                                className="mt-8 rounded-2xl border border-white/60 bg-white/50 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
                                 <div className="mb-6 flex items-center justify-between border-b border-slate-200/50 pb-4">
                                     <h2 className="text-lg font-bold text-slate-800">Detailed Facility Performance</h2>
                                 </div>
 
                                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                     {facilityChartData.map((row) => (
-                                        <div key={row.facility} className="group relative overflow-hidden rounded-2xl bg-white/60 p-5 border border-white/40 transition-all hover:shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-1">
+                                        <div
+                                            key={row.facility}
+                                            className="group relative overflow-hidden rounded-2xl bg-white/60 p-5 border border-white/40 transition-all hover:shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-1">
                                             <div className="absolute top-0 right-0 h-16 w-16 -translate-y-8 translate-x-8 rounded-full bg-emerald-500/10 blur-xl transition-all group-hover:bg-emerald-500/20" />
 
                                             <div className="flex items-center justify-between mb-4">
@@ -482,8 +493,12 @@ export default function Scope1DashboardPage() {
 
                                             <div className="space-y-1">
                                                 <div className="flex items-end gap-1.5">
-                                                    <span className="text-xl font-bold text-slate-800">{formatTonnesFromKg(row.co2e)}</span>
-                                                    <span className="text-xs font-semibold text-slate-500 mb-1">tCO₂e</span>
+                                                    <span className="text-xl font-bold text-slate-800">
+                                                        {formatTonnesFromKg(row.co2e)}
+                                                    </span>
+                                                    <span className="text-xs font-semibold text-slate-500 mb-1">
+                                                        tCO₂e
+                                                    </span>
                                                 </div>
                                                 <div className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
                                                     <LuCircleDollarSign className="h-4 w-4 text-emerald-500/70" />
@@ -502,7 +517,9 @@ export default function Scope1DashboardPage() {
                                     ))}
                                     {!facilityChartData.length && (
                                         <div className="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white/40 p-8 text-center">
-                                            <p className="text-sm font-semibold text-slate-500">No facility data available for the selected time range.</p>
+                                            <p className="text-sm font-semibold text-slate-500">
+                                                No facility data available for the selected time range.
+                                            </p>
                                         </div>
                                     )}
                                 </div>
@@ -514,5 +531,3 @@ export default function Scope1DashboardPage() {
         </div>
     );
 }
-
-

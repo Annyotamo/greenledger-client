@@ -32,6 +32,11 @@ const NAV: NavItem[] = [
             },
         ],
     },
+    {
+        label: "Tenant",
+        href: "/tenant",
+        children: [{ label: "Add Tenant", href: "/tenant" }],
+    },
 ];
 
 function isActive(pathname: string, href?: string) {

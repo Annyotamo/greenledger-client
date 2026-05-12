@@ -213,3 +213,34 @@ export interface Scope2IngestRequest {
 }
 
 export type Scope2IngestResponse = ApiEnvelope<unknown>;
+
+export interface CompanyAddress {
+    line1: string;
+    line2: string;
+    city: string;
+    state: string;
+    country: string;
+    postalCode: string;
+}
+
+export interface CompanyDetails {
+    id: string;
+    tenantId: string;
+    legalCompanyName: string;
+    displayName: string;
+    industrySector: string;
+    cinNumber: string;
+    gstNumber: string;
+    registeredAddress: CompanyAddress;
+    baselineYear: number;
+    reportingCurrency: string;
+    fiscalYearStartMonth: number;
+    logoUrl: string;
+    scope1Enabled: boolean;
+    scope2Enabled: boolean;
+    scope3Enabled: boolean;
+    creationDate: string;
+    updateDate: string;
+}
+
+export type CompanyDetailsResponse = ApiEnvelope<CompanyDetails[]>;

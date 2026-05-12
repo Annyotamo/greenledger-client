@@ -40,6 +40,10 @@ function formatNumber(value: number): string {
     return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
 }
 
+function formatCO2e(value: number): string {
+    return value.toLocaleString(undefined, { maximumFractionDigits: 3 });
+}
+
 function getMonthLabel(value: string | null): string {
     if (!value) return "N/A";
     const [year, month] = value.split("-");
@@ -68,14 +72,16 @@ function DashboardTooltip({
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="rounded-xl bg-white/90 px-4 py-3 text-xs shadow-2xl ring-1 ring-emerald-900/10 backdrop-blur-xl"
-        >
+            className="rounded-xl bg-white/90 px-4 py-3 text-xs shadow-2xl ring-1 ring-emerald-900/10 backdrop-blur-xl">
             {label ? <p className="mb-2 font-bold uppercase tracking-widest text-emerald-900/50">{label}</p> : null}
             <div className="space-y-2">
                 {payload.map((p, i) => (
                     <div key={`${p.name ?? "metric"}-${i}`} className="flex items-center justify-between gap-6">
                         <div className="flex items-center gap-2">
-                            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: p.payload?.fill || p.payload?.color || '#059669' }} />
+                            <span
+                                className="h-2 w-2 rounded-full"
+                                style={{ backgroundColor: p.payload?.fill || p.payload?.color || "#059669" }}
+                            />
                             <span className="font-medium text-slate-600">{p.name}</span>
                         </div>
                         <span className="font-bold text-emerald-950">
@@ -96,14 +102,14 @@ const cardVariants = {
         transition: {
             delay: i * 0.05,
             duration: 0.4,
-            ease: [0.22, 1, 0.36, 1] as [number, number, number, number]
-        }
+            ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+        },
     }),
     hover: {
         y: -4,
         scale: 1.01,
-        transition: { duration: 0.2, ease: "easeOut" as const }
-    }
+        transition: { duration: 0.2, ease: "easeOut" as const },
+    },
 };
 
 export default function Scope2Page() {
@@ -121,14 +127,13 @@ export default function Scope2Page() {
     const [downloadError, setDownloadError] = useState<string | null>(null);
     const [form, setForm] = useState({
         quantityConsume: "",
-        unit: "kwh",
+        unit: "kWh",
         fuelName: "electricity",
         outputUnit: "MWh",
         cost: "",
         facilityName: "",
         orgName: "",
         yearMonth: "",
-        year: "",
     });
 
     async function handleDownloadCsv() {
@@ -233,13 +238,7 @@ export default function Scope2Page() {
             const source = row.scope2Factor?.factorSource ?? "Unknown";
             map.set(source, (map.get(source) ?? 0) + (row.co2eTotal ?? 0));
         }
-        const palette = [
-            "#059669",
-            "#10b981",
-            "#34d399",
-            "#6ee7b7",
-            "#a7f3d0"
-        ];
+        const palette = ["#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0"];
         return Array.from(map.entries())
             .map(([source, co2e], idx) => ({ source, co2e: toTonne(co2e), color: palette[idx % palette.length] }))
             .sort((a, b) => b.co2e - a.co2e);
@@ -259,7 +258,7 @@ export default function Scope2Page() {
                 facilityName: form.facilityName,
                 orgName: form.orgName,
                 yearMonth: form.yearMonth,
-                year: form.year,
+                year: form.yearMonth.split("-")[0],
             };
             await ingestMutation.mutateAsync(payload);
             setSubmitSuccess("Scope-2 emission record added successfully.");
@@ -294,19 +293,17 @@ export default function Scope2Page() {
                     sidebarOpen ? "lg:pl-80" : "lg:pl-28",
                     "transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
                 ].join(" ")}>
-
                 <div className="mx-auto max-w-7xl">
                     <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.5, ease: "easeOut" }}
-                            className="space-y-4"
-                        >
+                            className="space-y-4">
                             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-white/60 px-4 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.25em] text-emerald-800 shadow-sm backdrop-blur-md">
                                 <span className="relative flex h-2 w-2">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                                 </span>
                                 Scope-2 Analytics
                             </div>
@@ -320,8 +317,7 @@ export default function Scope2Page() {
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-                        >
+                            transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}>
                             <button
                                 type="button"
                                 onClick={() => {
@@ -329,14 +325,13 @@ export default function Scope2Page() {
                                     setSubmitSuccess(null);
                                     setForm({
                                         quantityConsume: "",
-                                        unit: "kwh",
+                                        unit: "kWh",
                                         fuelName: "electricity",
                                         outputUnit: "MWh",
                                         cost: "",
                                         facilityName: "",
                                         orgName: "",
                                         yearMonth: "",
-                                        year: "",
                                     });
                                     setIsModalOpen(true);
                                 }}
@@ -351,10 +346,9 @@ export default function Scope2Page() {
                         {submitSuccess && (
                             <motion.div
                                 initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
+                                animate={{ opacity: 1, height: "auto" }}
                                 exit={{ opacity: 0, height: 0 }}
-                                className="mb-6 overflow-hidden"
-                            >
+                                className="mb-6 overflow-hidden">
                                 <div className="rounded-2xl border border-emerald-200/50 bg-emerald-50/80 px-5 py-4 text-sm font-medium text-emerald-800 backdrop-blur-md">
                                     <span className="font-bold">Success:</span> {submitSuccess}
                                 </div>
@@ -370,7 +364,9 @@ export default function Scope2Page() {
                         </div>
                     ) : isError ? (
                         <div className="rounded-3xl border border-red-200/50 bg-red-50/80 p-8 text-center backdrop-blur-md">
-                            <p className="text-lg font-semibold text-red-600">Failed to load Scope-2 report data. Please try again.</p>
+                            <p className="text-lg font-semibold text-red-600">
+                                Failed to load Scope-2 report data. Please try again.
+                            </p>
                         </div>
                     ) : (
                         <>
@@ -408,8 +404,7 @@ export default function Scope2Page() {
                                         whileHover="hover"
                                         variants={cardVariants}
                                         key={stat.label}
-                                        className="relative overflow-hidden rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
-                                    >
+                                        className="relative overflow-hidden rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
                                         <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-gradient-to-br from-emerald-100 to-teal-50 opacity-50 blur-2xl" />
 
                                         <div className="relative flex items-start justify-between">
@@ -427,7 +422,9 @@ export default function Scope2Page() {
                                                     {stat.value}
                                                 </h3>
                                                 {stat.unit && (
-                                                    <span className="text-sm font-semibold text-slate-500">{stat.unit}</span>
+                                                    <span className="text-sm font-semibold text-slate-500">
+                                                        {stat.unit}
+                                                    </span>
                                                 )}
                                             </div>
                                         </div>
@@ -439,12 +436,13 @@ export default function Scope2Page() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.3 }}
-                                className="mt-8 rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
-                            >
+                                className="mt-8 rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
                                 <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                                     <div>
                                         <h2 className="text-lg font-bold text-slate-800">Scope-2 Report Records</h2>
-                                        <p className="text-xs font-medium text-slate-500 mt-1">Detailed view of indirect emissions data</p>
+                                        <p className="text-xs font-medium text-slate-500 mt-1">
+                                            Detailed view of indirect emissions data
+                                        </p>
                                     </div>
                                     <div className="flex flex-wrap items-center gap-3">
                                         <div className="flex items-center gap-2 rounded-xl bg-white/60 px-3 py-1.5 border border-white/40">
@@ -506,22 +504,34 @@ export default function Scope2Page() {
                                                                 {row.facilityName ?? "Unmapped"}
                                                             </span>
                                                         </td>
-                                                        <td className="px-4 py-3 text-slate-600">{row.orgName ?? "-"}</td>
-                                                        <td className="px-4 py-3 text-slate-600 font-medium">{row.fuelName ?? "-"}</td>
-                                                        <td className="px-4 py-3 text-slate-600">{row.yearMonth ?? "-"}</td>
+                                                        <td className="px-4 py-3 text-slate-600">
+                                                            {row.orgName ?? "-"}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-slate-600 font-medium">
+                                                            {row.fuelName ?? "-"}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-slate-600">
+                                                            {row.yearMonth ?? "-"}
+                                                        </td>
                                                         <td className="px-4 py-3 text-slate-600">
                                                             {formatNumber(row.quantityConsume ?? 0)}
                                                         </td>
-                                                        <td className="px-4 py-3 text-slate-500 text-xs">{row.unit ?? "-"}</td>
-                                                        <td className="px-4 py-3 text-slate-500 text-xs">{row.outputUnit ?? "-"}</td>
+                                                        <td className="px-4 py-3 text-slate-500 text-xs">
+                                                            {row.unit ?? "-"}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-slate-500 text-xs">
+                                                            {row.outputUnit ?? "-"}
+                                                        </td>
                                                         <td className="px-4 py-3 font-bold text-emerald-600">
-                                                            {formatNumber(toTonne(row.co2eTotal ?? 0))}
+                                                            {formatCO2e(toTonne(row.co2eTotal ?? 0))}
                                                         </td>
                                                     </tr>
                                                 ))}
                                                 {pagedRecords.length === 0 && (
                                                     <tr>
-                                                        <td colSpan={8} className="px-4 py-8 text-center text-sm text-slate-500">
+                                                        <td
+                                                            colSpan={8}
+                                                            className="px-4 py-8 text-center text-sm text-slate-500">
                                                             No reporting records found for this period.
                                                         </td>
                                                     </tr>
@@ -584,17 +594,20 @@ export default function Scope2Page() {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.4 }}
-                                    className="rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
-                                >
+                                    className="rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
                                     <div className="mb-6 flex items-center justify-between">
                                         <div>
-                                            <h2 className="text-lg font-bold text-slate-800">Monthly Emissions Trend</h2>
-                                            <p className="text-xs font-medium text-slate-500 mt-1">Aggregated tracking over time</p>
+                                            <h2 className="text-lg font-bold text-slate-800">
+                                                Monthly Emissions Trend
+                                            </h2>
+                                            <p className="text-xs font-medium text-slate-500 mt-1">
+                                                Aggregated tracking over time
+                                            </p>
                                         </div>
                                         <div className="flex items-center gap-2 rounded-full bg-emerald-100/50 px-3 py-1 border border-emerald-200/50 text-xs font-bold text-emerald-700">
                                             <span className="relative flex h-2 w-2">
-                                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                                             </span>
                                             Live
                                         </div>
@@ -606,14 +619,31 @@ export default function Scope2Page() {
                                                 margin={{ left: -20, right: 0, top: 10, bottom: 0 }}>
                                                 <defs>
                                                     <linearGradient id="scope2-a" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
-                                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                                                     </linearGradient>
                                                 </defs>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
-                                                <XAxis dataKey="monthLabel" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }} dy={10} />
-                                                <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }} />
-                                                <Tooltip content={<DashboardTooltip />} cursor={{ stroke: 'rgba(16,185,129,0.2)', strokeWidth: 2 }} />
+                                                <CartesianGrid
+                                                    strokeDasharray="3 3"
+                                                    vertical={false}
+                                                    stroke="rgba(0,0,0,0.05)"
+                                                />
+                                                <XAxis
+                                                    dataKey="monthLabel"
+                                                    tickLine={false}
+                                                    axisLine={false}
+                                                    tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }}
+                                                    dy={10}
+                                                />
+                                                <YAxis
+                                                    tickLine={false}
+                                                    axisLine={false}
+                                                    tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }}
+                                                />
+                                                <Tooltip
+                                                    content={<DashboardTooltip />}
+                                                    cursor={{ stroke: "rgba(16,185,129,0.2)", strokeWidth: 2 }}
+                                                />
                                                 <Area
                                                     type="monotone"
                                                     dataKey="emissions"
@@ -632,12 +662,13 @@ export default function Scope2Page() {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.5 }}
-                                    className="flex flex-col rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
-                                >
+                                    className="flex flex-col rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
                                     <div className="mb-4 flex items-center justify-between">
                                         <div>
                                             <h2 className="text-lg font-bold text-slate-800">Emissions By Source</h2>
-                                            <p className="text-xs font-medium text-slate-500 mt-1">Total distribution</p>
+                                            <p className="text-xs font-medium text-slate-500 mt-1">
+                                                Total distribution
+                                            </p>
                                         </div>
                                         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
                                             <LuFactory className="h-5 w-5" />
@@ -656,8 +687,7 @@ export default function Scope2Page() {
                                                     innerRadius={65}
                                                     outerRadius={95}
                                                     paddingAngle={4}
-                                                    stroke="none"
-                                                >
+                                                    stroke="none">
                                                     {sourceSeries.map((row) => (
                                                         <Cell key={row.source} fill={row.color} />
                                                     ))}
@@ -667,8 +697,13 @@ export default function Scope2Page() {
                                     </div>
                                     <div className="mt-4 grid grid-cols-2 gap-3">
                                         {sourceSeries.slice(0, 4).map((row) => (
-                                            <div key={row.source} className="flex items-center gap-3 rounded-2xl bg-white/60 px-4 py-3 border border-white/40">
-                                                <div className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: row.color }} />
+                                            <div
+                                                key={row.source}
+                                                className="flex items-center gap-3 rounded-2xl bg-white/60 px-4 py-3 border border-white/40">
+                                                <div
+                                                    className="h-3 w-3 rounded-full shrink-0"
+                                                    style={{ backgroundColor: row.color }}
+                                                />
                                                 <div className="min-w-0">
                                                     <p className="truncate text-[0.65rem] font-bold uppercase tracking-wider text-slate-500">
                                                         {row.source}
@@ -687,12 +722,13 @@ export default function Scope2Page() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.6 }}
-                                className="mt-8 rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl"
-                            >
+                                className="mt-8 rounded-3xl border border-white/60 bg-white/50 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
                                 <div className="mb-6 flex items-center justify-between">
                                     <div>
                                         <h2 className="text-lg font-bold text-slate-800">Facility Distribution</h2>
-                                        <p className="text-xs font-medium text-slate-500 mt-1">Emissions mapped by location</p>
+                                        <p className="text-xs font-medium text-slate-500 mt-1">
+                                            Emissions mapped by location
+                                        </p>
                                     </div>
                                     <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
                                         <LuBuilding2 className="h-5 w-5" />
@@ -710,8 +746,17 @@ export default function Scope2Page() {
                                                     <stop offset="100%" stopColor="#10b981" />
                                                 </linearGradient>
                                             </defs>
-                                            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(0,0,0,0.05)" />
-                                            <XAxis type="number" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }} />
+                                            <CartesianGrid
+                                                strokeDasharray="3 3"
+                                                horizontal={false}
+                                                stroke="rgba(0,0,0,0.05)"
+                                            />
+                                            <XAxis
+                                                type="number"
+                                                tickLine={false}
+                                                axisLine={false}
+                                                tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }}
+                                            />
                                             <YAxis
                                                 dataKey="facility"
                                                 type="category"
@@ -720,7 +765,10 @@ export default function Scope2Page() {
                                                 width={100}
                                                 tick={{ fontSize: 12, fill: "#475569", fontWeight: 600 }}
                                             />
-                                            <Tooltip content={<DashboardTooltip />} cursor={{ fill: 'rgba(0,0,0,0.02)' }} />
+                                            <Tooltip
+                                                content={<DashboardTooltip />}
+                                                cursor={{ fill: "rgba(0,0,0,0.02)" }}
+                                            />
                                             <Bar
                                                 dataKey="co2e"
                                                 name="tCO₂e"
@@ -743,14 +791,12 @@ export default function Scope2Page() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/40 p-4 backdrop-blur-sm sm:items-center sm:p-6"
-                    >
+                        className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/40 p-4 backdrop-blur-sm sm:items-center sm:p-6">
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                            className="w-full max-w-3xl max-h-[calc(100vh-2rem)] overflow-y-auto rounded-3xl border border-white/50 bg-white p-6 shadow-2xl sm:p-8 scrollbar-thin"
-                        >
+                            className="w-full max-w-3xl max-h-[calc(100vh-2rem)] overflow-y-auto rounded-3xl border border-white/50 bg-white p-6 shadow-2xl sm:p-8 scrollbar-thin">
                             <div className="mb-8 flex items-start justify-between gap-4">
                                 <div>
                                     <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-widest text-emerald-700 border border-emerald-100">
@@ -783,11 +829,13 @@ export default function Scope2Page() {
                                     />
                                 </Field>
                                 <Field label="Unit">
-                                    <input
+                                    <select
                                         value={form.unit}
                                         onChange={(e) => setForm((p) => ({ ...p, unit: e.target.value }))}
-                                        className={inputClass}
-                                    />
+                                        className={inputClass}>
+                                        <option value="kWh">kWh</option>
+                                        <option value="MWh">MWh</option>
+                                    </select>
                                 </Field>
                                 <Field label="Energy Source">
                                     <input
@@ -826,18 +874,11 @@ export default function Scope2Page() {
                                         className={inputClass}
                                     />
                                 </Field>
-                                <Field label="Year month">
+                                <Field label="Year Month">
                                     <input
+                                        type="month"
                                         value={form.yearMonth}
                                         onChange={(e) => setForm((p) => ({ ...p, yearMonth: e.target.value }))}
-                                        placeholder="YYYY-MM"
-                                        className={inputClass}
-                                    />
-                                </Field>
-                                <Field label="Year">
-                                    <input
-                                        value={form.year}
-                                        onChange={(e) => setForm((p) => ({ ...p, year: e.target.value }))}
                                         className={inputClass}
                                     />
                                 </Field>

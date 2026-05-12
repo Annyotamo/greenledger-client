@@ -41,6 +41,13 @@ body {
 }
 
 :root {
+    /* Fixed sidebar widths — keep in sync with `SidebarShell` motion widths */
+    --sidebar-width-expanded: 240px;
+    --sidebar-width-collapsed: 72px;
+    /* Horizontal breathing room between sidebar edge and page content (lg+) */
+    --sidebar-content-gap: 2rem;
+    --app-main-offset-expanded: calc(var(--sidebar-width-expanded) + var(--sidebar-content-gap));
+    --app-main-offset-collapsed: calc(var(--sidebar-width-collapsed) + var(--sidebar-content-gap));
     --color-primary: #1f7a3f;
     --color-primary-2: #4ea56c;
     --color-secondary: #f6fff8;
@@ -56,6 +63,23 @@ body {
     --anim-fast: 160ms;
     --anim-standard: 360ms;
     --anim-smooth: 620ms;
+}
+
+/*
+ * Fixed sidebar shell: offset `<main>` so content never sits under the aside.
+ * Uses plain CSS at the `lg` breakpoint so layout does not depend on Tailwind
+ * discovering arbitrary `pl-[var(--…)]` utilities.
+ */
+@media (min-width: 1024px) {
+    /* `main` + class beats utility-only `.px-*` so left offset is never overwritten */
+    main.gl-main-offset {
+        padding-left: var(--app-main-offset-expanded);
+        transition: padding-left 500ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    main.gl-main-offset.gl-main-offset--collapsed {
+        padding-left: var(--app-main-offset-collapsed);
+    }
 }
 
 @keyframes fadeInUp {

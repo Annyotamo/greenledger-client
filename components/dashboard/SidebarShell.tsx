@@ -15,7 +15,6 @@ import {
     LuChevronDown,
     LuChevronRight,
     LuFactory,
-    LuLeaf,
     LuLogOut,
     LuMenu,
     LuUser,
@@ -184,8 +183,8 @@ export function Sidebar() {
 
             {/* Sidebar */}
             <motion.aside
-                className={`fixed z-50 flex flex-col overflow-hidden bg-linear-to-b from-[#16362c]/65 via-[#112b23]/60 to-[#0d221c]/65 text-white backdrop-blur-3xl shadow-[0_22px_60px_-32px_rgba(0,0,0,0.7)] ${
-                    isMobile ? "top-16 bottom-3 left-3 rounded-3xl" : "inset-y-0 left-0"
+                className={`fixed z-50 flex min-h-0 flex-col overflow-hidden bg-linear-to-b from-[#16362c]/65 via-[#112b23]/60 to-[#0d221c]/65 text-white backdrop-blur-3xl shadow-[0_22px_60px_-32px_rgba(0,0,0,0.7)] ${
+                    isMobile ? "top-16 bottom-3 left-3 max-h-[calc(100dvh-4.75rem)] rounded-3xl" : "inset-y-0 left-0 h-dvh max-h-dvh"
                 }`}
                 initial={false}
                 animate={
@@ -196,6 +195,7 @@ export function Sidebar() {
                               width: "min(20rem, calc(100vw - 1.5rem))",
                           }
                         : {
+                              /* Match --sidebar-width-expanded / --sidebar-width-collapsed in globals.css */
                               width: isOpen ? 240 : 72,
                           }
                 }
@@ -211,7 +211,7 @@ export function Sidebar() {
 
                 {/* Brand */}
                 <div
-                    className={`relative hidden lg:flex items-center ${compact ? "justify-center" : "justify-start gap-3"} px-4 pt-6 pb-5 border-b border-white/10 overflow-hidden`}>
+                    className={`relative hidden shrink-0 lg:flex ${compact ? "items-center justify-center" : "items-center justify-start gap-3"} px-4 pt-5 pb-4 border-b border-white/10 overflow-hidden`}>
                     <Image
                         src="/GLLogo.png"
                         alt="Green Ledger"
@@ -219,21 +219,24 @@ export function Sidebar() {
                         height={64}
                         className={
                             compact
-                                ? "h-9 w-9 transition-transform duration-300"
-                                : "h-10 w-10 transition-transform duration-300 hover:scale-105"
+                                ? "h-9 w-9 shrink-0 transition-transform duration-300"
+                                : "h-10 w-10 shrink-0 transition-transform duration-300 hover:scale-105"
                         }
                         priority
                     />
                     <AnimatePresence>
                         {!compact && (
-                            <motion.span
+                            <motion.div
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -10 }}
                                 transition={{ duration: 0.2 }}
-                                className="text-lg font-black tracking-tight text-white whitespace-nowrap">
-                                GreenLedger
-                            </motion.span>
+                                className="min-w-0">
+                                <div className="text-lg font-black tracking-tight text-white">GreenLedger</div>
+                                <p className="mt-0.5 max-w-[11.5rem] text-[0.68rem] font-medium leading-snug text-emerald-100/65">
+                                    Carbon accounting & disclosure, simplified.
+                                </p>
+                            </motion.div>
                         )}
                     </AnimatePresence>
                 </div>
@@ -241,8 +244,8 @@ export function Sidebar() {
                 {/* Nav */}
                 <nav
                     className={[
-                        "relative flex-1 overflow-y-auto pt-6 pb-6 space-y-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent",
-                        compact ? "px-3" : "px-4",
+                        "relative flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden px-3 pb-3 pt-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent",
+                        !compact ? "lg:px-4" : "",
                     ].join(" ")}>
                     <SidebarItem
                         label="Dashboard"
@@ -257,12 +260,7 @@ export function Sidebar() {
                     />
 
                     {/* GHG group */}
-                    <div className="pt-2">
-                        {!compact && (
-                            <div className="mb-2 px-3 text-[0.65rem] font-bold uppercase tracking-widest text-emerald-100/50">
-                                Analytics
-                            </div>
-                        )}
+                    <div className="flex flex-col gap-2">
                         <button
                             type="button"
                             onClick={() => {
@@ -298,7 +296,7 @@ export function Sidebar() {
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: "auto" }}
                                     exit={{ opacity: 0, height: 0 }}
-                                    className="relative ml-5 mt-1 space-y-1 pl-4">
+                                    className="relative ml-5 mt-0.5 flex flex-col gap-1.5 pl-4">
                                     <div className="pointer-events-none absolute left-[11px] top-0 h-full w-[2px] bg-gradient-to-b from-white/10 to-transparent rounded-full" />
 
                                     <button
@@ -358,16 +356,13 @@ export function Sidebar() {
                     </div>
                 </nav>
 
-                <div className="px-4 pb-2">
+                <div className="relative z-10 flex shrink-0 flex-col gap-2 border-t border-white/10 px-3 pb-2 pt-3 lg:px-4">
                     <SidebarItem
                         label={isLoggingOut ? "Logging out..." : "Logout"}
                         icon={<LuLogOut className="h-[1.15rem] w-[1.15rem]" />}
                         compact={compact}
                         onClick={handleLogout}
                     />
-                </div>
-
-                <div className="px-4 pb-4">
                     <SidebarItem
                         label="Company"
                         icon={<LuBuilding2 className="h-[1.15rem] w-[1.15rem]" />}
@@ -381,7 +376,7 @@ export function Sidebar() {
                 </div>
 
                 {/* Footer: user + collapse control */}
-                <div className="relative hidden lg:flex flex-col border-t border-white/10 px-4 pb-6 pt-4 bg-black/10">
+                <div className="relative z-10 hidden shrink-0 lg:flex flex-col border-t border-white/10 px-4 pb-5 pt-3 bg-black/10">
                     <div
                         className={[
                             "flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 shadow-sm backdrop-blur-md",
@@ -400,7 +395,7 @@ export function Sidebar() {
                         ) : null}
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between">
+                    <div className="mt-3 flex items-center justify-between">
                         {!compact ? (
                             <div className="flex flex-col">
                                 <span className="text-[0.65rem] font-bold uppercase tracking-widest text-emerald-100/50">

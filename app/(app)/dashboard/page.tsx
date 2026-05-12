@@ -115,9 +115,8 @@ export default function DashboardPage() {
 
             <main
                 className={[
-                    "px-4 pb-2 pt-16 sm:px-5 lg:pr-10 lg:pt-4",
-                    sidebarOpen ? "lg:pl-80" : "lg:pl-28",
-                    "transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                    "gl-main-offset px-4 pb-2 pt-16 sm:px-5 lg:pr-10 lg:pt-4",
+                    !sidebarOpen ? "gl-main-offset--collapsed" : "",
                 ].join(" ")}>
                 <section className="section-bg relative overflow-hidden rounded-3xl border border-white/60 p-5 shadow-[0_30px_90px_-45px_rgba(0,40,25,0.6)] backdrop-blur-md sm:p-6 md:p-7">
                     <div className="pointer-events-none absolute -right-20 -top-16 h-56 w-56 rounded-full bg-emerald-500/12 blur-3xl" />

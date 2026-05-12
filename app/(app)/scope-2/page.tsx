@@ -290,8 +290,8 @@ export default function Scope2Page() {
             <main
                 className={[
                     "relative z-10 px-4 pb-12 pt-20 sm:px-6 lg:pr-12 lg:pt-10",
-                    sidebarOpen ? "lg:pl-80" : "lg:pl-28",
-                    "transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                    "gl-main-offset",
+                    !sidebarOpen ? "gl-main-offset--collapsed" : "",
                 ].join(" ")}>
                 <div className="mx-auto max-w-7xl">
                     <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">

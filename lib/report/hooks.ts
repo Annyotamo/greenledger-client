@@ -35,6 +35,7 @@ export function useIngestScope1EmissionMutation() {
         mutationFn: (payload: Scope1IngestRequest) => ingestScope1Emission(payload),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["reports", "scope1"] });
+            queryClient.invalidateQueries({ queryKey: ["scope1", "ingested-records"] });
         },
     });
 }

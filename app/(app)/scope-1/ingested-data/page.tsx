@@ -1,7 +1,9 @@
 "use client";
 
+import { AxiosError } from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import Select from "react-select";
 import {
     LuCircleDollarSign,
     LuDatabase,
@@ -9,6 +11,9 @@ import {
     LuFilter,
     LuLeaf,
     LuCalendarDays,
+    LuPlus,
+    LuSparkles,
+    LuX,
 } from "react-icons/lu";
 import { IoMdAlert } from "react-icons/io";
 import {
@@ -25,9 +30,14 @@ import {
 } from "recharts";
 
 import { Sidebar } from "@/components/dashboard/SidebarShell";
-import { useScope1IngestedRecordsQuery } from "@/lib/report/hooks";
+import {
+    useIngestScope1EmissionMutation,
+    useScope1EmissionsOverlayDropdownQuery,
+    useScope1IngestedRecordsQuery,
+} from "@/lib/report/hooks";
 import { useSidebarStore } from "@/lib/sidebarStore";
-import type { Scope1IngestRecord } from "@/types/report";
+import type { ApiErrorBody } from "@/types/api/common";
+import type { Scope1IngestRecord, Scope1IngestRequest } from "@/types/report";
 
 function formatNumber(value: number): string {
     return value.toLocaleString(undefined, {
@@ -152,6 +162,23 @@ export default function Scope1IngestedDataPage() {
     const { data, isLoading, isError } =
         useScope1IngestedRecordsQuery();
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const {
+        data: overlayDropdownData,
+        isLoading: isLoadingOverlayData,
+    } = useScope1EmissionsOverlayDropdownQuery(isModalOpen);
+
+    const ingestMutation = useIngestScope1EmissionMutation();
+
+    const [submitError, setSubmitError] = useState<string | null>(null);
+
+    const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+
+    const [isMounted, setIsMounted] = useState(false);
+
+    const [selectedFuelType, setSelectedFuelType] = useState<string | null>(null);
+
     const [startMonth, setStartMonth] =
         useState("2026-01");
 
@@ -166,11 +193,79 @@ export default function Scope1IngestedDataPage() {
 
     const pageSize = 10;
 
+    const [ingestForm, setIngestForm] = useState<{
+        fuelName: string;
+        fuelType: string;
+        quantity: string;
+        cost: string;
+        unit: string;
+        orgName: string;
+        facilityName: string;
+        yearMonth: string;
+    }>({
+        fuelName: "",
+        fuelType: "",
+        quantity: "",
+        cost: "",
+        unit: "",
+        orgName: "",
+        facilityName: "",
+        yearMonth: "",
+    });
+
     useEffect(() => {
         setActiveSection("scope-1");
     }, [setActiveSection]);
 
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
     const records: Scope1IngestRecord[] = data ?? [];
+
+    const fuelTypeOptions = useMemo(() => {
+        const fuelTypes = overlayDropdownData?.FuelType ?? [];
+
+        return Array.from(new Set(fuelTypes))
+            .sort((a, b) => a.localeCompare(b))
+            .map((ft) => ({
+                label: ft,
+                value: ft,
+            }));
+    }, [overlayDropdownData]);
+
+    const fuelNameOptions = useMemo(() => {
+        if (!overlayDropdownData || !selectedFuelType) return [];
+
+        const rows = overlayDropdownData[selectedFuelType] ?? [];
+
+        return Array.from(new Set(rows))
+            .sort((a, b) => a.localeCompare(b))
+            .map((fn) => ({
+                label: fn,
+                value: fn,
+            }));
+    }, [overlayDropdownData, selectedFuelType]);
+
+    const selectedFuelTypeOption = useMemo(() => {
+        if (!selectedFuelType) return null;
+
+        return {
+            label: selectedFuelType,
+            value: selectedFuelType,
+        };
+    }, [selectedFuelType]);
+
+    const unitOptions = useMemo(() => {
+        const units = overlayDropdownData?.["all units"] ?? [];
+
+        return Array.from(new Set(units))
+            .sort((a, b) => a.localeCompare(b))
+            .map((unit) => ({
+                label: unit,
+                value: unit,
+            }));
+    }, [overlayDropdownData]);
 
     const filtered = useMemo(() => {
         const rangeFiltered = records.filter((row) => {
@@ -298,6 +393,47 @@ export default function Scope1IngestedDataPage() {
             startMonth > endMonth
     );
 
+    async function onSubmitIngest(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+
+        setSubmitError(null);
+
+        setSubmitSuccess(null);
+
+        try {
+            const payload: Scope1IngestRequest = {
+                fuelName: ingestForm.fuelName,
+                fuelType: ingestForm.fuelType,
+                quantity: Number(ingestForm.quantity || 0),
+                cost: Number(ingestForm.cost || 0),
+                unit: ingestForm.unit,
+                orgName: ingestForm.orgName,
+                facilityName: ingestForm.facilityName,
+                yearMonth: ingestForm.yearMonth,
+            };
+
+            await ingestMutation.mutateAsync(payload);
+
+            setSubmitSuccess("New emission record added successfully.");
+
+            setIsModalOpen(false);
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                if (error.response?.status === 401) {
+                    return;
+                }
+
+                const body = error.response?.data as ApiErrorBody | undefined;
+
+                setSubmitError(body?.response ?? body?.message ?? "Failed to add emission record.");
+
+                return;
+            }
+
+            setSubmitError("Failed to add emission record.");
+        }
+    }
+
     return (
         <div className="relative min-h-screen w-full overflow-x-hidden bg-slate-50/50 text-slate-900">
             {/* Background */}
@@ -310,16 +446,13 @@ export default function Scope1IngestedDataPage() {
 
             <main
                 className={[
-                    "relative z-10 px-3 pb-8 pt-16 sm:px-4 lg:pr-8 lg:pt-8",
-                    sidebarOpen
-                        ? "lg:pl-80"
-                        : "lg:pl-28",
-                    "transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                    "gl-main-offset relative z-10 px-3 pb-8 pt-16 sm:px-4 lg:pr-8 lg:pt-8",
+                    !sidebarOpen ? "gl-main-offset--collapsed" : "",
                 ].join(" ")}
             >
                 <div className="mx-auto w-full max-w-[1600px] overflow-hidden">
                     {/* Header */}
-                    <header className="mb-7 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+                    <header className="mb-7 flex flex-col justify-between gap-5 md:flex-row md:items-start">
                         <motion.div
                             initial={{
                                 opacity: 0,
@@ -356,8 +489,50 @@ export default function Scope1IngestedDataPage() {
                             </p>
                         </motion.div>
 
-                        {/* Filters */}
-                        <motion.div
+                        <div className="flex w-full flex-col items-stretch gap-3 md:w-auto md:items-end">
+                            <motion.div
+                                initial={{
+                                    opacity: 0,
+                                    x: 20,
+                                }}
+                                animate={{
+                                    opacity: 1,
+                                    x: 0,
+                                }}
+                                transition={{
+                                    duration: 0.5,
+                                    delay: 0.05,
+                                }}
+                            >
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setSubmitError(null);
+                                        setSubmitSuccess(null);
+                                        setSelectedFuelType(null);
+
+                                        setIngestForm({
+                                            fuelName: "",
+                                            fuelType: "",
+                                            quantity: "",
+                                            cost: "",
+                                            unit: "",
+                                            orgName: "",
+                                            facilityName: "",
+                                            yearMonth: "",
+                                        });
+
+                                        setIsModalOpen(true);
+                                    }}
+                                    className="group inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 text-xs font-bold text-white shadow-lg shadow-emerald-500/25 transition-all hover:scale-[1.02] hover:shadow-emerald-500/40 md:w-auto"
+                                >
+                                    <LuPlus className="h-4 w-4 transition-transform group-hover:rotate-90" />
+                                    Add Emission Data
+                                </button>
+                            </motion.div>
+
+                            {/* Filters */}
+                            <motion.div
                             initial={{
                                 opacity: 0,
                                 x: 20,
@@ -436,7 +611,33 @@ export default function Scope1IngestedDataPage() {
                                 </div>
                             </div>
                         </motion.div>
+                        </div>
                     </header>
+
+                    <AnimatePresence>
+                        {submitSuccess && (
+                            <motion.div
+                                initial={{
+                                    opacity: 0,
+                                    height: 0,
+                                }}
+                                animate={{
+                                    opacity: 1,
+                                    height: "auto",
+                                }}
+                                exit={{
+                                    opacity: 0,
+                                    height: 0,
+                                }}
+                                className="mb-5 overflow-hidden"
+                            >
+                                <div className="rounded-2xl border border-emerald-200/50 bg-emerald-50/80 px-4 py-3 text-xs font-medium text-emerald-800 backdrop-blur-md">
+                                    <span className="font-bold">Success:</span>{" "}
+                                    {submitSuccess}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     <AnimatePresence>
                         {rangeInvalid && (
@@ -1061,6 +1262,304 @@ export default function Scope1IngestedDataPage() {
                     )}
                 </div>
             </main>
+
+            <AnimatePresence>
+                {isModalOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/40 p-4 backdrop-blur-sm sm:items-center sm:p-6"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="scrollbar-thin max-h-[calc(100vh-2rem)] w-full max-w-3xl overflow-y-auto rounded-3xl border border-white/50 bg-white p-6 shadow-2xl sm:p-8"
+                        >
+                            <div className="mb-8 flex items-start justify-between gap-4">
+                                <div>
+                                    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-widest text-emerald-700">
+                                        <LuSparkles className="h-3.5 w-3.5" />
+                                        Manual Ingestion
+                                    </div>
+                                    <h3 className="mt-4 text-2xl font-black tracking-tight text-slate-900">
+                                        Add New Scope-1 Record
+                                    </h3>
+                                    <p className="mt-1 text-sm font-medium text-slate-500">
+                                        Enter activity details to directly ingest direct emissions data.
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700"
+                                >
+                                    <LuX className="h-5 w-5" />
+                                </button>
+                            </div>
+
+                            <form onSubmit={onSubmitIngest} className="grid gap-5 sm:grid-cols-2">
+                                <Field label="Fuel Type">
+                                    {isMounted && !isLoadingOverlayData ? (
+                                        <Select
+                                            options={fuelTypeOptions}
+                                            value={selectedFuelTypeOption}
+                                            onChange={(opt) => {
+                                                setSelectedFuelType(opt?.value ?? null);
+                                                setIngestForm((p) => ({
+                                                    ...p,
+                                                    fuelType: opt?.value ?? "",
+                                                    fuelName: "",
+                                                }));
+                                            }}
+                                            placeholder="Select fuel type..."
+                                            styles={{
+                                                control: (base) => ({
+                                                    ...base,
+                                                    height: "44px",
+                                                    borderRadius: "12px",
+                                                    borderColor: "#e2e8f0",
+                                                    backgroundColor: "#f8fafc",
+                                                    paddingLeft: "12px",
+                                                    fontSize: "14px",
+                                                    fontWeight: "500",
+                                                    color: "#1e293b",
+                                                }),
+                                                option: (base) => ({
+                                                    ...base,
+                                                    backgroundColor: "white",
+                                                    color: "#1e293b",
+                                                    cursor: "pointer",
+                                                    "&:hover": {
+                                                        backgroundColor: "#f1f5f9",
+                                                    },
+                                                }),
+                                                menuList: (base) => ({
+                                                    ...base,
+                                                    borderRadius: "12px",
+                                                }),
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="h-11 animate-pulse rounded-xl bg-slate-100" />
+                                    )}
+                                </Field>
+
+                                <Field label="Fuel Name">
+                                    {isMounted && !isLoadingOverlayData ? (
+                                        <Select
+                                            options={fuelNameOptions}
+                                            value={
+                                                ingestForm.fuelName
+                                                    ? {
+                                                          label: ingestForm.fuelName,
+                                                          value: ingestForm.fuelName,
+                                                      }
+                                                    : null
+                                            }
+                                            onChange={(opt) =>
+                                                setIngestForm((p) => ({
+                                                    ...p,
+                                                    fuelName: opt?.value ?? "",
+                                                }))
+                                            }
+                                            placeholder="Select fuel name..."
+                                            isDisabled={!selectedFuelType}
+                                            styles={{
+                                                control: (base) => ({
+                                                    ...base,
+                                                    height: "44px",
+                                                    borderRadius: "12px",
+                                                    borderColor: "#e2e8f0",
+                                                    backgroundColor: "#f8fafc",
+                                                    paddingLeft: "12px",
+                                                    fontSize: "14px",
+                                                    fontWeight: "500",
+                                                    color: "#1e293b",
+                                                    opacity: !selectedFuelType ? 0.5 : 1,
+                                                    cursor: !selectedFuelType ? "not-allowed" : "pointer",
+                                                }),
+                                                option: (base) => ({
+                                                    ...base,
+                                                    backgroundColor: "white",
+                                                    color: "#1e293b",
+                                                    cursor: "pointer",
+                                                    "&:hover": {
+                                                        backgroundColor: "#f1f5f9",
+                                                    },
+                                                }),
+                                                menuList: (base) => ({
+                                                    ...base,
+                                                    borderRadius: "12px",
+                                                }),
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="h-11 animate-pulse rounded-xl bg-slate-100" />
+                                    )}
+                                </Field>
+
+                                <Field label="Quantity">
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        value={ingestForm.quantity}
+                                        onChange={(e) =>
+                                            setIngestForm((p) => ({
+                                                ...p,
+                                                quantity: e.target.value,
+                                            }))
+                                        }
+                                        className={inputClass}
+                                    />
+                                </Field>
+
+                                <Field label="Unit">
+                                    {isMounted && !isLoadingOverlayData ? (
+                                        <Select
+                                            options={unitOptions}
+                                            value={
+                                                ingestForm.unit
+                                                    ? {
+                                                          label: ingestForm.unit,
+                                                          value: ingestForm.unit,
+                                                      }
+                                                    : null
+                                            }
+                                            onChange={(opt) =>
+                                                setIngestForm((p) => ({
+                                                    ...p,
+                                                    unit: opt?.value ?? "",
+                                                }))
+                                            }
+                                            placeholder="Select unit..."
+                                            styles={{
+                                                control: (base) => ({
+                                                    ...base,
+                                                    height: "44px",
+                                                    borderRadius: "12px",
+                                                    borderColor: "#e2e8f0",
+                                                    backgroundColor: "#f8fafc",
+                                                    paddingLeft: "12px",
+                                                    fontSize: "14px",
+                                                    fontWeight: "500",
+                                                    color: "#1e293b",
+                                                }),
+                                                option: (base) => ({
+                                                    ...base,
+                                                    backgroundColor: "white",
+                                                    color: "#1e293b",
+                                                    cursor: "pointer",
+                                                    "&:hover": {
+                                                        backgroundColor: "#f1f5f9",
+                                                    },
+                                                }),
+                                                menuList: (base) => ({
+                                                    ...base,
+                                                    borderRadius: "12px",
+                                                }),
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="h-11 animate-pulse rounded-xl bg-slate-100" />
+                                    )}
+                                </Field>
+
+                                <Field label="Cost">
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        value={ingestForm.cost}
+                                        onChange={(e) =>
+                                            setIngestForm((p) => ({
+                                                ...p,
+                                                cost: e.target.value,
+                                            }))
+                                        }
+                                        className={inputClass}
+                                    />
+                                </Field>
+
+                                <Field label="Facility">
+                                    <input
+                                        value={ingestForm.facilityName}
+                                        onChange={(e) =>
+                                            setIngestForm((p) => ({
+                                                ...p,
+                                                facilityName: e.target.value,
+                                            }))
+                                        }
+                                        className={inputClass}
+                                    />
+                                </Field>
+
+                                <Field label="Organization">
+                                    <input
+                                        value={ingestForm.orgName}
+                                        onChange={(e) =>
+                                            setIngestForm((p) => ({
+                                                ...p,
+                                                orgName: e.target.value,
+                                            }))
+                                        }
+                                        className={inputClass}
+                                    />
+                                </Field>
+
+                                <Field label="Year Month">
+                                    <input
+                                        type="month"
+                                        value={ingestForm.yearMonth}
+                                        onChange={(e) =>
+                                            setIngestForm((p) => ({
+                                                ...p,
+                                                yearMonth: e.target.value,
+                                            }))
+                                        }
+                                        className={inputClass}
+                                    />
+                                </Field>
+
+                                {submitError && (
+                                    <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600 sm:col-span-2">
+                                        {submitError}
+                                    </p>
+                                )}
+
+                                <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-6 sm:col-span-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsModalOpen(false)}
+                                        className="h-11 rounded-xl px-6 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={ingestMutation.isPending}
+                                        className="h-11 rounded-xl bg-emerald-600 px-6 text-sm font-bold text-white shadow-md shadow-emerald-500/20 transition-colors hover:bg-emerald-700 disabled:opacity-50"
+                                    >
+                                        {ingestMutation.isPending ? "Saving..." : "Save Record"}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
+    );
+}
+
+const inputClass =
+    "h-11 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-medium text-slate-800 outline-none transition-all hover:bg-white focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10";
+
+function Field({ label, children }: { label: string; children: ReactNode }) {
+    return (
+        <label className="grid gap-2">
+            <span className="text-[0.7rem] font-bold uppercase tracking-widest text-slate-500">{label}</span>
+            {children}
+        </label>
     );
 }

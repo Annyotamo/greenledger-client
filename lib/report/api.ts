@@ -10,8 +10,10 @@ import type {
     Scope1IngestResponse,
     Scope1ReportRecord,
     Scope1ReportResponse,
+    Scope2IngestListResponse,
     Scope2IngestRequest,
     Scope2IngestResponse,
+    Scope2ActivityDataIngest,
     Scope2ReportRecord,
     Scope2ReportResponse,
     CompanyDetails,
@@ -60,6 +62,16 @@ export async function getScope2Reports(): Promise<Scope2ReportRecord[]> {
 
 export async function ingestScope2Emission(payload: Scope2IngestRequest): Promise<void> {
     await privateApi.post<Scope2IngestResponse>("/scope2Ingest/ingestEmission", payload);
+}
+
+export async function getScope2IngestedRecords(): Promise<Scope2ActivityDataIngest[]> {
+    const { data } = await privateApi.get<Scope2ActivityDataIngest[] | Scope2IngestListResponse>(
+        "/scope2Ingest/getAll",
+    );
+    if (Array.isArray(data)) {
+        return data;
+    }
+    return data?.data ?? [];
 }
 
 export async function downloadScope2ReportCsv(startMonth: string, endMonth: string): Promise<Blob> {

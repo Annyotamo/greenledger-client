@@ -166,6 +166,7 @@ export interface Scope2ActivityDataIngest {
     outputUnit: string | null;
     cost: number | null;
     facilityName: string | null;
+    facilityid?: string | null;
     orgName: string | null;
     email: string | null;
     yearMonth: string | null;
@@ -213,6 +214,8 @@ export interface Scope2IngestRequest {
 }
 
 export type Scope2IngestResponse = ApiEnvelope<unknown>;
+
+export type Scope2IngestListResponse = ApiEnvelope<Scope2ActivityDataIngest[]>;
 
 export interface CompanyAddress {
     line1: string;

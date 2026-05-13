@@ -6,6 +6,7 @@ import {
     getScope1EmissionsOverlayDropdownData,
     getScope1IngestedRecords,
     getScope1Reports,
+    getScope2IngestedRecords,
     getScope2Reports,
     ingestScope1Emission,
     ingestScope2Emission,
@@ -16,6 +17,7 @@ import type {
     Scope1IngestRecord,
     Scope1IngestRequest,
     Scope1ReportRecord,
+    Scope2ActivityDataIngest,
     Scope2IngestRequest,
     Scope2ReportRecord,
 } from "@/types/report";
@@ -81,6 +83,15 @@ export function useIngestScope2EmissionMutation() {
         mutationFn: (payload: Scope2IngestRequest) => ingestScope2Emission(payload),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["reports", "scope2"] });
+            queryClient.invalidateQueries({ queryKey: ["scope2", "ingested-records"] });
         },
+    });
+}
+
+export function useScope2IngestedRecordsQuery() {
+    return useQuery<Scope2ActivityDataIngest[], unknown, Scope2ActivityDataIngest[]>({
+        queryKey: ["scope2", "ingested-records"],
+        queryFn: getScope2IngestedRecords,
+        staleTime: 60_000,
     });
 }

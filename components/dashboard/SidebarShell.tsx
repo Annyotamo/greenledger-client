@@ -86,29 +86,52 @@ export function Sidebar() {
     const scope1ReportRouteActive = pathname === "/scope-1/reports" || pathname.startsWith("/scope-1/reports/");
     const scope1IngestedRouteActive =
         pathname === "/scope-1/ingested-data" || pathname.startsWith("/scope-1/ingested-data/");
+    const scope2DashboardRouteActive = pathname === "/scope-2";
+    const scope2ReportRouteActive = pathname === "/scope-2/reports" || pathname.startsWith("/scope-2/reports/");
+    const scope2IngestedRouteActive =
+        pathname === "/scope-2/ingested-data" || pathname.startsWith("/scope-2/ingested-data/");
 
     const scope1ButtonRef = useRef<HTMLButtonElement | null>(null);
-    const closeHoverTimerRef = useRef<number | null>(null);
+    const scope2ButtonRef = useRef<HTMLButtonElement | null>(null);
+    const closeHoverTimerScope1Ref = useRef<number | null>(null);
+    const closeHoverTimerScope2Ref = useRef<number | null>(null);
     const [scope1FlyoutOpen, setScope1FlyoutOpen] = useState(false);
     const [scope1FlyoutPos, setScope1FlyoutPos] = useState<{ top: number; left: number } | null>(null);
+    const [scope2FlyoutOpen, setScope2FlyoutOpen] = useState(false);
+    const [scope2FlyoutPos, setScope2FlyoutPos] = useState<{ top: number; left: number } | null>(null);
 
     useEffect(() => {
         if (isMobile && !isOpen) {
             setScope1FlyoutOpen(false);
+            setScope2FlyoutOpen(false);
         }
     }, [isMobile, isOpen]);
 
     function cancelScope1Close() {
-        if (closeHoverTimerRef.current) {
-            window.clearTimeout(closeHoverTimerRef.current);
-            closeHoverTimerRef.current = null;
+        if (closeHoverTimerScope1Ref.current) {
+            window.clearTimeout(closeHoverTimerScope1Ref.current);
+            closeHoverTimerScope1Ref.current = null;
+        }
+    }
+
+    function cancelScope2Close() {
+        if (closeHoverTimerScope2Ref.current) {
+            window.clearTimeout(closeHoverTimerScope2Ref.current);
+            closeHoverTimerScope2Ref.current = null;
         }
     }
 
     function scheduleScope1Close() {
         cancelScope1Close();
-        closeHoverTimerRef.current = window.setTimeout(() => {
+        closeHoverTimerScope1Ref.current = window.setTimeout(() => {
             setScope1FlyoutOpen(false);
+        }, 140);
+    }
+
+    function scheduleScope2Close() {
+        cancelScope2Close();
+        closeHoverTimerScope2Ref.current = window.setTimeout(() => {
+            setScope2FlyoutOpen(false);
         }, 140);
     }
 
@@ -116,6 +139,8 @@ export function Sidebar() {
         const el = scope1ButtonRef.current;
         if (!el) return;
         cancelScope1Close();
+        setScope2FlyoutOpen(false);
+        cancelScope2Close();
         const rect = el.getBoundingClientRect();
         setScope1FlyoutPos({
             top: rect.top - 8,
@@ -124,9 +149,24 @@ export function Sidebar() {
         setScope1FlyoutOpen(true);
     }
 
+    function openScope2FlyoutFromButton() {
+        const el = scope2ButtonRef.current;
+        if (!el) return;
+        cancelScope2Close();
+        setScope1FlyoutOpen(false);
+        cancelScope1Close();
+        const rect = el.getBoundingClientRect();
+        setScope2FlyoutPos({
+            top: rect.top - 8,
+            left: rect.right + 12,
+        });
+        setScope2FlyoutOpen(true);
+    }
+
     useEffect(() => {
         return () => {
             cancelScope1Close();
+            cancelScope2Close();
         };
     }, []);
 
@@ -265,6 +305,7 @@ export function Sidebar() {
                             type="button"
                             onClick={() => {
                                 setScope1FlyoutOpen(false);
+                                setScope2FlyoutOpen(false);
                                 toggleGhg();
                             }}
                             className={[
@@ -303,6 +344,7 @@ export function Sidebar() {
                                         type="button"
                                         ref={scope1ButtonRef}
                                         onClick={() => {
+                                            setScope2FlyoutOpen(false);
                                             setActiveSection("scope-1");
                                             if (isMobile) {
                                                 openScope1FlyoutFromButton();
@@ -333,18 +375,32 @@ export function Sidebar() {
 
                                     <button
                                         type="button"
+                                        ref={scope2ButtonRef}
                                         onClick={() => {
                                             setScope1FlyoutOpen(false);
+                                            cancelScope1Close();
                                             setActiveSection("scope-2");
+                                            if (isMobile) {
+                                                openScope2FlyoutFromButton();
+                                                return;
+                                            }
                                             router.push("/scope-2");
-                                            if (isMobile) setOpen(false);
                                         }}
                                         className={[
                                             "group relative flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold tracking-tight transition-all duration-200",
                                             activeSection === "scope-2" || scope2RouteActive
                                                 ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10"
                                                 : "text-emerald-100/60 hover:bg-white/10 hover:text-white",
-                                        ].join(" ")}>
+                                        ].join(" ")}
+                                        onMouseEnter={() => {
+                                            if (isMobile) return;
+                                            cancelScope2Close();
+                                            openScope2FlyoutFromButton();
+                                        }}
+                                        onMouseLeave={() => {
+                                            if (isMobile) return;
+                                            scheduleScope2Close();
+                                        }}>
                                         <div
                                             className={`absolute left-[-17px] top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full border-2 bg-emerald-900 transition-colors ${activeSection === "scope-2" || scope2RouteActive ? "border-emerald-400" : "border-white/30 group-hover:border-emerald-400"}`}
                                         />
@@ -445,6 +501,7 @@ export function Sidebar() {
                             <button
                                 type="button"
                                 onClick={() => {
+                                    setScope2FlyoutOpen(false);
                                     setActiveSection("scope-1");
                                     router.push("/scope-1");
                                     setScope1FlyoutOpen(false);
@@ -464,6 +521,7 @@ export function Sidebar() {
                             <button
                                 type="button"
                                 onClick={() => {
+                                    setScope2FlyoutOpen(false);
                                     setActiveSection("scope-1");
                                     router.push("/scope-1/reports");
                                     setScope1FlyoutOpen(false);
@@ -483,6 +541,7 @@ export function Sidebar() {
                             <button
                                 type="button"
                                 onClick={() => {
+                                    setScope2FlyoutOpen(false);
                                     setActiveSection("scope-1");
                                     router.push("/scope-1/ingested-data");
                                     setScope1FlyoutOpen(false);
@@ -496,6 +555,89 @@ export function Sidebar() {
                                 ].join(" ")}>
                                 <LuFactory
                                     className={`h-4 w-4 ${scope1IngestedRouteActive ? "text-emerald-600" : "text-slate-400 group-hover:text-emerald-500"}`}
+                                />
+                                Ingested Data
+                            </button>
+                        </div>
+                    </motion.div>
+                ) : null}
+            </AnimatePresence>
+
+            {/* Flyout for Scope-2 */}
+            <AnimatePresence>
+                {scope2FlyoutOpen && scope2FlyoutPos ? (
+                    <motion.div
+                        initial={{ opacity: 0, x: -10, scale: 0.95 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        exit={{ opacity: 0, x: -10, scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        style={{ top: scope2FlyoutPos.top, left: scope2FlyoutPos.left, position: "fixed" }}
+                        onMouseEnter={!isMobile ? cancelScope2Close : undefined}
+                        onMouseLeave={!isMobile ? scheduleScope2Close : undefined}
+                        className="z-50 w-[240px] overflow-hidden rounded-3xl bg-white/80 p-2 shadow-[0_20px_45px_-10px_rgba(0,0,0,0.1)] ring-1 ring-white/60 backdrop-blur-2xl">
+                        <div className="mb-1 px-3 py-2">
+                            <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400">
+                                Scope-2 Analytics
+                            </p>
+                        </div>
+                        <div className="space-y-1">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setScope1FlyoutOpen(false);
+                                    setActiveSection("scope-2");
+                                    router.push("/scope-2");
+                                    setScope2FlyoutOpen(false);
+                                    if (isMobile) setOpen(false);
+                                }}
+                                className={[
+                                    "group flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
+                                    scope2DashboardRouteActive
+                                        ? "bg-gradient-to-r from-emerald-50 to-teal-50/50 text-emerald-800 shadow-sm ring-1 ring-emerald-500/20"
+                                        : "text-slate-600 hover:bg-white hover:text-slate-900 shadow-sm ring-1 ring-transparent hover:ring-slate-200/50",
+                                ].join(" ")}>
+                                <LuLayoutDashboard
+                                    className={`h-4 w-4 ${scope2DashboardRouteActive ? "text-emerald-600" : "text-slate-400 group-hover:text-emerald-500"}`}
+                                />
+                                Dashboard
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setScope1FlyoutOpen(false);
+                                    setActiveSection("scope-2");
+                                    router.push("/scope-2/reports");
+                                    setScope2FlyoutOpen(false);
+                                    if (isMobile) setOpen(false);
+                                }}
+                                className={[
+                                    "group flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
+                                    scope2ReportRouteActive
+                                        ? "bg-gradient-to-r from-emerald-50 to-teal-50/50 text-emerald-800 shadow-sm ring-1 ring-emerald-500/20"
+                                        : "text-slate-600 hover:bg-white hover:text-slate-900 shadow-sm ring-1 ring-transparent hover:ring-slate-200/50",
+                                ].join(" ")}>
+                                <LuActivity
+                                    className={`h-4 w-4 ${scope2ReportRouteActive ? "text-emerald-600" : "text-slate-400 group-hover:text-emerald-500"}`}
+                                />
+                                Reports
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setScope1FlyoutOpen(false);
+                                    setActiveSection("scope-2");
+                                    router.push("/scope-2/ingested-data");
+                                    setScope2FlyoutOpen(false);
+                                    if (isMobile) setOpen(false);
+                                }}
+                                className={[
+                                    "group flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
+                                    scope2IngestedRouteActive
+                                        ? "bg-gradient-to-r from-emerald-50 to-teal-50/50 text-emerald-800 shadow-sm ring-1 ring-emerald-500/20"
+                                        : "text-slate-600 hover:bg-white hover:text-slate-900 shadow-sm ring-1 ring-transparent hover:ring-slate-200/50",
+                                ].join(" ")}>
+                                <LuFactory
+                                    className={`h-4 w-4 ${scope2IngestedRouteActive ? "text-emerald-600" : "text-slate-400 group-hover:text-emerald-500"}`}
                                 />
                                 Ingested Data
                             </button>

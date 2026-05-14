@@ -21,6 +21,7 @@ import {
     LuLayoutDashboard,
     LuActivity,
     LuBuilding2,
+    LuMapPin,
 } from "react-icons/lu";
 
 type SidebarItemProps = {
@@ -422,10 +423,22 @@ export function Sidebar() {
                     <SidebarItem
                         label="Company"
                         icon={<LuBuilding2 className="h-[1.15rem] w-[1.15rem]" />}
+                        isActive={pathname === "/company"}
                         compact={compact}
                         onClick={() => {
                             setActiveSection("company");
                             router.push("/company");
+                            if (isMobile) setOpen(false);
+                        }}
+                    />
+                    <SidebarItem
+                        label="Facilities"
+                        icon={<LuMapPin className="h-[1.15rem] w-[1.15rem]" />}
+                        isActive={pathname === "/facility"}
+                        compact={compact}
+                        onClick={() => {
+                            setActiveSection("facility");
+                            router.push("/facility");
                             if (isMobile) setOpen(false);
                         }}
                     />

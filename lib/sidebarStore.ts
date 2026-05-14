@@ -10,6 +10,7 @@ type SectionKey =
     | "scope-1"
     | "scope-2"
     | "company"
+    | "facility"
     | "settings";
 
 type SidebarState = {

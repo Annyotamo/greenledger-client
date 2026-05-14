@@ -35,7 +35,6 @@ const NAV: NavItem[] = [
     {
         label: "Tenant",
         href: "/tenant",
-        children: [{ label: "Add Tenant", href: "/tenant" }],
     },
 ];
 
@@ -100,21 +99,45 @@ export function Navbar() {
                             className="relative inline-flex items-center gap-1.5 rounded-full bg-white/65 px-2 py-1.5 ring-1 ring-black/5 shadow-[0_18px_50px_-45px_rgba(15,23,42,0.35)]"
                             onMouseEnter={() => setNavOpen(true)}
                             onMouseLeave={() => setNavOpen(false)}>
-                            <button
-                                type="button"
-                                onClick={() => setNavOpen((v) => !v)}
-                                className={[
-                                    "px-3 py-1.5 rounded-full text-sm font-semibold tracking-tight transition inline-flex items-center gap-1.5",
-                                    isActive(pathname, ghg?.href)
-                                        ? "bg-black/6 text-black shadow-[0_10px_30px_-24px_rgba(15,23,42,0.6)]"
-                                        : "text-black/70 hover:bg-black/5 hover:text-black/90",
-                                ].join(" ")}
-                                aria-label="Open navigation">
-                                {ghg?.label ?? "Menu"}
-                                <FiChevronDown
-                                    className={["text-black/45 transition", navOpen ? "rotate-180" : ""].join(" ")}
-                                />
-                            </button>
+                            {NAV.map((item) => {
+                                const isItemActive = isActive(pathname, item.href);
+                                const hasChildren = item.children && item.children.length > 0;
+                                
+                                if (hasChildren) {
+                                    return (
+                                        <button
+                                            key={item.label}
+                                            type="button"
+                                            onClick={() => setNavOpen((v) => !v)}
+                                            className={[
+                                                "px-3 py-1.5 rounded-full text-sm font-semibold tracking-tight transition inline-flex items-center gap-1.5",
+                                                isItemActive
+                                                    ? "bg-black/6 text-black shadow-[0_10px_30px_-24px_rgba(15,23,42,0.6)]"
+                                                    : "text-black/70 hover:bg-black/5 hover:text-black/90",
+                                            ].join(" ")}
+                                            aria-label={`Open ${item.label} navigation`}>
+                                            {item.label}
+                                            <FiChevronDown
+                                                className={["text-black/45 transition", navOpen ? "rotate-180" : ""].join(" ")}
+                                            />
+                                        </button>
+                                    );
+                                }
+
+                                return (
+                                    <Link
+                                        key={item.label}
+                                        href={item.href ?? "#"}
+                                        className={[
+                                            "px-3 py-1.5 rounded-full text-sm font-semibold tracking-tight transition",
+                                            isItemActive
+                                                ? "bg-black/6 text-black shadow-[0_10px_30px_-24px_rgba(15,23,42,0.6)]"
+                                                : "text-black/70 hover:bg-black/5 hover:text-black/90",
+                                        ].join(" ")}>
+                                        {item.label}
+                                    </Link>
+                                );
+                            })}
 
                             {crumbs.slice(1).map((c, idx) => (
                                 <div key={`${c.label}-${c.href ?? idx}`} className="flex items-center">

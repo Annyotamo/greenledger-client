@@ -38,7 +38,7 @@ function SidebarItem({ label, icon, isActive, onClick, compact }: SidebarItemPro
             type="button"
             onClick={onClick}
             className={[
-                "group relative flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all duration-300",
+                "group relative flex w-full items-center gap-3 rounded-2xl px-2 py-1 text-sm font-semibold transition-all duration-300",
                 compact ? "justify-center px-2" : "",
                 isActive
                     ? "bg-white/15 text-white shadow-lg ring-1 ring-white/10"
@@ -91,6 +91,7 @@ export function Sidebar() {
     const scope2ReportRouteActive = pathname === "/scope-2/reports" || pathname.startsWith("/scope-2/reports/");
     const scope2IngestedRouteActive =
         pathname === "/scope-2/ingested-data" || pathname.startsWith("/scope-2/ingested-data/");
+    const usersRouteActive = pathname === "/users";
 
     const scope1ButtonRef = useRef<HTMLButtonElement | null>(null);
     const scope2ButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -225,7 +226,9 @@ export function Sidebar() {
             {/* Sidebar */}
             <motion.aside
                 className={`fixed z-50 flex min-h-0 flex-col overflow-hidden bg-linear-to-b from-[#16362c]/65 via-[#112b23]/60 to-[#0d221c]/65 text-white backdrop-blur-3xl shadow-[0_22px_60px_-32px_rgba(0,0,0,0.7)] ${
-                    isMobile ? "top-16 bottom-3 left-3 max-h-[calc(100dvh-4.75rem)] rounded-3xl" : "inset-y-0 left-0 h-dvh max-h-dvh"
+                    isMobile
+                        ? "top-16 bottom-3 left-3 max-h-[calc(100dvh-4.75rem)] rounded-3xl"
+                        : "inset-y-0 left-0 h-dvh max-h-dvh"
                 }`}
                 initial={false}
                 animate={
@@ -413,7 +416,7 @@ export function Sidebar() {
                     </div>
                 </nav>
 
-                <div className="relative z-10 flex shrink-0 flex-col gap-2 border-t border-white/10 px-3 pb-2 pt-3 lg:px-4">
+                <div className="relative z-10 flex shrink-0 flex-col border-t border-white/10 px-4">
                     <SidebarItem
                         label={isLoggingOut ? "Logging out..." : "Logout"}
                         icon={<LuLogOut className="h-[1.15rem] w-[1.15rem]" />}
@@ -428,6 +431,17 @@ export function Sidebar() {
                         onClick={() => {
                             setActiveSection("company");
                             router.push("/company");
+                            if (isMobile) setOpen(false);
+                        }}
+                    />
+                    <SidebarItem
+                        label="Team"
+                        icon={<LuUser className="h-[1.15rem] w-[1.15rem]" />}
+                        isActive={usersRouteActive}
+                        compact={compact}
+                        onClick={() => {
+                            setActiveSection("users");
+                            router.push("/users");
                             if (isMobile) setOpen(false);
                         }}
                     />

@@ -139,7 +139,14 @@ export default function ApplicationPage() {
     };
 
     const handleSubmit = async () => {
-        if (!user.firstName || !user.lastName || !user.email || !user.userName || !user.password || !user.confirmPassword) {
+        if (
+            !user.firstName ||
+            !user.lastName ||
+            !user.email ||
+            !user.userName ||
+            !user.password ||
+            !user.confirmPassword
+        ) {
             setError("Please fill out all required user fields.");
             return;
         }
@@ -173,7 +180,7 @@ export default function ApplicationPage() {
                 role: "ADMIN",
             };
 
-            await publicApi.post("/user/addUser", userPayload);
+            await publicApi.post("/user/registerUser", userPayload);
 
             setSuccess(true);
             setTimeout(() => {
@@ -229,22 +236,24 @@ export default function ApplicationPage() {
                     <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
                         Setup your GreenLedger
                     </h1>
-                    <p className="text-emerald-100/80">
-                        Create your company profile and admin account to get started.
-                    </p>
+                    <p className="text-emerald-100/80">Create your company profile and admin account to get started.</p>
                 </div>
 
                 {/* Step indicator */}
                 <div className="mt-10 flex items-center gap-4">
-                    <div className={`flex items-center gap-3 ${step >= 1 ? "text-emerald-300" : "text-emerald-100/40"}`}>
-                        <div className={`flex h-8 w-8 items-center justify-center rounded-full border ${step >= 1 ? "border-emerald-400 bg-emerald-500/20" : "border-emerald-100/20 bg-transparent"} text-sm font-bold`}>
+                    <div
+                        className={`flex items-center gap-3 ${step >= 1 ? "text-emerald-300" : "text-emerald-100/40"}`}>
+                        <div
+                            className={`flex h-8 w-8 items-center justify-center rounded-full border ${step >= 1 ? "border-emerald-400 bg-emerald-500/20" : "border-emerald-100/20 bg-transparent"} text-sm font-bold`}>
                             1
                         </div>
                         <span className="font-semibold tracking-wide">Company</span>
                     </div>
                     <div className="h-px w-12 bg-white/10 sm:w-24" />
-                    <div className={`flex items-center gap-3 ${step >= 2 ? "text-emerald-300" : "text-emerald-100/40"}`}>
-                        <div className={`flex h-8 w-8 items-center justify-center rounded-full border ${step >= 2 ? "border-emerald-400 bg-emerald-500/20" : "border-emerald-100/20 bg-transparent"} text-sm font-bold`}>
+                    <div
+                        className={`flex items-center gap-3 ${step >= 2 ? "text-emerald-300" : "text-emerald-100/40"}`}>
+                        <div
+                            className={`flex h-8 w-8 items-center justify-center rounded-full border ${step >= 2 ? "border-emerald-400 bg-emerald-500/20" : "border-emerald-100/20 bg-transparent"} text-sm font-bold`}>
                             2
                         </div>
                         <span className="font-semibold tracking-wide">Admin User</span>
@@ -272,35 +281,123 @@ export default function ApplicationPage() {
                             </div>
 
                             <div className="grid gap-5 sm:grid-cols-2">
-                                <Field label="Legal Company Name" required value={company.legalCompanyName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCompany("legalCompanyName", e.target.value)} />
-                                <Field label="Display Name" required value={company.displayName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCompany("displayName", e.target.value)} />
-                                <Field label="Industry Sector" required value={company.industrySector} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCompany("industrySector", e.target.value)} />
-                                <Field label="CIN Number" value={company.cinNumber} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCompany("cinNumber", e.target.value)} />
-                                <Field label="GST Number" value={company.gstNumber} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCompany("gstNumber", e.target.value)} />
-                                <Field label="Baseline Year" type="number" required value={company.baselineYear.toString()} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCompany("baselineYear", parseInt(e.target.value) || 2025)} />
+                                <Field
+                                    label="Legal Company Name"
+                                    required
+                                    value={company.legalCompanyName}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        updateCompany("legalCompanyName", e.target.value)
+                                    }
+                                />
+                                <Field
+                                    label="Display Name"
+                                    required
+                                    value={company.displayName}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        updateCompany("displayName", e.target.value)
+                                    }
+                                />
+                                <Field
+                                    label="Industry Sector"
+                                    required
+                                    value={company.industrySector}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        updateCompany("industrySector", e.target.value)
+                                    }
+                                />
+                                <Field
+                                    label="CIN Number"
+                                    value={company.cinNumber}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        updateCompany("cinNumber", e.target.value)
+                                    }
+                                />
+                                <Field
+                                    label="GST Number"
+                                    value={company.gstNumber}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        updateCompany("gstNumber", e.target.value)
+                                    }
+                                />
+                                <Field
+                                    label="Baseline Year"
+                                    type="number"
+                                    required
+                                    value={company.baselineYear.toString()}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        updateCompany("baselineYear", parseInt(e.target.value) || 2025)
+                                    }
+                                />
                             </div>
 
                             <div className="mt-8 border-t border-emerald-900/10 pt-6">
-                                <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-emerald-900/60">Registered Address</h3>
+                                <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-emerald-900/60">
+                                    Registered Address
+                                </h3>
                                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                                    <Field label="Address Line 1" value={company.registeredAddress.line1} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateAddress("line1", e.target.value)} />
-                                    <Field label="Address Line 2" value={company.registeredAddress.line2} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateAddress("line2", e.target.value)} />
-                                    <Field label="City" value={company.registeredAddress.city} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateAddress("city", e.target.value)} />
-                                    <Field label="State / Province" value={company.registeredAddress.state} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateAddress("state", e.target.value)} />
-                                    <Field label="Country" value={company.registeredAddress.country} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateAddress("country", e.target.value)} />
-                                    <Field label="Postal Code" value={company.registeredAddress.postalCode} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateAddress("postalCode", e.target.value)} />
+                                    <Field
+                                        label="Address Line 1"
+                                        value={company.registeredAddress.line1}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                            updateAddress("line1", e.target.value)
+                                        }
+                                    />
+                                    <Field
+                                        label="Address Line 2"
+                                        value={company.registeredAddress.line2}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                            updateAddress("line2", e.target.value)
+                                        }
+                                    />
+                                    <Field
+                                        label="City"
+                                        value={company.registeredAddress.city}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                            updateAddress("city", e.target.value)
+                                        }
+                                    />
+                                    <Field
+                                        label="State / Province"
+                                        value={company.registeredAddress.state}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                            updateAddress("state", e.target.value)
+                                        }
+                                    />
+                                    <Field
+                                        label="Country"
+                                        value={company.registeredAddress.country}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                            updateAddress("country", e.target.value)
+                                        }
+                                    />
+                                    <Field
+                                        label="Postal Code"
+                                        value={company.registeredAddress.postalCode}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                            updateAddress("postalCode", e.target.value)
+                                        }
+                                    />
                                 </div>
                             </div>
 
                             <div className="mt-8 border-t border-emerald-900/10 pt-6">
-                                <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-emerald-900/60">Reporting Configuration</h3>
+                                <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-emerald-900/60">
+                                    Reporting Configuration
+                                </h3>
                                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                                     <label className="grid gap-1.5">
-                                        <span className="text-xs font-semibold text-emerald-950">Reporting Currency <span className="text-red-500">*</span></span>
+                                        <span className="text-xs font-semibold text-emerald-950">
+                                            Reporting Currency <span className="text-red-500">*</span>
+                                        </span>
                                         <Select
                                             options={CURRENCIES}
-                                            value={CURRENCIES.find((c) => c.value === company.reportingCurrency) || CURRENCIES[0]}
-                                            onChange={(option) => updateCompany("reportingCurrency", option?.value || "INR")}
+                                            value={
+                                                CURRENCIES.find((c) => c.value === company.reportingCurrency) ||
+                                                CURRENCIES[0]
+                                            }
+                                            onChange={(option) =>
+                                                updateCompany("reportingCurrency", option?.value || "INR")
+                                            }
                                             styles={{
                                                 control: (base) => ({
                                                     ...base,
@@ -314,27 +411,53 @@ export default function ApplicationPage() {
                                         />
                                     </label>
                                     <label className="grid gap-1.5">
-                                        <span className="text-xs font-semibold text-emerald-950">Fiscal Year Start Month <span className="text-red-500">*</span></span>
+                                        <span className="text-xs font-semibold text-emerald-950">
+                                            Fiscal Year Start Month <span className="text-red-500">*</span>
+                                        </span>
                                         <select
                                             value={company.fiscalYearStartMonth}
-                                            onChange={(e) => updateCompany("fiscalYearStartMonth", parseInt(e.target.value) || 4)}
-                                            className="h-11 rounded-xl border border-emerald-900/10 bg-white px-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-100"
-                                        >
+                                            onChange={(e) =>
+                                                updateCompany("fiscalYearStartMonth", parseInt(e.target.value) || 4)
+                                            }
+                                            className="h-11 rounded-xl border border-emerald-900/10 bg-white px-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-100">
                                             {MONTHS.map((m) => (
-                                                <option key={m.value} value={m.value}>{m.label}</option>
+                                                <option key={m.value} value={m.value}>
+                                                    {m.label}
+                                                </option>
                                             ))}
                                         </select>
                                     </label>
-                                    <Field label="Logo URL" type="url" value={company.logoUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCompany("logoUrl", e.target.value)} />
+                                    <Field
+                                        label="Logo URL"
+                                        type="url"
+                                        value={company.logoUrl}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                            updateCompany("logoUrl", e.target.value)
+                                        }
+                                    />
                                 </div>
                             </div>
 
                             <div className="mt-8 border-t border-emerald-900/10 pt-6">
-                                <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-emerald-900/60">Enabled Modules</h3>
+                                <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-emerald-900/60">
+                                    Enabled Modules
+                                </h3>
                                 <div className="grid gap-4 sm:grid-cols-3">
-                                    <Switch label="Scope 1 Emissions" checked={company.scope1Enabled} onChange={(v) => updateCompany("scope1Enabled", v)} />
-                                    <Switch label="Scope 2 Emissions" checked={company.scope2Enabled} onChange={(v) => updateCompany("scope2Enabled", v)} />
-                                    <Switch label="Scope 3 Emissions" checked={company.scope3Enabled} onChange={(v) => updateCompany("scope3Enabled", v)} />
+                                    <Switch
+                                        label="Scope 1 Emissions"
+                                        checked={company.scope1Enabled}
+                                        onChange={(v) => updateCompany("scope1Enabled", v)}
+                                    />
+                                    <Switch
+                                        label="Scope 2 Emissions"
+                                        checked={company.scope2Enabled}
+                                        onChange={(v) => updateCompany("scope2Enabled", v)}
+                                    />
+                                    <Switch
+                                        label="Scope 3 Emissions"
+                                        checked={company.scope3Enabled}
+                                        onChange={(v) => updateCompany("scope3Enabled", v)}
+                                    />
                                 </div>
                             </div>
 
@@ -357,23 +480,77 @@ export default function ApplicationPage() {
                                 </div>
                                 <div>
                                     <h2 className="text-lg font-bold text-emerald-950">Administrator Profile</h2>
-                                    <p className="text-xs text-slate-500">First user account for {company.displayName || "your company"}.</p>
+                                    <p className="text-xs text-slate-500">
+                                        First user account for {company.displayName || "your company"}.
+                                    </p>
                                 </div>
                             </div>
 
                             <div className="grid gap-5 sm:grid-cols-2">
-                                <Field label="First Name" required value={user.firstName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateUser("firstName", e.target.value)} />
-                                <Field label="Last Name" required value={user.lastName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateUser("lastName", e.target.value)} />
-                                
-                                <Field label="Email Address" type="email" required value={user.email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateUser("email", e.target.value)} />
-                                <Field label="Phone Number" type="tel" value={user.phNo} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateUser("phNo", e.target.value)} />
-                                
-                                <Field label="Username" required value={user.userName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateUser("userName", e.target.value)} />
+                                <Field
+                                    label="First Name"
+                                    required
+                                    value={user.firstName}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        updateUser("firstName", e.target.value)
+                                    }
+                                />
+                                <Field
+                                    label="Last Name"
+                                    required
+                                    value={user.lastName}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        updateUser("lastName", e.target.value)
+                                    }
+                                />
+
+                                <Field
+                                    label="Email Address"
+                                    type="email"
+                                    required
+                                    value={user.email}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        updateUser("email", e.target.value)
+                                    }
+                                />
+                                <Field
+                                    label="Phone Number"
+                                    type="tel"
+                                    value={user.phNo}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        updateUser("phNo", e.target.value)
+                                    }
+                                />
+
+                                <Field
+                                    label="Username"
+                                    required
+                                    value={user.userName}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        updateUser("userName", e.target.value)
+                                    }
+                                />
                             </div>
 
                             <div className="mt-5 grid gap-5 sm:grid-cols-2 border-t border-emerald-900/10 pt-5">
-                                <PasswordField label="Password" required value={user.password} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateUser("password", e.target.value)} />
-                                <Field label="Confirm Password" type="password" required value={user.confirmPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateUser("confirmPassword", e.target.value)} onPaste={(e: React.ClipboardEvent<HTMLInputElement>) => e.preventDefault()} />
+                                <PasswordField
+                                    label="Password"
+                                    required
+                                    value={user.password}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        updateUser("password", e.target.value)
+                                    }
+                                />
+                                <Field
+                                    label="Confirm Password"
+                                    type="password"
+                                    required
+                                    value={user.confirmPassword}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        updateUser("confirmPassword", e.target.value)
+                                    }
+                                    onPaste={(e: React.ClipboardEvent<HTMLInputElement>) => e.preventDefault()}
+                                />
                             </div>
 
                             <div className="mt-8 flex items-center justify-between pt-4">
@@ -391,8 +568,19 @@ export default function ApplicationPage() {
                                     {isSubmitting ? (
                                         <>
                                             <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                                                <circle
+                                                    className="opacity-25"
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="10"
+                                                    stroke="currentColor"
+                                                    strokeWidth="4"
+                                                />
+                                                <path
+                                                    className="opacity-75"
+                                                    fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                                />
                                             </svg>
                                             Registering...
                                         </>
@@ -452,8 +640,7 @@ function PasswordField({ label, value, onChange, required = false }: FieldProps)
                 <button
                     type="button"
                     onClick={() => setShow(!show)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-emerald-900/50 transition hover:bg-emerald-50 hover:text-emerald-900"
-                >
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-emerald-900/50 transition hover:bg-emerald-50 hover:text-emerald-900">
                     {show ? <LuEyeOff className="h-4 w-4" /> : <LuEye className="h-4 w-4" />}
                 </button>
             </div>
@@ -461,7 +648,15 @@ function PasswordField({ label, value, onChange, required = false }: FieldProps)
     );
 }
 
-function Switch({ label, checked, onChange }: { label: string; checked: boolean; onChange: (checked: boolean) => void }) {
+function Switch({
+    label,
+    checked,
+    onChange,
+}: {
+    label: string;
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+}) {
     return (
         <div className="flex items-center justify-between rounded-xl border border-emerald-900/10 bg-emerald-50/40 px-4 py-3 shadow-sm transition hover:bg-emerald-50/80">
             <span className="text-sm font-semibold text-emerald-950">{label}</span>
@@ -470,9 +665,10 @@ function Switch({ label, checked, onChange }: { label: string; checked: boolean;
                 role="switch"
                 aria-checked={checked}
                 onClick={() => onChange(!checked)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2 ${checked ? 'bg-emerald-600' : 'bg-slate-200'}`}
-            >
-                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2 ${checked ? "bg-emerald-600" : "bg-slate-200"}`}>
+                <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${checked ? "translate-x-5" : "translate-x-0"}`}
+                />
             </button>
         </div>
     );

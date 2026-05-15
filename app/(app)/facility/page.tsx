@@ -60,6 +60,22 @@ export default function FacilityPage() {
         }
     }
 
+    async function handleDeleteFacility(id: string) {
+        if (!confirm("Are you sure you want to delete this facility?")) return;
+        try {
+            const res = await fetch(`/api/facility/delete/${id}`, {
+                method: "DELETE",
+            });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.message || "Failed to delete facility");
+            }
+            fetchFacilities();
+        } catch (error: any) {
+            alert(error.message);
+        }
+    }
+
     useEffect(() => {
         fetchFacilities();
     }, []);
@@ -245,9 +261,17 @@ export default function FacilityPage() {
                                                         <div className="my-1 h-px w-full bg-slate-100" />
 
                                                         {/* Delete Button */}
-                                                        <button className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
-                                                            <LuTrash2 className="text-lg" />
-                                                            Delete Facility
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                setOpenDropdownId(null);
+                                                                handleDeleteFacility(facility.id);
+                                                            }}
+                                                            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
+                                                            <LuTrash2 className="text-lg pointer-events-none" />
+                                                            <span className="pointer-events-none">Delete Facility</span>
                                                         </button>
                                                     </motion.div>
                                                 )}

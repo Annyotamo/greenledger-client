@@ -13,8 +13,16 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "Not authenticated." }, { status: 401 });
         }
 
-        const body = await req.json().catch(() => ({}));
-        
+        const rawBody = await req.json().catch(() => ({}));
+        const body = {
+            companyName: String(rawBody.companyName ?? "").trim(),
+            location: String(rawBody.location ?? "").trim(),
+        };
+
+        if (!body.companyName || !body.location) {
+            return NextResponse.json({ message: "companyName and location are required." }, { status: 400 });
+        }
+
         const url = apiUrl("/tenant/add");
         const res = await api.post(url, body, {
             headers: {

@@ -159,8 +159,10 @@ export default function TenantPage() {
                                 <dl className="grid grid-cols-2 gap-2 text-xs">
                                     <div>
                                         <dt className="text-slate-400">Added By</dt>
-                                        <dd className="mt-0.5 truncate font-medium text-slate-700" title={tenant.addedBy}>
-                                            {tenant.addedBy.split('@')[0]}
+                                        <dd
+                                            className="mt-0.5 truncate font-medium text-slate-700"
+                                            title={tenant.addedBy ?? "Unknown"}>
+                                            {tenant.addedBy ? tenant.addedBy.split("@")[0] : "Unknown"}
                                         </dd>
                                     </div>
                                     <div>

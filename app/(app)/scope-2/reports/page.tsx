@@ -195,7 +195,7 @@ export default function Scope2ReportsPage() {
             .map(([month, v]) => ({
                 month,
                 monthLabel: getMonthLabel(month),
-                emissions: toTonne(v.emissions),
+                emissions: v.emissions,
                 cost: v.cost,
             }))
             .sort((a, b) => a.month.localeCompare(b.month));
@@ -208,7 +208,7 @@ export default function Scope2ReportsPage() {
             map.set(facility, (map.get(facility) ?? 0) + (row.co2eTotal ?? 0));
         }
         return Array.from(map.entries())
-            .map(([facility, co2e]) => ({ facility, co2e: toTonne(co2e) }))
+            .map(([facility, co2e]) => ({ facility, co2e }))
             .sort((a, b) => b.co2e - a.co2e);
     }, [records]);
 
@@ -220,7 +220,7 @@ export default function Scope2ReportsPage() {
         }
         const palette = ["#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0"];
         return Array.from(map.entries())
-            .map(([source, co2e], idx) => ({ source, co2e: toTonne(co2e), color: palette[idx % palette.length] }))
+            .map(([source, co2e], idx) => ({ source, co2e, color: palette[idx % palette.length] }))
             .sort((a, b) => b.co2e - a.co2e);
     }, [records]);
 
@@ -282,7 +282,7 @@ export default function Scope2ReportsPage() {
                                 {[
                                     {
                                         label: "Total Emissions",
-                                        value: `${formatNumber(toTonne(totals.totalEmissions))}`,
+                                        value: `${formatNumber(totals.totalEmissions)}`,
                                         unit: "tCO₂e",
                                         icon: <LuBolt />,
                                     },
@@ -295,7 +295,7 @@ export default function Scope2ReportsPage() {
                                     {
                                         label: "Total Cost",
                                         value: `${formatNumber(totals.totalCost)}`,
-                                        unit: "",
+                                        unit: "INR",
                                         icon: <LuCircleDollarSign />,
                                     },
                                     {
@@ -431,7 +431,7 @@ export default function Scope2ReportsPage() {
                                                             {row.outputUnit ?? "-"}
                                                         </td>
                                                         <td className="px-4 py-3 font-bold text-emerald-600">
-                                                            {formatCO2e(toTonne(row.co2eTotal ?? 0))}
+                                                            {formatNumber(row.co2eTotal ?? 0)}
                                                         </td>
                                                     </tr>
                                                 ))}

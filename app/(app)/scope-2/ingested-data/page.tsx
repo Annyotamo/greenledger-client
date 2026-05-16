@@ -176,9 +176,6 @@ export default function Scope2IngestedDataPage() {
                             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">
                                 Ingested data feed
                             </h1>
-                            <p className="max-w-lg text-xs font-medium text-slate-500 sm:text-sm">
-                                Indirect energy ingestion log from <code className="rounded bg-slate-100 px-1 text-[11px]">/scope2Ingest/getAll</code>.
-                            </p>
                         </motion.div>
 
                         <div className="flex w-full flex-col items-stretch gap-3 md:w-auto md:items-end">
@@ -301,6 +298,7 @@ export default function Scope2IngestedDataPage() {
                                     {
                                         label: "Total cost",
                                         value: formatNumber(totals.totalCost),
+                                        unit: "INR",
                                         icon: <LuCircleDollarSign />,
                                     },
                                     {
@@ -336,6 +334,11 @@ export default function Scope2IngestedDataPage() {
                                                 "err" in stat && stat.err ? "text-red-600" : "text-slate-800"
                                             }`}>
                                             {stat.value}
+                                            {stat.unit && (
+                                                <span className="text-sm font-semibold text-slate-500 ml-2">
+                                                    {stat.unit}
+                                                </span>
+                                            )}
                                         </h3>
                                     </motion.div>
                                 ))}
@@ -372,18 +375,30 @@ export default function Scope2IngestedDataPage() {
                                             <tbody className="divide-y divide-slate-100">
                                                 {paged.map((row) => (
                                                     <tr key={row.id} className="transition-colors hover:bg-white/80">
-                                                        <td className="px-3 py-2 font-semibold text-slate-800">{safe(row.fuelName)}</td>
-                                                        <td className="px-3 py-2 text-slate-600">{formatNumber(row.quantityConsume ?? 0)}</td>
+                                                        <td className="px-3 py-2 font-semibold text-slate-800">
+                                                            {safe(row.fuelName)}
+                                                        </td>
+                                                        <td className="px-3 py-2 text-slate-600">
+                                                            {formatNumber(row.quantityConsume ?? 0)}
+                                                        </td>
                                                         <td className="px-3 py-2 text-slate-600">
                                                             {formatNumber(row.outPutQuantityConsume ?? 0)}
                                                         </td>
                                                         <td className="px-3 py-2 text-[10px] text-slate-500">
                                                             {safe(row.unit)} → {safe(row.outputUnit)}
                                                         </td>
-                                                        <td className="px-3 py-2 text-slate-600">{formatNumber(row.cost ?? 0)}</td>
-                                                        <td className="px-3 py-2 text-slate-600">{safe(row.facilityName)}</td>
-                                                        <td className="px-3 py-2 text-slate-600">{safe(row.orgName)}</td>
-                                                        <td className="px-3 py-2 text-slate-600">{getMonthLabel(row.yearMonth)}</td>
+                                                        <td className="px-3 py-2 text-slate-600">
+                                                            {formatNumber(row.cost ?? 0)}
+                                                        </td>
+                                                        <td className="px-3 py-2 text-slate-600">
+                                                            {safe(row.facilityName)}
+                                                        </td>
+                                                        <td className="px-3 py-2 text-slate-600">
+                                                            {safe(row.orgName)}
+                                                        </td>
+                                                        <td className="px-3 py-2 text-slate-600">
+                                                            {getMonthLabel(row.yearMonth)}
+                                                        </td>
                                                         <td className="px-3 py-2">
                                                             <span
                                                                 className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${
@@ -394,14 +409,18 @@ export default function Scope2IngestedDataPage() {
                                                                 {row.status ?? "-"}
                                                             </span>
                                                         </td>
-                                                        <td className="max-w-[200px] truncate px-3 py-2 text-[10px] text-slate-500" title={safe(row.errorMsg)}>
+                                                        <td
+                                                            className="max-w-[200px] truncate px-3 py-2 text-[10px] text-slate-500"
+                                                            title={safe(row.errorMsg)}>
                                                             {safe(row.errorMsg)}
                                                         </td>
                                                     </tr>
                                                 ))}
                                                 {paged.length === 0 && (
                                                     <tr>
-                                                        <td colSpan={10} className="px-4 py-8 text-center text-sm text-slate-500">
+                                                        <td
+                                                            colSpan={10}
+                                                            className="px-4 py-8 text-center text-sm text-slate-500">
                                                             No records in this range.
                                                         </td>
                                                     </tr>
@@ -444,7 +463,7 @@ export default function Scope2IngestedDataPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/40 p-4 backdrop-blur-sm sm:items-center sm:p-6">
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm sm:p-6">
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -456,7 +475,9 @@ export default function Scope2IngestedDataPage() {
                                         <LuSparkles className="h-3.5 w-3.5" />
                                         Manual ingestion
                                     </div>
-                                    <h3 className="mt-4 text-2xl font-black tracking-tight text-slate-900">Add Scope-2 record</h3>
+                                    <h3 className="mt-4 text-2xl font-black tracking-tight text-slate-900">
+                                        Add Scope-2 record
+                                    </h3>
                                     <p className="mt-1 text-sm font-medium text-slate-500">
                                         Indirect energy / purchased electricity activity.
                                     </p>

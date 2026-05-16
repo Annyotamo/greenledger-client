@@ -249,7 +249,7 @@ export default function Scope1DashboardPage() {
                                     {
                                         label: "Total Cost",
                                         value: formatNumber(total.cost),
-                                        unit: "",
+                                        unit: "INR",
                                         icon: <LuCircleDollarSign />,
                                         trend: "-1.2%",
                                         trendUp: true,

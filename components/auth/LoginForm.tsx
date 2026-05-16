@@ -369,7 +369,8 @@ export default function LoginForm() {
     }
 
     function handleOtpSuccess() {
-        router.push("/dashboard");
+        // Temporarily redirect users to scope-1 dashboard after successful login
+        router.push("/scope-1");
     }
 
     function handleBack() {

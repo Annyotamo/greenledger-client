@@ -58,6 +58,8 @@ function SidebarItem({ label, icon, isActive, onClick, compact }: SidebarItemPro
 
 export function Sidebar() {
     const { isOpen, toggle, setOpen, activeSection, setActiveSection, ghgExpanded, toggleGhg } = useSidebarStore();
+    // Temporary flag to hide the top-level Dashboard link while it's under work
+    const HIDE_DASHBOARD = true;
     const router = useRouter();
     const pathname = usePathname();
 
@@ -291,17 +293,19 @@ export function Sidebar() {
                         "relative flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden px-3 pb-3 pt-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent",
                         !compact ? "lg:px-4" : "",
                     ].join(" ")}>
-                    <SidebarItem
-                        label="Dashboard"
-                        icon={<LuLayoutDashboard className="h-[1.15rem] w-[1.15rem]" />}
-                        compact={compact}
-                        isActive={pathname === "/dashboard"}
-                        onClick={() => {
-                            setActiveSection("dashboard");
-                            router.push("/dashboard");
-                            if (isMobile) setOpen(false);
-                        }}
-                    />
+                    {!HIDE_DASHBOARD && (
+                        <SidebarItem
+                            label="Dashboard"
+                            icon={<LuLayoutDashboard className="h-[1.15rem] w-[1.15rem]" />}
+                            compact={compact}
+                            isActive={pathname === "/dashboard"}
+                            onClick={() => {
+                                setActiveSection("dashboard");
+                                router.push("/dashboard");
+                                if (isMobile) setOpen(false);
+                            }}
+                        />
+                    )}
 
                     {/* GHG group */}
                     <div className="flex flex-col gap-2">

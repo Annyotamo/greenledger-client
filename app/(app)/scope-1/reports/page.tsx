@@ -416,7 +416,7 @@ export default function Scope1Page() {
                                     {
                                         label: "Total Cost",
                                         value: formatNumber(totals.totalCost),
-                                        unit: "",
+                                        unit: "INR",
                                         icon: <LuCircleDollarSign />,
                                     },
                                 ].map((stat, idx) => (

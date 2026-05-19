@@ -77,20 +77,23 @@ export default function HeroSection() {
                                     className="h-7 w-auto object-contain opacity-95"
                                 />
                             </a>
+                        </div>
+                        <div className="inline-flex items-center gap-3 rounded-2xl border border-white/25 bg-white/10 px-4 py-2 shadow-sm backdrop-blur-md h-12">
+                            <span className="text-[0.7rem] font-bold uppercase tracking-[0.22em] text-emerald-50/85">
+                                Certifications
+                            </span>
                             <span className="h-5 w-px bg-white/20" aria-hidden />
                             <a href="https://www.servicesepc.org/" target="_blank" rel="noopener noreferrer">
                                 <Image src={sepcKolkata} alt="SEPC" className="h-7 w-auto object-contain opacity-95" />
                             </a>
-                        </div>
-                        <div className="inline-flex items-center gap-3 rounded-2xl border border-white/25 bg-white/10 px-4 py-2 shadow-sm backdrop-blur-md h-12">
-                            <Image
-                                src={isoCertifaction}
-                                alt="ISO 27001 certification"
-                                className="h-12 w-12 object-contain opacity-95 sm:h-12"
-                            />
-                            <span className="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-emerald-50/85">
-                                ISO 27001
-                            </span>
+                            <span className="h-5 w-px bg-white/20" aria-hidden />
+                            <a href="https://www.iso.org/standard/27001" target="_blank" rel="noopener noreferrer">
+                                <Image
+                                    src={isoCertifaction}
+                                    alt="ISO 27001 certification"
+                                    className="h-7 w-auto object-contain opacity-95"
+                                />
+                            </a>
                         </div>
                     </div>
                 </div>

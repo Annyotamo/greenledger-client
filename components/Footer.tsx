@@ -53,7 +53,7 @@ export default function Footer() {
                                 </a>{" "}
                                 |{" "}
                                 <a href="https://www.servicesepc.org/" target="_blank" rel="noopener noreferrer">
-                                    SEPC Kolkata
+                                    Service Export Promotion Council (SEPC) India
                                 </a>
                             </p>
                         </div>
@@ -90,7 +90,7 @@ export default function Footer() {
                             </p>
                             <p className="mt-1 text-base font-bold tracking-tight hidden sm:block text-emerald-950 sm:text-lg">
                                 <a href="https://www.servicesepc.org/" target="_blank" rel="noopener noreferrer">
-                                    SEPC
+                                    SEPC India
                                 </a>{" "}
                                 |{" "}
                                 <a href="https://www.iso.org/standard/27001" target="_blank" rel="noopener noreferrer">

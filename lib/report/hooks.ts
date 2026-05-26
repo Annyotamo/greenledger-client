@@ -10,6 +10,24 @@ import {
     getScope2Reports,
     ingestScope1Emission,
     ingestScope2Emission,
+    getScope1Activities,
+    createScope1Activity,
+    getScope2EnergyActivities,
+    createScope2EnergyActivity,
+    getEmissionFactorSources,
+    getFuelCategories,
+    getFuels,
+    getFuelUnits,
+    getFacilities,
+    type Scope1Activity,
+    type CreateScope1ActivityRequest,
+    type Scope2EnergyActivity,
+    type CreateScope2EnergyActivityRequest,
+    type EmissionFactorSource,
+    type FuelCategory,
+    type Fuel,
+    type QuantityUnit,
+    type Facility,
 } from "@/lib/report/api";
 import type {
     Scope1DashboardData,
@@ -93,5 +111,89 @@ export function useScope2IngestedRecordsQuery() {
         queryKey: ["scope2", "ingested-records"],
         queryFn: getScope2IngestedRecords,
         staleTime: 60_000,
+    });
+}
+
+// Scope 1 Activities Hooks
+export function useScope1ActivitiesQuery() {
+    return useQuery<Scope1Activity[], unknown, Scope1Activity[]>({
+        queryKey: ["scope1", "activities"],
+        queryFn: getScope1Activities,
+        staleTime: 60_000,
+    });
+}
+
+export function useCreateScope1ActivityMutation() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (payload: CreateScope1ActivityRequest) => createScope1Activity(payload),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["scope1", "activities"] });
+        },
+    });
+}
+
+export function useScope2EnergyActivitiesQuery() {
+    return useQuery<Scope2EnergyActivity[], unknown, Scope2EnergyActivity[]>({
+        queryKey: ["scope2", "energy-activities"],
+        queryFn: getScope2EnergyActivities,
+        staleTime: 60_000,
+    });
+}
+
+export function useCreateScope2EnergyActivityMutation() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (payload: CreateScope2EnergyActivityRequest) => createScope2EnergyActivity(payload),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["scope2", "energy-activities"] });
+        },
+    });
+}
+
+export function useEmissionFactorSourcesQuery(enabled = true) {
+    return useQuery<EmissionFactorSource[], unknown, EmissionFactorSource[]>({
+        queryKey: ["emission-factor-sources"],
+        queryFn: getEmissionFactorSources,
+        staleTime: 5 * 60_000,
+        enabled,
+    });
+}
+
+export function useFuelCategoriesQuery(enabled = true) {
+    return useQuery<FuelCategory[], unknown, FuelCategory[]>({
+        queryKey: ["fuel-categories"],
+        queryFn: getFuelCategories,
+        staleTime: 5 * 60_000,
+        enabled,
+    });
+}
+
+export function useFuelsQuery(categoryId?: string, enabled = true) {
+    return useQuery<Fuel[], unknown, Fuel[]>({
+        queryKey: ["fuels", categoryId],
+        queryFn: () => getFuels(categoryId),
+        staleTime: 5 * 60_000,
+        enabled: enabled && !!categoryId,
+    });
+}
+
+export function useFuelUnitsQuery(fuelId?: string, enabled = true) {
+    return useQuery<QuantityUnit[], unknown, QuantityUnit[]>({
+        queryKey: ["fuel-units", fuelId],
+        queryFn: () => getFuelUnits(fuelId!),
+        staleTime: 5 * 60_000,
+        enabled: enabled && !!fuelId,
+    });
+}
+
+export function useFacilitiesQuery(enabled = true) {
+    return useQuery<Facility[], unknown, Facility[]>({
+        queryKey: ["facilities"],
+        queryFn: getFacilities,
+        staleTime: 5 * 60_000,
+        enabled,
     });
 }

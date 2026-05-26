@@ -213,6 +213,64 @@ export interface Scope2IngestRequest {
     year: string;
 }
 
+export interface Scope2EnergyActivity {
+    id: string;
+    created_at: string;
+    updated_at: string;
+    tenant_id: string;
+    fuel_id: string;
+    quantity: string;
+    unit_id: string;
+    source_id: string;
+    start_date: string | null;
+    end_date: string | null;
+    activity_date: string;
+    calculated_tonnes: string;
+    energy_gj: string;
+    fuel?: {
+        id: string;
+        name: string;
+        slug: string;
+        factor_type: string;
+        applicable_scopes: string[];
+        is_active: boolean;
+    } | null;
+    quantity_unit?: {
+        id: string;
+        name: string;
+        symbol: string;
+        unit_type: string;
+    } | null;
+    source?: {
+        id: string;
+        standard: string;
+        version: string;
+        region: string;
+        data_year: number;
+        is_active: boolean;
+        emission_unit: string;
+    } | null;
+    activity_period?: {
+        activity_date: string;
+        start_date: string | null;
+        end_date: string | null;
+    } | null;
+    calculated_emissions?: {
+        tonnes: string;
+        energy_gj: string;
+    } | null;
+    status?: string | null;
+    error_message?: string | null;
+}
+
+export interface CreateScope2EnergyActivityRequest {
+    fuel_id: string;
+    quantity: number;
+    unit_id: string;
+    source_id: string;
+    activity_date: string;
+}
+
 export type Scope2IngestResponse = ApiEnvelope<unknown>;
 
 export type Scope2IngestListResponse = ApiEnvelope<Scope2ActivityDataIngest[]>;

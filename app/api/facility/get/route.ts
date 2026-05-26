@@ -14,7 +14,7 @@ export async function GET() {
         }
 
         const baseURL = process.env.NEXT_PUBLIC_BASE_URL ?? "";
-        const url = `${baseURL}/facility/get`;
+        const url = `${baseURL}/api/v1/tenant/facility`;
         const res = await axios.get(url, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -41,7 +41,9 @@ export async function GET() {
         }
 
         const message =
-            typeof err === "object" && err && "message" in err ? String((err as any).message) : "Get facilities failed.";
+            typeof err === "object" && err && "message" in err
+                ? String((err as any).message)
+                : "Get facilities failed.";
         return NextResponse.json({ message }, { status: 500 });
     }
 }

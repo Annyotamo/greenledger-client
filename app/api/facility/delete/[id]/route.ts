@@ -15,7 +15,7 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
         const params = await context.params;
         const id = params.id;
         const baseURL = process.env.NEXT_PUBLIC_BASE_URL ?? "";
-        const url = `${baseURL}/facility/delete/${id}`;
+        const url = `${baseURL}/api/v1/tenant/facility/${id}`;
 
         const res = await axios.delete(url, {
             headers: {

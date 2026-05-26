@@ -16,7 +16,7 @@ export async function POST(req: Request) {
         const body = await req.json().catch(() => ({}));
 
         const baseURL = process.env.NEXT_PUBLIC_BASE_URL ?? "";
-        const url = `${baseURL}/facility/add`;
+        const url = `${baseURL}/api/v1/tenant/facility`;
         const res = await axios.post(url, body, {
             headers: {
                 Authorization: `Bearer ${token}`,

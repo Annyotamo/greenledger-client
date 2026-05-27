@@ -24,7 +24,6 @@ import {
     LuMapPin,
     LuZap,
 } from "react-icons/lu";
-
 type SidebarItemProps = {
     label: string;
     icon: ReactNode;
@@ -100,12 +99,16 @@ export function Sidebar() {
 
     const scope1ButtonRef = useRef<HTMLButtonElement | null>(null);
     const scope2ButtonRef = useRef<HTMLButtonElement | null>(null);
+    const energyButtonRef = useRef<HTMLButtonElement | null>(null);
     const closeHoverTimerScope1Ref = useRef<number | null>(null);
     const closeHoverTimerScope2Ref = useRef<number | null>(null);
+    const closeHoverTimerEnergyRef = useRef<number | null>(null);
     const [scope1FlyoutOpen, setScope1FlyoutOpen] = useState(false);
     const [scope1FlyoutPos, setScope1FlyoutPos] = useState<{ top: number; left: number } | null>(null);
     const [scope2FlyoutOpen, setScope2FlyoutOpen] = useState(false);
     const [scope2FlyoutPos, setScope2FlyoutPos] = useState<{ top: number; left: number } | null>(null);
+    const [energyFlyoutOpen, setEnergyFlyoutOpen] = useState(false);
+    const [energyFlyoutPos, setEnergyFlyoutPos] = useState<{ top: number; left: number } | null>(null);
 
     useEffect(() => {
         if (isMobile && !isOpen) {
@@ -128,6 +131,13 @@ export function Sidebar() {
         }
     }
 
+    function cancelEnergyClose() {
+        if (closeHoverTimerEnergyRef.current) {
+            window.clearTimeout(closeHoverTimerEnergyRef.current);
+            closeHoverTimerEnergyRef.current = null;
+        }
+    }
+
     function scheduleScope1Close() {
         cancelScope1Close();
         closeHoverTimerScope1Ref.current = window.setTimeout(() => {
@@ -139,6 +149,13 @@ export function Sidebar() {
         cancelScope2Close();
         closeHoverTimerScope2Ref.current = window.setTimeout(() => {
             setScope2FlyoutOpen(false);
+        }, 140);
+    }
+
+    function scheduleEnergyClose() {
+        cancelEnergyClose();
+        closeHoverTimerEnergyRef.current = window.setTimeout(() => {
+            setEnergyFlyoutOpen(false);
         }, 140);
     }
 
@@ -168,6 +185,22 @@ export function Sidebar() {
             left: rect.right + 12,
         });
         setScope2FlyoutOpen(true);
+    }
+
+    function openEnergyFlyoutFromButton() {
+        const el = energyButtonRef.current;
+        if (!el) return;
+        cancelEnergyClose();
+        setScope1FlyoutOpen(false);
+        cancelScope1Close();
+        setScope2FlyoutOpen(false);
+        cancelScope2Close();
+        const rect = el.getBoundingClientRect();
+        setEnergyFlyoutPos({
+            top: rect.top - 8,
+            left: rect.right + 12,
+        });
+        setEnergyFlyoutOpen(true);
     }
 
     useEffect(() => {
@@ -225,6 +258,71 @@ export function Sidebar() {
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
                     />
+                ) : null}
+            </AnimatePresence>
+
+            {/* Flyout for Energy (Dashboard / Activities) */}
+            <AnimatePresence>
+                {energyFlyoutOpen && energyFlyoutPos ? (
+                    <motion.div
+                        initial={{ opacity: 0, x: -10, scale: 0.95 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        exit={{ opacity: 0, x: -10, scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        style={{ top: energyFlyoutPos.top, left: energyFlyoutPos.left, position: "fixed" }}
+                        onMouseEnter={!isMobile ? cancelEnergyClose : undefined}
+                        onMouseLeave={!isMobile ? scheduleEnergyClose : undefined}
+                        className="z-50 w-[220px] overflow-hidden rounded-3xl bg-white/80 p-2 shadow-[0_20px_45px_-10px_rgba(0,0,0,0.1)] ring-1 ring-white/60 backdrop-blur-2xl">
+                        <div className="px-3 py-2 mb-1">
+                            <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400">Energy</p>
+                        </div>
+
+                        <div className="space-y-1">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setScope1FlyoutOpen(false);
+                                    setScope2FlyoutOpen(false);
+                                    setEnergyFlyoutOpen(false);
+                                    setActiveSection("scope-2");
+                                    router.push("/scope-2/dashboard");
+                                    if (isMobile) setOpen(false);
+                                }}
+                                className={[
+                                    "group flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
+                                    pathname === "/scope-2/dashboard"
+                                        ? "bg-gradient-to-r from-emerald-50 to-teal-50/50 text-emerald-800 shadow-sm ring-1 ring-emerald-500/20"
+                                        : "text-slate-600 hover:bg-white hover:text-slate-900 shadow-sm ring-1 ring-transparent hover:ring-slate-200/50",
+                                ].join(" ")}>
+                                <LuLayoutDashboard
+                                    className={`h-4 w-4 ${pathname === "/scope-2/dashboard" ? "text-emerald-600" : "text-slate-400 group-hover:text-emerald-500"}`}
+                                />
+                                Dashboard
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setScope1FlyoutOpen(false);
+                                    setScope2FlyoutOpen(false);
+                                    setEnergyFlyoutOpen(false);
+                                    setActiveSection("scope-2");
+                                    router.push("/scope-2/energy-activity");
+                                    if (isMobile) setOpen(false);
+                                }}
+                                className={[
+                                    "group flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
+                                    scope2EnergyActivityRouteActive
+                                        ? "bg-gradient-to-r from-emerald-50 to-teal-50/50 text-emerald-800 shadow-sm ring-1 ring-emerald-500/20"
+                                        : "text-slate-600 hover:bg-white hover:text-slate-900 shadow-sm ring-1 ring-transparent hover:ring-slate-200/50",
+                                ].join(" ")}>
+                                <LuActivity
+                                    className={`h-4 w-4 ${scope2EnergyActivityRouteActive ? "text-emerald-600" : "text-slate-400 group-hover:text-emerald-500"}`}
+                                />
+                                Activities
+                            </button>
+                        </div>
+                    </motion.div>
                 ) : null}
             </AnimatePresence>
 
@@ -561,26 +659,6 @@ export function Sidebar() {
                         </div>
 
                         <div className="space-y-1">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setScope2FlyoutOpen(false);
-                                    setActiveSection("scope-1");
-                                    router.push("/scope-1");
-                                    setScope1FlyoutOpen(false);
-                                    if (isMobile) setOpen(false);
-                                }}
-                                className={[
-                                    "group flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
-                                    scope1DashboardRouteActive
-                                        ? "bg-gradient-to-r from-emerald-50 to-teal-50/50 text-emerald-800 shadow-sm ring-1 ring-emerald-500/20"
-                                        : "text-slate-600 hover:bg-white hover:text-slate-900 shadow-sm ring-1 ring-transparent hover:ring-slate-200/50",
-                                ].join(" ")}>
-                                <LuLayoutDashboard
-                                    className={`h-4 w-4 ${scope1DashboardRouteActive ? "text-emerald-600" : "text-slate-400 group-hover:text-emerald-500"}`}
-                                />
-                                Dashboard
-                            </button>
                             <button
                                 type="button"
                                 onClick={() => {

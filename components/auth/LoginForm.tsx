@@ -165,7 +165,7 @@ export default function LoginForm() {
     const router = useRouter();
 
     function handleCredentialsSuccess() {
-        router.push("/scope-1");
+        router.push("/scope-2/dashboard");
     }
 
     return (

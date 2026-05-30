@@ -151,7 +151,7 @@ export default function Home() {
                                 </p>
                             </div>
                             <Link
-                                href="/get-started"
+                                href="/#cta"
                                 className="inline-flex shrink-0 items-center justify-center rounded-xl bg-white px-8 py-3.5 text-center text-sm font-bold text-emerald-900 shadow-lg transition hover:bg-emerald-50">
                                 Book a free demo
                             </Link>

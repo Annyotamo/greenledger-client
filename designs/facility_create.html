@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add New Facility | ESG Reporting</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#4edea3",
+                    "surface-container-low": "#f3f4f5",
+                    "secondary-fixed": "#6ffbbe",
+                    "on-surface-variant": "#45464c",
+                    "surface": "#f8f9fa",
+                    "inverse-primary": "#c0c6db",
+                    "surface-dim": "#d9dadb",
+                    "surface-container-high": "#e7e8e9",
+                    "primary-fixed-dim": "#c0c6db",
+                    "surface-tint": "#575e70",
+                    "primary": "#000000",
+                    "on-error-container": "#93000a",
+                    "on-primary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed-variant": "#404758",
+                    "inverse-on-surface": "#f0f1f2",
+                    "tertiary": "#000000",
+                    "on-tertiary-fixed": "#001a42",
+                    "surface-variant": "#e1e3e4",
+                    "on-primary-fixed": "#141b2b",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed": "#dce2f7",
+                    "surface-bright": "#f8f9fa",
+                    "on-tertiary-fixed-variant": "#004395",
+                    "surface-container": "#edeeef",
+                    "background": "#f8f9fa",
+                    "on-tertiary-container": "#3980f4",
+                    "on-surface": "#191c1d",
+                    "tertiary-container": "#001a42",
+                    "on-secondary-fixed-variant": "#005236",
+                    "secondary": "#006c49",
+                    "on-error": "#ffffff",
+                    "primary-container": "#141b2b",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-fixed": "#d8e2ff",
+                    "on-secondary-fixed": "#002113",
+                    "on-background": "#191c1d",
+                    "error": "#ba1a1a",
+                    "outline-variant": "#c6c6cd",
+                    "on-primary-container": "#7d8497",
+                    "tertiary-fixed-dim": "#adc6ff",
+                    "secondary-container": "#6cf8bb",
+                    "inverse-surface": "#2e3132",
+                    "error-container": "#ffdad6",
+                    "on-secondary-container": "#00714d",
+                    "surface-container-highest": "#e1e3e4",
+                    "outline": "#76777d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "stack-gap": "1rem",
+                    "section-gap": "2rem",
+                    "gutter": "1rem",
+                    "card-padding": "1.25rem",
+                    "container-margin": "1rem"
+            },
+            "fontFamily": {
+                    "label-md": ["JetBrains Mono"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "headline-md": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Hanken Grotesk"],
+                    "headline-sm": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .form-input-focus:focus {
+            outline: none;
+            border-color: #000000;
+            ring: 1px solid #000000;
+        }
+        .toggle-checked:checked {
+            background-color: #006c49;
+            border-color: #006c49;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md overflow-x-hidden">
+<!-- SideNavBar Shell -->
+<aside class="w-64 h-screen fixed left-0 top-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant py-gutter px-3 z-50">
+<div class="mb-8 px-4">
+<h1 class="text-headline-md font-headline-md font-bold text-primary">ESG Reporting</h1>
+<p class="font-label-md text-label-md text-on-surface-variant opacity-70">GHG Accounting v2.1</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="text-on-surface-variant hover:text-on-surface flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="bg-secondary-container text-on-secondary-container font-semibold rounded-lg flex items-center gap-3 px-4 py-3 scale-[0.98] transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="domain" style="font-variation-settings: 'FILL' 1;">domain</span>
+<span class="font-label-md text-label-md">Facilities</span>
+</a>
+<a class="text-on-surface-variant hover:text-on-surface flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="energy_savings_leaf">energy_savings_leaf</span>
+<span class="font-label-md text-label-md">Activities</span>
+</a>
+<a class="text-on-surface-variant hover:text-on-surface flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-label-md text-label-md">Team Members</span>
+</a>
+<a class="text-on-surface-variant hover:text-on-surface flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="business">business</span>
+<span class="font-label-md text-label-md">Tenant Profile</span>
+</a>
+<a class="text-on-surface-variant hover:text-on-surface flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-label-md text-label-md">Audit Trails</span>
+</a>
+</nav>
+<div class="mt-auto pt-gutter space-y-1">
+<button class="w-full bg-secondary text-on-secondary py-3 rounded-lg font-label-md text-label-md mb-4 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[20px]" data-icon="add_task">add_task</span>
+                Submit Report
+            </button>
+<a class="text-on-surface-variant hover:text-on-surface flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+<a class="text-on-surface-variant hover:text-on-surface flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-label-md text-label-md">Help &amp; Support</span>
+</a>
+</div>
+</aside>
+<!-- TopAppBar Shell -->
+<header class="h-16 w-full fixed top-0 z-40 bg-white border-b border-outline-variant flex justify-between items-center pl-[17rem] pr-gutter">
+<div class="flex items-center gap-4">
+<span class="font-headline-sm font-bold text-primary">ESG Analytics Dashboard</span>
+<div class="h-4 w-[1px] bg-outline-variant mx-2"></div>
+<nav class="flex gap-6">
+<a class="text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" href="#">Sustainability Report</a>
+<a class="text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" href="#">Emissions Tracker</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary text-on-primary px-4 py-2 rounded font-label-md text-label-md hover:opacity-80 transition-opacity">New Audit</button>
+<button class="text-on-surface-variant hover:bg-surface-container-low p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img alt="Corporate Sustainability Officer" class="w-full h-full object-cover" data-alt="Professional headshot of a corporate sustainability officer in a minimalist studio setting with soft directional lighting. The person is dressed in business casual attire, conveying authority and approachability. The background is a clean, muted gray that aligns with a modern ESG enterprise software interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFq0_6PhGCmbmIO9XSHC7VACLKe6NvbDnr0YktWEzOU-L1O5XoXfrOl0ILWJ4UoI7_3f6JfN5XzKtRiylSSJiZwanBiHsfCviKEQ4D3-LGIdIToyqwvVF7aDPbBkVzVnqB8383ifj2IMQd8wQ3huNdAEBWNC9cglR9vxGEFGFYNRIu7BWQofLbSBZTvzNjazYDSNRc6LPfnTTfQVqIFcTWedZhSqGDaS0wBsowYegWBFzE-y5w3F49E_Pjy2Kt2rkxttviJ1j7G90"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pl-64 pt-16 min-h-screen">
+<div class="max-w-4xl mx-auto py-12 px-container-margin">
+<!-- Breadcrumbs -->
+<div class="flex items-center gap-2 mb-6 text-on-surface-variant font-label-md text-label-md">
+<a class="hover:text-primary" href="#">Facilities</a>
+<span class="material-symbols-outlined text-[16px]" data-icon="chevron_right">chevron_right</span>
+<span class="text-primary font-semibold">Add New Facility</span>
+</div>
+<!-- Page Header -->
+<header class="mb-10">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-2">Facility Registration</h2>
+<p class="text-on-surface-variant font-body-lg text-body-lg">Define a new operational node for GHG accounting and impact tracking.</p>
+</header>
+<!-- Form Section -->
+<form class="space-y-8">
+<!-- Basic Information -->
+<section class="bg-white rounded-xl border border-outline-variant overflow-hidden">
+<div class="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="info">info</span>
+<h3 class="font-headline-sm text-headline-sm text-primary">Basic Information</h3>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant opacity-60">* Mandatory fields</span>
+</div>
+<div class="p-card-padding grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="block font-label-md text-label-md text-on-surface-variant">Facility Name <span class="text-error">*</span></label>
+<input class="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="e.g., GreenLedger Facility 001" required="" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="block font-label-md text-label-md text-on-surface-variant">Facility Code <span class="text-error">*</span></label>
+<input class="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="e.g., GRNL-01/17" required="" type="text"/>
+</div>
+<div class="space-y-2 md:col-span-2">
+<label class="block font-label-md text-label-md text-on-surface-variant">Description</label>
+<textarea class="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="Briefly describe the facility's core function..." rows="3"></textarea>
+</div>
+<div class="space-y-2">
+<label class="block font-label-md text-label-md text-on-surface-variant">Facility Type</label>
+<select class="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white">
+<option>Manufacturing</option>
+<option>Office</option>
+<option>Warehouse</option>
+<option>Retail</option>
+<option>Data Center</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="block font-label-md text-label-md text-on-surface-variant">Ownership Type</label>
+<div class="flex gap-4 pt-2">
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="w-4 h-4 text-primary focus:ring-primary" name="ownership" type="radio" value="owned"/>
+<span class="font-body-md text-body-md">Owned</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input class="w-4 h-4 text-primary focus:ring-primary" name="ownership" type="radio" value="leased"/>
+<span class="font-body-md text-body-md">Leased</span>
+</label>
+</div>
+</div>
+</div>
+</section>
+<!-- Location Details -->
+<section class="bg-white rounded-xl border border-outline-variant overflow-hidden">
+<div class="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="location_on">location_on</span>
+<h3 class="font-headline-sm text-headline-sm text-primary">Location Details</h3>
+</div>
+<div class="p-card-padding grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="space-y-2">
+<label class="block font-label-md text-label-md text-on-surface-variant">Country</label>
+<input class="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none" type="text" value="India"/>
+</div>
+<div class="space-y-2">
+<label class="block font-label-md text-label-md text-on-surface-variant">State / Province</label>
+<input class="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none" type="text" value="West Bengal"/>
+</div>
+<div class="space-y-2">
+<label class="block font-label-md text-label-md text-on-surface-variant">City</label>
+<input class="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none" type="text" value="Kolkata"/>
+</div>
+<div class="space-y-2 md:col-span-2">
+<label class="block font-label-md text-label-md text-on-surface-variant">Address Line 1 <span class="text-error">*</span></label>
+<input class="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="Street address, P.O. box" required="" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="block font-label-md text-label-md text-on-surface-variant">Postal Code</label>
+<input class="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="700001" type="text"/>
+</div>
+<div class="space-y-2 md:col-span-3">
+<label class="block font-label-md text-label-md text-on-surface-variant">Timezone</label>
+<select class="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white">
+<option>(GMT+05:30) Chennai, Kolkata, Mumbai, New Delhi</option>
+<option>(GMT+00:00) UTC</option>
+<option>(GMT-05:00) Eastern Time (US &amp; Canada)</option>
+</select>
+</div>
+</div>
+</section>
+<!-- Operational Details -->
+<section class="bg-white rounded-xl border border-outline-variant overflow-hidden">
+<div class="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="settings_input_component">settings_input_component</span>
+<h3 class="font-headline-sm text-headline-sm text-primary">Operational Details</h3>
+</div>
+<div class="p-card-padding grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="block font-label-md text-label-md text-on-surface-variant">Operational Since</label>
+<input class="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none" type="date"/>
+</div>
+<div class="space-y-2">
+<label class="block font-label-md text-label-md text-on-surface-variant">Operational Until (Optional)</label>
+<input class="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none" type="date"/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-2">
+<label class="block font-label-md text-label-md text-on-surface-variant">Floor Area</label>
+<input class="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none" type="text" value="1570"/>
+</div>
+<div class="space-y-2">
+<label class="block font-label-md text-label-md text-on-surface-variant">Unit</label>
+<select class="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white">
+<option>sqft</option>
+<option>sqm</option>
+</select>
+</div>
+</div>
+<div class="space-y-2">
+<label class="block font-label-md text-label-md text-on-surface-variant">Employee Count</label>
+<input class="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="e.g., 250" type="number"/>
+</div>
+</div>
+</section>
+<!-- Scope Configuration -->
+<section class="bg-white rounded-xl border border-outline-variant overflow-hidden">
+<div class="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="analytics">analytics</span>
+<h3 class="font-headline-sm text-headline-sm text-primary">Scope Configuration</h3>
+</div>
+<div class="p-card-padding grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="flex items-center justify-between p-4 bg-surface border border-outline-variant rounded-lg">
+<div>
+<h4 class="font-headline-sm text-headline-sm text-primary">Scope 1</h4>
+<p class="text-label-md font-label-md text-on-surface-variant">Direct Emissions</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface border border-outline-variant rounded-lg">
+<div>
+<h4 class="font-headline-sm text-headline-sm text-primary">Scope 2</h4>
+<p class="text-label-md font-label-md text-on-surface-variant">Indirect Energy</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface border border-outline-variant rounded-lg">
+<div>
+<h4 class="font-headline-sm text-headline-sm text-primary">Scope 3</h4>
+<p class="text-label-md font-label-md text-on-surface-variant">Value Chain</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Actions -->
+<footer class="flex items-center justify-end gap-4 pt-4 border-t border-outline-variant">
+<button class="px-8 py-3 rounded-lg font-label-md text-label-md border border-outline-variant text-on-surface hover:bg-surface-container-low transition-colors" type="button">
+                        Cancel
+                    </button>
+<button class="px-10 py-3 rounded-lg font-label-md text-label-md bg-secondary text-on-secondary hover:opacity-90 shadow-md transition-all active:scale-[0.98]" type="submit">
+                        Save Facility
+                    </button>
+</footer>
+</form>
+</div>
+</main>
+<!-- Success Modal Interaction (Demo purposes) -->
+<div class="hidden fixed inset-0 z-[100] flex items-center justify-center p-gutter bg-primary/20 backdrop-blur-sm" id="success-modal">
+<div class="bg-white rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] max-w-sm w-full p-8 text-center border border-outline-variant">
+<div class="w-16 h-16 bg-secondary-container text-on-secondary-container rounded-full flex items-center justify-center mx-auto mb-6">
+<span class="material-symbols-outlined text-[32px]" data-icon="check_circle">check_circle</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Facility Created</h3>
+<p class="text-on-surface-variant mb-8">Facility ID <span class="font-label-md">FAC-2024-918</span> has been successfully registered in the system.</p>
+<button class="w-full bg-primary text-on-primary py-3 rounded-lg font-label-md text-label-md" onclick="document.getElementById('success-modal').classList.add('hidden')">Continue to Inventory</button>
+</div>
+</div>
+<script>
+        // Micro-interaction for form submission (prevents reload for demo)
+        document.querySelector('form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const modal = document.getElementById('success-modal');
+            modal.classList.remove('hidden');
+        });
+
+        // Add visual feedback for input focus
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.querySelector('label')?.classList.add('text-primary');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.querySelector('label')?.classList.remove('text-primary');
+            });
+        });
+    </script>
+</body></html>

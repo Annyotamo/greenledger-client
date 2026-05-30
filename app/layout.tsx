@@ -25,7 +25,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" data-scroll-behavior="smooth" className={`${RalewayFont.variable} h-full antialiased`}>
+        <html lang="en" data-scroll-behavior="smooth" className={`${RalewayFont.variable} h-full antialiased`} suppressHydrationWarning>
             <body className="flex min-h-screen flex-col overflow-x-hidden font-[family-name:var(--font-raleway),system-ui,sans-serif]">
                 <QueryProvider>{children}</QueryProvider>
             </body>

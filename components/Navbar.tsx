@@ -38,7 +38,7 @@ const Navbar = () => {
                 </ul>
                 <div className="flex items-center gap-2">
                     <Link
-                        href="/get-started"
+                        href="/#cta"
                         className="shrink-0 rounded-full bg-emerald-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700 sm:px-4 sm:text-sm">
                         Book demo
                     </Link>

@@ -1,0 +1,255 @@
+/* ─── Light theme (Clarity ESG) ─── */
+:root {
+    --gl-surface: #f8f9fa;
+    --gl-surface-dim: #d9dadb;
+    --gl-surface-bright: #f8f9fa;
+    --gl-surface-container-lowest: #ffffff;
+    --gl-surface-container-low: #f3f4f5;
+    --gl-surface-container: #edeeef;
+    --gl-surface-container-high: #e7e8e9;
+    --gl-surface-container-highest: #e1e3e4;
+    --gl-on-surface: #191c1d;
+    --gl-on-surface-variant: #45464c;
+    --gl-inverse-surface: #2e3132;
+    --gl-inverse-on-surface: #f0f1f2;
+    --gl-outline: #76777d;
+    --gl-outline-variant: #c6c6cd;
+    --gl-surface-tint: #575e70;
+    --gl-primary: #000000;
+    --gl-on-primary: #ffffff;
+    --gl-primary-container: #141b2b;
+    --gl-on-primary-container: #7d8497;
+    --gl-inverse-primary: #c0c6db;
+    --gl-secondary: #006c49;
+    --gl-on-secondary: #ffffff;
+    --gl-secondary-container: #6cf8bb;
+    --gl-on-secondary-container: #00714d;
+    --gl-tertiary: #000000;
+    --gl-on-tertiary: #ffffff;
+    --gl-tertiary-container: #001a42;
+    --gl-on-tertiary-container: #3980f4;
+    --gl-error: #ba1a1a;
+    --gl-on-error: #ffffff;
+    --gl-error-container: #ffdad6;
+    --gl-on-error-container: #93000a;
+    --gl-secondary-fixed-dim: #4edea3;
+    --gl-background: #f8f9fa;
+    --gl-on-background: #191c1d;
+    --gl-surface-variant: #e1e3e4;
+    --gl-chart-grid: #cbd5e1;
+    --gl-nav-connector: #10b981;
+    --gl-sidebar-width: 16rem;
+    --gl-sidebar-collapsed-width: 5rem;
+    --gl-header-offset: 17rem;
+    --gl-header-offset-collapsed: 6rem;
+
+    /* Data colors — constant across themes */
+    --gl-data-green: #10b981;
+    --gl-data-blue: #60a5fa;
+    --gl-data-error: #ef4444;
+    /* Scope 2 donut & comparison (light reference) */
+    --gl-chart-esg-teal: #0d9488;
+    --gl-chart-solar: #fbbf24;
+    --gl-chart-wind: #3b82f6;
+}
+
+/* ─── Dark theme ─── */
+.dark {
+    --gl-surface: #111827;
+    --gl-surface-dim: #0b0f19;
+    --gl-surface-bright: #1f2937;
+    --gl-surface-container-lowest: #0b0f19;
+    --gl-surface-container-low: #111827;
+    --gl-surface-container: #1f2937;
+    --gl-surface-container-high: #374151;
+    --gl-surface-container-highest: #4b5563;
+    --gl-on-surface: #f3f4f6;
+    --gl-on-surface-variant: #9ca3af;
+    --gl-inverse-surface: #f3f4f6;
+    --gl-inverse-on-surface: #191c1d;
+    --gl-outline: #4b5563;
+    --gl-outline-variant: #374151;
+    --gl-surface-tint: #9ca3af;
+    --gl-primary: #ffffff;
+    --gl-on-primary: #111827;
+    --gl-primary-container: #1e293b;
+    --gl-on-primary-container: #94a3b8;
+    --gl-inverse-primary: #000000;
+    --gl-secondary: #10b981;
+    --gl-on-secondary: #111827;
+    --gl-secondary-container: #064e3b;
+    --gl-on-secondary-container: #4ade80;
+    --gl-tertiary: #ffffff;
+    --gl-on-tertiary: #111827;
+    --gl-tertiary-container: #1e3a8a;
+    --gl-on-tertiary-container: #60a5fa;
+    --gl-error: #ef4444;
+    --gl-on-error: #ffffff;
+    --gl-error-container: #7f1d1d;
+    --gl-on-error-container: #ffdad6;
+    --gl-secondary-fixed-dim: #4edea3;
+    --gl-background: #111827;
+    --gl-on-background: #f3f4f6;
+    --gl-surface-variant: #374151;
+    --gl-chart-grid: #334155;
+    --gl-nav-connector: #10b981;
+}
+
+@theme inline {
+    --color-surface: var(--gl-surface);
+    --color-surface-dim: var(--gl-surface-dim);
+    --color-surface-bright: var(--gl-surface-bright);
+    --color-surface-container-lowest: var(--gl-surface-container-lowest);
+    --color-surface-container-low: var(--gl-surface-container-low);
+    --color-surface-container: var(--gl-surface-container);
+    --color-surface-container-high: var(--gl-surface-container-high);
+    --color-surface-container-highest: var(--gl-surface-container-highest);
+    --color-on-surface: var(--gl-on-surface);
+    --color-on-surface-variant: var(--gl-on-surface-variant);
+    --color-inverse-surface: var(--gl-inverse-surface);
+    --color-inverse-on-surface: var(--gl-inverse-on-surface);
+    --color-outline: var(--gl-outline);
+    --color-outline-variant: var(--gl-outline-variant);
+    --color-surface-tint: var(--gl-surface-tint);
+    --color-primary: var(--gl-primary);
+    --color-on-primary: var(--gl-on-primary);
+    --color-primary-container: var(--gl-primary-container);
+    --color-on-primary-container: var(--gl-on-primary-container);
+    --color-inverse-primary: var(--gl-inverse-primary);
+    --color-secondary: var(--gl-secondary);
+    --color-on-secondary: var(--gl-on-secondary);
+    --color-secondary-container: var(--gl-secondary-container);
+    --color-on-secondary-container: var(--gl-on-secondary-container);
+    --color-tertiary: var(--gl-tertiary);
+    --color-on-tertiary: var(--gl-on-tertiary);
+    --color-tertiary-container: var(--gl-tertiary-container);
+    --color-on-tertiary-container: var(--gl-on-tertiary-container);
+    --color-error: var(--gl-error);
+    --color-on-error: var(--gl-on-error);
+    --color-error-container: var(--gl-error-container);
+    --color-on-error-container: var(--gl-on-error-container);
+    --color-secondary-fixed-dim: var(--gl-secondary-fixed-dim);
+    --color-background: var(--gl-background);
+    --color-on-background: var(--gl-on-background);
+    --color-surface-variant: var(--gl-surface-variant);
+    --color-data-green: var(--gl-data-green);
+    --color-data-blue: var(--gl-data-blue);
+    --color-data-error: var(--gl-data-error);
+
+    --font-sans: var(--font-hanken, "Hanken Grotesk"), system-ui, sans-serif;
+    --font-mono: var(--font-jetbrains, "JetBrains Mono"), ui-monospace, monospace;
+
+    --text-headline-lg: 2rem;
+    --text-headline-lg--line-height: 2.5rem;
+    --text-headline-lg--font-weight: 700;
+    --text-headline-lg--letter-spacing: -0.02em;
+
+    --text-headline-md: 1.5rem;
+    --text-headline-md--line-height: 2rem;
+    --text-headline-md--font-weight: 600;
+    --text-headline-md--letter-spacing: -0.01em;
+
+    --text-headline-sm: 1.125rem;
+    --text-headline-sm--line-height: 1.5rem;
+    --text-headline-sm--font-weight: 600;
+
+    --text-body-md: 0.875rem;
+    --text-body-md--line-height: 1.25rem;
+
+    --text-label-md: 0.75rem;
+    --text-label-md--line-height: 1rem;
+    --text-label-md--letter-spacing: 0.05em;
+    --text-label-md--font-weight: 500;
+
+    --spacing-card-padding: 1.25rem;
+    --spacing-gutter: 1rem;
+    --spacing-section-gap: 2rem;
+    --spacing-stack-gap: 1rem;
+
+    /* Match reference Tailwind config: rounded-lg = 4px, rounded-xl = 8px */
+    --radius-sm: 0.125rem;
+    --radius-DEFAULT: 0.25rem;
+    --radius-lg: 0.25rem;
+    --radius-xl: 0.5rem;
+}
+
+.material-symbols-outlined {
+    font-variation-settings:
+        "FILL" 0,
+        "wght" 400,
+        "GRAD" 0,
+        "opsz" 24;
+    user-select: none;
+}
+
+.gl-dashboard {
+    font-family: var(--font-sans);
+    background-color: var(--gl-background);
+    color: var(--gl-on-surface);
+    transition:
+        background-color 300ms ease,
+        color 300ms ease;
+}
+
+.gl-dashboard-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+
+.gl-dashboard-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.gl-dashboard-scroll::-webkit-scrollbar-thumb {
+    background: var(--gl-outline-variant);
+    border-radius: 10px;
+}
+
+.chart-grid-bg {
+    background-image:
+        linear-gradient(var(--gl-chart-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--gl-chart-grid) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: 0 0;
+}
+
+.nav-connector {
+    background-image: radial-gradient(circle, var(--gl-nav-connector) 1.5px, transparent 1.5px);
+    background-size: 1px 6px;
+    background-repeat: repeat-y;
+    opacity: 0.4;
+}
+
+.nav-connector-glow {
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.15);
+}
+
+.timeline-connector {
+    background-image: radial-gradient(circle, var(--gl-nav-connector) 2px, transparent 2px);
+    background-size: 1px 8px;
+    background-repeat: repeat-y;
+    opacity: 0.2;
+}
+
+.progress-grow {
+    animation: gl-progress-grow 800ms cubic-bezier(0.34, 1.1, 0.64, 1) forwards;
+}
+
+@keyframes gl-progress-grow {
+    from {
+        width: 0;
+    }
+}
+
+.fab-pulse {
+    animation: fab-pulse 2s ease-in-out infinite;
+}
+
+@keyframes fab-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.4;
+    }
+}

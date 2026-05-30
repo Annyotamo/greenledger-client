@@ -29,7 +29,7 @@ function CredentialsStep({ onSuccess }: { onSuccess: () => void }) {
         setIsSubmitting(true);
         try {
             const payload = { email: trimmed, password };
-            const res = await publicApi.post("/api/v1/user/auth/login", payload);
+            const res = await publicApi.post("/user/auth/login", payload);
 
             const body = res.data as any;
             if (!body || body.success !== true || !body.data || !body.data.access_token) {
@@ -165,7 +165,7 @@ export default function LoginForm() {
     const router = useRouter();
 
     function handleCredentialsSuccess() {
-        router.push("/scope-2/dashboard");
+        router.push("/dashboard");
     }
 
     return (

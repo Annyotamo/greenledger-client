@@ -27,7 +27,7 @@ export default function Footer() {
                     <a href="#" className="hover:text-emerald-700">
                         Security
                     </a>
-                    <Link href="/get-started" className="hover:text-emerald-700">
+                    <Link href="/#cta" className="hover:text-emerald-700">
                         Contact
                     </Link>
                 </nav>

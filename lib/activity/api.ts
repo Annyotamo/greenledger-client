@@ -1,0 +1,114 @@
+import { privateApi } from "@/lib/http/client";
+import type { FuelActivity, FuelActivityApiResponse, FuelActivityItemDto } from "./types";
+
+function mapFuelActivityItem(dto: FuelActivityItemDto): FuelActivity {
+    return {
+        id: dto.id,
+        createdAt: dto.created_at,
+        updatedAt: dto.updated_at,
+        facilityId: dto.context.facility_id,
+        reportingPeriodId: dto.context.reporting_period_id,
+        activityStartDate: dto.context.activity_start_date,
+        activityEndDate: dto.context.activity_end_date,
+        scopeType: dto.activity.scope_type,
+        fuelId: dto.activity.fuel_id,
+        fuelName: dto.factor.fuel.name,
+        fuelSlug: dto.factor.fuel.slug,
+        quantity: Number(dto.activity.quantity),
+        quantityUnitId: dto.activity.quantity_unit_id,
+        unitName: dto.factor.unit.name,
+        unitSymbol: dto.factor.unit.symbol,
+        usageType: dto.activity.usage_type,
+        emissionType: dto.activity.emission_type,
+        energyContentGJ: Number(dto.activity.energy_content_gj),
+        generatorEfficiencyPercentage: Number(dto.activity.generator_efficiency_percentage),
+        generatedElectricityKwh: Number(dto.activity.generated_electricity_kwh),
+        generatedElectricityMwh: Number(dto.activity.generated_electricity_mwh),
+        generatedSteamGJ: dto.activity.generated_steam_gj ? Number(dto.activity.generated_steam_gj) : null,
+        dataQualityTier: dto.activity.data_quality_tier,
+        estimationBasis: dto.activity.estimation_basis,
+        notes: dto.activity.notes,
+        workflowStatus: dto.workflow.status,
+        calculatedTCo2e: Number(dto.calculated.calculated_t_co2e),
+        calculatedKgCo2e: Number(dto.calculated.calculated_kg_co2e),
+        documentsCount: dto.documents.count,
+        fuelFactorStandard: dto.factor.source.standard,
+        fuelFactorVersion: dto.factor.source.version,
+        fuelFactorRegion: dto.factor.source.region,
+    };
+}
+
+export async function getFuelActivities(): Promise<FuelActivity[]> {
+    const response = await privateApi.get<FuelActivityApiResponse>("/tenant/activity/fuel");
+    const rawItems = response.data.data?.items ?? [];
+    return Array.isArray(rawItems) ? rawItems.map(mapFuelActivityItem) : [];
+}
+
+export async function createFuelActivity(payload: Record<string, unknown>) {
+    const response = await privateApi.post("/tenant/activity/fuel", payload);
+    return response.data;
+}
+
+export async function uploadS3File(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await privateApi.post("/tenant/upload/s3", formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+
+    return response.data.data?.url as string;
+}
+
+export async function uploadFuelActivityDocument(activityId: string, payload: Record<string, unknown>) {
+    const response = await privateApi.post(`/tenant/activity/fuel/${activityId}/documents`, payload);
+    return response.data;
+}
+
+function mapElectricityActivityItem(dto: any) {
+    return {
+        id: dto.id,
+        createdAt: dto.created_at,
+        updatedAt: dto.updated_at,
+        facilityId: dto.context.facility_id,
+        reportingPeriodId: dto.context.reporting_period_id,
+        activityStartDate: dto.context.activity_start_date,
+        activityEndDate: dto.context.activity_end_date,
+        scopeType: dto.activity.scope_type,
+        electricityActivityType: dto.activity.electricity_activity_type,
+        sourceType: dto.activity.source_type,
+        electricityKwh: Number(dto.activity.electricity_kwh),
+        electricityMwh: Number(dto.activity.electricity_mwh),
+        sourceFuelActivityId: dto.activity.source_fuel_activity_id,
+        supplierName: dto.activity.supplier_name,
+        isRenewableCertified: dto.activity.is_renewable_certified,
+        dataQualityTier: dto.activity.data_quality_tier,
+        estimationBasis: dto.activity.estimation_basis,
+        notes: dto.activity.notes,
+        workflowStatus: dto.workflow.status,
+        calculatedTCo2e: dto.calculated ? Number(dto.calculated.calculated_t_co2e) : 0,
+        calculatedKgCo2e: dto.calculated ? Number(dto.calculated.calculated_kg_co2e) : 0,
+        documentsCount: dto.documents.count,
+        factorSourceStandard: dto.factor?.source?.standard ?? null,
+        factorSourceVersion: dto.factor?.source?.version ?? null,
+        factorSourceRegion: dto.factor?.source?.region ?? null,
+    };
+}
+
+export async function getElectricityActivities() {
+    const response = await privateApi.get("/tenant/activity/electricity");
+    const rawItems = response.data.data?.items ?? [];
+    return Array.isArray(rawItems) ? rawItems.map(mapElectricityActivityItem) : [];
+}
+
+export async function createElectricityActivity(payload: Record<string, unknown>) {
+    const response = await privateApi.post("/tenant/activity/electricity", payload);
+    return response.data;
+}
+
+export async function uploadElectricityActivityDocument(activityId: string, payload: Record<string, unknown>) {
+    const response = await privateApi.post(`/tenant/activity/electricity/${activityId}/documents`, payload);
+    return response.data;
+}

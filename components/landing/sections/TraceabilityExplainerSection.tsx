@@ -6,36 +6,34 @@ export default function TraceabilityExplainerSection() {
             <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
                 <div>
                     <h2 className="text-2xl font-bold text-emerald-950 sm:text-3xl">
-                        Supply chain traceability, explained without the buzzwords
+                        Activity traceability for audit-ready fuel, electricity and energy records
                     </h2>
                     <p className="mt-4 text-sm leading-relaxed text-slate-700 sm:text-base">
-                        Imagine scanning a QR code on a product and seeing where each ingredient or component came from,
-                        who processed it, and whether key sustainability criteria were met. That experience only works
-                        if the back office maintains a structured map of suppliers, batches, certificates, and
-                        transformations.
+                        Keep every fuel, electricity, and energy activity tied to the supporting record, submission
+                        trail, and approval decision. This is the kind of traceability auditors expect for operational
+                        data.
                     </p>
                     <p className="mt-4 text-sm leading-relaxed text-slate-700 sm:text-base">
-                        GreenLedger connects operational procurement data with customer-facing storytelling. You decide
-                        what is public, what stays internal, and how much detail each market requires while preserving a
-                        single governed record underneath.
+                        GreenLedger preserves a single governed activity record, showing who submitted it, what evidence
+                        was attached, and when it was approved or returned for correction.
                     </p>
                     <ul className="mt-6 space-y-3 text-sm text-slate-700">
                         <li className="flex gap-3">
                             <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-600" />
-                            <span>Map multi-tier suppliers with documents, audits, and corrective actions in one place.</span>
-                        </li>
-                        <li className="flex gap-3">
-                            <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-600" />
                             <span>
-                                Tie specific lots or SKUs to chain-of-custody events for recalls, claims, or premium
-                                certifications.
+                                Map multi-tier suppliers with documents, audits, and corrective actions in one place.
                             </span>
                         </li>
                         <li className="flex gap-3">
                             <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-600" />
                             <span>
-                                Publish localized QR pages that reflect the latest approved facts no manual website
-                                updates per change.
+                                Tie activity submissions to evidence, approval history, and the final reported total.
+                            </span>
+                        </li>
+                        <li className="flex gap-3">
+                            <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-600" />
+                            <span>
+                                Make it clear which records were reviewed, approved, or returned for correction.
                             </span>
                         </li>
                     </ul>
@@ -43,8 +41,14 @@ export default function TraceabilityExplainerSection() {
                 <div className="flex flex-col justify-center gap-4">
                     {[
                         { t: "Scan", d: "Consumer lands on a branded page with clear provenance and impact context." },
-                        { t: "Trace", d: "Behind the scenes, every statement resolves to supplier evidence and timestamps." },
-                        { t: "Improve", d: "Procurement sees gaps instantly where data is missing or certifications lapse." },
+                        {
+                            t: "Trace",
+                            d: "Behind the scenes, every statement resolves to supplier evidence and timestamps.",
+                        },
+                        {
+                            t: "Improve",
+                            d: "Procurement sees gaps instantly where data is missing or certifications lapse.",
+                        },
                     ].map((step, i) => (
                         <div
                             key={step.t}
@@ -63,4 +67,3 @@ export default function TraceabilityExplainerSection() {
         </section>
     );
 }
-

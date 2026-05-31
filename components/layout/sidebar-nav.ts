@@ -13,9 +13,9 @@ export type NavScopeChild = {
 export const MAIN_NAV: NavItem[] = [
     { label: "Dashboard", icon: "dashboard", href: "/dashboard", active: true },
     { label: "Facilities", icon: "domain", href: "/facilities" },
-    { label: "Team Members", icon: "group", href: "#" },
-    { label: "Tenant Profile", icon: "business", href: "#" },
-    { label: "Audit Trails", icon: "history", href: "#" },
+    { label: "Reporting Periods", icon: "calendar_month", href: "/reporting-period" },
+    { label: "Team Members", icon: "group", href: "/team-members" },
+    { label: "Tenant Profile", icon: "business", href: "/tenant" },
 ];
 
 export const SCOPE_NAV_CHILDREN: NavScopeChild[] = [

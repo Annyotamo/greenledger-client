@@ -1,0 +1,66 @@
+export type TenantProfileDto = {
+    company_name: string;
+    legal_company_name: string;
+    company_email: string;
+    company_phone: string;
+    website: string;
+    country: string;
+    state: string;
+    city: string;
+    address_line_1: string;
+    address_line_2: string;
+    postal_code: string;
+    industry_type: string;
+    sector: string;
+    organization_size: number;
+    id: string;
+    tenant_code: string;
+    slug: string;
+    max_users: number;
+    max_facilities: number;
+    tenant_status: string;
+    is_verified: boolean;
+    onboarding_completed: boolean;
+    is_active: boolean;
+    logo_url: string | null;
+    banner_image_url: string | null;
+};
+
+export type TenantProfile = {
+    companyName: string;
+    legalCompanyName: string;
+    companyEmail: string;
+    companyPhone: string;
+    website: string;
+    country: string;
+    state: string;
+    city: string;
+    addressLine1: string;
+    addressLine2: string;
+    postalCode: string;
+    industryType: string;
+    sector: string;
+    organizationSize: number;
+    id: string;
+    tenantCode: string;
+    slug: string;
+    maxUsers: number;
+    maxFacilities: number;
+    tenantStatus: string;
+    isVerified: boolean;
+    onboardingCompleted: boolean;
+    isActive: boolean;
+    logoUrl: string | null;
+    bannerImageUrl: string | null;
+};
+
+export type TenantProfileApiResponse = {
+    success: boolean;
+    status_code: number;
+    message: string;
+    data: TenantProfileDto;
+    error: unknown | null;
+    method: string;
+    path: string;
+    timestamp: string;
+};

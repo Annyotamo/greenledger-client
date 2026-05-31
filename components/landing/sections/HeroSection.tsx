@@ -29,12 +29,12 @@ export default function HeroSection() {
             <div className="relative z-10 mx-auto flex w-full max-w-none flex-col gap-10 px-4 py-14 sm:px-5 md:flex-row md:items-center md:justify-between md:px-6 md:py-16 lg:px-12 lg:py-20">
                 <div className="min-w-0 flex-1">
                     <h1 className="text-balance text-3xl font-extrabold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_28px_rgba(0,0,0,0.35)] sm:text-4xl lg:text-5xl xl:text-6xl">
-                        GHG accounting and ESG reporting built for Indian businesses
+                        GHG accounting and ESG reporting — audit-ready operations and role-based controls
                     </h1>
                     <p className="mt-6 max-w-3xl text-pretty text-base leading-relaxed text-emerald-50/95 sm:text-lg">
-                        GreenLedger helps organizations collect environmental and social data, auto-generate standards
-                        aligned reports (BRSR), run rigorous carbon accounting across Scopes 1 to 3, and prove product
-                        stories with supply chain traceability from factory floor to QR code in a shopper’s hand.
+                        GreenLedger centralizes ESG reporting and GHG accounting, producing audit-ready outputs with
+                        immutable logging. Manage role-based access and approval queues for activity submissions, and
+                        capture fuel, electricity and energy activities with meter- and invoice-grade fidelity.
                     </p>
                     <div className="mt-9 flex flex-wrap gap-3">
                         <a
@@ -105,37 +105,9 @@ export default function HeroSection() {
                             alt="GreenLedger"
                             width={220}
                             height={220}
-                            className="h-auto w-[min(100%,200px)] object-contain sm:w-[220px]"
+                            className="h-auto w-[min(100%,200px)] object-contain sm:w-55"
                             priority
                         />
-                    </div>
-                    <div className="hidden w-88 max-w-full grid-cols-2 gap-3 md:grid">
-                        {[
-                            { src: esgAccountingImg, label: "ESG accounting" },
-                            { src: sasbImg, label: "Framework-ready" },
-                            { src: esgReportingImg, label: "Disclosure workflows" },
-                            { src: sustainableFinanceImg, label: "Finance-grade" },
-                        ].map((tile) => (
-                            <div
-                                key={tile.label}
-                                className="card-hover relative overflow-hidden rounded-2xl border border-white/40 bg-white/20 shadow-lg backdrop-blur-md">
-                                <Image
-                                    src={tile.src}
-                                    alt=""
-                                    className="h-28 w-full object-cover"
-                                    sizes="(min-width: 768px) 180px, 45vw"
-                                />
-                                <div
-                                    className="absolute inset-0 bg-linear-to-t from-black/55 via-black/10 to-transparent"
-                                    aria-hidden
-                                />
-                                <div className="absolute bottom-2 left-2 right-2">
-                                    <span className="inline-flex rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[0.68rem] font-semibold tracking-wide text-white backdrop-blur-md">
-                                        {tile.label}
-                                    </span>
-                                </div>
-                            </div>
-                        ))}
                     </div>
                     <p className="max-w-xs text-center text-xs leading-relaxed text-emerald-100/85 md:text-right">
                         Built for enterprises that need audit-ready numbers and consumer-trusted product stories not

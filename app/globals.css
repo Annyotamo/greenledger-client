@@ -22,10 +22,11 @@ body {
 
 body {
     font-family:
+        "Hanken Grotesk",
         Inter,
         system-ui,
         -apple-system,
-        Segoe UI,
+        "Segoe UI",
         Roboto,
         sans-serif;
     color: #0f2f14;
@@ -35,6 +36,47 @@ body {
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
+}
+
+.font-headline-lg,
+.text-headline-lg {
+    font-family: "Hanken Grotesk", Inter, system-ui, sans-serif;
+    font-size: clamp(1.75rem, 2vw + 1rem, 2.75rem);
+    line-height: 1.05;
+    font-weight: 700;
+}
+
+.font-headline-md,
+.text-headline-md {
+    font-family: "Hanken Grotesk", Inter, system-ui, sans-serif;
+    font-size: clamp(1.35rem, 1.5vw + 0.5rem, 2rem);
+    line-height: 1.08;
+    font-weight: 700;
+}
+
+.font-body-lg,
+.text-body-lg {
+    font-family: "Hanken Grotesk", Inter, system-ui, sans-serif;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    font-weight: 400;
+}
+
+.font-body-md,
+.text-body-md {
+    font-family: "Hanken Grotesk", Inter, system-ui, sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    font-weight: 400;
+}
+
+.font-label-md,
+.text-label-md {
+    font-family: "JetBrains Mono", Monaco, Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    letter-spacing: 0.08em;
+    font-weight: 600;
 }
 
 * {
@@ -212,6 +254,43 @@ body {
 .landing-strip {
     background: linear-gradient(90deg, rgba(31, 122, 63, 0.08), rgba(136, 190, 151, 0.2), rgba(31, 122, 63, 0.08));
     border-block: 1px solid rgba(31, 122, 63, 0.12);
+}
+
+.news-ticker-track {
+    animation: news-marquee 18s linear infinite;
+    will-change: transform;
+}
+
+.news-ticker-item {
+    padding: 0;
+}
+
+.news-ticker-item span {
+    display: inline-flex;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .news-ticker-track {
+        animation: none;
+    }
+}
+
+@keyframes news-marquee {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+@media (max-width: 768px) {
+    .news-ticker-track {
+        animation-duration: 26s;
+    }
+    .news-ticker-item {
+        padding: 0 0.5rem;
+    }
 }
 
 /* Fully hidden scrollbar (slider, etc.) */

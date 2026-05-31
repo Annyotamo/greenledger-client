@@ -3,7 +3,7 @@ import DecorativeVideo from "@/components/landing/DecorativeVideo";
 
 export default function VideoBandSection() {
     return (
-        <section className="full-bleed relative isolate overflow-hidden border-y border-white/35 py-14 md:py-52">
+        <section className="full-bleed relative isolate overflow-hidden py-14 md:py-52">
             {/* Mobile: keep this decorative and light (static image instead of video). */}
             <div className="absolute inset-0 md:hidden" aria-hidden>
                 <Image
@@ -34,17 +34,18 @@ export default function VideoBandSection() {
             <div className="relative mx-auto grid w-full max-w-none gap-6 px-4 sm:px-5 md:grid-cols-[1.2fr_0.8fr] md:items-center md:px-6 lg:px-7">
                 <div>
                     <h2 className="mt-4 max-w-3xl text-balance text-2xl font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">
-                        Sustainability intelligence designed to feel alive, trusted, and board-ready
+                        ESG reporting with audit-ready logging and controlled activity approvals
                     </h2>
                     <p className="mt-4 max-w-2xl text-sm leading-relaxed text-emerald-50/90 sm:text-base">
-                        Listed companies and growing MSMEs. Audit-ready numbers. Annual reports filed on time.
+                        Designed for teams that need ESG reporting, GHG accounting, and evidence-aware workflows for
+                        fuel, electricity and energy activities.
                     </p>
                 </div>
                 <div className="grid gap-3">
                     {[
-                        "Track all three scopes with guided data entry and automatic calculations.",
-                        "Your sustainability report is ready when you need it no last-minute scrambles.",
-                        "Simple data collection that works for everyone in your value chain.",
+                        "Guide Scope 1–3 activity capture with structured data entry.",
+                        "Create audit-ready logs and submission trails for every entry.",
+                        "Keep fuel, electricity and energy activities governed in one system.",
                     ].map((item) => (
                         <div
                             key={item}
@@ -57,4 +58,3 @@ export default function VideoBandSection() {
         </section>
     );
 }
-

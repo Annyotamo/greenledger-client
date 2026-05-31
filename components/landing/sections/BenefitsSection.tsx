@@ -3,20 +3,20 @@ export default function BenefitsSection() {
         <section className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
             {[
                 {
-                    title: "Accelerate ROI",
-                    body: "Turn compliance work into measurable cost reductions, avoided penalties, and improved access to green finance.",
+                    title: "Audit-ready reporting",
+                    body: "Immutable logs, evidence attachments, and clear reviewer trails make disclosures defensible.",
                 },
                 {
-                    title: "Increase trust",
-                    body: "Give customers, regulators, and partners transparent emissions and custody proofs they can verify.",
+                    title: "Operational accuracy",
+                    body: "Meter- and invoice-grade ingestion for fuel and electricity activities with validation rules.",
                 },
                 {
-                    title: "Stay resilient",
-                    body: "See weak supplier nodes early and remediate before disruptions or reputational issues compound.",
+                    title: "Governed approvals",
+                    body: "Role-based permissions and approval queues reduce misreporting and provide governance evidence.",
                 },
                 {
-                    title: "Scale confidently",
-                    body: "Begin with core reporting and extend to deep Scope 3 and SKU-level traceability without re-platforming.",
+                    title: "Faster assurance",
+                    body: "Exportable audit packages and versioned reports speed up review cycles and reduce audit friction.",
                 },
             ].map((item) => (
                 <article
@@ -29,4 +29,3 @@ export default function BenefitsSection() {
         </section>
     );
 }
-

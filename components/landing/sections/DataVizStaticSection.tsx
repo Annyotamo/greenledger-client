@@ -127,13 +127,7 @@ function TrendSvg() {
                 strokeLinecap="round"
             />
             {["Q1", "Q2", "Q3", "Q4"].map((q, i) => (
-                <text
-                    key={q}
-                    x={54 + i * 92}
-                    y="172"
-                    textAnchor="middle"
-                    fontSize="10"
-                    fill="rgba(15,47,20,0.55)">
+                <text key={q} x={54 + i * 92} y="172" textAnchor="middle" fontSize="10" fill="rgba(15,47,20,0.55)">
                     {q}
                 </text>
             ))}
@@ -190,9 +184,15 @@ function PieSvg() {
                 />
             </g>
             <g fontSize="10" fill="rgba(15,47,20,0.6)">
-                <text x="16" y="18">Purchased goods</text>
-                <text x="16" y="34">Logistics</text>
-                <text x="16" y="50">Energy</text>
+                <text x="16" y="18">
+                    Purchased goods
+                </text>
+                <text x="16" y="34">
+                    Logistics
+                </text>
+                <text x="16" y="50">
+                    Energy
+                </text>
             </g>
         </svg>
     );
@@ -203,18 +203,23 @@ export default function DataVizStaticSection() {
         <section className="full-bleed py-12 md:py-14">
             <div className="mx-auto w-full max-w-none px-4 sm:px-5 md:px-6 lg:px-7">
                 <div className="mb-8 max-w-4xl">
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-900/60">Live-looking visuals</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-900/60">
+                        Live-looking visuals
+                    </p>
                     <h2 className="mt-2 text-2xl font-bold tracking-tight text-emerald-950 sm:text-3xl">
-                        Finance grade ESG dashboards, even before data is connected
+                        Example dashboards for ESG reporting and GHG accounting
                     </h2>
                     <p className="mt-3 text-sm leading-relaxed text-slate-700 sm:text-base">
-                        These are illustrative examples of the kinds of views you’ll get for Scopes 1–3, reporting readiness,
-                        and audit compliance.
+                        These illustrative visuals show how Scope 1–3 rollups, audit-aware reporting summaries, and
+                        activity validation views can be surfaced from the same governed dataset.
                     </p>
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-3">
-                    <CardShell subtitle="Carbon accounting" title="Scopes 1–3 rollup" icon={<LuFactory className="h-5 w-5" aria-hidden />}>
+                    <CardShell
+                        subtitle="Carbon accounting"
+                        title="Scopes 1–3 rollup"
+                        icon={<LuFactory className="h-5 w-5" aria-hidden />}>
                         <ChartFrame>
                             <BarsSvg />
                         </ChartFrame>
@@ -225,7 +230,10 @@ export default function DataVizStaticSection() {
                         </div>
                     </CardShell>
 
-                    <CardShell subtitle="Performance" title="Emissions intensity trend" icon={<LuCloud className="h-5 w-5" aria-hidden />}>
+                    <CardShell
+                        subtitle="Performance"
+                        title="Emissions intensity trend"
+                        icon={<LuCloud className="h-5 w-5" aria-hidden />}>
                         <ChartFrame>
                             <TrendSvg />
                         </ChartFrame>
@@ -234,7 +242,10 @@ export default function DataVizStaticSection() {
                         </p>
                     </CardShell>
 
-                    <CardShell subtitle="Audit‑ready reporting" title="Scope‑3 category mix" icon={<LuShieldCheck className="h-5 w-5" aria-hidden />}>
+                    <CardShell
+                        subtitle="Audit‑ready reporting"
+                        title="Scope‑3 category mix"
+                        icon={<LuShieldCheck className="h-5 w-5" aria-hidden />}>
                         <ChartFrame>
                             <PieSvg />
                         </ChartFrame>
@@ -259,4 +270,3 @@ export default function DataVizStaticSection() {
         </section>
     );
 }
-

@@ -13,6 +13,8 @@ import SocialProofSection from "@/components/landing/sections/SocialProofSection
 import BenefitsSection from "@/components/landing/sections/BenefitsSection";
 
 import MotionInView from "@/components/landing/MotionInView";
+import NewsTicker from "@/components/landing/NewsTicker";
+import BlogsSection from "@/components/landing/sections/BlogsSection";
 import VideoBandSection from "@/components/landing/sections/VideoBandSection";
 import esgReportingImg from "@/assets/landing-images/esg-reporting.jpg";
 import opsImg from "@/assets/landing-images/746569-848x441.jpg";
@@ -24,58 +26,56 @@ const sliderCards: SliderCard[] = [
     {
         id: "esg",
         eyebrow: "ESG reporting",
-        title: "From raw data to audit-ready disclosures",
+        title: "ESG reporting & GHG accounting — live and defensible",
         description:
-            "Regulators especially in Europe expect consistent, evidence-backed reporting on environmental and social impact. GreenLedger centralizes collection, validation, and narrative so teams ship CSRD- and ESRS-aligned outputs without spreadsheet chaos.",
+            "Capture activity-level data, validate it, and produce audit-ready disclosures with versioned evidence and traceable transformations.",
         bullets: [
-            "Structured data capture mapped to international disclosure frameworks",
-            "Automated report generation with version history for auditors",
-            "Dashboards for executives and working views for sustainability teams",
-            "Banking edition: financed emissions linked to loans and portfolios (PCAF-style workflows)",
+            "Continuous GHG accounting across Scopes 1–3",
+            "Standards-aligned outputs with revision history for auditors",
+            "Built-in validations and uncertainty flags for higher data quality",
+            "Executive dashboards and working views for teams",
         ],
         accent: "#1f7a3f",
         imageSrc: esgReportingImg.src,
     },
     {
-        id: "carbon",
-        eyebrow: "Carbon accounting",
-        title: "A finance-grade footprint across Scopes 1–3",
+        id: "audit",
+        eyebrow: "Audit ready",
+        title: "Immutable logging & evidence-first workflows",
         description:
-            "Treat carbon like a ledger: every activity rolls up to totals you can defend in the boardroom. Built-in GHG Protocol thinking, activity data imports, and uncertainty flags help you improve data quality over time not just once a year.",
+            "Every submission carries verifiable attachments and tamper-evident logs so auditors see the provenance and reviewers see who signed off when.",
         bullets: [
-            "Scope 1 & 2 operational emissions with facility and energy views",
-            "Scope 3 categories with supplier and spend-based starting points",
-            "Scenario and reduction modeling tied to operational levers",
-            "Exports that plug into ESG reports and management commentary",
+            "Append-only logs and exportable audit trails",
+            "Evidence attachments tied to activity records",
+            "Verification states and auditor-friendly exports",
         ],
         accent: "#315a43",
         imageSrc: opsImg.src,
     },
     {
-        id: "trace",
-        eyebrow: "Supply chain traceability",
-        title: "From supplier to QR proof consumers can trust",
+        id: "roles",
+        eyebrow: "Permissions & approvals",
+        title: "Role-based auth with activity submission approval",
         description:
-            "Modern buyers want to know where things come from and whether production met sustainability expectations. Map ingredients and components across tiers, attach evidence, and publish consumer-facing journeys that start with a scan.",
+            "Segregate duties and manage approval queues: submitters, reviewers, and approvers with clear audit stamps and notifications.",
         bullets: [
-            "Multi-tier supplier graph with risk and certification signals",
-            "Batch- or SKU-level chain of custody where you need precision",
-            "QR-linked product pages: origin, makers, and sustainability claims",
-            "Faster verification cycles for procurement and compliance teams",
+            "Role-based access controls and scoped permissions",
+            "Approval workflows for fuel/electricity/energy activities",
+            "Activity-level comments, rejections, and resubmissions",
         ],
         accent: "#2d6b4e",
         imageSrc: heroMosaic.src,
     },
     {
-        id: "platform",
-        eyebrow: "One operating system",
-        title: "Finance, ops, and sustainability on one timeline",
+        id: "activities",
+        eyebrow: "Fuel & Electricity",
+        title: "Fuel, electricity and energy activities — measured right",
         description:
-            "Reporting, accounting, and traceability share the same master data. When a supplier updates a factor or a loan book shifts, every dependent view updates so your ESG story stays coherent end to end.",
+            "Ingest meters, invoices and manual entries. Normalize units, flag anomalies, and reconcile against contracts so operational teams can trust the numbers.",
         bullets: [
-            "Role-based access for sustainability, finance, and procurement",
-            "API-friendly exports for data warehouses and BI tools",
-            "Implementation paths: start with reporting, expand to Scope 3, add traceability",
+            "Meter-level ingestion and invoice reconciliation",
+            "Unit normalization and conversion chains",
+            "Activity validation rules and exception reporting",
         ],
         accent: "#1f7a3f",
         imageSrc: sustainableFinanceImg.src,
@@ -88,11 +88,12 @@ export default function Home() {
             <Navbar />
             <main className="mx-auto w-full max-w-400 px-4 sm:px-5 md:px-6 lg:px-7">
                 {/* Above-the-fold: pure server-rendered content (no client JS required). */}
-                <div className="mb-12">
-                    <HeroSection />
-                </div>
+                <HeroSection />
 
-                <MotionInView className="mb-16">
+                {/* Recent ESG news ticker */}
+                <NewsTicker />
+
+                <MotionInView>
                     <Suspense
                         fallback={
                             <section className="full-bleed overflow-hidden rounded-3xl border border-emerald-900/10 bg-white/70 p-8 shadow-sm">
@@ -102,10 +103,6 @@ export default function Home() {
                         }>
                         <VideoBandSection />
                     </Suspense>
-                </MotionInView>
-
-                <MotionInView className="mb-14" delayMs={50}>
-                    <MetricsStripSection />
                 </MotionInView>
 
                 <MotionInView className="mb-16" delayMs={25}>
@@ -118,10 +115,6 @@ export default function Home() {
 
                 <MotionInView className="mb-16 scroll-mt-24" delayMs={80}>
                     <DeepDiveSection />
-                </MotionInView>
-
-                <MotionInView className="mb-16 scroll-mt-24" delayMs={40}>
-                    <TraceabilityExplainerSection />
                 </MotionInView>
 
                 <MotionInView className="mb-16" delayMs={35}>

@@ -3,10 +3,10 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
-import { USER_PROFILE } from "@/lib/dashboard/data";
+import { getCurrentUser, UserProfile } from "@/lib/user/api";
 import { cn } from "@/lib/utils/cn";
 import { useSidebarStore } from "@/stores/sidebar-store";
 import { BOTTOM_NAV, MAIN_NAV, SCOPE_NAV_CHILDREN } from "./sidebar-nav";
@@ -18,11 +18,27 @@ export function Sidebar() {
     const collapsed = useSidebarStore((s) => s.collapsed);
     const toggle = useSidebarStore((s) => s.toggle);
     const [activitiesOpen, setActivitiesOpen] = useState(true);
+    const [user, setUser] = useState<UserProfile | null>(null);
 
     const beforeActivities = MAIN_NAV.filter((i) => i.label === "Dashboard" || i.label === "Facilities");
     const afterActivities = MAIN_NAV.filter(
         (i) => i.label === "Team Members" || i.label === "Tenant Profile" || i.label === "Audit Trails",
     );
+
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                const profile = await getCurrentUser();
+                if (mounted) setUser(profile);
+            } catch (error) {
+                // intentionally silent; sidebar still renders
+            }
+        })();
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
     return (
         <motion.aside
@@ -108,23 +124,37 @@ export function Sidebar() {
                     </Link>
 
                     {!collapsed && (
-                        <div className="mx-1 flex items-center gap-3 rounded-xl bg-surface-container p-3">
-                            <Image
-                                src={USER_PROFILE.avatar}
-                                alt={USER_PROFILE.name}
-                                width={40}
-                                height={40}
-                                className="h-10 w-10 rounded-full border border-outline-variant object-cover"
-                            />
-                            <div className="min-w-0 overflow-hidden">
-                                <p className="truncate font-mono text-label-md font-semibold text-primary">
-                                    {USER_PROFILE.name}
-                                </p>
-                                <p className="font-mono text-[10px] uppercase tracking-wider text-on-surface-variant">
-                                    {USER_PROFILE.role}
-                                </p>
+                        <Link href="/user" className="mx-1 block">
+                            <div className="flex items-center gap-3 rounded-xl bg-surface-container p-3 hover:shadow-sm">
+                                {/** client fetch will populate `user` state; render placeholder until loaded */}
+                                {user?.avatar ? (
+                                    <Image
+                                        src={user.avatar}
+                                        alt={user.full_name || `${user.first_name} ${user.last_name}`}
+                                        width={40}
+                                        height={40}
+                                        className="h-10 w-10 rounded-full border border-outline-variant object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-on-secondary font-semibold">
+                                        {user
+                                            ? `${(user.first_name || "").charAt(0)}${(user.last_name || "").charAt(0)}`
+                                            : "U"}
+                                    </div>
+                                )}
+
+                                <div className="min-w-0 overflow-hidden">
+                                    <p className="truncate font-mono text-label-md font-semibold text-primary">
+                                        {(user?.full_name ?? user?.first_name)
+                                            ? `${user.first_name} ${user.last_name}`
+                                            : "User"}
+                                    </p>
+                                    <p className="font-mono text-[10px] uppercase tracking-wider text-on-surface-variant">
+                                        {user?.job_title ?? user?.role ?? ""}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
+                        </Link>
                     )}
                 </div>
             </div>

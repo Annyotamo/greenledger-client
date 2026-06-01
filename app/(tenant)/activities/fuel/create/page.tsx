@@ -8,7 +8,6 @@ import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Input } from "@/components/ui/input";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { useFacilities } from "@/lib/facility/hooks";
-import { useEmissionSources } from "@/lib/emissionSource/hooks";
 import { useFuelCategories, useFuels, useFuelUnits } from "@/lib/fuel/hooks";
 import { createFuelActivity, uploadFuelActivityDocument, uploadS3File } from "@/lib/activity/api";
 
@@ -21,14 +20,6 @@ const documentTypeOptions = [
     { label: "Estimation Basis", value: "estimation_basis" },
     { label: "Audit Report", value: "audit_report" },
     { label: "Internal Report", value: "internal_report" },
-    { label: "Other", value: "other" },
-];
-const usageTypeOptions = [
-    { label: "Direct Combustion", value: "direct_combustion" },
-    { label: "Electricity Generation", value: "electricity_generation" },
-    { label: "Steam Generation", value: "steam_generation" },
-    { label: "Heating", value: "heating" },
-    { label: "Vehicle Fuel", value: "vehicle_fuel" },
     { label: "Other", value: "other" },
 ];
 const collectionTypeOptions = [
@@ -49,11 +40,11 @@ export default function LogFuelActivityPage() {
         activityEndDate: "",
         fuelType: "",
         fuelCategory: "",
-        source: "",
+        source: "ceea4ef9-1120-4c0f-9325-b5c5fca66400",
         meterId: "",
         quantity: "",
         unit: "",
-        usageType: "",
+        usageType: "direct_combustion",
         collectionType: "",
         generatorEfficiency: "",
         isDraft: false,
@@ -71,7 +62,6 @@ export default function LogFuelActivityPage() {
     const router = useRouter();
     const reportingPeriodsQuery = useReportingPeriods();
     const facilitiesQuery = useFacilities();
-    const emissionSourcesQuery = useEmissionSources();
     const fuelCategoriesQuery = useFuelCategories();
     const fuelsQuery = useFuels(form.fuelCategory);
     const unitsQuery = useFuelUnits(form.fuelType);
@@ -90,16 +80,6 @@ export default function LogFuelActivityPage() {
             return next;
         });
         setErrors((current) => ({ ...current, [field]: "" }));
-    }
-
-    function handleUsageTypeChange(value: string) {
-        setForm((current) => ({
-            ...current,
-            usageType: value,
-            generatorEfficiency:
-                value === "electricity_generation" || value === "steam_generation" ? current.generatorEfficiency : "",
-        }));
-        setErrors((current) => ({ ...current, usageType: "", generatorEfficiency: "" }));
     }
 
     function handleDocumentLinkChange(value: string) {
@@ -128,12 +108,7 @@ export default function LogFuelActivityPage() {
         if (!form.activityStartDate) nextErrors.activityStartDate = "Start date is required.";
         if (!form.activityEndDate) nextErrors.activityEndDate = "End date is required.";
         if (!form.fuelType) nextErrors.fuelType = "Fuel type is required.";
-        if (!form.usageType) nextErrors.usageType = "Usage type is required.";
         if (!form.collectionType) nextErrors.collectionType = "Collection type is required.";
-        if (form.usageType === "electricity_generation" || form.usageType === "steam_generation") {
-            if (!form.generatorEfficiency)
-                nextErrors.generatorEfficiency = "Generator efficiency is required for this usage type.";
-        }
         if (!form.quantity) nextErrors.quantity = "Quantity is required.";
         if (!form.unit) nextErrors.unit = "Unit is required.";
         if (!form.documentType) nextErrors.documentType = "Document type is required.";
@@ -318,22 +293,6 @@ export default function LogFuelActivityPage() {
                     <div className="p-card-padding grid gap-4 lg:grid-cols-2">
                         <div>
                             <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Emission Factor Source
-                            </label>
-                            <select
-                                value={form.source}
-                                onChange={(event) => handleChange("source", event.target.value)}
-                                className={formFieldClass(Boolean(errors.source))}>
-                                <option value="">Select source...</option>
-                                {emissionSourcesQuery.data?.map((s: any) => (
-                                    <option key={s.id} value={s.id}>
-                                        {s.standard} {s.version ? `(${s.version})` : ""}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
                                 Fuel Category
                             </label>
                             <select
@@ -443,31 +402,14 @@ export default function LogFuelActivityPage() {
                                 <MaterialIcon name="insights" size="sm" />
                             </div>
                             <div>
-                                <h2 className="text-headline-sm font-semibold text-primary">Operational Details</h2>
+                                <h2 className="text-headline-sm font-semibold text-primary">Data Quality</h2>
                                 <p className="text-xs text-on-surface-variant">
-                                    Provide usage type and generator efficiency.
+                                    Specify how the activity data was collected or measured.
                                 </p>
                             </div>
                         </div>
                     </div>
                     <div className="p-card-padding grid gap-4 lg:grid-cols-2">
-                        <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Usage Type
-                            </label>
-                            <select
-                                value={form.usageType}
-                                onChange={(event) => handleUsageTypeChange(event.target.value)}
-                                className={formFieldClass(Boolean(errors.usageType))}>
-                                <option value="">Select usage...</option>
-                                {usageTypeOptions.map((option) => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.usageType && <p className="mt-2 text-xs text-error">{errors.usageType}</p>}
-                        </div>
                         <div>
                             <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
                                 Collection Type
@@ -485,25 +427,6 @@ export default function LogFuelActivityPage() {
                             </select>
                             {errors.collectionType && (
                                 <p className="mt-2 text-xs text-error">{errors.collectionType}</p>
-                            )}
-                        </div>
-                        <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Generator Efficiency (%)
-                            </label>
-                            <Input
-                                type="number"
-                                step="0.01"
-                                value={form.generatorEfficiency}
-                                onChange={(event) => handleChange("generatorEfficiency", event.target.value)}
-                                className={`${formFieldClass(Boolean(errors.generatorEfficiency))} border border-outline-variant`}
-                                placeholder="0.00"
-                                disabled={!["electricity_generation", "steam_generation"].includes(form.usageType)}
-                            />
-                            {!form.usageType && (
-                                <p className="mt-2 text-xs text-on-surface-variant">
-                                    Generator efficiency applies only for electricity or steam generation.
-                                </p>
                             )}
                         </div>
                         <div className="lg:col-span-2 flex items-center gap-3 rounded-lg border border-outline-variant bg-surface-container p-4">

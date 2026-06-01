@@ -45,14 +45,14 @@ export default function ElectricityActivitiesPage() {
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                    <Button variant="secondary" size="md">
+                    <button className="bg-white border border-outline-variant px-4 py-2 flex items-center gap-2 hover:bg-surface-container-low transition-colors rounded">
                         <MaterialIcon name="filter_list" size="sm" />
-                        Filter
-                    </Button>
-                    <Link href="/activities/electricity/create" className="inline-flex">
-                        <button className="inline-flex h-11 items-center justify-center rounded bg-primary px-5 text-sm font-semibold text-on-primary hover:opacity-90 transition-opacity">
+                        <span className="font-label-md text-label-md uppercase">Filter</span>
+                    </button>
+                    <Link href="/activities/electricity/create">
+                        <button className="bg-primary text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm">
                             <MaterialIcon name="add" size="sm" />
-                            New Electricity Activity
+                            <span className="font-label-md text-label-md uppercase">New Activity</span>
                         </button>
                     </Link>
                 </div>

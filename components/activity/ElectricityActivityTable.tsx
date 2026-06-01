@@ -1,10 +1,15 @@
 "use client";
 
+import { useState } from "react";
+import { format, isAfter } from "date-fns";
+import { getScope2Report } from "@/lib/ghg/api";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { ElectricityActivity } from "@/lib/activity/electricityTypes";
+import { DATE_RANGE_LABEL } from "@/lib/dashboard/data";
 
 const statusStyles: Record<string, string> = {
     verified: "bg-secondary text-white",
@@ -34,6 +39,11 @@ function formatNumber(value: number, digits = 0) {
     }).format(value);
 }
 
+type DateRange = {
+    start: Date | null;
+    end: Date | null;
+};
+
 export function ElectricityActivityTable({
     activities,
     isLoading,
@@ -53,6 +63,78 @@ export function ElectricityActivityTable({
     onFacilityChange: (value: string) => void;
     facilityOptions: string[];
 }) {
+    const [isDateModalOpen, setIsDateModalOpen] = useState(false);
+    const [selectedRange, setSelectedRange] = useState<DateRange>({ start: null, end: null });
+    const [draftRange, setDraftRange] = useState<DateRange>(selectedRange);
+    const [isExporting, setIsExporting] = useState(false);
+
+    const selectedRangeLabel =
+        selectedRange.start && selectedRange.end
+            ? `${format(selectedRange.start, "MMM d, yyyy")} - ${format(selectedRange.end, "MMM d, yyyy")}`
+            : DATE_RANGE_LABEL;
+
+    const canExport = Boolean(selectedRange.start && selectedRange.end);
+
+    function openDateModal() {
+        setDraftRange(selectedRange);
+        setIsDateModalOpen(true);
+    }
+
+    function closeDateModal() {
+        setDraftRange(selectedRange);
+        setIsDateModalOpen(false);
+    }
+
+    function handleDraftDateChange(side: "start" | "end", date: Date) {
+        setDraftRange((current) => {
+            const next: DateRange = { ...current };
+
+            if (side === "start") {
+                next.start = date;
+                if (current.end && isAfter(date, current.end)) {
+                    next.end = date;
+                }
+            } else {
+                next.end = date;
+                if (current.start && isAfter(current.start, date)) {
+                    next.start = date;
+                }
+            }
+
+            return next;
+        });
+    }
+
+    function applyDateRange() {
+        if (!draftRange.start || !draftRange.end) return;
+        setSelectedRange(draftRange);
+        setIsDateModalOpen(false);
+    }
+
+    async function handleExport() {
+        if (!selectedRange.start || !selectedRange.end) return;
+        setIsExporting(true);
+
+        try {
+            const startDate = format(selectedRange.start, "yyyy-MM-dd");
+            const endDate = format(selectedRange.end, "yyyy-MM-dd");
+            const blob = await getScope2Report(startDate, endDate);
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            const fileName = `scope2-report-${startDate}-to-${endDate}.xlsx`;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsExporting(false);
+        }
+    }
+
     return (
         <Card className="overflow-hidden">
             <div className="flex flex-col gap-6 border-b border-outline-variant bg-surface p-4 lg:flex-row lg:items-center lg:justify-between">
@@ -62,43 +144,90 @@ export function ElectricityActivityTable({
                         Monitor on-site and grid electricity activity across tenant facilities.
                     </p>
                 </div>
-                <Button variant="secondary" size="md">
-                    <MaterialIcon name="filter_list" size="sm" />
-                    Filter
-                </Button>
-            </div>
-
-            <div className="flex flex-col gap-4 border-t border-outline-variant bg-white p-4 md:flex-row md:items-center md:justify-between">
-                <div className="grid gap-3 md:grid-cols-[1fr_1fr] lg:flex-1">
-                    <div className="rounded-lg border border-outline-variant bg-surface-container p-3">
-                        <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-on-surface-variant">
-                            Search activities
-                        </label>
-                        <input
-                            value={searchTerm}
-                            onChange={(event) => onSearchChange(event.target.value)}
-                            className="mt-2 w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
-                            placeholder="Search by facility, source or status"
-                        />
-                    </div>
-                    <div className="rounded-lg border border-outline-variant bg-surface-container p-3">
-                        <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-on-surface-variant">
-                            Facility
-                        </label>
-                        <select
-                            value={selectedFacility}
-                            onChange={(event) => onFacilityChange(event.target.value)}
-                            className="mt-2 w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary">
-                            <option value="">All facilities</option>
-                            {facilityOptions.map((facility) => (
-                                <option key={facility} value={facility}>
-                                    {facility}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                <div className="flex flex-wrap items-center gap-3">
+                    <Button variant="secondary" size="md" onClick={openDateModal}>
+                        <MaterialIcon name="calendar_today" size="sm" />
+                        {selectedRangeLabel}
+                    </Button>
+                    <Button variant="secondary" size="md" onClick={handleExport} disabled={!canExport || isExporting}>
+                        <MaterialIcon name="download" size="sm" />
+                        {isExporting ? "Exporting" : "Export"}
+                    </Button>
                 </div>
             </div>
+
+            {isDateModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+                    <button
+                        type="button"
+                        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+                        onClick={closeDateModal}
+                        aria-label="Close date picker"
+                    />
+                    <div className="relative w-full max-w-5xl overflow-hidden rounded-3xl border border-outline-variant bg-surface-container-lowest shadow-2xl">
+                        <div className="flex flex-col gap-3 border-b border-outline-variant px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h2 className="text-headline-sm font-semibold text-primary">
+                                    Select export date range
+                                </h2>
+                                <p className="text-body-sm text-on-surface-variant">
+                                    Choose a start date and end date to generate the scope 2 export.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={closeDateModal}
+                                className="inline-flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant transition hover:bg-surface-container-high">
+                                <MaterialIcon name="close" size="sm" />
+                            </button>
+                        </div>
+
+                        <div className="grid gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between gap-4">
+                                    <div className="text-sm font-semibold text-on-surface">Start date</div>
+                                    {draftRange.start ? (
+                                        <time className="text-sm text-on-surface-variant">
+                                            {format(draftRange.start, "PPP")}
+                                        </time>
+                                    ) : (
+                                        <div className="text-sm text-on-surface-variant">Choose a start date</div>
+                                    )}
+                                </div>
+                                <Calendar
+                                    date={draftRange.start}
+                                    onDateChange={(date) => handleDraftDateChange("start", date)}
+                                />
+                            </div>
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between gap-4">
+                                    <div className="text-sm font-semibold text-on-surface">End date</div>
+                                    {draftRange.end ? (
+                                        <time className="text-sm text-on-surface-variant">
+                                            {format(draftRange.end, "PPP")}
+                                        </time>
+                                    ) : (
+                                        <div className="text-sm text-on-surface-variant">Choose an end date</div>
+                                    )}
+                                </div>
+                                <Calendar
+                                    date={draftRange.end}
+                                    onDateChange={(date) => handleDraftDateChange("end", date)}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-3 border-t border-outline-variant bg-surface p-5 sm:flex-row sm:justify-end">
+                            <Button variant="secondary" size="md" onClick={closeDateModal}>
+                                Cancel
+                            </Button>
+                            <Button size="md" onClick={applyDateRange} disabled={!draftRange.start || !draftRange.end}>
+                                Save range
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="overflow-x-auto bg-white">
                 <Table className="w-full table-auto">
@@ -146,7 +275,9 @@ export function ElectricityActivityTable({
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="font-semibold text-body-md text-primary">{activity.facilityId}</div>
+                                            <div className="font-semibold text-body-md text-primary">
+                                                {activity.facilityId}
+                                            </div>
                                             <div className="mt-2 text-[11px] text-on-surface-variant">
                                                 {activity.scopeType}
                                             </div>
@@ -184,7 +315,8 @@ export function ElectricityActivityTable({
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <span className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${statusClass}`}>
+                                            <span
+                                                className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${statusClass}`}>
                                                 {status}
                                             </span>
                                         </TableCell>

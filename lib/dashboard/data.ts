@@ -15,7 +15,7 @@ export const DASHBOARD_TABS: { id: DashboardTab; label: string }[] = [
     { id: "scope-2", label: "Scope 2" },
 ];
 
-export const DATE_RANGE_LABEL = "Jan 1, 2024 - Jun 30, 2024";
+export const DATE_RANGE_LABEL = "April 1, 2025 - March 31, 2026";
 
 export const METRIC_CARDS: MetricCardData[] = [
     {

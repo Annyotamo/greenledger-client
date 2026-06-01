@@ -9,7 +9,7 @@ const buttonVariants = cva(
             variant: {
                 primary: "bg-primary text-on-primary hover:opacity-90 active:scale-[0.98]",
                 secondary:
-                    "border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-high",
+                    "inline-flex items-center gap-2 rounded border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-mono text-label-md text-on-surface transition-colors hover:bg-surface-container-high",
                 ghost: "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
                 danger: "text-error hover:bg-error-container/20",
                 surface: "bg-surface-container-high text-on-surface hover:bg-surface-container-highest",
@@ -24,16 +24,14 @@ const buttonVariants = cva(
             variant: "primary",
             size: "md",
         },
-    }
+    },
 );
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<typeof buttonVariants>;
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ className, variant, size, ...props }, ref) => (
-        <button ref={ref} className={cn(buttonVariants({ variant, size }), className)} {...props} />
-    )
-);
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({ className, variant, size, ...props }, ref) => (
+    <button ref={ref} className={cn(buttonVariants({ variant, size }), className)} {...props} />
+));
 Button.displayName = "Button";
 
 export { buttonVariants };

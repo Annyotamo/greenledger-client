@@ -7,3 +7,11 @@ export async function getScope1Report(startDate: string, endDate: string) {
     });
     return response.data as Blob;
 }
+
+export async function getScope2Report(startDate: string, endDate: string) {
+    const response = await privateApi.get("/tenant/ghg/scope-2/report", {
+        params: { start_date: startDate, end_date: endDate },
+        responseType: "blob",
+    });
+    return response.data as Blob;
+}

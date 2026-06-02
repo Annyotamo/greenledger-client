@@ -6,7 +6,7 @@ export default function TraceabilityExplainerSection() {
             <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
                 <div>
                     <h2 className="text-2xl font-bold text-emerald-950 sm:text-3xl">
-                        Activity traceability for audit-ready fuel, electricity and energy records
+                        Activity traceability for audit ready fuel, electricity and energy records
                     </h2>
                     <p className="mt-4 text-sm leading-relaxed text-slate-700 sm:text-base">
                         Keep every fuel, electricity, and energy activity tied to the supporting record, submission

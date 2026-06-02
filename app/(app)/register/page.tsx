@@ -34,7 +34,7 @@ export default function RegisterPage() {
                                     </p>
                                 </div>
                                 <div className="p-6 bg-white border border-outline-variant rounded-lg transition-all hover:border-primary">
-                                    <h3 className="font-headline-sm text-headline-sm mb-2">Audit-Ready Data</h3>
+                                    <h3 className="font-headline-sm text-headline-sm mb-2">audit ready Data</h3>
                                     <p className="font-body-md text-body-md text-on-surface-variant">
                                         Add tenant details, create an owner account, and optionally scaffold your first
                                         facility and reporting period.

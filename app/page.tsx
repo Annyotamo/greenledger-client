@@ -26,9 +26,9 @@ const sliderCards: SliderCard[] = [
     {
         id: "esg",
         eyebrow: "ESG reporting",
-        title: "ESG reporting & GHG accounting — live and defensible",
+        title: "ESG reporting & GHG accounting liveand defensible",
         description:
-            "Capture activity-level data, validate it, and produce audit-ready disclosures with versioned evidence and traceable transformations.",
+            "Capture activity-level data, validate it, and produce audit ready disclosures with versioned evidence and traceable transformations.",
         bullets: [
             "Continuous GHG accounting across Scopes 1–3",
             "Standards-aligned outputs with revision history for auditors",
@@ -41,11 +41,11 @@ const sliderCards: SliderCard[] = [
     {
         id: "audit",
         eyebrow: "Audit ready",
-        title: "Immutable logging & evidence-first workflows",
+        title: "Immutable logging & evidence first workflows",
         description:
             "Every submission carries verifiable attachments and tamper-evident logs so auditors see the provenance and reviewers see who signed off when.",
         bullets: [
-            "Append-only logs and exportable audit trails",
+            "append only logs and exportable audit trails",
             "Evidence attachments tied to activity records",
             "Verification states and auditor-friendly exports",
         ],
@@ -55,11 +55,11 @@ const sliderCards: SliderCard[] = [
     {
         id: "roles",
         eyebrow: "Permissions & approvals",
-        title: "Role-based auth with activity submission approval",
+        title: "role based auth with activity submission approval",
         description:
             "Segregate duties and manage approval queues: submitters, reviewers, and approvers with clear audit stamps and notifications.",
         bullets: [
-            "Role-based access controls and scoped permissions",
+            "role based access controls and scoped permissions",
             "Approval workflows for fuel/electricity/energy activities",
             "Activity-level comments, rejections, and resubmissions",
         ],
@@ -69,11 +69,11 @@ const sliderCards: SliderCard[] = [
     {
         id: "activities",
         eyebrow: "Fuel & Electricity",
-        title: "Fuel, electricity and energy activities — measured right",
+        title: "Fuel, electricity and energy activities measured right",
         description:
             "Ingest meters, invoices and manual entries. Normalize units, flag anomalies, and reconcile against contracts so operational teams can trust the numbers.",
         bullets: [
-            "Meter-level ingestion and invoice reconciliation",
+            "meterlevel ingestion and invoice reconciliation",
             "Unit normalization and conversion chains",
             "Activity validation rules and exception reporting",
         ],
@@ -84,7 +84,7 @@ const sliderCards: SliderCard[] = [
 
 export default function Home() {
     return (
-        <div className="min-h-screen w-full text-slate-900">
+        <div className="min-h-screen w-full text-slate-900 font-[var(--font-hanken),Inter,system-ui,sans-serif]">
             <Navbar />
             <main className="mx-auto w-full max-w-400 px-4 sm:px-5 md:px-6 lg:px-7">
                 {/* Above-the-fold: pure server-rendered content (no client JS required). */}

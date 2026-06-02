@@ -1,13 +1,13 @@
 const accordionItems = [
     {
         id: "c1",
-        title: "ESG reporting and GHG accounting: how to be audit-ready",
+        title: "ESG reporting and GHG accounting: how to be audit ready",
         subtitle: "Continuous capture, evidence, and defensible outputs",
         body: (
             <>
                 <p>
-                    Focus on structured capture of activity data and attach verifiable evidence to every claim.
-                    Audit-ready reporting requires traceable transformations and versioned exports auditors can follow.
+                    Focus on structured capture of activity data and attach verifiable evidence to every claim. audit
+                    ready reporting requires traceable transformations and versioned exports auditors can follow.
                 </p>
                 <p className="mt-3">
                     Our approach builds immutable logging, reviewer approvals, and export formats that align with common
@@ -18,13 +18,13 @@ const accordionItems = [
     },
     {
         id: "c2",
-        title: "Audit-ready logging and evidence",
+        title: "audit ready logging and evidence",
         subtitle: "Immutable trails, attachments, and auditor-friendly exports",
         body: (
             <>
                 <p>
-                    An append-only logging model with linked evidence reduces auditor friction. Each activity record
-                    records who submitted, who reviewed, and what evidence was attached — all exportable alongside the
+                    An append only logging model with linked evidence reduces auditor friction. Each activity record
+                    records who submitted, who reviewed, and what evidence was attached all exportable alongside the
                     numbers.
                 </p>
                 <p className="mt-3">
@@ -36,12 +36,12 @@ const accordionItems = [
     },
     {
         id: "c3",
-        title: "Role-based auth & approval workflows",
+        title: "role based auth & approval workflows",
         subtitle: "Segregation of duties for reliable operational data",
         body: (
             <>
                 <p>
-                    Implement clear roles — submitter, validator, approver — and configurable approval queues. Activity
+                    Implement clear roles submitter, validator, approver and configurable approval queues. Activity
                     submissions can be rejected with comments and routed back for correction, preserving history.
                 </p>
                 <p className="mt-3">
@@ -81,7 +81,7 @@ export default function DeepDiveSection() {
                     The longer read how we think about the problem
                 </h2>
                 <p className="mt-3 text-sm leading-relaxed text-slate-700 sm:text-base">
-                    Expand any topic for plain-language context. This is the layer executives share with boards when
+                    Expand any topic for plain language context. This is the layer executives share with boards when
                     they need more than a feature list.
                 </p>
             </div>

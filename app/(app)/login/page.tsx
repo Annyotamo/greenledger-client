@@ -41,7 +41,7 @@ export default function LoginPage() {
                     <div className="relative flex h-full flex-col">
                         <div className="animate-fade-up">
                             <p className="inline-flex rounded-full border border-white/25 bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-50 shadow-sm backdrop-blur-md">
-                                Secure access · Audit-ready by design
+                                Secure access · audit ready by design
                             </p>
                             <h1 className="mt-5 text-balance text-3xl font-extrabold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_28px_rgba(0,0,0,0.35)] sm:text-4xl">
                                 Sign in to GreenLedger

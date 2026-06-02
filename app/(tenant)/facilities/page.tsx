@@ -77,7 +77,7 @@ export default function FacilitiesPage() {
                     <h4 className="font-headline-sm text-headline-sm text-white">Audit Readiness</h4>
                     <p className="mt-3 text-body-md text-white/80 leading-relaxed">
                         Your facility portfolio currently has 87% data completeness for FY2024. Resolve flags in EU
-                        Logistics Hub to achieve &quot;Audit-Ready&quot; status.
+                        Logistics Hub to achieve &quot;audit ready&quot; status.
                     </p>
                     <div className="mt-6 space-y-4">
                         <div>

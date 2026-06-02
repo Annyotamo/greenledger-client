@@ -14,7 +14,7 @@ export default function Footer() {
                     <p className="text-xs font-semibold uppercase tracking-wide text-emerald-900">GreenLedger</p>
                     <p className="mt-2 text-xs leading-relaxed">
                         ESG reporting, carbon accounting, and supply chain traceability on one platform designed for
-                        audit-ready enterprises and consumer-trusted brands.
+                        audit ready enterprises and consumer-trusted brands.
                     </p>
                 </div>
                 <nav className="flex flex-wrap gap-x-6 gap-y-2 text-xs">

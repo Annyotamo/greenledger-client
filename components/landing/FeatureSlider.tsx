@@ -32,15 +32,15 @@ function FeatureSliderInner({ cards }: FeatureSliderProps) {
     const extended = useMemo(() => (cards.length > 0 ? [...cards, ...cards] : []), [cards]);
 
     return (
-        <div className="relative z-0 w-full overflow-visible py-2">
-            <div className="relative overflow-hidden pb-6 pt-10">
+        <div className="relative z-0 w-full">
+            <div className="relative overflow-hidden">
                 {smallScreen || reduceMotion ? (
-                    <div className="scrollbar-hide isolate flex gap-6 overflow-x-auto overflow-y-clip pl-0.5 pr-1 [-webkit-overflow-scrolling:touch]">
+                    <div className="scrollbar-hide isolate flex gap-6 overflow-x-auto overflow-y-clip pl-1 pr-1 [-webkit-overflow-scrolling:touch]">
                         {cards.map((card) => (
                             <article
                                 key={card.id}
                                 data-slider-card
-                                className="relative z-1 flex min-h-[min(52vh,480px)] w-[min(calc(100vw-2.75rem),26rem)] shrink-0 flex-col rounded-[1.35rem] border border-white/75 bg-white/95 p-7 shadow-[0_20px_50px_-24px_rgba(15,80,40,0.35)] backdrop-blur-md sm:w-[min(calc(100vw-3.5rem),28rem)] sm:min-h-[500px] sm:p-8 md:w-lg lg:w-136 lg:max-w-xl lg:p-9">
+                                className="relative z-1 flex min-h-[min(52vh,480px)] w-[min(calc(100vw-2.75rem),26rem)] shrink-0 flex-col rounded-[1.35rem] border bg-white/95 p-7 backdrop-blur-md sm:w-[min(calc(100vw-3.5rem),28rem)] sm:min-h-125 sm:p-8 md:w-lg lg:w-136 lg:max-w-xl lg:p-9">
                                 {card.imageSrc ? (
                                     <div className="relative -mx-7 -mt-7 mb-6 overflow-hidden rounded-t-[1.35rem] border-b border-emerald-900/10 bg-emerald-950/5 sm:-mx-8 sm:-mt-8 lg:-mx-9 lg:-mt-9">
                                         <div className="relative h-44 w-full sm:h-52">
@@ -56,13 +56,17 @@ function FeatureSliderInner({ cards }: FeatureSliderProps) {
                                         <div className="pointer-events-none absolute inset-x-0 top-24 h-24 bg-linear-to-t from-white/90 to-transparent sm:top-28 sm:h-28" />
                                     </div>
                                 ) : null}
-                                <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.22em]" style={{ color: card.accent }}>
+                                <p
+                                    className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.22em]"
+                                    style={{ color: card.accent }}>
                                     {card.eyebrow}
                                 </p>
                                 <h3 className="mb-4 text-balance text-2xl font-bold tracking-tight text-emerald-950 sm:text-[1.65rem] lg:text-3xl">
                                     {card.title}
                                 </h3>
-                                <p className="mb-5 text-sm leading-relaxed text-slate-700 sm:text-[0.95rem]">{card.description}</p>
+                                <p className="mb-5 text-sm leading-relaxed text-slate-700 sm:text-[0.95rem]">
+                                    {card.description}
+                                </p>
                                 <ul className="mt-auto space-y-2.5 border-t border-emerald-900/10 pt-5 text-sm leading-snug text-slate-600">
                                     {card.bullets.map((b) => (
                                         <li key={b} className="flex gap-3">
@@ -87,7 +91,7 @@ function FeatureSliderInner({ cards }: FeatureSliderProps) {
                                     <article
                                         key={key}
                                         data-slider-card
-                                        className="relative z-1 flex min-h-[min(52vh,480px)] w-[min(calc(100vw-2.75rem),26rem)] shrink-0 flex-col rounded-[1.35rem] border border-white/75 bg-white/95 p-7 shadow-[0_20px_50px_-24px_rgba(15,80,40,0.35)] backdrop-blur-md sm:w-[min(calc(100vw-3.5rem),28rem)] sm:min-h-[500px] sm:p-8 md:w-lg lg:w-136 lg:max-w-xl lg:p-9">
+                                        className="relative z-1 flex min-h-[min(52vh,480px)] w-[min(calc(100vw-2.75rem),26rem)] shrink-0 flex-col rounded-[1.35rem] bg-white/95 p-7 sm:w-[min(calc(100vw-3.5rem),28rem)] sm:min-h-125 sm:p-8 md:w-lg lg:w-136 lg:max-w-xl lg:p-9">
                                         {card.imageSrc ? (
                                             <div className="relative -mx-7 -mt-7 mb-6 overflow-hidden rounded-t-[1.35rem] border-b border-emerald-900/10 bg-emerald-950/5 sm:-mx-8 sm:-mt-8 lg:-mx-9 lg:-mt-9">
                                                 <div className="relative h-44 w-full sm:h-52">

@@ -1,11 +1,21 @@
 import type { Metadata } from "next";
-import { Raleway } from "next/font/google";
+import { Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/providers/QueryProvider";
+import "@material-symbols/font-400/outlined.css";
 
-const RalewayFont = Raleway({
-    variable: "--font-raleway",
+const hanken = Hanken_Grotesk({
     subsets: ["latin"],
+    variable: "--font-hanken",
+    display: "swap",
+    weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+});
+
+const jetbrains = JetBrains_Mono({
+    subsets: ["latin"],
+    variable: "--font-jetbrains",
+    display: "swap",
+    weight: ["100", "200", "300", "400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -25,8 +35,12 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" data-scroll-behavior="smooth" className={`${RalewayFont.variable} h-full antialiased`} suppressHydrationWarning>
-            <body className="flex min-h-screen flex-col overflow-x-hidden font-[family-name:var(--font-raleway),system-ui,sans-serif]">
+        <html
+            lang="en"
+            data-scroll-behavior="smooth"
+            className={`${hanken.variable} ${jetbrains.variable} h-full antialiased`}
+            suppressHydrationWarning>
+            <body className="flex min-h-screen flex-col overflow-x-hidden font-[var(--font-hanken),Inter,system-ui,sans-serif]">
                 <QueryProvider>{children}</QueryProvider>
             </body>
         </html>

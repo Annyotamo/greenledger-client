@@ -9,7 +9,7 @@ export default function PillarsSection({ cards }: { cards: SliderCard[] }) {
                     Four capabilities, one continuous data spine
                 </h2>
                 <p className="mt-3 text-sm leading-relaxed text-slate-700 sm:text-base">
-                    Explore how ESG reporting, audit-ready logging, role-based approvals, and energy activity capture
+                    Explore how ESG reporting, audit ready logging, role based approvals, and energy activity capture
                     work from the same governed dataset so you keep numbers aligned across teams.
                 </p>
             </div>

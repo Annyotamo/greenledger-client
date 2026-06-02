@@ -6,7 +6,7 @@ const NEWS = [
     "The SEC has launched a formal process to rescind corporate climate reporting rules, moving to scrap previous climate disclosure mandates.",
     "DigitalBridge acquired electrification and decarbonization investor ArcLight for $1 billion to scale AI and power grid infrastructure.",
     "Fusion startups saw major capital injections, including Thea Energy raising $100 million and Focused Energy securing $240 million for laser fusion power in Germany.",
-    "McDonald's announced it will miss its 2030 value-chain decarbonization target, but reaffirmed its commitment to reaching net-zero emissions by 2050.",
+    "McDonald's announced it will miss its 2030 value chain decarbonization target, but reaffirmed its commitment to reaching net-zero emissions by 2050.",
     "The European Investment Fund backed a €200 million European biomethane investment fund alongside CIP to accelerate renewable gas projects.",
     "Stockholm officially became the world's fifth largest buyer of permanent carbon removals to offset municipal emissions.",
 ];

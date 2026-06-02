@@ -34,7 +34,7 @@ export default function VideoBandSection() {
             <div className="relative mx-auto grid w-full max-w-none gap-6 px-4 sm:px-5 md:grid-cols-[1.2fr_0.8fr] md:items-center md:px-6 lg:px-7">
                 <div>
                     <h2 className="mt-4 max-w-3xl text-balance text-2xl font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">
-                        ESG reporting with audit-ready logging and controlled activity approvals
+                        ESG reporting with audit ready logging and controlled activity approvals
                     </h2>
                     <p className="mt-4 max-w-2xl text-sm leading-relaxed text-emerald-50/90 sm:text-base">
                         Designed for teams that need ESG reporting, GHG accounting, and evidence-aware workflows for
@@ -44,7 +44,7 @@ export default function VideoBandSection() {
                 <div className="grid gap-3">
                     {[
                         "Guide Scope 1–3 activity capture with structured data entry.",
-                        "Create audit-ready logs and submission trails for every entry.",
+                        "Create audit ready logs and submission trails for every entry.",
                         "Keep fuel, electricity and energy activities governed in one system.",
                     ].map((item) => (
                         <div

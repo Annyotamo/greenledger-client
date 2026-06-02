@@ -29,14 +29,14 @@ export default function HeroSection() {
             <div className="relative z-10 mx-auto flex w-full max-w-none flex-col gap-10 px-4 py-14 sm:px-5 md:flex-row md:items-center md:justify-between md:px-6 md:py-16 lg:px-12 lg:py-20">
                 <div className="min-w-0 flex-1">
                     <h1 className="text-balance text-3xl font-extrabold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_28px_rgba(0,0,0,0.35)] sm:text-4xl lg:text-5xl xl:text-6xl">
-                        GHG accounting and ESG reporting — audit-ready operations and role-based controls
+                        GHG accounting and ESG reporting audit ready operations and role based controls
                     </h1>
                     <p className="mt-6 max-w-3xl text-pretty text-base leading-relaxed text-emerald-50/95 sm:text-lg">
-                        GreenLedger centralizes ESG reporting and GHG accounting, producing audit-ready outputs with
-                        immutable logging. Manage role-based access and approval queues for activity submissions, and
-                        capture fuel, electricity and energy activities with meter- and invoice-grade fidelity.
+                        GreenLedger centralizes ESG reporting and GHG accounting, producing audit ready outputs with
+                        immutable logging. Manage role based access and approval queues for activity submissions, and
+                        capture fuel, electricity and energy activities with meter and invoice grade fidelity.
                     </p>
-                    <div className="mt-9 flex flex-wrap gap-3">
+                    <div className="mt-22 flex flex-wrap gap-3">
                         <a
                             href="#pillars"
                             className="rounded-xl bg-emerald-400 px-5 py-3 text-sm font-semibold text-emerald-950 shadow-lg shadow-black/20 transition hover:bg-emerald-300">
@@ -96,23 +96,6 @@ export default function HeroSection() {
                             </a>
                         </div>
                     </div>
-                </div>
-
-                <div className="flex shrink-0 flex-col items-center gap-5 md:items-end">
-                    <div className="rounded-3xl border border-white/40 bg-white/60 shadow-2xl shadow-black/30 ring-1 ring-white/60 backdrop-blur-sm gl-shimmer-border">
-                        <Image
-                            src={greenLedgerLogo}
-                            alt="GreenLedger"
-                            width={220}
-                            height={220}
-                            className="h-auto w-[min(100%,200px)] object-contain sm:w-55"
-                            priority
-                        />
-                    </div>
-                    <p className="max-w-xs text-center text-xs leading-relaxed text-emerald-100/85 md:text-right">
-                        Built for enterprises that need audit-ready numbers and consumer-trusted product stories not
-                        slide-deck estimates.
-                    </p>
                 </div>
             </div>
         </section>

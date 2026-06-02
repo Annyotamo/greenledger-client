@@ -11,13 +11,13 @@ const POSTS = [
     },
     {
         id: "post-2",
-        title: "Audit-Ready Workflows with Immutable Logging",
+        title: "audit ready Workflows with Immutable Logging",
         excerpt: "Design patterns for tamper-evident logs, evidence attachments, and auditor-friendly outputs.",
         image: "/landing-news-2.jpg",
     },
     {
         id: "post-3",
-        title: "Role-Based Auth & Approval for Activity Submissions",
+        title: "role based Auth & Approval for Activity Submissions",
         excerpt:
             "Best practices for segmented permissions and approval queues for submitted fuel/electricity activities.",
         image: "/landing-news-3.jpg",

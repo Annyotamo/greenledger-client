@@ -15,7 +15,6 @@ import BenefitsSection from "@/components/landing/sections/BenefitsSection";
 import MotionInView from "@/components/landing/MotionInView";
 import NewsTicker from "@/components/landing/NewsTicker";
 import BlogsSection from "@/components/landing/sections/BlogsSection";
-import VideoBandSection from "@/components/landing/sections/VideoBandSection";
 import esgReportingImg from "@/assets/landing-images/esg-reporting.jpg";
 import opsImg from "@/assets/landing-images/746569-848x441.jpg";
 import heroMosaic from "@/assets/landing-images/esg_main.960_0_1.jpg";
@@ -89,21 +88,8 @@ export default function Home() {
             <main className="mx-auto w-full max-w-400 px-4 sm:px-5 md:px-6 lg:px-7">
                 {/* Above-the-fold: pure server-rendered content (no client JS required). */}
                 <HeroSection />
-
                 {/* Recent ESG news ticker */}
                 <NewsTicker />
-
-                <MotionInView>
-                    <Suspense
-                        fallback={
-                            <section className="full-bleed overflow-hidden rounded-3xl border border-emerald-900/10 bg-white/70 p-8 shadow-sm">
-                                <div className="h-7 w-2/3 rounded-xl bg-emerald-900/10" />
-                                <div className="mt-4 h-4 w-1/2 rounded-xl bg-emerald-900/10" />
-                            </section>
-                        }>
-                        <VideoBandSection />
-                    </Suspense>
-                </MotionInView>
 
                 <MotionInView className="mb-16" delayMs={25}>
                     <DataVizStaticSection />

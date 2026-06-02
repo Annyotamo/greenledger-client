@@ -1,4 +1,5 @@
 import Image from "next/image";
+import DecorativeVideo from "@/components/landing/DecorativeVideo";
 
 import startupIndia from "@/assets/startupIndia.png";
 import IMKKolkata from "@/assets/IMIKolkata.jpg";
@@ -14,7 +15,15 @@ import sepcKolkata from "@/assets/sepc.png";
 export default function HeroSection() {
     return (
         <section className="full-bleed relative min-h-[min(90vh,820px)] overflow-hidden rounded-none shadow-[0_24px_80px_-30px_rgba(0,40,25,0.55)]">
-            <Image src="/GreenLedger_Background.jpg" alt="" fill priority className="object-cover object-center" />
+            {/* Video background with responsive sizing and intelligent playback */}
+            <DecorativeVideo
+                src="/api/media/green-earth"
+                poster="/GreenLedger_Background.jpg"
+                className="absolute inset-0 h-full w-full object-cover"
+                startTime={2}
+            />
+
+            {/* Overlay gradients for text readability and aesthetic depth */}
             <div
                 className="absolute inset-0 bg-linear-to-br from-emerald-950/92 via-emerald-900/78 to-teal-950/88"
                 aria-hidden
@@ -24,14 +33,16 @@ export default function HeroSection() {
                 className="absolute inset-0 bg-[radial-gradient(ellipse_110%_70%_at_50%_-10%,rgba(255,255,255,0.16),transparent_52%)]"
                 aria-hidden
             />
+
+            {/* Grain texture for visual refinement */}
             <div className="gl-grain" aria-hidden />
 
-            <div className="relative z-10 mx-auto flex w-full max-w-none flex-col gap-10 px-4 py-14 sm:px-5 md:flex-row md:items-center md:justify-between md:px-6 md:py-16 lg:px-12 lg:py-20">
+            <div className="relative z-10 mx-auto flex w-full max-w-none flex-col gap-10 px-4 py-14 sm:px-5 md:flex-row md:items-center md:justify-between md:px-6 md:py-16 lg:px-12 lg:py-20 lg:my-28">
                 <div className="min-w-0 flex-1">
-                    <h1 className="text-balance text-3xl font-extrabold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_28px_rgba(0,0,0,0.35)] sm:text-4xl lg:text-5xl xl:text-6xl">
+                    <h1 className="text-balance text-3xl font-extrabold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_28px_rgba(0,0,0,0.35)] sm:text-4xl lg:text-5xl xl:text-5xl">
                         GHG accounting and ESG reporting audit ready operations and role based controls
                     </h1>
-                    <p className="mt-6 max-w-3xl text-pretty text-base leading-relaxed text-emerald-50/95 sm:text-lg">
+                    <p className="mt-6 max-w-3xl text-pretty text-base leading-relaxed text-emerald-50/95 sm:text-lg ">
                         GreenLedger centralizes ESG reporting and GHG accounting, producing audit ready outputs with
                         immutable logging. Manage role based access and approval queues for activity submissions, and
                         capture fuel, electricity and energy activities with meter and invoice grade fidelity.

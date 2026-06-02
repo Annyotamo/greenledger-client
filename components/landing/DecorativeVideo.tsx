@@ -6,6 +6,7 @@ type DecorativeVideoProps = {
     className?: string;
     src: string;
     poster?: string;
+    startTime?: number;
 };
 
 function useInView(ref: React.RefObject<Element>, rootMargin: string) {
@@ -26,7 +27,7 @@ function useInView(ref: React.RefObject<Element>, rootMargin: string) {
     return inView;
 }
 
-const DecorativeVideoInner = ({ className, src, poster }: DecorativeVideoProps) => {
+const DecorativeVideoInner = ({ className, src, poster, startTime = 0 }: DecorativeVideoProps) => {
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const inView = useInView(videoRef as unknown as React.RefObject<Element>, "0px 0px -15% 0px");
 
@@ -45,6 +46,9 @@ const DecorativeVideoInner = ({ className, src, poster }: DecorativeVideoProps) 
         const schedule = () => {
             const cb = () => {
                 if (cancelled) return;
+                if (startTime > 0) {
+                    video.currentTime = startTime;
+                }
                 video.play().catch(() => {});
             };
 
@@ -68,7 +72,7 @@ const DecorativeVideoInner = ({ className, src, poster }: DecorativeVideoProps) 
             }
             video.pause();
         };
-    }, [inView, reducedMotion]);
+    }, [inView, reducedMotion, startTime]);
 
     return (
         <video

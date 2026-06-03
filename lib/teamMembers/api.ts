@@ -24,7 +24,7 @@ export async function getTeamMembers(): Promise<TeamMember[]> {
 }
 
 export async function createTeamMember(payload: CreateTeamMemberPayload): Promise<TeamMember> {
-    const response = await privateApi.post("/tenant/user", payload);
+    const response = await privateApi.post("/tenant/user/invite", payload);
     const rawData = response.data.data?.items ?? response.data.data;
     const dto = Array.isArray(rawData) ? rawData[0] : rawData;
     return mapTeamMember(dto as TeamMemberDto);

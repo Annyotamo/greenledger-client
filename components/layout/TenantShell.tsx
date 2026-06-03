@@ -14,7 +14,7 @@ type TenantShellProps = {
 
 export function TenantShell({ children }: TenantShellProps) {
     const collapsed = useSidebarStore((s) => s.collapsed);
-    const [activeTab, setActiveTab] = useState<DashboardTab>("dashboard");
+    const [activeTab, setActiveTab] = useState<DashboardTab>("emissions");
     const mainMargin = collapsed ? "5rem" : "16rem";
     const mainPaddingTop = "6rem";
 

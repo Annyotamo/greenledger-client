@@ -10,9 +10,15 @@ export default function ActivitiesPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedFacility, setSelectedFacility] = useState("");
     const [selectedFuel, setSelectedFuel] = useState("");
+    const [status, setStatus] = useState("");
+    const [usageType, setUsageType] = useState("");
+    const [emissionType, setEmissionType] = useState("");
 
     const facilityOptions = useMemo(
-        () => Array.from(new Set(activities.map((activity) => activity.facilityId))).sort(),
+        () =>
+            Array.from(new Set(activities.map((activity) => activity.facilityId)))
+                .sort()
+                .map((id) => ({ id, name: id })),
         [activities],
     );
 
@@ -48,9 +54,15 @@ export default function ActivitiesPage() {
                 searchTerm={searchTerm}
                 selectedFacility={selectedFacility}
                 selectedFuel={selectedFuel}
+                status={status}
+                usageType={usageType}
+                emissionType={emissionType}
                 onSearchChange={setSearchTerm}
                 onFacilityChange={setSelectedFacility}
                 onFuelChange={setSelectedFuel}
+                onStatusChange={setStatus}
+                onUsageTypeChange={setUsageType}
+                onEmissionTypeChange={setEmissionType}
                 facilityOptions={facilityOptions}
                 fuelOptions={fuelOptions}
             />

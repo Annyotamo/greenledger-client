@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { format, isAfter } from "date-fns";
 import { getScope1Report } from "@/lib/ghg/api";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
@@ -10,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { FuelActivity } from "@/lib/activity/types";
 import { DATE_RANGE_LABEL } from "@/lib/dashboard/data";
+import { FuelActivityDetailModal } from "./FuelActivityDetailModal";
 
 const statusStyles: Record<string, string> = {
     verified: "bg-secondary text-white",
@@ -41,31 +43,51 @@ export function FuelActivityTable({
     activities,
     isLoading,
     isError,
-    searchTerm,
+    searchTerm = "",
     selectedFacility,
     selectedFuel,
+    status,
+    usageType,
+    emissionType,
     onSearchChange,
     onFacilityChange,
     onFuelChange,
+    onStatusChange,
+    onUsageTypeChange,
+    onEmissionTypeChange,
     facilityOptions,
     fuelOptions,
+    showFilters,
+    onToggleFilters,
 }: {
     activities: FuelActivity[];
     isLoading: boolean;
     isError: boolean;
-    searchTerm: string;
+    searchTerm?: string;
     selectedFacility: string;
     selectedFuel: string;
-    onSearchChange: (value: string) => void;
+    status: string;
+    usageType: string;
+    emissionType: string;
+    onSearchChange?: (value: string) => void;
     onFacilityChange: (value: string) => void;
     onFuelChange: (value: string) => void;
-    facilityOptions: string[];
+    onStatusChange: (value: string) => void;
+    onUsageTypeChange: (value: string) => void;
+    onEmissionTypeChange: (value: string) => void;
+    facilityOptions: Array<{ id: string; name: string }>;
     fuelOptions: string[];
+    showFilters?: boolean;
+    onToggleFilters?: (v: boolean) => void;
 }) {
     const [isDateModalOpen, setIsDateModalOpen] = useState(false);
     const [selectedRange, setSelectedRange] = useState<DateRange>({ start: null, end: null });
     const [draftRange, setDraftRange] = useState<DateRange>(selectedRange);
     const [isExporting, setIsExporting] = useState(false);
+    const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
+
+    const selectedActivity = activities.find((a) => a.id === selectedActivityId);
 
     const selectedRangeLabel =
         selectedRange.start && selectedRange.end
@@ -110,6 +132,21 @@ export function FuelActivityTable({
         setIsDateModalOpen(false);
     }
 
+    useEffect(() => {
+        function handleDocClick(e: MouseEvent) {
+            const target = e.target as HTMLElement | null;
+            if (!target) return;
+            const inMenu = !!target.closest("[data-action-menu]");
+            const inToggle = !!target.closest("[data-action-toggle]");
+            if (!inMenu && !inToggle) {
+                setOpenMenuId(null);
+            }
+        }
+
+        document.addEventListener("click", handleDocClick);
+        return () => document.removeEventListener("click", handleDocClick);
+    }, []);
+
     async function handleExport() {
         if (!selectedRange.start || !selectedRange.end) return;
         setIsExporting(true);
@@ -136,12 +173,74 @@ export function FuelActivityTable({
 
     return (
         <Card className="overflow-hidden">
-            <div className="flex flex-col gap-4 border-b border-outline-variant bg-surface p-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4 border-b border-outline-variant bg-surface p-4">
                 <div className="space-y-1">
                     <h3 className="text-headline-sm font-semibold text-primary">Fuel Activity Details</h3>
                     <p className="text-body-md text-on-surface-variant">
                         Monitor activity records, emissions and quality tiers across all fuel sources.
                     </p>
+                    {onSearchChange ? (
+                        <div className="mt-4 w-full">
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => onSearchChange(e.target.value)}
+                                placeholder="Search activities"
+                                className="w-full rounded border border-outline-variant bg-surface-container-high px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                            />
+                        </div>
+                    ) : null}
+                    {showFilters ? (
+                        <div className="mt-4 w-full grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                            <select
+                                className="w-full rounded border p-2 text-sm"
+                                aria-label="Status"
+                                value={status}
+                                onChange={(e) => onStatusChange(e.target.value)}>
+                                <option value="">All statuses</option>
+                                <option value="draft">Draft</option>
+                                <option value="submitted">Submitted</option>
+                                <option value="verified">Verified</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                            <select
+                                className="w-full rounded border p-2 text-sm"
+                                aria-label="Facility"
+                                onChange={(e) => onFacilityChange(e.target.value)}
+                                value={selectedFacility}>
+                                <option value="">All facilities</option>
+                                {facilityOptions.map((f) => (
+                                    <option key={f.id} value={f.id}>
+                                        {f.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <select
+                                className="w-full rounded border p-2 text-sm"
+                                aria-label="Usage type"
+                                value={usageType}
+                                onChange={(e) => onUsageTypeChange(e.target.value)}>
+                                <option value="">All usage types</option>
+                                <option value="direct_combustion">Direct Combustion</option>
+                                <option value="electricity_generation">Electricity Generation</option>
+                                <option value="steam_generation">Steam Generation</option>
+                                <option value="heating">Heating</option>
+                                <option value="vehicle_fuel">Vehicle Fuel</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <select
+                                className="w-full rounded border p-2 text-sm"
+                                aria-label="Emission type"
+                                value={emissionType}
+                                onChange={(e) => onEmissionTypeChange(e.target.value)}>
+                                <option value="">All emission types</option>
+                                <option value="stationary">Stationary</option>
+                                <option value="mobile">Mobile</option>
+                                <option value="process">Process</option>
+                                <option value="fugitive">Fugitive</option>
+                            </select>
+                        </div>
+                    ) : null}
                 </div>
                 <div className="flex flex-col items-end gap-2">
                     <div className="flex flex-wrap items-center gap-3">
@@ -239,13 +338,13 @@ export function FuelActivityTable({
                     <TableHeader>
                         <TableRow className="bg-surface-container-low border-b border-outline-variant">
                             <TableHead>Period</TableHead>
-                            <TableHead>Facility</TableHead>
+                            <TableHead>Applicable scope</TableHead>
                             <TableHead>Fuel / Usage</TableHead>
                             <TableHead>Quantity</TableHead>
                             <TableHead>Energy / Emissions</TableHead>
-                            <TableHead>Quality</TableHead>
                             <TableHead>Docs</TableHead>
                             <TableHead>Status</TableHead>
+                            <TableHead />
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -281,20 +380,21 @@ export function FuelActivityTable({
                                 );
 
                                 return (
-                                    <TableRow key={activity.id}>
+                                    <TableRow
+                                        key={activity.id}
+                                        onClick={() => setOpenMenuId(activity.id)}
+                                        className="hover:bg-surface-container-high cursor-pointer">
                                         <TableCell>
                                             <div className="font-semibold text-body-md text-primary">
-                                                {activity.activityStartDate} - {activity.activityEndDate}
+                                                {format(activityStart, "MMMM d, yyyy")} to{" "}
+                                                {format(activityEnd, "MMMM d, yyyy")}
                                             </div>
                                             <div className="mt-2 text-[11px] uppercase tracking-[0.12em] text-on-surface-variant">
                                                 {activeDays} days
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="font-semibold text-body-md text-primary">
-                                                {activity.facilityId}
-                                            </div>
-                                            <div className="mt-2 text-[11px] text-on-surface-variant">
+                                            <div className="font-semibold text-body-md text-primary capitalize">
                                                 {activity.scopeType}
                                             </div>
                                         </TableCell>
@@ -306,7 +406,7 @@ export function FuelActivityTable({
                                                 {activity.usageType.replaceAll("_", " ")}
                                             </div>
                                             <div className="mt-1 text-[11px] text-on-surface-variant">
-                                                {activity.fuelFactorRegion} • {activity.fuelFactorVersion}
+                                                {activity.fuelFactorStandard} • {activity.fuelFactorVersion}
                                             </div>
                                         </TableCell>
                                         <TableCell>
@@ -319,19 +419,13 @@ export function FuelActivityTable({
                                         </TableCell>
                                         <TableCell>
                                             <div className="text-body-md text-primary">
-                                                {activity.energyContentGJ.toFixed(1)} GJ
-                                            </div>
-                                            <div className="mt-2 text-[11px] text-on-surface-variant">
                                                 {activity.calculatedTCo2e.toFixed(2)} tCO₂e
                                             </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="text-body-md text-primary capitalize">
-                                                {activity.dataQualityTier}
-                                            </div>
-                                            <div className="mt-2 text-[11px] text-on-surface-variant uppercase tracking-[0.12em]">
-                                                {activity.estimationBasis ?? "—"}
-                                            </div>
+                                            {activity.energyContentGJ > 0 ? (
+                                                <div className="mt-2 text-[11px] text-on-surface-variant">
+                                                    {activity.energyContentGJ.toFixed(1)} GJ
+                                                </div>
+                                            ) : null}
                                         </TableCell>
                                         <TableCell>
                                             <div className="inline-flex items-center gap-2 rounded-full bg-surface-container-high px-2 py-1 text-[11px] text-on-surface-variant">
@@ -344,6 +438,60 @@ export function FuelActivityTable({
                                                 className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${statusClass}`}>
                                                 {status}
                                             </span>
+                                        </TableCell>
+                                        <TableCell className="relative">
+                                            <button
+                                                aria-label="Open actions"
+                                                data-action-toggle
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    // toggle menu for this activity
+                                                    const id = activity.id;
+                                                    setOpenMenuId((current) => (current === id ? null : id));
+                                                }}
+                                                className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-surface-container-high">
+                                                <MaterialIcon name="more_horiz" size="sm" />
+                                            </button>
+
+                                            {openMenuId === activity.id ? (
+                                                <div
+                                                    data-action-menu
+                                                    className="absolute right-0 top-8 z-50 w-44 rounded-md border border-outline-variant bg-white shadow-lg">
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedActivityId(activity.id);
+                                                            setOpenMenuId(null);
+                                                        }}
+                                                        className="w-full text-left px-3 py-2 hover:bg-surface-container-high">
+                                                        <div className="flex items-center gap-2">
+                                                            <MaterialIcon name="visibility" size="sm" />
+                                                            <span>View</span>
+                                                        </div>
+                                                    </button>
+                                                    <Link
+                                                        href={`/activities/fuel/${activity.id}/edit`}
+                                                        className="block px-3 py-2 hover:bg-surface-container-high">
+                                                        <div className="flex items-center gap-2">
+                                                            <MaterialIcon name="edit" size="sm" />
+                                                            <span>Edit</span>
+                                                        </div>
+                                                    </Link>
+                                                    {activity.workflowStatus.toLowerCase() !== "verified" ? (
+                                                        <button
+                                                            onClick={() => {
+                                                                // placeholder verify action
+                                                                console.log("verify", activity.id);
+                                                                setOpenMenuId(null);
+                                                            }}
+                                                            className="w-full text-left px-3 py-2 hover:bg-surface-container-high">
+                                                            <div className="flex items-center gap-2">
+                                                                <MaterialIcon name="check_circle" size="sm" />
+                                                                <span>Verify</span>
+                                                            </div>
+                                                        </button>
+                                                    ) : null}
+                                                </div>
+                                            ) : null}
                                         </TableCell>
                                     </TableRow>
                                 );
@@ -381,6 +529,16 @@ export function FuelActivityTable({
                     </button>
                 </div>
             </div>
+
+            {selectedActivity && (
+                <FuelActivityDetailModal
+                    activity={selectedActivity}
+                    onClose={() => setSelectedActivityId(null)}
+                    onVerify={(id) => {
+                        console.log("Verify activity:", id);
+                    }}
+                />
+            )}
         </Card>
     );
 }

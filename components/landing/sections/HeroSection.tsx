@@ -59,53 +59,52 @@ export default function HeroSection() {
                             Read how it works
                         </a>
                     </div>
-                    <div className="mt-7 flex flex-wrap items-center gap-3">
-                        <div className="inline-flex items-center gap-3 rounded-2xl border border-white/25 bg-white/10 px-4 py-2 shadow-sm backdrop-blur-md transition hover:bg-white/15">
+                    <div className="mt-7 flex flex-col">
+                        <div className="inline-flex items-center gap-3 rounded-2xl px-1 py-2">
                             <span className="text-[0.7rem] font-bold uppercase tracking-[0.22em] text-emerald-50/85">
                                 Supported by
                             </span>
-                            <span className="h-5 w-px bg-white/20" aria-hidden />
                             <a href="https://www.startupindia.gov.in/" target="_blank" rel="noopener noreferrer">
                                 <Image
                                     src={startupIndia}
                                     alt="Startup India"
-                                    className="h-7 w-auto object-contain opacity-95"
+                                    className="h-7 rounded-sm w-auto object-contain opacity-95"
                                 />
                             </a>
-                            <span className="h-5 w-px bg-white/20" aria-hidden />
                             <a href="https://www.entrepreneurcafe.org/" target="_blank" rel="noopener noreferrer">
                                 <Image
                                     src={entrepreneurCafe}
                                     alt="Entrepreneur Cafe"
-                                    className="h-7 w-auto object-contain opacity-95"
+                                    className="h-7 w-auto object-contain opacity-95 rounded-sm"
                                 />
                             </a>
-                            <span className="h-5 w-px bg-white/20" aria-hidden />
                             <a href="https://imik.edu.in" target="_blank" rel="noopener noreferrer">
                                 <Image
                                     src={IMKKolkata}
                                     alt="IMI Kolkata"
-                                    className="h-7 w-auto object-contain opacity-95"
+                                    className="h-7 w-auto object-contain opacity-95 rounded-sm"
                                 />
                             </a>
                         </div>
-                        <div className="inline-flex items-center gap-3 rounded-2xl border border-white/25 bg-white/10 px-4 py-2 shadow-sm backdrop-blur-md h-12">
+                        {/* <div className="inline-flex items-center gap-3 rounded-2xl px-1 py-2 h-auto">
                             <span className="text-[0.7rem] font-bold uppercase tracking-[0.22em] text-emerald-50/85">
                                 Certifications
                             </span>
-                            <span className="h-5 w-px bg-white/20" aria-hidden />
                             <a href="https://www.servicesepc.org/" target="_blank" rel="noopener noreferrer">
-                                <Image src={sepcKolkata} alt="SEPC" className="h-7 w-auto object-contain opacity-95" />
+                                <Image
+                                    src={sepcKolkata}
+                                    alt="SEPC"
+                                    className="h-7 w-auto object-contain opacity-95 rounded-sm"
+                                />
                             </a>
-                            <span className="h-5 w-px bg-white/20" aria-hidden />
                             <a href="https://www.iso.org/standard/27001" target="_blank" rel="noopener noreferrer">
                                 <Image
                                     src={isoCertifaction}
                                     alt="ISO 27001 certification"
-                                    className="h-7 w-auto object-contain opacity-95"
+                                    className="h-7 w-auto object-contain opacity-95 rounded-sm"
                                 />
                             </a>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </div>

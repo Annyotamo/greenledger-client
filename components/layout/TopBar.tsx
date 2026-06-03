@@ -50,9 +50,9 @@ export function TopBar({ activeTab, onTabChange }: TopBarProps) {
                     <MaterialIcon
                         name="search"
                         size="sm"
-                        className="absolute left-3 top-1/2 -translate-y-1/2 !text-sm text-on-surface-variant"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-sm! text-on-surface-variant"
                     />
-                    <Input placeholder="Search emissions data..." className="h-auto py-2" />
+                    <Input placeholder="Search emissions data..." className="h-auto lg:h-[37.5px]" />
                 </div>
             </div>
 
@@ -60,20 +60,20 @@ export function TopBar({ activeTab, onTabChange }: TopBarProps) {
                 <div className="flex items-center gap-1">
                     <button
                         type="button"
-                        className="relative rounded-full p-2 transition-colors hover:bg-surface-container-high"
+                        className="relative rounded-full p-2 pb-0 transition-colors hover:bg-surface-container-high"
                         aria-label="Notifications">
                         <MaterialIcon name="notifications" className="text-on-surface-variant" />
                         <span className="fab-pulse absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-error" />
                     </button>
                     <button
                         type="button"
-                        className="rounded-full p-2 transition-colors hover:bg-surface-container-high"
+                        className="rounded-full p-2 pb-0 transition-colors hover:bg-surface-container-high"
                         aria-label="Help">
                         <MaterialIcon name="help_outline" className="text-on-surface-variant" />
                     </button>
                     <button
                         type="button"
-                        className="rounded-full p-2 transition-colors hover:bg-surface-container-high"
+                        className="rounded-full p-2 pb-0 transition-colors hover:bg-surface-container-high"
                         aria-label="Toggle theme"
                         onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
                         <MaterialIcon
@@ -82,15 +82,6 @@ export function TopBar({ activeTab, onTabChange }: TopBarProps) {
                         />
                     </button>
                 </div>
-
-                <div className="mx-1 h-6 w-px bg-outline-variant" />
-
-                <button
-                    type="button"
-                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-mono text-label-md text-on-primary transition-opacity hover:opacity-90">
-                    <MaterialIcon name="add" size="sm" />
-                    New Audit
-                </button>
             </div>
         </header>
     );

@@ -56,4 +56,4 @@ export type ScopeComparisonMonth = {
     scope2: number;
 };
 
-export type DashboardTab = "dashboard" | "scope-1" | "scope-2";
+export type DashboardTab = "emissions" | "energy";

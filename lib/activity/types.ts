@@ -135,6 +135,28 @@ export type FuelActivity = {
     fuelFactorStandard: string;
     fuelFactorVersion: string;
     fuelFactorRegion: string;
+    // Full calculated data
+    calculatedKgCo2: number;
+    calculatedTCo2: number;
+    calculatedKgCh4: number;
+    calculatedTCh4: number;
+    calculatedKgN2o: number;
+    calculatedTN2o: number;
+    biogenicKgCo2: number | null;
+    biogenicTCo2: number | null;
+    calculationMethod: string | null;
+    calculationDetails: string | null;
+    // Full factor data
+    factorKgCo2e: number;
+    factorKgCo2eOfCo2: number;
+    factorKgCo2eOfCh4: number;
+    factorKgCo2eOfN2o: number;
+    factorOtherGhgKgCo2e: number | null;
+    factorTCo2e: number;
+    factorTCo2eOfCo2: number;
+    factorTCo2eOfCh4: number;
+    factorTCo2eOfN2o: number;
+    factorOtherGhgTCo2e: number | null;
 };
 
 export type FuelActivityPagination = {

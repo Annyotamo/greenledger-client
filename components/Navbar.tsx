@@ -11,7 +11,7 @@ const navLinks = [
 
 const Navbar = () => {
     return (
-        <header className="fixed top-0 z-50 w-full bg-transparent backdrop-filter-none">
+        <header className="absolute top-0 z-50 w-full bg-transparent backdrop-filter-none">
             <nav className="mx-auto flex w-full max-w-400 items-center justify-between gap-4 px-4 py-4 sm:px-5 md:px-6 lg:px-7 bg-transparent">
                 <Link href="/" className="flex min-w-0 items-center gap-2 sm:gap-3">
                     <Image

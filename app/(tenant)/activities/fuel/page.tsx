@@ -7,17 +7,30 @@ import { Button } from "@/components/ui/button";
 import { FuelActivitySummary } from "@/components/activity/FuelActivitySummary";
 import { FuelActivityTable } from "@/components/activity/FuelActivityTable";
 import { useFuelActivities } from "@/lib/activity/hooks";
+import { useFacilities } from "@/lib/facility/hooks";
 
 export default function FuelActivitiesPage() {
-    const { data: activities = [], isPending, isError } = useFuelActivities();
-    const [searchTerm, setSearchTerm] = useState("");
+    const [status, setStatus] = useState("");
+    const [usageType, setUsageType] = useState("");
+    const [emissionType, setEmissionType] = useState("");
     const [selectedFacility, setSelectedFacility] = useState("");
     const [selectedFuel, setSelectedFuel] = useState("");
+    const [showFilters, setShowFilters] = useState(false);
 
-    const facilityOptions = useMemo(
-        () => Array.from(new Set(activities.map((activity) => activity.facilityId))).sort(),
-        [activities],
-    );
+    const {
+        data: activities = [],
+        isPending,
+        isError,
+    } = useFuelActivities({
+        status: status || undefined,
+        usage_type: usageType || undefined,
+        emission_type: emissionType || undefined,
+        facility_id: selectedFacility || undefined,
+    });
+
+    const { data: facilities = [] } = useFacilities();
+
+    const facilityOptions = useMemo(() => facilities.map((f) => ({ id: f.id, name: f.name })), [facilities]);
 
     const fuelOptions = useMemo(
         () => Array.from(new Set(activities.map((activity) => activity.fuelName))).sort(),
@@ -26,19 +39,10 @@ export default function FuelActivitiesPage() {
 
     const filteredActivities = useMemo(() => {
         return activities.filter((activity) => {
-            const searchLower = searchTerm.trim().toLowerCase();
-            const matchesSearch =
-                !searchLower ||
-                activity.fuelName.toLowerCase().includes(searchLower) ||
-                activity.facilityId.toLowerCase().includes(searchLower) ||
-                activity.usageType.toLowerCase().includes(searchLower) ||
-                activity.workflowStatus.toLowerCase().includes(searchLower);
-
-            const matchesFacility = !selectedFacility || activity.facilityId === selectedFacility;
             const matchesFuel = !selectedFuel || activity.fuelName === selectedFuel;
-            return matchesSearch && matchesFacility && matchesFuel;
+            return matchesFuel;
         });
-    }, [activities, searchTerm, selectedFacility, selectedFuel]);
+    }, [activities, selectedFuel]);
 
     return (
         <div className="space-y-8">
@@ -50,7 +54,7 @@ export default function FuelActivitiesPage() {
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                    <Button variant="secondary" size="md">
+                    <Button variant="secondary" size="md" onClick={() => setShowFilters((s) => !s)}>
                         <MaterialIcon name="filter_list" size="sm" />
                         Filter
                     </Button>
@@ -69,12 +73,18 @@ export default function FuelActivitiesPage() {
                 activities={filteredActivities}
                 isLoading={isPending}
                 isError={isError}
-                searchTerm={searchTerm}
                 selectedFacility={selectedFacility}
                 selectedFuel={selectedFuel}
-                onSearchChange={setSearchTerm}
+                status={status}
+                usageType={usageType}
+                emissionType={emissionType}
+                showFilters={showFilters}
+                onToggleFilters={setShowFilters}
                 onFacilityChange={setSelectedFacility}
                 onFuelChange={setSelectedFuel}
+                onStatusChange={setStatus}
+                onUsageTypeChange={setUsageType}
+                onEmissionTypeChange={setEmissionType}
                 facilityOptions={facilityOptions}
                 fuelOptions={fuelOptions}
             />

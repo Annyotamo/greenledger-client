@@ -10,9 +10,8 @@ import type {
 } from "./types";
 
 export const DASHBOARD_TABS: { id: DashboardTab; label: string }[] = [
-    { id: "dashboard", label: "Dashboard" },
-    { id: "scope-1", label: "Scope 1" },
-    { id: "scope-2", label: "Scope 2" },
+    { id: "emissions", label: "Emissions" },
+    { id: "energy", label: "Energy" },
 ];
 
 export const DATE_RANGE_LABEL = "April 1, 2025 - March 31, 2026";

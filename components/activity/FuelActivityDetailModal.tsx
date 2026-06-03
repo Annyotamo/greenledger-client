@@ -350,18 +350,15 @@ export function FuelActivityDetailModal({
                             </button>
                         </Link>
                         {!isVerified && (
-                            <Button
-                                type="button"
-                                variant="primary"
-                                size="md"
+                            <button
+                                className="bg-green-500 text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm"
                                 onClick={() => {
                                     onVerify(activity.id);
                                     onClose();
-                                }}
-                                className="w-full sm:w-auto">
+                                }}>
                                 <MaterialIcon name="check_circle" size="sm" />
-                                Verify
-                            </Button>
+                                <span className="font-label-md text-label-md uppercase">Verify</span>
+                            </button>
                         )}
                     </div>
                 </div>

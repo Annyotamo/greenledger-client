@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { format, isAfter } from "date-fns";
 import { getScope1Report } from "@/lib/ghg/api";
+import { useQueryClient } from "@tanstack/react-query";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -87,6 +88,15 @@ export function FuelActivityTable({
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
 
+    const [confirmState, setConfirmState] = useState<{
+        open: boolean;
+        action: "verify" | "reject" | null;
+        activityId?: string | null;
+    }>({ open: false, action: null, activityId: null });
+    const [rejectReason, setRejectReason] = useState("");
+
+    const queryClient = useQueryClient();
+
     const selectedActivity = activities.find((a) => a.id === selectedActivityId);
 
     const selectedRangeLabel =
@@ -130,6 +140,37 @@ export function FuelActivityTable({
         if (!draftRange.start || !draftRange.end) return;
         setSelectedRange(draftRange);
         setIsDateModalOpen(false);
+    }
+
+    async function performVerify(activityId?: string | null) {
+        if (!activityId) return;
+        try {
+            const res = await fetch(`/tenant/activity/fuel/${activityId}/verify`, { method: "POST" });
+            if (!res.ok) throw new Error("Verify failed");
+            setConfirmState({ open: false, action: null, activityId: null });
+            setRejectReason("");
+            await queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function performReject(activityId?: string | null, reason?: string) {
+        if (!activityId) return;
+        if (!reason || reason.length < 1 || reason.length > 2000) return;
+        try {
+            const res = await fetch(`/tenant/activity/fuel/${activityId}/reject`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ rejected_reason: reason }),
+            });
+            if (!res.ok) throw new Error("Reject failed");
+            setConfirmState({ open: false, action: null, activityId: null });
+            setRejectReason("");
+            await queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     useEffect(() => {
@@ -188,57 +229,6 @@ export function FuelActivityTable({
                                 placeholder="Search activities"
                                 className="w-full rounded border border-outline-variant bg-surface-container-high px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                             />
-                        </div>
-                    ) : null}
-                    {showFilters ? (
-                        <div className="mt-4 w-full grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                            <select
-                                className="w-full rounded border p-2 text-sm"
-                                aria-label="Status"
-                                value={status}
-                                onChange={(e) => onStatusChange(e.target.value)}>
-                                <option value="">All statuses</option>
-                                <option value="draft">Draft</option>
-                                <option value="submitted">Submitted</option>
-                                <option value="verified">Verified</option>
-                                <option value="rejected">Rejected</option>
-                            </select>
-                            <select
-                                className="w-full rounded border p-2 text-sm"
-                                aria-label="Facility"
-                                onChange={(e) => onFacilityChange(e.target.value)}
-                                value={selectedFacility}>
-                                <option value="">All facilities</option>
-                                {facilityOptions.map((f) => (
-                                    <option key={f.id} value={f.id}>
-                                        {f.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <select
-                                className="w-full rounded border p-2 text-sm"
-                                aria-label="Usage type"
-                                value={usageType}
-                                onChange={(e) => onUsageTypeChange(e.target.value)}>
-                                <option value="">All usage types</option>
-                                <option value="direct_combustion">Direct Combustion</option>
-                                <option value="electricity_generation">Electricity Generation</option>
-                                <option value="steam_generation">Steam Generation</option>
-                                <option value="heating">Heating</option>
-                                <option value="vehicle_fuel">Vehicle Fuel</option>
-                                <option value="other">Other</option>
-                            </select>
-                            <select
-                                className="w-full rounded border p-2 text-sm"
-                                aria-label="Emission type"
-                                value={emissionType}
-                                onChange={(e) => onEmissionTypeChange(e.target.value)}>
-                                <option value="">All emission types</option>
-                                <option value="stationary">Stationary</option>
-                                <option value="mobile">Mobile</option>
-                                <option value="process">Process</option>
-                                <option value="fugitive">Fugitive</option>
-                            </select>
                         </div>
                     ) : null}
                 </div>
@@ -477,18 +467,40 @@ export function FuelActivityTable({
                                                         </div>
                                                     </Link>
                                                     {activity.workflowStatus.toLowerCase() !== "verified" ? (
-                                                        <button
-                                                            onClick={() => {
-                                                                // placeholder verify action
-                                                                console.log("verify", activity.id);
-                                                                setOpenMenuId(null);
-                                                            }}
-                                                            className="w-full text-left px-3 py-2 hover:bg-surface-container-high">
-                                                            <div className="flex items-center gap-2">
-                                                                <MaterialIcon name="check_circle" size="sm" />
-                                                                <span>Verify</span>
-                                                            </div>
-                                                        </button>
+                                                        <>
+                                                            <button
+                                                                onClick={() => {
+                                                                    setConfirmState({
+                                                                        open: true,
+                                                                        action: "verify",
+                                                                        activityId: activity.id,
+                                                                    });
+                                                                    setOpenMenuId(null);
+                                                                }}
+                                                                className="w-full text-left px-3 py-2 hover:bg-surface-container-high">
+                                                                <div className="flex items-center gap-2 text-emerald-600">
+                                                                    <MaterialIcon name="check_circle" size="sm" />
+                                                                    <span className="text-emerald-600">Verify</span>
+                                                                </div>
+                                                            </button>
+                                                            {activity.workflowStatus.toLowerCase() !== "rejected" ? (
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setConfirmState({
+                                                                            open: true,
+                                                                            action: "reject",
+                                                                            activityId: activity.id,
+                                                                        });
+                                                                        setOpenMenuId(null);
+                                                                    }}
+                                                                    className="w-full text-left px-3 py-2 hover:bg-surface-container-high">
+                                                                    <div className="flex items-center gap-2 text-red-600">
+                                                                        <MaterialIcon name="block" size="sm" />
+                                                                        <span className="text-red-600">Reject</span>
+                                                                    </div>
+                                                                </button>
+                                                            ) : null}
+                                                        </>
                                                     ) : null}
                                                 </div>
                                             ) : null}
@@ -539,6 +551,73 @@ export function FuelActivityTable({
                     }}
                 />
             )}
+
+            {confirmState.open ? (
+                <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+                    <button
+                        type="button"
+                        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+                        onClick={() => setConfirmState({ open: false, action: null, activityId: null })}
+                        aria-label="Close modal"
+                    />
+                    <div className="relative w-full max-w-lg overflow-hidden rounded-md border border-outline-variant bg-white shadow-2xl">
+                        <div className="flex items-start justify-between gap-4 px-6 py-5">
+                            <div>
+                                <h3 className="text-headline-sm font-semibold text-primary">
+                                    {confirmState.action === "verify" ? "Verify activity" : "Reject activity"}
+                                </h3>
+                                <p className="text-body-sm text-on-surface-variant mt-1">
+                                    {confirmState.action === "verify"
+                                        ? "This will mark the activity as verified. This action cannot be undone."
+                                        : "Please provide a reason for rejecting this activity (1-2000 characters)."}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setConfirmState({ open: false, action: null, activityId: null })}
+                                className="inline-flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant transition hover:bg-surface-container-high">
+                                <MaterialIcon name="close" size="sm" />
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {confirmState.action === "reject" ? (
+                                <textarea
+                                    value={rejectReason}
+                                    onChange={(e) => setRejectReason(e.target.value)}
+                                    placeholder="Enter rejection reason"
+                                    className="w-full rounded border border-outline-variant p-3 text-sm"
+                                    rows={6}
+                                    maxLength={2000}
+                                />
+                            ) : null}
+                        </div>
+
+                        <div className="flex items-center gap-3 border-t border-outline-variant bg-surface p-4 justify-end">
+                            <Button
+                                variant="secondary"
+                                onClick={() => setConfirmState({ open: false, action: null, activityId: null })}>
+                                Cancel
+                            </Button>
+                            {confirmState.action === "verify" ? (
+                                <button
+                                    className="bg-primary text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm"
+                                    onClick={() => performVerify(confirmState.activityId)}>
+                                    <MaterialIcon name="check_circle" size="sm" />
+                                    <span className="font-label-md text-label-md uppercase">Confirm verify</span>
+                                </button>
+                            ) : (
+                                <Button
+                                    variant="danger"
+                                    onClick={() => performReject(confirmState.activityId, rejectReason)}
+                                    disabled={rejectReason.length < 1 || rejectReason.length > 2000}>
+                                    Confirm reject
+                                </Button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            ) : null}
         </Card>
     );
 }

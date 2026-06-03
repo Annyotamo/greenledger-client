@@ -67,6 +67,59 @@ export default function FuelActivitiesPage() {
                 </div>
             </div>
 
+            {showFilters ? (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <select
+                        className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        aria-label="Status"
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}>
+                        <option value="">All statuses</option>
+                        <option value="draft">Draft</option>
+                        <option value="submitted">Submitted</option>
+                        <option value="verified">Verified</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                    <select
+                        className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        aria-label="Facility"
+                        value={selectedFacility}
+                        onChange={(e) => setSelectedFacility(e.target.value)}>
+                        <option value="">All facilities</option>
+                        {facilityOptions.map((f) => (
+                            <option key={f.id} value={f.id}>
+                                {f.name}
+                            </option>
+                        ))}
+                    </select>
+                    <select
+                        className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        aria-label="Usage type"
+                        value={usageType}
+                        onChange={(e) => setUsageType(e.target.value)}>
+                        <option value="">All usage types</option>
+                        <option value="direct_combustion">Direct Combustion</option>
+                        <option value="electricity_generation">Electricity Generation</option>
+                        <option value="steam_generation">Steam Generation</option>
+                        <option value="heating">Heating</option>
+                        <option value="vehicle_fuel">Vehicle Fuel</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <select
+                        className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        aria-label="Fuel"
+                        value={selectedFuel}
+                        onChange={(e) => setSelectedFuel(e.target.value)}>
+                        <option value="">All fuels</option>
+                        {fuelOptions.map((f) => (
+                            <option key={f} value={f}>
+                                {f}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            ) : null}
+
             <FuelActivitySummary activities={filteredActivities} />
 
             <FuelActivityTable

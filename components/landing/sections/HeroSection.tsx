@@ -1,27 +1,21 @@
 import Image from "next/image";
 import DecorativeVideo from "@/components/landing/DecorativeVideo";
-
 import startupIndia from "@/assets/startupIndia.png";
 import IMKKolkata from "@/assets/IMIKolkata.jpg";
 import entrepreneurCafe from "@/assets/entrepreneurCafe.jpg";
-import isoCertifaction from "@/assets/isoCertifaction.png";
-import greenLedgerLogo from "@/assets/GLLogo.png";
-import esgAccountingImg from "@/assets/landing-images/14841_esgaccounting_572996_crop.jpg";
-import esgReportingImg from "@/assets/landing-images/esg-reporting.jpg";
-import sustainableFinanceImg from "@/assets/landing-images/ESG-Courses-Sustainable-Finance-1600x900-1.jpg";
-import sasbImg from "@/assets/landing-images/Navigating-SASB.webp";
-import sepcKolkata from "@/assets/sepc.png";
 
 export default function HeroSection() {
     return (
         <section className="full-bleed relative min-h-[min(90vh,820px)] overflow-hidden rounded-none shadow-[0_24px_80px_-30px_rgba(0,40,25,0.55)]">
             {/* Video background with responsive sizing and intelligent playback */}
-            <DecorativeVideo
-                src="/api/media/green-earth"
-                poster="/GreenLedger_Background.jpg"
-                className="absolute inset-0 h-full w-full object-cover"
-                startTime={2}
-            />
+            <div className="bg-gradient-to-br from-[#011E16] via-[#033A2E] to-[#0B5242]">
+                <DecorativeVideo
+                    src="/api/media/green-earth"
+                    poster="/GreenLedger_Background.jpg"
+                    className="absolute inset-0 h-full w-full object-cover bg-gradient-to-br from-[#011E16] via-[#033A2E] to-[#0B5242]"
+                    startTime={2}
+                />
+            </div>
 
             {/* Overlay gradients for text readability and aesthetic depth */}
             <div

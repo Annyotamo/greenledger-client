@@ -32,7 +32,7 @@ function FeatureSliderInner({ cards }: FeatureSliderProps) {
     const extended = useMemo(() => (cards.length > 0 ? [...cards, ...cards] : []), [cards]);
 
     return (
-        <div className="relative z-0 w-full">
+        <div className="relative z-0 w-screen -ml-7">
             <div className="relative overflow-hidden">
                 {smallScreen || reduceMotion ? (
                     <div className="scrollbar-hide isolate flex gap-6 overflow-x-auto overflow-y-clip pl-1 pr-1 [-webkit-overflow-scrolling:touch]">

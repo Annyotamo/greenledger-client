@@ -2,24 +2,23 @@ import Link from "next/link";
 import { Suspense } from "react";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import "@/components/designs/SoftAurora.css";
 import HeroSection from "@/components/landing/sections/HeroSection";
 import DataVizStaticSection from "@/components/landing/sections/DataVizStaticSection";
-import MetricsStripSection from "@/components/landing/sections/MetricsStripSection";
 import PillarsSection from "@/components/landing/sections/PillarsSection";
 import DeepDiveSection from "@/components/landing/sections/DeepDiveSection";
-import TraceabilityExplainerSection from "@/components/landing/sections/TraceabilityExplainerSection";
 import KickoffToReportingSection from "@/components/landing/sections/KickoffToReportingSection";
 import SocialProofSection from "@/components/landing/sections/SocialProofSection";
 import BenefitsSection from "@/components/landing/sections/BenefitsSection";
-
 import MotionInView from "@/components/landing/MotionInView";
 import NewsTicker from "@/components/landing/NewsTicker";
-import BlogsSection from "@/components/landing/sections/BlogsSection";
 import esgReportingImg from "@/assets/landing-images/esg-reporting.jpg";
 import opsImg from "@/assets/landing-images/746569-848x441.jpg";
 import heroMosaic from "@/assets/landing-images/esg_main.960_0_1.jpg";
 import sustainableFinanceImg from "@/assets/landing-images/ESG-Courses-Sustainable-Finance-1600x900-1.jpg";
 import type { SliderCard } from "@/components/landing/FeatureSlider";
+import SoftAurora from "@/components/designs/SoftAurora";
+import AuroraCarousel from "@/components/landing/AuroraCarousel";
 
 const sliderCards: SliderCard[] = [
     {
@@ -83,38 +82,53 @@ const sliderCards: SliderCard[] = [
 
 export default function Home() {
     return (
-        <div className="min-h-screen w-full text-slate-900 font-[var(--font-hanken),Inter,system-ui,sans-serif]">
-            <Navbar />
-            <main className="mx-auto w-full max-w-400 px-4 sm:px-5 md:px-6 lg:px-7">
-                {/* Above-the-fold: pure server-rendered content (no client JS required). */}
+        /* Removed overflow-x: hidden from main to keep page calculations clean */
+        <main className="w-full text-slate-900 font-[var(--font-hanken),Inter,system-ui,sans-serif]">
+            <div className="mx-auto w-full max-w-400 px-4 sm:px-5 md:px-6 lg:px-7 h-full">
                 <HeroSection />
-                {/* Recent ESG news ticker */}
-                <NewsTicker />
+            </div>
 
+            <div className="min-h-screen lg:h-[145vh] w-full overflow-hidden bg-greenledger-blend ">
+                <SoftAurora
+                    speed={0.6}
+                    scale={1.5}
+                    brightness={1}
+                    color1="#00C897"
+                    color2="#094d3d"
+                    noiseFrequency={2.5}
+                    noiseAmplitude={1}
+                    bandHeight={0.5}
+                    bandSpread={1}
+                    octaveDecay={0.1}
+                    layerOffset={0}
+                    colorSpeed={1}
+                    enableMouseInteraction
+                    mouseInfluence={0.25}>
+                    <AuroraCarousel />
+                </SoftAurora>
+            </div>
+
+            <div className="mx-6">
+                <Navbar />
+                <NewsTicker />
                 <MotionInView className="mb-16" delayMs={25}>
                     <DataVizStaticSection />
                 </MotionInView>
-
                 <MotionInView className="mb-16 scroll-mt-24" delayMs={80}>
                     <PillarsSection cards={sliderCards} />
                 </MotionInView>
-
                 <MotionInView className="mb-16 scroll-mt-24" delayMs={80}>
                     <DeepDiveSection />
                 </MotionInView>
-
                 <MotionInView className="mb-16" delayMs={35}>
                     <KickoffToReportingSection />
                 </MotionInView>
-
                 <MotionInView className="mb-16" delayMs={45}>
                     <SocialProofSection />
                 </MotionInView>
-
                 <MotionInView className="mb-16" delayMs={25}>
                     <BenefitsSection />
                 </MotionInView>
-
                 <MotionInView delayMs={60}>
                     <section
                         id="cta"
@@ -131,23 +145,16 @@ export default function Home() {
                             </div>
                             <Link
                                 href="/#cta"
-                                className="inline-flex shrink-0 items-center justify-center rounded-xl bg-white px-8 py-3.5 text-center text-sm font-bold text-emerald-900 shadow-lg transition hover:bg-emerald-50">
+                                className="inline-flex shrink-0 items-center justify-center rounded-md bg-white px-8 py-3.5 text-center text-sm font-bold text-emerald-900 shadow-lg transition hover:bg-emerald-50">
                                 Book a free demo
                             </Link>
                         </div>
                     </section>
                 </MotionInView>
-
-                <Suspense
-                    fallback={
-                        <footer className="mt-14 rounded-2xl border border-white/70 bg-white/80 p-6 text-sm text-slate-600 section-bg backdrop-blur-sm sm:p-7 mb-6">
-                            <div className="h-4 w-1/3 rounded bg-emerald-900/10" />
-                            <div className="mt-3 h-3 w-2/3 rounded bg-emerald-900/10" />
-                        </footer>
-                    }>
+                <Suspense fallback={<div>Loading Footer...</div>}>
                     <Footer />
                 </Suspense>
-            </main>
-        </div>
+            </div>
+        </main>
     );
 }

@@ -12,6 +12,8 @@ body {
     width: 100%;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
+    touch-action: pan-y;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -316,4 +318,40 @@ body {
 
 .scrollbar-thin::-webkit-scrollbar-track {
     background: rgba(31, 122, 63, 0.06);
+}
+
+@layer utilities {
+    .bg-ticker-blend {
+        background: linear-gradient(
+            180deg,
+            #04261d 0%,
+            /* The deep green at the top of the ticker section */ #04261d 40%,
+            /* Extends solid green down through the text area */ #0b382d 65%,
+            /* Subtle gradient transition block */ #608075 82%,
+            /* Soft bridge color to prevent muddy/grayish blending */ #c8cecf 98%,
+            /* Fades smoothly into your light background color */ #c8cecf 100%
+                /* Solid light color finish at the absolute bottom */
+        );
+    }
+}
+
+html,
+body {
+    scroll-behavior: smooth; /* we control this in JS with custom easing */
+}
+
+/* Snap sections are just tall sections in normal flow — no scroll context */
+.scroll-area {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-shrink: 0;
+    position: relative;
+}
+
+/* Passive visual — no snap logic here */
+.page-snap-root {
+    display: block;
+    width: 100%;
 }

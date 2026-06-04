@@ -294,7 +294,7 @@ export default function SoftAurora({
     ]);
 
     return (
-        <div ref={containerRef} className="soft-aurora-container py-37.5 px-15">
+        <div ref={containerRef} className="soft-aurora-container py-40 px-15 -mt-32">
             {children}
         </div>
     );

@@ -88,28 +88,28 @@ export default function Home() {
                 <HeroSection />
             </div>
 
-            <div className="min-h-screen lg:h-[145vh] w-full overflow-hidden bg-greenledger-blend ">
+            <div className="min-h-screen lg:h-[125vh] w-full overflow-hidden bg-greenledger-blend">
                 <SoftAurora
-                    speed={0.6}
-                    scale={1.5}
-                    brightness={1}
+                    speed={1}
+                    scale={2.5}
+                    brightness={0.95}
                     color1="#00C897"
                     color2="#094d3d"
                     noiseFrequency={2.5}
-                    noiseAmplitude={1}
+                    noiseAmplitude={3}
                     bandHeight={0.5}
                     bandSpread={1}
-                    octaveDecay={0.1}
-                    layerOffset={0}
-                    colorSpeed={1}
+                    octaveDecay={0.5}
+                    layerOffset={2}
+                    colorSpeed={1.5}
                     enableMouseInteraction
-                    mouseInfluence={0.25}>
+                    mouseInfluence={0.3}>
                     <AuroraCarousel />
                 </SoftAurora>
             </div>
 
+            <Navbar />
             <div className="mx-6">
-                <Navbar />
                 <NewsTicker />
                 <MotionInView className="mb-16" delayMs={25}>
                     <DataVizStaticSection />

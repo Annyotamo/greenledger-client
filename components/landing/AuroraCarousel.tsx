@@ -62,14 +62,14 @@ export default function AuroraCarousel() {
             </h1>
 
             <div className="w-full flex items-center justify-center pointer-events-auto">
-                <div className="relative w-full px-0 lg:px-2">
+                <div className="relative z-20 w-full px-0">
                     {Array.from({ length: totalSlides }).map((_, s) => {
                         const active = s === index;
                         return (
                             <div
                                 key={s}
                                 aria-hidden={!active}
-                                className={`h-[350px] flex items-center justify-center transition-all duration-700 ease-in-out transform ${
+                                className={`h-87.5 flex items-center justify-center transition-all duration-700 ease-in-out transform ${
                                     active
                                         ? "relative opacity-100 translate-y-0"
                                         : "absolute inset-0 opacity-0 -translate-y-8 pointer-events-none"
@@ -79,7 +79,7 @@ export default function AuroraCarousel() {
                                         {features.map((feature, index) => (
                                             <article
                                                 key={index}
-                                                className="group relative flex flex-col overflow-hidden rounded-xl border border-white/10 bg-slate-950/50 shadow-[0_32px_90px_rgba(0,0,0,0.35)] transition duration-500 hover:-translate-y-1"
+                                                className="group relative z-20 flex flex-col overflow-hidden rounded-xl border border-white/10 bg-slate-950/50 shadow-[0_32px_90px_rgba(0,0,0,0.35)] transition duration-500 hover:-translate-y-1"
                                                 style={{ backdropFilter: "blur(20px)" }}>
                                                 <div className="absolute inset-x-0 top-0 h-full bg-[radial-gradient(circle_at_top_left,rgba(6,182,147,0.18),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.11),transparent_35%)]" />
                                                 <div className="relative overflow-hidden">
@@ -108,12 +108,21 @@ export default function AuroraCarousel() {
                                 ) : (
                                     <div className="w-full flex items-center justify-center px-4">
                                         <div
-                                            className="w-full max-w-2xl bg-linear-to-t from-slate-950/30 via-slate-950/10 to-transparent backdrop-blur-sm border border-white/10 rounded-xl p-6 text-emerald-50 shadow-[0_18px_60px_rgba(2,6,23,0.6)] sm:p-8"
+                                            className="w-full max-w-2xl bg-linear-to-t from-slate-950/30 via-slate-950/10 to-transparent backdrop-blur-sm border border-white/10 rounded-xl text-emerald-50 shadow-[0_18px_60px_rgba(2,6,23,0.6)] p-6"
                                             style={{ backdropFilter: "blur(20px)" }}>
-                                            <h3 className="text-2xl font-bold text-white sm:text-3xl">
-                                                {features[s - 1].title}
-                                            </h3>
-                                            <p className="mt-10 text-md leading-relaxed text-emerald-100">
+                                            <div className="relative -mx-6 -mt-6 mb-6 h-48 overflow-hidden rounded-t-xl">
+                                                <Image
+                                                    src={features[s - 1].imageSrc}
+                                                    alt={features[s - 1].title}
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                                <div className="absolute inset-0 bg-linear-to-t from-slate-950/75 via-transparent to-transparent" />
+                                                <h3 className="text-4xl! absolute left-6 bottom-6 font-bold text-white sm:text-3xl">
+                                                    {features[s - 1].title}
+                                                </h3>
+                                            </div>
+                                            <p className="mt-6 text-md leading-relaxed text-emerald-100">
                                                 {features[s - 1].long}
                                             </p>
                                         </div>

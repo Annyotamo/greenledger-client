@@ -23,24 +23,28 @@ export type FuelUnitsDto = {
     unit_type: string;
 };
 
-export async function getFuelCategories() {
+export type FuelQueryType = "FUEL" | "REFRIGERANT";
+
+export async function getFuelCategories(type: FuelQueryType = "FUEL") {
     const response = await privateApi.get<{
         success: boolean;
         status_code: number;
         message: string;
         data: FuelCategoryDto[];
-    }>("/user/fuel-categories");
+    }>(`/user/fuel-categories?type=${type}`);
 
     return response.data.data ?? [];
 }
 
-export async function getFuelsByCategory(categoryId: string) {
+export async function getFuels(type: FuelQueryType = "FUEL", categoryId?: string) {
+    const query = new URLSearchParams({ type });
+    if (categoryId) query.append("category_id", categoryId);
     const response = await privateApi.get<{
         success: boolean;
         status_code: number;
         message: string;
         data: FuelDto[];
-    }>(`/user/fuels?category_id=${categoryId}`);
+    }>(`/user/fuels?${query.toString()}`);
 
     return response.data.data ?? [];
 }

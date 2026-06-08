@@ -1,7 +1,7 @@
 import axios from "axios";
 import { clearAuthToken, getAuthToken } from "@/lib/auth/token";
 
-const baseURL = process.env.NEXT_PUBLIC_BASE_URL ?? "";
+const baseURL = process.env.NEXT_PUBLIC_BASE_URL || "https://dev.greenledgeresg.com/api/v1";
 
 const defaultConfig = {
     baseURL,
@@ -36,5 +36,5 @@ privateApi.interceptors.response.use(
             }
         }
         return Promise.reject(error);
-    }
+    },
 );

@@ -12,6 +12,7 @@ import {
     subMonths,
 } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
+import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { cn } from "@/lib/utils/cn";
 
 type CalendarProps = {
@@ -46,7 +47,7 @@ export function Calendar({ date, onDateChange, className }: CalendarProps) {
                     onClick={() => setCurrentMonth((month) => subMonths(month, 1))}
                     className="inline-flex p-1 px-2 font-extrabold items-center justify-center rounded-xl border border-outline-variant bg-white text-on-surface transition hover:bg-surface-container-high"
                     aria-label="Previous month">
-                    ‹
+                    <MaterialIcon name="chevron_left" size="sm" />
                 </button>
                 <div className="text-sm font-semibold text-on-surface">{format(currentMonth, "MMMM yyyy")}</div>
                 <button
@@ -54,7 +55,7 @@ export function Calendar({ date, onDateChange, className }: CalendarProps) {
                     onClick={() => setCurrentMonth((month) => addMonths(month, 1))}
                     className="inline-flex px-2 p-1 font-extrabold items-center justify-center rounded-xl border border-outline-variant bg-white text-on-surface transition hover:bg-surface-container-high"
                     aria-label="Next month">
-                    ›
+                    <MaterialIcon name="chevron_right" size="sm" />
                 </button>
             </div>
 

@@ -1,16 +1,16 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getFuelCategories, getFuelsByCategory, getUnitsForFuel } from "./api";
+import { getFuelCategories, getFuels, getUnitsForFuel, FuelQueryType } from "./api";
 
-export function useFuelCategories() {
-    return useQuery({ queryKey: ["fuelCategories"], queryFn: getFuelCategories });
+export function useFuelCategories(type: FuelQueryType = "FUEL") {
+    return useQuery({ queryKey: ["fuelCategories", type], queryFn: () => getFuelCategories(type) });
 }
 
-export function useFuels(categoryId?: string) {
+export function useFuels(type: FuelQueryType = "FUEL", categoryId?: string) {
     return useQuery({
-        queryKey: ["fuels", categoryId],
-        queryFn: () => getFuelsByCategory(categoryId ?? ""),
+        queryKey: ["fuels", type, categoryId],
+        queryFn: () => getFuels(type, categoryId),
         enabled: Boolean(categoryId),
     });
 }

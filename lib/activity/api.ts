@@ -90,6 +90,18 @@ export async function createFuelActivity(payload: Record<string, unknown>) {
     return response.data;
 }
 
+export async function verifyFuelActivity(activityId: string) {
+    const response = await privateApi.post(`/tenant/activity/fuel/${activityId}/verify`);
+    return response.data;
+}
+
+export async function rejectFuelActivity(activityId: string, rejected_reason: string) {
+    const response = await privateApi.post(`/tenant/activity/fuel/${activityId}/reject`, {
+        rejected_reason,
+    });
+    return response.data;
+}
+
 export async function uploadS3File(file: File) {
     const formData = new FormData();
     formData.append("file", file);

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { format, isAfter } from "date-fns";
 import { getScope1Report } from "@/lib/ghg/api";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { verifyFuelActivity, rejectFuelActivity } from "@/lib/activity/api";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -142,35 +143,41 @@ export function FuelActivityTable({
         setIsDateModalOpen(false);
     }
 
-    async function performVerify(activityId?: string | null) {
-        if (!activityId) return;
-        try {
-            const res = await fetch(`/tenant/activity/fuel/${activityId}/verify`, { method: "POST" });
-            if (!res.ok) throw new Error("Verify failed");
+    const verifyMutation = useMutation<unknown, Error, string>({
+        mutationFn: verifyFuelActivity,
+        onSuccess: () => {
             setConfirmState({ open: false, action: null, activityId: null });
             setRejectReason("");
-            await queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
-        } catch (err) {
-            console.error(err);
-        }
+            queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
+        },
+        onError: (error: Error) => {
+            console.error("Verify failed", error);
+        },
+    });
+
+    const rejectMutation = useMutation<unknown, Error, { activityId: string; rejected_reason: string }>({
+        mutationFn: ({ activityId, rejected_reason }) => rejectFuelActivity(activityId, rejected_reason),
+        onSuccess: () => {
+            setConfirmState({ open: false, action: null, activityId: null });
+            setRejectReason("");
+            queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
+        },
+        onError: (error: Error) => {
+            console.error("Reject failed", error);
+        },
+    });
+
+    const isSubmitting = verifyMutation.status === "pending" || rejectMutation.status === "pending";
+
+    async function performVerify(activityId?: string | null) {
+        if (!activityId) return;
+        await verifyMutation.mutateAsync(activityId);
     }
 
     async function performReject(activityId?: string | null, reason?: string) {
         if (!activityId) return;
         if (!reason || reason.length < 1 || reason.length > 2000) return;
-        try {
-            const res = await fetch(`/tenant/activity/fuel/${activityId}/reject`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ rejected_reason: reason }),
-            });
-            if (!res.ok) throw new Error("Reject failed");
-            setConfirmState({ open: false, action: null, activityId: null });
-            setRejectReason("");
-            await queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
-        } catch (err) {
-            console.error(err);
-        }
+        await rejectMutation.mutateAsync({ activityId, rejected_reason: reason });
     }
 
     useEffect(() => {
@@ -466,7 +473,10 @@ export function FuelActivityTable({
                                                             <span>Edit</span>
                                                         </div>
                                                     </Link>
-                                                    {activity.workflowStatus.toLowerCase() !== "verified" ? (
+
+                                                    {["draft", "submitted"].includes(
+                                                        activity.workflowStatus.toLowerCase(),
+                                                    ) ? (
                                                         <>
                                                             <button
                                                                 onClick={() => {
@@ -483,23 +493,21 @@ export function FuelActivityTable({
                                                                     <span className="text-emerald-600">Verify</span>
                                                                 </div>
                                                             </button>
-                                                            {activity.workflowStatus.toLowerCase() !== "rejected" ? (
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setConfirmState({
-                                                                            open: true,
-                                                                            action: "reject",
-                                                                            activityId: activity.id,
-                                                                        });
-                                                                        setOpenMenuId(null);
-                                                                    }}
-                                                                    className="w-full text-left px-3 py-2 hover:bg-surface-container-high">
-                                                                    <div className="flex items-center gap-2 text-red-600">
-                                                                        <MaterialIcon name="block" size="sm" />
-                                                                        <span className="text-red-600">Reject</span>
-                                                                    </div>
-                                                                </button>
-                                                            ) : null}
+                                                            <button
+                                                                onClick={() => {
+                                                                    setConfirmState({
+                                                                        open: true,
+                                                                        action: "reject",
+                                                                        activityId: activity.id,
+                                                                    });
+                                                                    setOpenMenuId(null);
+                                                                }}
+                                                                className="w-full text-left px-3 py-2 hover:bg-surface-container-high">
+                                                                <div className="flex items-center gap-2 text-red-600">
+                                                                    <MaterialIcon name="block" size="sm" />
+                                                                    <span className="text-red-600">Reject</span>
+                                                                </div>
+                                                            </button>
                                                         </>
                                                     ) : null}
                                                 </div>
@@ -601,17 +609,20 @@ export function FuelActivityTable({
                             </Button>
                             {confirmState.action === "verify" ? (
                                 <button
-                                    className="bg-primary text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm"
-                                    onClick={() => performVerify(confirmState.activityId)}>
+                                    className="bg-primary text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm disabled:opacity-70"
+                                    onClick={() => performVerify(confirmState.activityId)}
+                                    disabled={isSubmitting}>
                                     <MaterialIcon name="check_circle" size="sm" />
-                                    <span className="font-label-md text-label-md uppercase">Confirm verify</span>
+                                    <span className="font-label-md text-label-md uppercase">
+                                        {verifyMutation.status === "pending" ? "Verifying..." : "Confirm verify"}
+                                    </span>
                                 </button>
                             ) : (
                                 <Button
                                     variant="danger"
                                     onClick={() => performReject(confirmState.activityId, rejectReason)}
-                                    disabled={rejectReason.length < 1 || rejectReason.length > 2000}>
-                                    Confirm reject
+                                    disabled={isSubmitting || rejectReason.length < 1 || rejectReason.length > 2000}>
+                                    {rejectMutation.status === "pending" ? "Rejecting..." : "Confirm reject"}
                                 </Button>
                             )}
                         </div>

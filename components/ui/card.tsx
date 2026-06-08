@@ -33,7 +33,7 @@ export function CardHeader({ children, className, bordered = true, tone = "strip
     return (
         <div
             className={cn(
-                "flex items-center justify-between px-card-padding py-4",
+                "flex items-center justify-between px-card-padding py-2",
                 tone === "strip" ? "bg-surface-container" : "bg-surface-container-lowest",
                 bordered && "border-b border-outline-variant",
                 className,

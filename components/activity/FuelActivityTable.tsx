@@ -28,12 +28,35 @@ const StatusLabel: Record<string, string> = {
     rejected: "Rejected",
 };
 
+const emissionTypeStyles: Record<string, string> = {
+    stationary: "bg-surface-container-high text-on-surface-variant",
+    mobile: "bg-surface-container-high text-on-surface-variant",
+    process: "bg-secondary/10 text-secondary",
+    fugitive: "bg-error/10 text-error",
+    default: "bg-surface-container-high text-on-surface-variant",
+};
+
+const emissionTypeLabels: Record<string, string> = {
+    stationary: "Stationary",
+    mobile: "Mobile",
+    process: "Process",
+    fugitive: "Fugitive",
+};
+
 function getStatusClass(status: string) {
     return statusStyles[status.toLowerCase()] ?? statusStyles.default;
 }
 
 function getStatusLabel(status: string) {
     return StatusLabel[status.toLowerCase()] ?? status;
+}
+
+function getEmissionTypeClass(emissionType: string) {
+    return emissionTypeStyles[emissionType.toLowerCase()] ?? emissionTypeStyles.default;
+}
+
+function getEmissionTypeLabel(emissionType: string) {
+    return emissionTypeLabels[emissionType.toLowerCase()] ?? emissionType;
 }
 
 type DateRange = {
@@ -322,7 +345,11 @@ export function FuelActivityTable({
                             <Button variant="secondary" size="md" onClick={closeDateModal}>
                                 Cancel
                             </Button>
-                            <Button size="md" onClick={applyDateRange} disabled={!draftRange.start || !draftRange.end}>
+                            <Button
+                                size="md"
+                                variant="primary"
+                                onClick={applyDateRange}
+                                disabled={!draftRange.start || !draftRange.end}>
                                 Save range
                             </Button>
                         </div>
@@ -335,7 +362,7 @@ export function FuelActivityTable({
                     <TableHeader>
                         <TableRow className="bg-surface-container-low border-b border-outline-variant">
                             <TableHead>Period</TableHead>
-                            <TableHead>Applicable scope</TableHead>
+                            <TableHead>Emission type</TableHead>
                             <TableHead>Fuel / Usage</TableHead>
                             <TableHead>Quantity</TableHead>
                             <TableHead>Energy / Emissions</TableHead>
@@ -391,9 +418,12 @@ export function FuelActivityTable({
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="font-semibold text-body-md text-primary capitalize">
-                                                {activity.scopeType}
-                                            </div>
+                                            <span
+                                                className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${getEmissionTypeClass(
+                                                    activity.emissionType,
+                                                )}`}>
+                                                {getEmissionTypeLabel(activity.emissionType)}
+                                            </span>
                                         </TableCell>
                                         <TableCell>
                                             <div className="inline-flex rounded-full border border-outline-variant bg-surface-container-high px-3 py-1 text-[11px] font-semibold text-on-surface-variant">

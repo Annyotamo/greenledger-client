@@ -25,15 +25,14 @@ function getMostCommon(items: string[]) {
 export function ElectricityActivitySummary({ activities }: ElectricityActivitySummaryProps) {
     const totalEmissions = activities.reduce((sum, activity) => sum + activity.calculatedTCo2e, 0);
     const totalKwh = activities.reduce((sum, activity) => sum + activity.electricityKwh, 0);
+    const totalMwh = activities.reduce((sum, activity) => sum + activity.electricityMwh, 0);
     const activeFacilities = new Set(activities.map((activity) => activity.facilityId)).size;
     const activeSources = new Set(activities.map((activity) => activity.sourceType)).size;
     const renewableCertified = activities.filter((activity) => activity.isRenewableCertified).length;
     const averageEmissions = activities.length ? totalEmissions / activities.length : 0;
-    const averageKwh = activities.length ? totalKwh / activities.length : 0;
+    const averageMwh = activities.length ? totalMwh / activities.length : 0;
     const mostCommonSource = getMostCommon(activities.map((activity) => activity.sourceType));
-    const certifiedPercent = activities.length
-        ? Math.round((renewableCertified / activities.length) * 100)
-        : 0;
+    const certifiedPercent = activities.length ? Math.round((renewableCertified / activities.length) * 100) : 0;
 
     return (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-4">
@@ -45,7 +44,8 @@ export function ElectricityActivitySummary({ activities }: ElectricityActivitySu
                     {formatNumber(activities.length, 0)}
                 </p>
                 <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-on-surface-variant">
-                    Across {activeFacilities} facility{activeFacilities === 1 ? "" : "ies"} across {activeSources} source{activeSources === 1 ? "" : "s"}
+                    Across {activeFacilities} facility{activeFacilities === 1 ? "" : "ies"} across {activeSources}{" "}
+                    source{activeSources === 1 ? "" : "s"}
                 </p>
             </Card>
 
@@ -54,11 +54,11 @@ export function ElectricityActivitySummary({ activities }: ElectricityActivitySu
                     Total Electricity
                 </p>
                 <p className="mt-3 text-headline-lg font-headline-lg font-semibold text-primary">
-                    {formatNumber(totalKwh, 0)}
-                    <span className="text-body-md font-normal text-on-surface-variant"> kWh</span>
+                    {formatNumber(totalMwh, 2)}
+                    <span className="text-body-md font-normal text-on-surface-variant"> MWh</span>
                 </p>
                 <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-on-surface-variant">
-                    Avg. {formatNumber(averageKwh, 0)} kWh/activity
+                    Avg. {formatNumber(averageMwh, 2)} MWh/activity
                 </p>
             </Card>
 
@@ -86,10 +86,7 @@ export function ElectricityActivitySummary({ activities }: ElectricityActivitySu
                 </div>
                 <div className="mt-4 space-y-3">
                     <div className="h-2.5 rounded-full bg-surface-container-high overflow-hidden">
-                        <div
-                            className="h-full rounded-full bg-secondary"
-                            style={{ width: `${certifiedPercent}%` }}
-                        />
+                        <div className="h-full rounded-full bg-secondary" style={{ width: `${certifiedPercent}%` }} />
                     </div>
                     <p className="text-[11px] text-on-surface-variant">
                         {renewableCertified} of {activities.length} activities certified renewable

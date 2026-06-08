@@ -3,7 +3,6 @@
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { useEffect, useState } from "react";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DASHBOARD_TABS } from "@/lib/dashboard/data";
 import type { DashboardTab } from "@/lib/dashboard/types";
@@ -13,9 +12,10 @@ import { useSidebarStore } from "@/stores/sidebar-store";
 type TopBarProps = {
     activeTab: DashboardTab;
     onTabChange: (tab: DashboardTab) => void;
+    searchPlaceholder?: string;
 };
 
-export function TopBar({ activeTab, onTabChange }: TopBarProps) {
+export function TopBar({ activeTab, onTabChange, searchPlaceholder }: TopBarProps) {
     const collapsed = useSidebarStore((s) => s.collapsed);
     const { resolvedTheme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
@@ -52,7 +52,10 @@ export function TopBar({ activeTab, onTabChange }: TopBarProps) {
                         size="sm"
                         className="absolute left-3 top-1/2 -translate-y-1/2 text-sm! text-on-surface-variant"
                     />
-                    <Input placeholder="Search emissions data..." className="h-auto lg:h-[37.5px]" />
+                    <Input
+                        placeholder={searchPlaceholder ?? "Search emissions data..."}
+                        className="h-auto lg:h-[37.5px]"
+                    />
                 </div>
             </div>
 

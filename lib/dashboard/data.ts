@@ -2,6 +2,9 @@ import type {
     ActivityItem,
     DashboardTab,
     EmissionsTrendPoint,
+    EnergyTrendPoint,
+    EnergyBarItem,
+    EnergySourceNode,
     FacilityRow,
     MetricCardData,
     Scope1FuelItem,
@@ -156,6 +159,140 @@ export const SCOPE_COMPARISON: ScopeComparisonMonth[] = [
     { month: "April", scope1: 50, scope2: 65 },
     { month: "May", scope1: 47, scope2: 72 },
     { month: "June", scope1: 52, scope2: 80 },
+];
+
+export const ENERGY_METRIC_CARDS: MetricCardData[] = [
+    {
+        id: "energy-total",
+        label: "Total Energy Consumed",
+        icon: "leaderboard",
+        value: 38600,
+        unit: "MWh",
+        progressPercent: 100,
+        progressClassName: "bg-primary",
+    },
+    {
+        id: "energy-captive",
+        label: "Captive Generated",
+        icon: "energy_savings_leaf",
+        value: 30400,
+        unit: "MWh",
+        progressPercent: 79,
+        progressClassName: "bg-secondary",
+    },
+    {
+        id: "energy-grid",
+        label: "Grid Sourced",
+        icon: "bolt",
+        value: 8200,
+        unit: "MWh",
+        progressPercent: 21,
+        progressClassName: "bg-primary-container",
+    },
+    {
+        id: "energy-displacement",
+        label: "Grid Displacement",
+        icon: "trending_up",
+        value: 56,
+        unit: "%",
+        statusLabel: "Improved vs. FY24",
+        progressPercent: 56,
+        progressClassName: "bg-secondary-fixed-dim shadow-[0_0_8px_rgba(78,222,163,0.5)]",
+    },
+];
+
+export const ENERGY_TREND: EnergyTrendPoint[] = [
+    { month: "Apr", captive: 3200, grid: 900 },
+    { month: "May", captive: 3300, grid: 860 },
+    { month: "Jun", captive: 3400, grid: 820 },
+    { month: "Jul", captive: 3450, grid: 780 },
+    { month: "Aug", captive: 3500, grid: 760 },
+    { month: "Sep", captive: 3600, grid: 740 },
+    { month: "Oct", captive: 3550, grid: 800 },
+    { month: "Nov", captive: 3580, grid: 820 },
+    { month: "Dec", captive: 3600, grid: 840 },
+];
+
+export const ENERGY_MIX_SEGMENTS: Scope2Segment[] = [
+    { label: "Captive Generated", percent: 79, color: "var(--gl-secondary)" },
+    { label: "Grid Purchase", percent: 21, color: "#fb923c" },
+];
+
+export const ENERGY_MIX_TOTAL = 30400;
+
+export const ENERGY_HIERARCHY: EnergyBarItem[] = [
+    { label: "Captive Steam WHRB", value: 19200, percent: 95, color: "var(--gl-secondary)" },
+    { label: "Captive Fossil", value: 10200, percent: 50, color: "#fb923c" },
+    { label: "Captive Solar", value: 1000, percent: 10, color: "#60a5fa" },
+    { label: "Grid DISCOM", value: 8200, percent: 41, color: "#64748b" },
+];
+
+export const ENERGY_SOURCE_TREE: EnergySourceNode[] = [
+    {
+        label: "Captive Generated",
+        value: 30400,
+        unit: "MWh",
+        children: [
+            {
+                label: "Captive Steam",
+                value: 19200,
+                unit: "MWh",
+                children: [
+                    { label: "WHRB 3 DRI Kilns", value: 19200, unit: "MWh" },
+                    {
+                        label: "Kiln 1",
+                        value: 6500,
+                        unit: "MWh",
+                    },
+                    {
+                        label: "Kiln 2",
+                        value: 6400,
+                        unit: "MWh",
+                    },
+                    {
+                        label: "Kiln 3",
+                        value: 6300,
+                        unit: "MWh",
+                    },
+                ],
+            },
+            {
+                label: "Captive Fossil",
+                value: 10200,
+                unit: "MWh",
+                children: [
+                    { label: "CFBC (Coal/Dolo)", value: 7000, unit: "MWh" },
+                    { label: "AFBC (Coal/Dolo)", value: 3200, unit: "MWh" },
+                ],
+            },
+            {
+                label: "Captive Renewable",
+                value: 1000,
+                unit: "MWh",
+            },
+        ],
+    },
+    {
+        label: "Grid DISCOM",
+        value: 8200,
+        unit: "MWh",
+        note: "EF 0.712 tCO₂/MWh — CEA V21.0",
+    },
+];
+
+export const ENERGY_GENERATION_SOURCES: EnergyBarItem[] = [
+    { label: "WHRB Kiln 1-3", value: 20400, percent: 100, color: "var(--gl-secondary)" },
+    { label: "CFBC Coal", value: 4800, percent: 70, color: "#fb923c" },
+    { label: "Solar Rooftop", value: 1000, percent: 20, color: "#60a5fa" },
+    { label: "CFBC Dolochar", value: 2200, percent: 45, color: "#f59e0b" },
+    { label: "AFBC Coal", value: 1800, percent: 35, color: "#fb7185" },
+];
+
+export const ENERGY_BOILER_FUEL: EnergyBarItem[] = [
+    { label: "CFBC Coal", value: 4800, percent: 80, color: "#f59e0b" },
+    { label: "CFBC Dolo", value: 2200, percent: 40, color: "#fbbf24" },
+    { label: "AFBC Coal", value: 1800, percent: 30, color: "#fb7185" },
+    { label: "AFBC Dolo", value: 1400, percent: 25, color: "#a855f7" },
 ];
 
 export const USER_PROFILE = {

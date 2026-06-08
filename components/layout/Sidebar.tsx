@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { getCurrentUser, UserProfile } from "@/lib/user/api";
@@ -19,6 +20,7 @@ export function Sidebar() {
     const toggle = useSidebarStore((s) => s.toggle);
     const [activitiesOpen, setActivitiesOpen] = useState(true);
     const [user, setUser] = useState<UserProfile | null>(null);
+    const pathname = usePathname();
 
     const beforeActivities = MAIN_NAV.filter((i) => i.label === "Dashboard" || i.label === "Facilities");
     const afterActivities = MAIN_NAV.filter(
@@ -90,15 +92,23 @@ export function Sidebar() {
                             <div className="relative ml-[1.625rem]">
                                 <div className="nav-connector nav-connector-glow absolute bottom-4 left-0 top-0 w-[2px]" />
                                 <div className="space-y-1 py-1">
-                                    {SCOPE_NAV_CHILDREN.map((child) => (
-                                        <Link
-                                            key={child.label}
-                                            href={child.href}
-                                            className="relative flex items-center gap-3 py-2 pl-6 text-on-surface-variant transition-colors hover:text-on-surface">
-                                            <div className="absolute left-0 top-1/2 h-[2px] w-4 -translate-y-1/2 bg-secondary opacity-40" />
-                                            <span className="font-mono text-[11px]">{child.label}</span>
-                                        </Link>
-                                    ))}
+                                    {SCOPE_NAV_CHILDREN.map((child) => {
+                                        const childActive = pathname?.startsWith(child.href);
+                                        return (
+                                            <Link
+                                                key={child.label}
+                                                href={child.href}
+                                                className={cn(
+                                                    "relative flex items-center gap-3 py-2 pl-6 transition-colors",
+                                                    childActive
+                                                        ? "text-on-surface font-semibold"
+                                                        : "text-on-surface-variant hover:text-on-surface",
+                                                )}>
+                                                <div className="absolute left-0 top-1/2 h-[2px] w-4 -translate-y-1/2 bg-secondary opacity-40" />
+                                                <span className="font-mono text-[11px]">{child.label}</span>
+                                            </Link>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}
@@ -171,7 +181,8 @@ function SidebarLink({
     collapsed: boolean;
     compact?: boolean;
 }) {
-    const isActive = item.active;
+    const pathname = usePathname();
+    const isActive = !!item.active || (pathname && item.href !== "#" && pathname.startsWith(item.href));
 
     return (
         <Link

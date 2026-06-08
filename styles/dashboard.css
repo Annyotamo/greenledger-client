@@ -219,6 +219,37 @@
     background-position: 0 0;
 }
 
+.tree-line {
+    position: relative;
+    padding-left: 0.85rem;
+}
+
+.tree-line::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 0.75rem;
+    height: 1px;
+    background-color: var(--gl-outline-variant);
+    transform: translateY(-50%);
+}
+
+.tree-line-vertical {
+    position: relative;
+    padding-left: 0.85rem;
+}
+
+.tree-line-vertical::after {
+    content: "";
+    position: absolute;
+    left: 0.4rem;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: var(--gl-outline-variant);
+}
+
 .nav-connector {
     background-image: radial-gradient(circle, var(--gl-nav-connector) 1.5px, transparent 1.5px);
     background-size: 1px 6px;

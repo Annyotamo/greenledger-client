@@ -17,16 +17,17 @@ export default function FuelActivitiesPage() {
     const [selectedFuel, setSelectedFuel] = useState("");
     const [showFilters, setShowFilters] = useState(false);
 
-    const {
-        data: activities = [],
-        isPending,
-        isError,
-    } = useFuelActivities({
-        status: status || undefined,
-        usage_type: usageType || undefined,
-        emission_type: emissionType || undefined,
-        facility_id: selectedFacility || undefined,
-    });
+    const filterParams = useMemo(
+        () => ({
+            status: status || undefined,
+            usage_type: usageType || undefined,
+            emission_type: emissionType || undefined,
+            facility_id: selectedFacility || undefined,
+        }),
+        [status, usageType, emissionType, selectedFacility],
+    );
+
+    const { data: activities = [], isPending, isError } = useFuelActivities(filterParams);
 
     const { data: facilities = [] } = useFacilities();
 
@@ -36,6 +37,14 @@ export default function FuelActivitiesPage() {
         () => Array.from(new Set(activities.map((activity) => activity.fuelName))).sort(),
         [activities],
     );
+
+    function handleRefresh() {
+        setStatus("");
+        setUsageType("");
+        setEmissionType("");
+        setSelectedFacility("");
+        setSelectedFuel("");
+    }
 
     const filteredActivities = useMemo(() => {
         return activities.filter((activity) => {
@@ -68,7 +77,7 @@ export default function FuelActivitiesPage() {
             </div>
 
             {showFilters ? (
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="w-full grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
                     <select
                         className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                         aria-label="Status"
@@ -107,6 +116,17 @@ export default function FuelActivitiesPage() {
                     </select>
                     <select
                         className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        aria-label="Emission type"
+                        value={emissionType}
+                        onChange={(e) => setEmissionType(e.target.value)}>
+                        <option value="">All emission types</option>
+                        <option value="stationary">Stationary</option>
+                        <option value="mobile">Mobile</option>
+                        <option value="process">Process</option>
+                        <option value="fugitive">Fugitive</option>
+                    </select>
+                    <select
+                        className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                         aria-label="Fuel"
                         value={selectedFuel}
                         onChange={(e) => setSelectedFuel(e.target.value)}>
@@ -117,6 +137,17 @@ export default function FuelActivitiesPage() {
                             </option>
                         ))}
                     </select>
+
+                    <div className="flex items-center justify-end gap-2">
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            type="button"
+                            onClick={handleRefresh}
+                            className="border-none bg-transparent">
+                            <MaterialIcon name="refresh" size="lg" />
+                        </Button>
+                    </div>
                 </div>
             ) : null}
 

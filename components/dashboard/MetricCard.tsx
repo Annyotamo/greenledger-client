@@ -24,7 +24,7 @@ function AnimatedValue({ value, isPercent }: { value: number; isPercent: boolean
                 setDisplay(
                     isPercent
                         ? `${v.toFixed(1)}%`
-                        : v.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+                        : v.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
                 );
             },
         });
@@ -38,8 +38,8 @@ export function MetricCard({ data }: MetricCardProps) {
     const isPercent = data.id === "net-zero";
 
     return (
-        <Card interactive className="p-card-padding">
-            <div className="mb-2 flex items-start justify-between">
+        <Card interactive className="flex h-full flex-col p-card-padding">
+            <div className="mb-2 flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2">
                     <MaterialIcon name={data.icon} size="sm" className="text-on-surface-variant" />
                     <span className="font-mono text-label-md uppercase tracking-tight text-on-surface-variant">
@@ -56,17 +56,18 @@ export function MetricCard({ data }: MetricCardProps) {
                 )}
             </div>
 
-            <div className="flex items-baseline gap-2">
-                <AnimatedValue value={data.value} isPercent={isPercent} />
-                <span className="font-mono text-[10px] text-on-surface-variant">{data.unit}</span>
-            </div>
-
-            <div className="mt-3">
-                <ProgressBar
-                    percent={data.progressPercent}
-                    className={data.progressClassName}
-                    trackClassName="h-1"
-                />
+            <div className="flex flex-col gap-4">
+                <div className="flex items-baseline gap-2">
+                    <AnimatedValue value={data.value} isPercent={isPercent} />
+                    <span className="font-mono text-[10px] text-on-surface-variant">{data.unit}</span>
+                </div>
+                <div className="mt-auto">
+                    <ProgressBar
+                        percent={data.progressPercent}
+                        className={data.progressClassName}
+                        trackClassName="h-1"
+                    />
+                </div>
             </div>
         </Card>
     );

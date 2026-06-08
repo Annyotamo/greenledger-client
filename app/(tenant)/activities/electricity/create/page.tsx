@@ -4,7 +4,9 @@ import type { ChangeEvent, FormEvent } from "react";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { format, isAfter } from "date-fns";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { useFacilities } from "@/lib/facility/hooks";
@@ -43,6 +45,8 @@ export default function LogElectricityActivityPage() {
         documentDate: "",
         attachmentName: "",
     });
+    const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
+    const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
 
     const [documentFile, setDocumentFile] = useState<File | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -62,6 +66,30 @@ export default function LogElectricityActivityPage() {
         setDocumentFile(null);
         setForm((current) => ({ ...current, documentLink: value, attachmentName: "" }));
         setErrors((current) => ({ ...current, documentLink: "" }));
+    }
+
+    function handleStartDateChange(date: Date) {
+        const nextEndDate = selectedEndDate && isAfter(date, selectedEndDate) ? date : selectedEndDate;
+        setSelectedStartDate(date);
+        setSelectedEndDate(nextEndDate);
+        setForm((current) => ({
+            ...current,
+            activityStartDate: format(date, "yyyy-MM-dd"),
+            activityEndDate: nextEndDate ? format(nextEndDate, "yyyy-MM-dd") : current.activityEndDate,
+        }));
+        setErrors((current) => ({ ...current, activityStartDate: "", activityEndDate: "" }));
+    }
+
+    function handleEndDateChange(date: Date) {
+        const nextStartDate = selectedStartDate ? (isAfter(selectedStartDate, date) ? date : selectedStartDate) : date;
+        setSelectedEndDate(date);
+        setSelectedStartDate(nextStartDate);
+        setForm((current) => ({
+            ...current,
+            activityStartDate: format(nextStartDate, "yyyy-MM-dd"),
+            activityEndDate: format(date, "yyyy-MM-dd"),
+        }));
+        setErrors((current) => ({ ...current, activityEndDate: "" }));
     }
 
     function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
@@ -211,30 +239,34 @@ export default function LogElectricityActivityPage() {
                             </select>
                             {errors.facility && <p className="mt-2 text-xs text-error">{errors.facility}</p>}
                         </div>
-                        <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Activity Start Date
-                            </label>
-                            <input
-                                type="date"
-                                value={form.activityStartDate}
-                                onChange={(e) => handleChange("activityStartDate", e.target.value)}
-                                className={formFieldClass(Boolean(errors.activityStartDate))}
-                            />
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between gap-2">
+                                <label className="text-xs uppercase tracking-[0.18em] text-on-surface-variant">
+                                    Activity Start Date
+                                </label>
+                                {selectedStartDate ? (
+                                    <span className="text-xs text-on-surface-variant">
+                                        {format(selectedStartDate, "PPP")}
+                                    </span>
+                                ) : null}
+                            </div>
+                            <Calendar date={selectedStartDate} onDateChange={handleStartDateChange} />
                             {errors.activityStartDate && (
                                 <p className="mt-2 text-xs text-error">{errors.activityStartDate}</p>
                             )}
                         </div>
-                        <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Activity End Date
-                            </label>
-                            <input
-                                type="date"
-                                value={form.activityEndDate}
-                                onChange={(e) => handleChange("activityEndDate", e.target.value)}
-                                className={formFieldClass(Boolean(errors.activityEndDate))}
-                            />
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between gap-2">
+                                <label className="text-xs uppercase tracking-[0.18em] text-on-surface-variant">
+                                    Activity End Date
+                                </label>
+                                {selectedEndDate ? (
+                                    <span className="text-xs text-on-surface-variant">
+                                        {format(selectedEndDate, "PPP")}
+                                    </span>
+                                ) : null}
+                            </div>
+                            <Calendar date={selectedEndDate} onDateChange={handleEndDateChange} />
                             {errors.activityEndDate && (
                                 <p className="mt-2 text-xs text-error">{errors.activityEndDate}</p>
                             )}

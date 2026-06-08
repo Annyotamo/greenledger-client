@@ -14,9 +14,15 @@ export function useFuelActivities(filters?: {
     });
 }
 
-export function useElectricityActivities() {
+export function useElectricityActivities(filters?: {
+    status?: string;
+    electricity_activity_type?: string;
+    data_quality_tier?: string;
+    source_type?: string;
+    facility_id?: string;
+}) {
     return useQuery({
-        queryKey: ["electricity-activities"],
-        queryFn: getElectricityActivities,
+        queryKey: ["electricity-activities", filters],
+        queryFn: () => getElectricityActivities(filters),
     });
 }

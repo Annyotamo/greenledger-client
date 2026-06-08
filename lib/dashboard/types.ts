@@ -18,6 +18,27 @@ export type EmissionsTrendPoint = {
     target: number;
 };
 
+export type EnergyTrendPoint = {
+    month: string;
+    captive: number;
+    grid: number;
+};
+
+export type EnergyBarItem = {
+    label: string;
+    value: number;
+    percent: number;
+    color: string;
+};
+
+export type EnergySourceNode = {
+    label: string;
+    value: number;
+    unit: string;
+    children?: EnergySourceNode[];
+    note?: string;
+};
+
 export type FacilityRow = {
     id: string;
     region: string;

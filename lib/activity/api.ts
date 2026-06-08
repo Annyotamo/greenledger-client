@@ -150,8 +150,27 @@ function mapElectricityActivityItem(dto: any) {
     };
 }
 
-export async function getElectricityActivities() {
-    const response = await privateApi.get("/tenant/activity/electricity");
+export async function getElectricityActivities(filters?: {
+    status?: string;
+    electricity_activity_type?: string;
+    data_quality_tier?: string;
+    source_type?: string;
+    facility_id?: string;
+}) {
+    const params = new URLSearchParams();
+    if (filters?.status) params.append("status", filters.status);
+    if (filters?.electricity_activity_type) {
+        params.append("electricity_activity_type", filters.electricity_activity_type);
+    }
+    if (filters?.data_quality_tier) {
+        params.append("data_quality_tier", filters.data_quality_tier);
+    }
+    if (filters?.source_type) params.append("source_type", filters.source_type);
+    if (filters?.facility_id) params.append("facility_id", filters.facility_id);
+
+    const qs = params.toString();
+    const url = `/tenant/activity/electricity${qs ? `?${qs}` : ""}`;
+    const response = await privateApi.get(url);
     const rawItems = response.data.data?.items ?? [];
     return Array.isArray(rawItems) ? rawItems.map(mapElectricityActivityItem) : [];
 }

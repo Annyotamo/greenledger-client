@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ESG Metrics - Audit Trail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration Verbatim -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "surface-variant": "#e1e3e4",
+                  "primary": "#000000",
+                  "surface-container-lowest": "#ffffff",
+                  "on-tertiary": "#ffffff",
+                  "surface-bright": "#f8f9fa",
+                  "surface-tint": "#575e70",
+                  "on-surface-variant": "#45464c",
+                  "on-error-container": "#93000a",
+                  "error": "#ba1a1a",
+                  "tertiary-container": "#001a42",
+                  "surface-container-low": "#f3f4f5",
+                  "surface-container-high": "#e7e8e9",
+                  "on-tertiary-container": "#3980f4",
+                  "primary-fixed": "#dce2f7",
+                  "on-primary-fixed": "#141b2b",
+                  "tertiary-fixed-dim": "#adc6ff",
+                  "on-primary": "#ffffff",
+                  "surface-dim": "#d9dadb",
+                  "outline": "#76777d",
+                  "surface": "#f8f9fa",
+                  "on-secondary-fixed": "#002113",
+                  "inverse-on-surface": "#f0f1f2",
+                  "outline-variant": "#c6c6cd",
+                  "on-background": "#191c1d",
+                  "on-tertiary-fixed-variant": "#004395",
+                  "on-primary-container": "#7d8497",
+                  "primary-fixed-dim": "#c0c6db",
+                  "secondary": "#006c49",
+                  "primary-container": "#141b2b",
+                  "inverse-surface": "#2e3132",
+                  "inverse-primary": "#c0c6db",
+                  "tertiary": "#000000",
+                  "on-error": "#ffffff",
+                  "secondary-fixed": "#6ffbbe",
+                  "on-tertiary-fixed": "#001a42",
+                  "background": "#f8f9fa",
+                  "tertiary-fixed": "#d8e2ff",
+                  "on-secondary-fixed-variant": "#005236",
+                  "on-primary-fixed-variant": "#404758",
+                  "surface-container": "#edeeef",
+                  "secondary-container": "#6cf8bb",
+                  "on-secondary-container": "#00714d",
+                  "error-container": "#ffdad6",
+                  "on-surface": "#191c1d",
+                  "surface-container-highest": "#e1e3e4",
+                  "secondary-fixed-dim": "#4edea3",
+                  "on-secondary": "#ffffff"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.125rem",
+                  "lg": "0.25rem",
+                  "xl": "0.5rem",
+                  "full": "0.75rem"
+          },
+          "spacing": {
+                  "section-gap": "2rem",
+                  "container-margin": "1rem",
+                  "gutter": "1rem",
+                  "card-padding": "1.25rem",
+                  "stack-gap": "1rem"
+          },
+          "fontFamily": {
+                  "headline-lg-mobile": ["Hanken Grotesk"],
+                  "headline-lg": ["Hanken Grotesk"],
+                  "body-lg": ["Hanken Grotesk"],
+                  "headline-sm": ["Hanken Grotesk"],
+                  "body-md": ["Hanken Grotesk"],
+                  "label-md": ["JetBrains Mono"],
+                  "headline-md": ["Hanken Grotesk"]
+          },
+          "fontSize": {
+                  "headline-lg-mobile": ["28px", {"lineHeight": "34px", "fontWeight": "700"}],
+                  "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                  "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                  "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                  "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                  "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                  "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .timeline-line::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: 24px;
+      bottom: -24px;
+      width: 1px;
+      background-color: #E5E7EB;
+      z-index: 0;
+    }
+    .timeline-item:last-child .timeline-line::before {
+      display: none;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #e1e3e4;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-md text-body-md antialiased min-h-screen flex flex-col">
+<!-- TopAppBar Component -->
+<header class="bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-outline flex justify-between items-center w-full px-container-margin h-12 sticky top-0 z-40">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-secondary dark:text-secondary-fixed">ESG Metrics</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex gap-6">
+<button class="font-label-caps text-label-caps text-primary dark:text-primary-fixed hover:bg-surface-container-high transition-colors px-3 py-1 rounded">Dashboard</button>
+<button class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-high transition-colors px-3 py-1 rounded">Facilities</button>
+<button class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-high transition-colors px-3 py-1 rounded">Activities</button>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed">notifications</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_7C307hV6Flw-oyRGoobZYwvOSHbqJnKYlpOfEN1p8avuNKi_vOSYXp5ENHdngFE7GOdSwaAjJohnwHrTAr2IsQY00DvQ0qYfn4DsD6UY6OKd7JU7dpeHMDjUd1q-xhHDb79d6BzDBRMrvcsxYrWlKEQxEdz3cgP8IAabEe3-NIjGn9GE_BJMRC1XwzdLlux4QOCrGdG9pQcS_3oDrbG0uh1lOMU4_qkW9gbebnLq7TWvgAAwEfIWNGhY9RqIKO0KepQtHbS9Hxo"/>
+</div>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Desktop Sidebar (Hidden on Mobile) -->
+<aside class="hidden md:flex flex-col w-64 bg-surface border-r border-outline-variant p-4 space-y-2">
+<div class="mb-6">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest px-4">Navigation</span>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">factory</span>
+<span class="font-body-md text-body-md">Facilities</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-surface-container-high text-primary font-bold" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-md text-body-md">Activities</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-body-md text-body-md">Audit Trails</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-[calc(100vh-3rem)] overflow-hidden">
+<!-- Secondary Tab Nav (Visual Reference from user image) -->
+<div class="px-container-margin py-4 bg-white border-b border-outline-variant flex gap-8">
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors pb-2">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="font-body-md text-body-md">Batch details</span>
+</button>
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors pb-2">
+<span class="material-symbols-outlined text-[20px]">science</span>
+<span class="font-body-md text-body-md">Samples</span>
+</button>
+<button class="flex items-center gap-2 text-primary border-b-2 border-primary transition-colors pb-2">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="font-body-md text-body-md font-bold">Audit Trail</span>
+</button>
+</div>
+<!-- Filters Row -->
+<div class="px-container-margin py-4 flex flex-wrap items-center justify-between gap-4 bg-surface-bright">
+<div class="flex items-center gap-4 flex-wrap">
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[18px]">calendar_today</span>
+<input class="pl-10 pr-4 py-2 bg-white border border-outline-variant rounded-lg text-body-md focus:outline-none focus:border-primary w-48" placeholder="Date Range" type="text"/>
+</div>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[18px]">business</span>
+<select class="pl-10 pr-8 py-2 bg-white border border-outline-variant rounded-lg text-body-md appearance-none focus:outline-none focus:border-primary w-48">
+<option>All Facilities</option>
+<option>Lagos General</option>
+<option>Abuja Biotech</option>
+</select>
+</div>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[18px]">person</span>
+<input class="pl-10 pr-4 py-2 bg-white border border-outline-variant rounded-lg text-body-md focus:outline-none focus:border-primary w-48" placeholder="Filter by User" type="text"/>
+</div>
+</div>
+<button class="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Export Trail</span>
+</button>
+</div>
+<!-- Timeline Scrollable Area -->
+<div class="flex-1 overflow-y-auto px-container-margin py-8 custom-scrollbar">
+<div class="max-w-4xl mx-auto bg-white border border-outline-variant rounded-xl p-8 shadow-sm">
+<!-- Timeline Vertical -->
+<div class="space-y-0">
+<!-- Timeline Node 1 -->
+<div class="timeline-item flex gap-6 pb-8 relative timeline-line">
+<div class="z-10 bg-white p-1 rounded-full border border-outline-variant flex items-center justify-center w-6 h-6 mt-1">
+<span class="material-symbols-outlined text-[16px] text-outline">package_2</span>
+</div>
+<div class="flex-1 bg-surface-container-low p-card-padding rounded-lg border border-outline-variant">
+<div class="flex flex-wrap items-center gap-2 mb-1">
+<span class="font-bold">Batch 11317 Pickup Request Created</span>
+<span class="text-on-surface-variant">by</span>
+<span class="font-bold">Sandra Darlington</span>
+<span class="text-on-surface-variant">at</span>
+<span class="font-bold">Lagos General Hospital Gbagada</span>
+</div>
+<div class="text-on-surface-variant font-label-md text-label-md">11 Aug, 2023 · 09:23 AM</div>
+</div>
+</div>
+<!-- Timeline Node 2 -->
+<div class="timeline-item flex gap-6 pb-8 relative timeline-line">
+<div class="z-10 bg-white p-1 rounded-full border border-outline-variant flex items-center justify-center w-6 h-6 mt-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified</span>
+</div>
+<div class="flex-1 bg-surface-container-low p-card-padding rounded-lg border border-outline-variant">
+<div class="flex flex-wrap items-center gap-2 mb-1">
+<span class="font-bold">Batch 11317 Pickup Request</span>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-full font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">check_circle</span> Approved
+                  </span>
+<span class="text-on-surface-variant">by</span>
+<span class="font-bold">Oladejo Israel</span>
+<span class="text-on-surface-variant">at</span>
+<span class="font-bold">Institute of Human Virology H3Africa BioRepository</span>
+</div>
+<div class="text-on-surface-variant font-label-md text-label-md">12 Aug, 2023 · 11:19 AM</div>
+</div>
+</div>
+<!-- Timeline Node 3 -->
+<div class="timeline-item flex gap-6 pb-8 relative timeline-line">
+<div class="z-10 bg-white p-1 rounded-full border border-outline-variant flex items-center justify-center w-6 h-6 mt-1">
+<span class="material-symbols-outlined text-[16px] text-outline">flag</span>
+</div>
+<div class="flex-1 bg-surface-container-low p-card-padding rounded-lg border border-outline-variant">
+<div class="flex flex-wrap items-center gap-2 mb-1">
+<span class="font-bold">Batch 11317 was</span>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed-variant px-2 py-0.5 rounded-full font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">flag</span> Initiated
+                  </span>
+<span class="text-on-surface-variant">by</span>
+<span class="font-bold">Sandra Darlington</span>
+<span class="text-on-surface-variant">at</span>
+<span class="font-bold">Lagos General Hospital Gbagada</span>
+</div>
+<div class="text-on-surface-variant font-label-md text-label-md">12 Aug, 2023 · 11:19 AM</div>
+</div>
+</div>
+<!-- Timeline Node 4 -->
+<div class="timeline-item flex gap-6 pb-8 relative timeline-line">
+<div class="z-10 bg-white p-1 rounded-full border border-outline-variant flex items-center justify-center w-6 h-6 mt-1">
+<span class="material-symbols-outlined text-[16px] text-outline">person</span>
+</div>
+<div class="flex-1 bg-surface-container-low p-card-padding rounded-lg border border-outline-variant">
+<div class="flex flex-wrap items-center gap-2 mb-1">
+<span class="font-bold">Sandra Darlington</span>
+<span class="bg-on-tertiary-container/10 text-on-tertiary-container px-2 py-0.5 rounded-full font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">assignment_ind</span> Assigned
+                  </span>
+<span class="text-on-surface-variant">batch 11317 to</span>
+<span class="font-bold">Yusuf Ahmed</span>
+</div>
+<div class="text-on-surface-variant font-label-md text-label-md">12 Aug, 2023 · 11:20 AM</div>
+</div>
+</div>
+<!-- Timeline Node 5 -->
+<div class="timeline-item flex gap-6 pb-8 relative timeline-line">
+<div class="z-10 bg-white p-1 rounded-full border border-outline-variant flex items-center justify-center w-6 h-6 mt-1">
+<span class="material-symbols-outlined text-[16px] text-error">cancel</span>
+</div>
+<div class="flex-1 bg-error-container/30 p-card-padding rounded-lg border border-outline-variant">
+<div class="flex flex-wrap items-center gap-2 mb-1">
+<span class="font-bold">Batch 11317 was rejected</span>
+<span class="text-on-surface-variant">by</span>
+<span class="font-bold">Yusuf Ahmed</span>
+<span class="text-on-error font-medium bg-error px-2 py-0.5 rounded text-[11px] uppercase tracking-tighter">Due to faulty vehicle</span>
+</div>
+<div class="text-on-surface-variant font-label-md text-label-md">12 Aug, 2023 · 11:20 AM</div>
+</div>
+</div>
+<!-- Timeline Node 6 -->
+<div class="timeline-item flex gap-6 pb-8 relative timeline-line">
+<div class="z-10 bg-white p-1 rounded-full border border-outline-variant flex items-center justify-center w-6 h-6 mt-1">
+<span class="material-symbols-outlined text-[16px] text-outline">thermostat</span>
+</div>
+<div class="flex-1 bg-surface-container-low p-card-padding rounded-lg border border-outline-variant">
+<div class="flex flex-wrap items-center gap-3 mb-1">
+<span class="font-bold">Logger</span>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-full font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">sync</span> Synced
+                  </span>
+<span class="font-label-md text-label-md border-l border-outline-variant pl-3">ID: LGR-0421</span>
+<span class="bg-secondary-container/20 text-on-secondary-container border border-secondary-container px-2 py-0.5 rounded-full font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">battery_5_bar</span> 95% remaining
+                  </span>
+</div>
+<div class="text-on-surface-variant font-label-md text-label-md">12 Aug, 2023 · 11:25 AM</div>
+</div>
+</div>
+<!-- Timeline Node 7 -->
+<div class="timeline-item flex gap-6 pb-0 relative timeline-line">
+<div class="z-10 bg-white p-1 rounded-full border border-outline-variant flex items-center justify-center w-6 h-6 mt-1">
+<span class="material-symbols-outlined text-[16px] text-error">error</span>
+</div>
+<div class="flex-1 bg-surface-container-low p-card-padding rounded-lg border border-outline-variant">
+<div class="flex flex-wrap items-center gap-3 mb-1">
+<span class="font-bold">Logger</span>
+<span class="bg-error-container text-on-error-container px-2 py-0.5 rounded-full font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">sensors_off</span> Disconnected
+                  </span>
+<span class="font-label-md text-label-md border-l border-outline-variant pl-3">ID: LGR-0421</span>
+</div>
+<div class="text-on-surface-variant font-label-md text-label-md">12 Aug, 2023 · 11:22 AM</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar for Mobile -->
+<footer class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center bg-surface border-t border-outline-variant h-14 pb-safe z-50">
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-opacity">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-opacity">
+<span class="material-symbols-outlined">factory</span>
+<span class="font-label-md text-label-md">Facilities</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary font-bold">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-md text-label-md">Activities</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-opacity">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</button>
+</footer>
+<script>
+    // Subtle interaction: Highlight line on card hover
+    document.querySelectorAll('.timeline-item').forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        item.querySelector('.z-10').classList.add('border-primary', 'scale-110');
+      });
+      item.addEventListener('mouseleave', () => {
+        item.querySelector('.z-10').classList.remove('border-primary', 'scale-110');
+      });
+    });
+  </script>
+</body></html>

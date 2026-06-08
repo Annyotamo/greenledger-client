@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { format, isAfter } from "date-fns";
 import { getScope2Report } from "@/lib/ghg/api";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
@@ -48,18 +49,30 @@ export function ElectricityActivityTable({
     activities,
     isLoading,
     isError,
-    searchTerm,
+    status,
+    electricityActivityType,
+    dataQualityTier,
+    sourceType,
     selectedFacility,
-    onSearchChange,
+    onStatusChange,
+    onElectricityActivityTypeChange,
+    onDataQualityTierChange,
+    onSourceTypeChange,
     onFacilityChange,
     facilityOptions,
 }: {
     activities: ElectricityActivity[];
     isLoading: boolean;
     isError: boolean;
-    searchTerm: string;
+    status: string;
+    electricityActivityType: string;
+    dataQualityTier: string;
+    sourceType: string;
     selectedFacility: string;
-    onSearchChange: (value: string) => void;
+    onStatusChange: (value: string) => void;
+    onElectricityActivityTypeChange: (value: string) => void;
+    onDataQualityTierChange: (value: string) => void;
+    onSourceTypeChange: (value: string) => void;
     onFacilityChange: (value: string) => void;
     facilityOptions: string[];
 }) {
@@ -234,8 +247,8 @@ export function ElectricityActivityTable({
                     <TableHeader>
                         <TableRow className="bg-surface-container-low border-b border-outline-variant">
                             <TableHead>Period</TableHead>
-                            <TableHead>Facility</TableHead>
-                            <TableHead>Activity</TableHead>
+                            <TableHead>Activity Type</TableHead>
+                            <TableHead>Source</TableHead>
                             <TableHead>Electricity</TableHead>
                             <TableHead>Emissions</TableHead>
                             <TableHead>Status</TableHead>
@@ -264,43 +277,48 @@ export function ElectricityActivityTable({
                             activities.map((activity) => {
                                 const status = getStatusLabel(activity.workflowStatus);
                                 const statusClass = getStatusClass(activity.workflowStatus);
+                                const activityStart = new Date(activity.activityStartDate);
+                                const activityEnd = new Date(activity.activityEndDate);
+                                const activeDays = Math.max(
+                                    1,
+                                    Math.ceil(
+                                        (activityEnd.getTime() - activityStart.getTime()) / (1000 * 60 * 60 * 24),
+                                    ) + 1,
+                                );
                                 return (
-                                    <TableRow key={activity.id} className="hover:bg-surface-container-lowest">
+                                    <TableRow
+                                        key={activity.id}
+                                        className="hover:bg-surface-container-high cursor-pointer">
                                         <TableCell>
                                             <div className="font-semibold text-body-md text-primary">
-                                                {activity.activityStartDate} - {activity.activityEndDate}
+                                                {format(activityStart, "MMMM d, yyyy")} to{" "}
+                                                {format(activityEnd, "MMMM d, yyyy")}
                                             </div>
-                                            <div className="mt-2 text-[11px] text-on-surface-variant">
-                                                {activity.reportingPeriodId}
+                                            <div className="mt-2 text-[11px] uppercase tracking-[0.12em] text-on-surface-variant">
+                                                {activeDays} days
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="font-semibold text-body-md text-primary">
-                                                {activity.facilityId}
-                                            </div>
-                                            <div className="mt-2 text-[11px] text-on-surface-variant">
-                                                {activity.scopeType}
-                                            </div>
+                                            <span className="inline-flex rounded-full border border-outline-variant bg-surface-container-high px-3 py-1 text-[11px] font-semibold text-on-surface-variant">
+                                                {activity.electricityActivityType}
+                                            </span>
                                         </TableCell>
                                         <TableCell>
                                             <span className="inline-flex rounded-full border border-outline-variant bg-surface-container-high px-3 py-1 text-[11px] font-semibold text-on-surface-variant">
                                                 {activity.sourceType}
                                             </span>
-                                            <div className="mt-2 text-body-md text-primary capitalize">
-                                                {activity.electricityActivityType}
-                                            </div>
                                             {activity.supplierName ? (
-                                                <div className="mt-1 text-[11px] text-on-surface-variant">
+                                                <div className="mt-2 text-[11px] text-on-surface-variant">
                                                     {activity.supplierName}
                                                 </div>
                                             ) : null}
                                         </TableCell>
                                         <TableCell>
                                             <div className="text-body-md text-primary">
-                                                {formatNumber(activity.electricityKwh, 0)} kWh
+                                                {formatNumber(activity.electricityMwh, 2)} MWh
                                             </div>
                                             <div className="mt-2 text-[11px] text-on-surface-variant uppercase tracking-[0.12em]">
-                                                {formatNumber(activity.electricityMwh, 2)} MWh
+                                                {formatNumber(activity.electricityKwh, 0)} kWh
                                             </div>
                                             <div className="mt-2 text-[11px] uppercase tracking-[0.12em] text-on-surface-variant">
                                                 {activity.isRenewableCertified ? "Certified renewable" : "Uncertified"}

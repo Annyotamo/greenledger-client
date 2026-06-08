@@ -147,6 +147,10 @@ export default function LogFuelActivityPage() {
                 next.unit = "";
             }
 
+            if (field === "collectionType" && value !== "estimated") {
+                next.estimationBasis = "";
+            }
+
             return next;
         });
         setErrors((current) => ({ ...current, [field]: "" }));
@@ -223,8 +227,8 @@ export default function LogFuelActivityPage() {
         if (!form.documentType) nextErrors.documentType = "Document type is required.";
         if (!form.documentName) nextErrors.documentName = "Document name is required.";
         if (!documentFile && !form.documentLink) nextErrors.documentLink = "A document URL or file upload is required.";
-        if (form.documentType === "estimation_basis" && !form.estimationBasis) {
-            nextErrors.estimationBasis = "Estimation basis is required for this document type.";
+        if (form.collectionType === "estimated" && !form.estimationBasis) {
+            nextErrors.estimationBasis = "Estimation basis is required for estimated collection type.";
         }
 
         setErrors(nextErrors);
@@ -249,6 +253,7 @@ export default function LogFuelActivityPage() {
                 quantity_unit_id: form.unit,
                 cost: form.emissionType !== "fugitive" && form.cost ? Number(form.cost) : null,
                 data_quality_tier: form.collectionType,
+                estimation_basis: form.collectionType === "estimated" ? form.estimationBasis : undefined,
                 activity_start_date: form.activityStartDate,
                 activity_end_date: form.activityEndDate,
             };
@@ -630,6 +635,22 @@ export default function LogFuelActivityPage() {
                                 <p className="mt-2 text-xs text-error">{errors.collectionType}</p>
                             )}
                         </div>
+                        {form.collectionType === "estimated" && (
+                            <div className="lg:col-span-2">
+                                <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
+                                    Estimation Basis
+                                </label>
+                                <textarea
+                                    value={form.estimationBasis}
+                                    onChange={(event) => handleChange("estimationBasis", event.target.value)}
+                                    className={`${formFieldClass(Boolean(errors.estimationBasis))} min-h-[128px] border border-outline-variant bg-white px-3 py-2 text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary`}
+                                    placeholder="Describe the basis, methodology, or assumptions used for this estimation..."
+                                />
+                                {errors.estimationBasis && (
+                                    <p className="mt-2 text-xs text-error">{errors.estimationBasis}</p>
+                                )}
+                            </div>
+                        )}
                         <div className="lg:col-span-2 flex items-center gap-3 rounded-lg border border-outline-variant bg-surface-container p-4">
                             <input
                                 id="isDraft"
@@ -694,22 +715,6 @@ export default function LogFuelActivityPage() {
                                 placeholder="e.g. Q1_Diesel_Invoice_NorthHub"
                             />
                         </div>
-                        {form.documentType === "estimation_basis" && (
-                            <div className="lg:col-span-2">
-                                <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                    Estimation Basis
-                                </label>
-                                <textarea
-                                    value={form.estimationBasis}
-                                    onChange={(event) => handleChange("estimationBasis", event.target.value)}
-                                    className={`${formFieldClass(Boolean(errors.estimationBasis))} min-h-[100px] border border-outline-variant`}
-                                    placeholder="Describe the basis, methodology, or assumptions used for this estimation..."
-                                />
-                                {errors.estimationBasis && (
-                                    <p className="mt-2 text-xs text-error">{errors.estimationBasis}</p>
-                                )}
-                            </div>
-                        )}
                         <div className="lg:col-span-2">
                             <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
                                 Upload Supporting Evidence

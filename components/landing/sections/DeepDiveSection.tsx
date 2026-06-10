@@ -18,7 +18,7 @@ const accordionItems = [
     },
     {
         id: "c2",
-        title: "audit ready logging and evidence",
+        title: "Audit ready logging and evidence",
         subtitle: "Immutable trails, attachments, and auditor-friendly exports",
         body: (
             <>
@@ -36,7 +36,7 @@ const accordionItems = [
     },
     {
         id: "c3",
-        title: "role based auth & approval workflows",
+        title: "Role based auth & approval workflows",
         subtitle: "Segregation of duties for reliable operational data",
         body: (
             <>

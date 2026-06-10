@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import startupIndia from "@/assets/startupIndia.png";
@@ -5,10 +7,13 @@ import entrepreneurCafe from "@/assets/entrepreneurCafe.jpg";
 import isoCertifaction from "@/assets/isoCertifaction.png";
 import IMKKolkata from "@/assets/IMIKolkata.jpg";
 import sepcKolkata from "@/assets/sepc.png";
+import { useCookieConsentStore } from "@/stores/cookie-consent-store";
 
 export default function Footer() {
+    const setOpen = useCookieConsentStore((s) => s.setOpen);
+
     return (
-        <footer className="mt-14 rounded-2xl border border-white/70 bg-white/80 p-6 text-sm text-slate-600 section-bg backdrop-blur-sm sm:p-7 mb-6">
+        <footer className="mt-14 rounded-2xl border border-white/70 bg-white/80 p-6 text-sm text-slate-600 section-bg backdrop-blur-sm sm:p-7 mb-6 font-[var(--font-hanken)]">
             <div className="flex flex-col gap-6 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
                 <div className="max-w-md">
                     <p className="text-xs font-semibold uppercase tracking-wide text-emerald-900">GreenLedger</p>
@@ -17,7 +22,7 @@ export default function Footer() {
                         audit ready enterprises and consumer-trusted brands.
                     </p>
                 </div>
-                <nav className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
+                <nav className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs">
                     <a href="#" className="hover:text-emerald-700">
                         Privacy
                     </a>
@@ -27,12 +32,18 @@ export default function Footer() {
                     <a href="#" className="hover:text-emerald-700">
                         Security
                     </a>
+                    <button
+                        onClick={() => setOpen(true)}
+                        className="hover:text-emerald-700 cursor-pointer bg-transparent border-none p-0 text-xs font-inherit text-slate-600 focus:outline-none"
+                    >
+                        Cookie Preferences
+                    </button>
                     <Link href="/#cta" className="hover:text-emerald-700">
                         Contact
                     </Link>
                 </nav>
                 <div
-                    className="group w-full rounded-none sm:rounded-2xl bg-white/75 p-4 text-slate-700 shadow-none sm:shadow-sm transition hover:bg-white/90 hover:shadow-md sm:p-5"
+                    className="group w-full text-slate-700 transition hover:bg-white/90"
                     aria-label="Supported by Startup India (opens in new tab)">
                     <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
@@ -82,7 +93,8 @@ export default function Footer() {
                         </div>
                     </div>
                 </div>
-                <div className="group w-full rounded-none sm:rounded-2xl shadow-none bg-white/75 p-4 text-slate-700 sm:shadow-sm transition hover:bg-white/90 hover:shadow-md sm:p-5">
+                <hr className="my-2 border-gray-300 w-full" />
+                <div className="group w-full text-slate-700 transition hover:bg-white/90" aria-label="Certifications">
                     <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-emerald-900/65">

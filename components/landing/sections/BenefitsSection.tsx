@@ -3,16 +3,16 @@ export default function BenefitsSection() {
         <section className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
             {[
                 {
-                    title: "audit ready reporting",
+                    title: "Audit ready reporting",
                     body: "Immutable logs, evidence attachments, and clear reviewer trails make disclosures defensible.",
                 },
                 {
                     title: "Operational accuracy",
-                    body: "meter and invoice grade ingestion for fuel and electricity activities with validation rules.",
+                    body: "Meter and invoice grade ingestion for fuel and electricity activities with validation rules.",
                 },
                 {
                     title: "Governed approvals",
-                    body: "role based permissions and approval queues reduce misreporting and provide governance evidence.",
+                    body: "Role based permissions and approval queues reduce misreporting and provide governance evidence.",
                 },
                 {
                     title: "Faster assurance",

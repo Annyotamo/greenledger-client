@@ -4,6 +4,8 @@ import "./globals.css";
 import QueryProvider from "@/components/providers/QueryProvider";
 import "@material-symbols/font-400/outlined.css";
 
+import CookieConsentOverlay from "@/components/ui/CookieConsentOverlay";
+
 const hanken = Hanken_Grotesk({
     subsets: ["latin"],
     variable: "--font-hanken",
@@ -41,7 +43,10 @@ export default function RootLayout({
             className={`${hanken.variable} ${jetbrains.variable} h-full antialiased`}
             suppressHydrationWarning>
             <body className="flex min-h-screen flex-col overflow-x-hidden font-[var(--font-hanken),Inter,system-ui,sans-serif]">
-                <QueryProvider>{children}</QueryProvider>
+                <QueryProvider>
+                    {children}
+                    <CookieConsentOverlay />
+                </QueryProvider>
             </body>
         </html>
     );

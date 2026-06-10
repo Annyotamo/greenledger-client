@@ -43,7 +43,7 @@ const sliderCards: SliderCard[] = [
         description:
             "Every submission carries verifiable attachments and tamper-evident logs so auditors see the provenance and reviewers see who signed off when.",
         bullets: [
-            "append only logs and exportable audit trails",
+            "Append only logs and exportable audit trails",
             "Evidence attachments tied to activity records",
             "Verification states and auditor-friendly exports",
         ],
@@ -53,11 +53,11 @@ const sliderCards: SliderCard[] = [
     {
         id: "roles",
         eyebrow: "Permissions & approvals",
-        title: "role based auth with activity submission approval",
+        title: "Role based auth with activity submission approval",
         description:
             "Segregate duties and manage approval queues: submitters, reviewers, and approvers with clear audit stamps and notifications.",
         bullets: [
-            "role based access controls and scoped permissions",
+            "Role based access controls and scoped permissions",
             "Approval workflows for fuel/electricity/energy activities",
             "Activity-level comments, rejections, and resubmissions",
         ],
@@ -71,7 +71,7 @@ const sliderCards: SliderCard[] = [
         description:
             "Ingest meters, invoices and manual entries. Normalize units, flag anomalies, and reconcile against contracts so operational teams can trust the numbers.",
         bullets: [
-            "meterlevel ingestion and invoice reconciliation",
+            "Meter level ingestion and invoice reconciliation",
             "Unit normalization and conversion chains",
             "Activity validation rules and exception reporting",
         ],

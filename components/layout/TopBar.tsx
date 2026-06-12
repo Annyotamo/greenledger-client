@@ -54,7 +54,7 @@ export function TopBar({ activeTab, onTabChange, searchPlaceholder }: TopBarProp
                     />
                     <Input
                         placeholder={searchPlaceholder ?? "Search emissions data..."}
-                        className="h-auto lg:h-[37.5px]"
+                        className="h-auto lg:h-[35px] bg-gray-50"
                     />
                 </div>
             </div>
@@ -74,7 +74,7 @@ export function TopBar({ activeTab, onTabChange, searchPlaceholder }: TopBarProp
                         aria-label="Help">
                         <MaterialIcon name="help_outline" className="text-on-surface-variant" />
                     </button>
-                    <button
+                    {/* <button
                         type="button"
                         className="rounded-full p-2 pb-0 transition-colors hover:bg-surface-container-high"
                         aria-label="Toggle theme"
@@ -83,7 +83,7 @@ export function TopBar({ activeTab, onTabChange, searchPlaceholder }: TopBarProp
                             name={mounted && resolvedTheme === "dark" ? "light_mode" : "dark_mode"}
                             className="text-on-surface-variant"
                         />
-                    </button>
+                    </button> */}
                 </div>
             </div>
         </header>

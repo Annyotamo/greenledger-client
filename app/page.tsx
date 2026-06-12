@@ -10,6 +10,7 @@ import DeepDiveSection from "@/components/landing/sections/DeepDiveSection";
 import KickoffToReportingSection from "@/components/landing/sections/KickoffToReportingSection";
 import SocialProofSection from "@/components/landing/sections/SocialProofSection";
 import BenefitsSection from "@/components/landing/sections/BenefitsSection";
+import PricingSection from "@/components/landing/sections/PricingSection";
 import MotionInView from "@/components/landing/MotionInView";
 import NewsTicker from "@/components/landing/NewsTicker";
 import esgReportingImg from "@/assets/landing-images/esg-reporting.jpg";
@@ -128,6 +129,9 @@ export default function Home() {
                 </MotionInView>
                 <MotionInView className="mb-16" delayMs={25}>
                     <BenefitsSection />
+                </MotionInView>
+                <MotionInView className="mb-16 scroll-mt-24" delayMs={35}>
+                    <PricingSection />
                 </MotionInView>
                 <MotionInView delayMs={60}>
                     <section

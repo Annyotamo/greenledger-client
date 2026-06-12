@@ -5,6 +5,7 @@ import greenLedgerLogo from "@/assets/GLLogo.png";
 const navLinks = [
     { href: "/#pillars", label: "Platform" },
     { href: "/#deep-dive", label: "Solutions" },
+    { href: "/#pricing", label: "Pricing" },
     { href: "/#traceability", label: "Traceability" },
     { href: "/#cta", label: "Demo" },
 ];

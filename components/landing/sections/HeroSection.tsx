@@ -3,6 +3,7 @@ import DecorativeVideo from "@/components/landing/DecorativeVideo";
 import startupIndia from "@/assets/startupIndia.png";
 import IMKKolkata from "@/assets/IMIKolkata.jpg";
 import entrepreneurCafe from "@/assets/entrepreneurCafe.jpg";
+import rpsgLogo from "@/assets/rpsgrouplogo.jpg";
 
 export default function HeroSection() {
     return (
@@ -69,6 +70,13 @@ export default function HeroSection() {
                                 <Image
                                     src={entrepreneurCafe}
                                     alt="Entrepreneur Cafe"
+                                    className="h-7 w-auto object-contain opacity-95 rounded-sm"
+                                />
+                            </a>
+                            <a href="https://www.rpsg.in" target="_blank" rel="noopener noreferrer">
+                                <Image
+                                    src={rpsgLogo}
+                                    alt="RP-Sanjiv Goenka Group (IMI Kolkata)"
                                     className="h-7 w-auto object-contain opacity-95 rounded-sm"
                                 />
                             </a>

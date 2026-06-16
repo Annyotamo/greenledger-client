@@ -7,13 +7,14 @@ import entrepreneurCafe from "@/assets/entrepreneurCafe.jpg";
 import isoCertifaction from "@/assets/isoCertifaction.png";
 import IMKKolkata from "@/assets/IMIKolkata.jpg";
 import sepcKolkata from "@/assets/sepc.png";
+import rpsgLogo from "@/assets/rpsgrouplogo.jpg";
 import { useCookieConsentStore } from "@/stores/cookie-consent-store";
 
 export default function Footer() {
     const setOpen = useCookieConsentStore((s) => s.setOpen);
 
     return (
-        <footer className="mt-14 rounded-2xl border border-white/70 bg-white/80 p-6 text-sm text-slate-600 section-bg backdrop-blur-sm sm:p-7 mb-6 font-[var(--font-hanken)]">
+        <footer className="mt-14 rounded-2xl border border-white/70 bg-white/80 p-6 text-sm text-slate-600 section-bg backdrop-blur-sm sm:p-7 mb-6 font-(--font-hanken)">
             <div className="flex flex-col gap-6 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
                 <div className="max-w-md">
                     <p className="text-xs font-semibold uppercase tracking-wide text-emerald-900">GreenLedger</p>
@@ -34,8 +35,7 @@ export default function Footer() {
                     </a>
                     <button
                         onClick={() => setOpen(true)}
-                        className="hover:text-emerald-700 cursor-pointer bg-transparent border-none p-0 text-xs font-inherit text-slate-600 focus:outline-none"
-                    >
+                        className="hover:text-emerald-700 cursor-pointer bg-transparent border-none p-0 text-xs font-inherit text-slate-600 focus:outline-none">
                         Cookie Preferences
                     </button>
                     <Link href="/#cta" className="hover:text-emerald-700">
@@ -59,16 +59,12 @@ export default function Footer() {
                                     Entrepreneur Cafe
                                 </a>{" "}
                                 |{" "}
-                                <a href="https://imik.edu.in" target="_blank" rel="noopener noreferrer">
-                                    IMI Kolkata
-                                </a>{" "}
-                                |{" "}
-                                <a href="https://www.servicesepc.org/" target="_blank" rel="noopener noreferrer">
-                                    Service Export Promotion Council (SEPC) India
+                                <a href="https://www.rpsg.in" target="_blank" rel="noopener noreferrer">
+                                    RP-Sanjiv Goenka Group (IMI Kolkata)
                                 </a>
                             </p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-6">
                             <a href="https://www.startupindia.gov.in/" target="_blank" rel="noopener noreferrer">
                                 <Image
                                     src={startupIndia}
@@ -80,6 +76,13 @@ export default function Footer() {
                                 <Image
                                     src={entrepreneurCafe}
                                     alt="Entrepreneur Cafe"
+                                    className="h-12 w-auto object-contain opacity-95 sm:h-14"
+                                />
+                            </a>
+                            <a href="https://www.rpsg.in" target="_blank" rel="noopener noreferrer">
+                                <Image
+                                    src={rpsgLogo}
+                                    alt="RP-Sanjiv Goenka Group (IMI Kolkata)"
                                     className="h-12 w-auto object-contain opacity-95 sm:h-14"
                                 />
                             </a>
@@ -102,7 +105,7 @@ export default function Footer() {
                             </p>
                             <p className="mt-1 text-base font-bold tracking-tight hidden sm:block text-emerald-950 sm:text-lg">
                                 <a href="https://www.servicesepc.org/" target="_blank" rel="noopener noreferrer">
-                                    SEPC India
+                                    Service Export Promotion Council (SEPC) India
                                 </a>{" "}
                                 |{" "}
                                 <a href="https://www.iso.org/standard/27001" target="_blank" rel="noopener noreferrer">

@@ -24,6 +24,9 @@ export default function Footer() {
                     </p>
                 </div>
                 <nav className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs">
+                    <Link href="/cbam" className="hover:text-emerald-700">
+                        CBAM Compliance
+                    </Link>
                     <a href="#" className="hover:text-emerald-700">
                         Privacy
                     </a>

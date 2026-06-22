@@ -11,9 +11,9 @@ import CBAMExposure from "@/components/landing/sections/cbam/CBAMExposure";
 import CBAMCTA from "@/components/landing/sections/cbam/CBAMCTA";
 
 export const metadata: Metadata = {
-    title: "CBAM Technical Deep-Dive | GreenLedger",
+    title: "CBAM Module — Exporter View | GreenLedger",
     description:
-        "Navigate the Carbon Border Adjustment Mechanism with precision. Automate emissions calculations, manage registry compliance, and trace carbon footprint across overseas supplier nodes.",
+        "Installation-level embedded-emissions data for your EU buyers — verified and audit-ready, so your shipments aren't priced on punitive default values.",
 };
 
 export default function CBAMPage() {

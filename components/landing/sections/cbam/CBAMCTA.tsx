@@ -12,13 +12,13 @@ export default function CBAMCTA() {
 
             <div className="relative z-20 max-w-4xl mx-auto px-6 text-center">
                 <h2 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-6 leading-tight">
-                    Ready for the <br />
+                    Built for <br />
                     <span className="bg-gradient-to-r from-white via-emerald-200 to-emerald-400 bg-clip-text text-transparent">
-                        2026 Deadline?
+                        EU-bound exporters
                     </span>
                 </h2>
                 <p className="text-emerald-100/70 text-sm md:text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
-                    Don't wait for the definitive phase. Build your CBAM infrastructure today with the most advanced ESG reporting engine in the EU market.
+                    Give your EU buyers verified, audit-ready emissions data — and stay ahead of default-value penalties as the definitive regime ramps up.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -38,15 +38,15 @@ export default function CBAMCTA() {
                 <div className="mt-14 pt-8 border-t border-white/5 flex flex-wrap justify-center gap-x-8 gap-y-4 text-emerald-300/60 font-mono text-[10px] tracking-wider uppercase font-semibold">
                     <div className="flex items-center gap-2">
                         <span className="material-symbols-outlined text-sm text-emerald-400">verified</span>
-                        Fully Audited Logic
+                        Audit-Ready Data
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-sm text-emerald-400">sync</span>
-                        ERP-Ready Integrations
+                        <span className="material-symbols-outlined text-sm text-emerald-400">verified</span>
+                        Operators Portal
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-sm text-emerald-400">account_balance</span>
-                        Registry Compliant
+                        <span className="material-symbols-outlined text-sm text-emerald-400">verified</span>
+                        EU-Accredited Verification
                     </div>
                 </div>
             </div>

@@ -3,7 +3,7 @@ export default function CBAMGovernance() {
         {
             num: "01",
             title: "Data Ingestion",
-            description: "Secure aggregation of SKU-level production data and energy mix profiles.",
+            description: "Monitor installation & production data — fuels, process inputs, output tonnes per CN code.",
             icon: "database",
             badge: "PROCESSING",
             badgeIcon: "sync",
@@ -12,7 +12,7 @@ export default function CBAMGovernance() {
         {
             num: "02",
             title: "Emissions Logic",
-            description: "Automated Scope 1, 2, and 3 calculations aligned with EU methodologies.",
+            description: "Embedded emissions by the EU method (Annex IV). Direct + precursors for steel.",
             icon: "calculate",
             badge: "CALCULATING",
             badgeIcon: "analytics",
@@ -21,7 +21,7 @@ export default function CBAMGovernance() {
         {
             num: "03",
             title: "Third-Party Audit",
-            description: "Streamlined evidence package generation for accredited verifiers.",
+            description: "Verification by an EU-accredited verifier. Mandatory for actual data.",
             icon: "verified_user",
             badge: "VERIFYING",
             badgeIcon: "verified",
@@ -29,10 +29,10 @@ export default function CBAMGovernance() {
         },
         {
             num: "04",
-            title: "Final Declaration",
-            description: "Validated submission to the CBAM Transitional Registry system.",
+            title: "Share with Buyers",
+            description: "Communication template (Annex IV) via the Operators Portal to your EU customers.",
             icon: "send",
-            badge: "SUBMITTING",
+            badge: "SHARING",
             badgeIcon: "cloud_done",
             glow: "group-hover:shadow-[0_0_30px_rgba(20,184,166,0.25)]",
         },
@@ -61,7 +61,7 @@ export default function CBAMGovernance() {
                     Governance Lifecycle
                 </h2>
                 <p className="mt-4 text-base md:text-lg text-slate-700 max-w-2xl mx-auto leading-relaxed">
-                    An end-to-end operational framework for mandatory carbon reporting and verification.
+                    Your path as a producer: measure, calculate, verify, and share with EU buyers.
                 </p>
             </div>
 

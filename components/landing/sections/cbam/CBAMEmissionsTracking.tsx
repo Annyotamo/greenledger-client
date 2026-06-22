@@ -54,17 +54,12 @@ export default function CBAMEmissionsTracking() {
                                 </h3>
                             </div>
                             <p className="text-emerald-100/60 text-sm md:text-base">
-                                Real-time monitoring of carbon intensity across the manufacturing lifecycle.
+                                Carbon intensity by product and route, per reporting year.
                             </p>
                         </div>
                         <div className="flex items-center gap-4">
-                            <span className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-mono text-[10px] rounded tracking-wider uppercase font-semibold">
-                                Real-time Global Mapping
-                            </span>
-                            <div className="flex -space-x-2">
-                                <div className="w-8 h-8 rounded-full border-2 border-[#031c15] bg-emerald-800 flex items-center justify-center text-[10px] text-white font-bold">CN</div>
-                                <div className="w-8 h-8 rounded-full border-2 border-[#031c15] bg-emerald-700 flex items-center justify-center text-[10px] text-white font-bold">EU</div>
-                                <div className="w-8 h-8 rounded-full border-2 border-[#031c15] bg-emerald-500 flex items-center justify-center text-[10px] text-emerald-950 font-bold">+12</div>
+                            <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-mono text-xs rounded-full tracking-wider uppercase font-semibold flex items-center gap-2">
+                                <span className="font-bold">CN / EU</span>
                             </div>
                         </div>
                     </div>
@@ -86,7 +81,7 @@ export default function CBAMEmissionsTracking() {
                                         AVG Intensity
                                     </div>
                                     <div className="text-emerald-400 text-2xl font-extrabold tracking-tight">
-                                        1.82 tCO2e
+                                        1.82 <span className="text-base font-bold">tCO₂e/t</span>
                                     </div>
                                 </div>
                                 <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
@@ -106,14 +101,13 @@ export default function CBAMEmissionsTracking() {
                                 }`}>
                                 <div>
                                     <div className="text-emerald-300/60 font-mono text-[10px] tracking-wider uppercase mb-1">
-                                        Active Nodes
+                                        CN Codes Covered
                                     </div>
                                     <div className="text-white text-2xl font-extrabold tracking-tight">
-                                        124 Locations
+                                        9
                                     </div>
                                 </div>
                                 <div className="text-[10px] text-emerald-100/40">
-                                    Continuous data streaming live
                                 </div>
                             </button>
 
@@ -127,15 +121,14 @@ export default function CBAMEmissionsTracking() {
                                 }`}>
                                 <div>
                                     <div className="text-emerald-300/60 font-mono text-[10px] tracking-wider uppercase mb-1">
-                                        Compliance Variance
+                                        Verified Coverage
                                     </div>
-                                    <div className="text-rose-400 text-2xl font-extrabold tracking-tight">
-                                        12.4% Variance
+                                    <div className="text-emerald-400 text-2xl font-extrabold tracking-tight">
+                                        96<span className="text-base">%</span>
                                     </div>
                                 </div>
-                                <div className="text-[10px] text-rose-300/60 flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-[12px]">warning</span>
-                                    Exceeding default threshold
+                                <div className="text-[10px] text-emerald-100/40">
+                                    Remainder on EU default
                                 </div>
                             </button>
 
@@ -149,15 +142,15 @@ export default function CBAMEmissionsTracking() {
                                 }`}>
                                 <div>
                                     <div className="text-emerald-300/60 font-mono text-[10px] tracking-wider uppercase mb-1">
-                                        Last Sync Status
+                                        Product Mix
                                     </div>
                                     <div className="text-emerald-100 text-2xl font-extrabold tracking-tight">
-                                        04:00 GMT
+                                        3 Routes
                                     </div>
                                 </div>
                                 <div className="text-[10px] text-emerald-300 flex items-center gap-1 font-semibold">
                                     <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                                    Sync successful
+                                    Active reporting
                                 </div>
                             </button>
                         </div>
@@ -204,7 +197,7 @@ export default function CBAMEmissionsTracking() {
                             <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col justify-between min-h-[320px]">
                                 <div>
                                     <div className="flex justify-between items-center mb-8">
-                                        <span className="text-white font-bold text-lg">Asset Distribution</span>
+                                        <span className="text-white font-bold text-lg">Product Mix</span>
                                         <span className="material-symbols-outlined text-emerald-400 opacity-60">
                                             pie_chart
                                         </span>
@@ -214,53 +207,58 @@ export default function CBAMEmissionsTracking() {
                                     <div className="space-y-6">
                                         <div>
                                             <div className="flex justify-between font-mono text-[11px] mb-2 text-emerald-100/85">
-                                                <span>STEEL PRODUCTION</span>
-                                                <span className="font-bold text-emerald-400">64%</span>
+                                                <span>DRI / sponge iron</span>
+                                                <span className="font-bold text-emerald-400">48%</span>
                                             </div>
                                             <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
                                                 <div
                                                     className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.3)] transition-all duration-1000"
-                                                    style={{ width: "64%" }}
+                                                    style={{ width: "48%" }}
                                                 />
                                             </div>
                                         </div>
 
                                         <div>
                                             <div className="flex justify-between font-mono text-[11px] mb-2 text-emerald-100/85">
-                                                <span>ALUMINUM SMELTING</span>
-                                                <span className="font-bold text-slate-300">22%</span>
+                                                <span>EAF crude steel</span>
+                                                <span className="font-bold text-slate-300">30%</span>
                                             </div>
                                             <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
                                                 <div
                                                     className="h-full bg-slate-400 rounded-full transition-all duration-1000"
-                                                    style={{ width: "22%" }}
+                                                    style={{ width: "30%" }}
                                                 />
                                             </div>
                                         </div>
 
                                         <div>
                                             <div className="flex justify-between font-mono text-[11px] mb-2 text-emerald-100/85">
-                                                <span>ENERGY LOGISTICS</span>
-                                                <span className="font-bold text-slate-400">14%</span>
+                                                <span>Hot-rolled coil</span>
+                                                <span className="font-bold text-slate-400">22%</span>
                                             </div>
                                             <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
                                                 <div
                                                     className="h-full bg-slate-600 rounded-full transition-all duration-1000"
-                                                    style={{ width: "14%" }}
+                                                    style={{ width: "22%" }}
                                                 />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
-                                    <span className="text-emerald-100/30 text-[9px] font-mono uppercase tracking-wider">
-                                        Calculated with v2.4 Logic
+                                <div className="mt-8 pt-6 border-t border-white/5 flex flex-wrap items-center gap-3">
+                                    <span className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-mono text-[10px] rounded tracking-wider uppercase font-semibold flex items-center gap-1.5">
+                                        <span className="material-symbols-outlined text-sm">check</span>
+                                        EU Method · Annex IV
                                     </span>
-                                    <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-semibold">
-                                        <span className="material-symbols-outlined text-sm">verified</span>
-                                        Fully Audited
-                                    </div>
+                                    <span className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-mono text-[10px] rounded tracking-wider uppercase font-semibold flex items-center gap-1.5">
+                                        <span className="material-symbols-outlined text-sm">check</span>
+                                        Verified · ISO 14064-3
+                                    </span>
+                                    <span className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-mono text-[10px] rounded tracking-wider uppercase font-semibold flex items-center gap-1.5">
+                                        <span className="material-symbols-outlined text-sm">check</span>
+                                        Operators Portal
+                                    </span>
                                 </div>
                             </div>
                         </div>

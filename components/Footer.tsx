@@ -7,7 +7,7 @@ import entrepreneurCafe from "@/assets/entrepreneurCafe.jpg";
 import isoCertifaction from "@/assets/isoCertifaction.png";
 import IMKKolkata from "@/assets/IMIKolkata.jpg";
 import sepcKolkata from "@/assets/sepc.png";
-import rpsgLogo from "@/assets/rpsgrouplogo.jpg";
+import rpsgLogo from "@/assets/rpsgLogo3.jpg";
 import { useCookieConsentStore } from "@/stores/cookie-consent-store";
 
 export default function Footer() {

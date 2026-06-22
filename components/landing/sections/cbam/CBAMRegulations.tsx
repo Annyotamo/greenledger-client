@@ -21,10 +21,10 @@ export default function CBAMRegulations() {
                             </span>
                             <div>
                                 <h4 className="text-base font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
-                                    Regulation (EU) 2023/956 Compliance
+                                    Regulation (EU) 2023/956
                                 </h4>
                                 <p className="text-sm text-slate-700 mt-1 leading-relaxed">
-                                    Full mapping of primary emissions calculation methods as per EU guidance.
+                                    Base CBAM regulation. Embedded-emissions method, Annex IV.
                                 </p>
                             </div>
                         </div>
@@ -36,10 +36,10 @@ export default function CBAMRegulations() {
                             </span>
                             <div>
                                 <h4 className="text-base font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
-                                    Registry v2.4 Patch Sync
+                                    Regulation (EU) 2025/2083 — Omnibus
                                 </h4>
                                 <p className="text-sm text-slate-700 mt-1 leading-relaxed">
-                                    Automated updates for product-specific benchmark thresholds and CN codes.
+                                    Steel: precursors counted, finishing excluded. Grid electricity reported, not counted.
                                 </p>
                             </div>
                         </div>
@@ -51,10 +51,25 @@ export default function CBAMRegulations() {
                             </span>
                             <div>
                                 <h4 className="text-base font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
-                                    Transitional Phase Reporting
+                                    Dec 2025 implementing acts
                                 </h4>
                                 <p className="text-sm text-slate-700 mt-1 leading-relaxed">
-                                    Dynamic reporting templates for Q1 2024 - Q4 2025 submission cycles.
+                                    Country- & product-specific default values; +10% in 2026 — the cost of not verifying.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Regulation Item 4 */}
+                        <div className="flex gap-4 group cursor-pointer">
+                            <span className="material-symbols-outlined text-emerald-600 mt-1 shrink-0">
+                                check_circle
+                            </span>
+                            <div>
+                                <h4 className="text-base font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                                    Monitoring methodology
+                                </h4>
+                                <p className="text-sm text-slate-700 mt-1 leading-relaxed">
+                                    Documented in English; system boundaries for direct + precursors.
                                 </p>
                             </div>
                         </div>
@@ -62,7 +77,7 @@ export default function CBAMRegulations() {
                 </div>
 
                 <button className="mt-10 w-full py-4 border border-slate-200 rounded-xl font-mono text-xs uppercase tracking-wider hover:bg-emerald-50/50 hover:border-emerald-200 hover:text-emerald-700 transition-colors flex items-center justify-center gap-2 cursor-pointer font-semibold">
-                    2024 Compliance Guide
+                    2026 Compliance Guide
                     <span className="material-symbols-outlined text-sm">download</span>
                 </button>
             </div>
@@ -75,7 +90,7 @@ export default function CBAMRegulations() {
                             <span className="material-symbols-outlined text-2xl">analytics</span>
                         </div>
                         <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-                            Import Documentation
+                            Buyer Data Sharing
                         </h3>
                     </div>
 
@@ -83,18 +98,18 @@ export default function CBAMRegulations() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                         <div className="bg-emerald-50/50 border border-emerald-100/50 p-6 rounded-2xl">
                             <div className="text-slate-500 font-mono text-[10px] tracking-wider uppercase mb-1">
-                                Declarations Generated
+                                Verified Records
                             </div>
                             <div className="text-3xl font-extrabold text-slate-900">
-                                12,402
+                                1,240
                             </div>
                         </div>
                         <div className="bg-emerald-50/50 border border-emerald-100/50 p-6 rounded-2xl">
                             <div className="text-slate-500 font-mono text-[10px] tracking-wider uppercase mb-1">
-                                Validation Rate
+                                EU Buyers Connected
                             </div>
                             <div className="text-3xl font-extrabold text-emerald-700">
-                                99.8%
+                                38
                             </div>
                         </div>
                     </div>
@@ -103,21 +118,21 @@ export default function CBAMRegulations() {
                     <ul className="space-y-4">
                         <li className="flex items-center gap-3 text-sm font-semibold text-slate-700">
                             <span className="material-symbols-outlined text-emerald-600 font-bold">check</span>
-                            Automated CN Code Mapping
+                            Automated CN-code mapping
                         </li>
                         <li className="flex items-center gap-3 text-sm font-semibold text-slate-700">
                             <span className="material-symbols-outlined text-emerald-600 font-bold">check</span>
-                            Batch Declaration Generation
+                            Communication template (Annex IV) generation
                         </li>
                         <li className="flex items-center gap-3 text-sm font-semibold text-slate-700">
                             <span className="material-symbols-outlined text-emerald-600 font-bold">check</span>
-                            Direct XML Export for EU Registry
+                            Operators Portal registration & buyer access
                         </li>
                     </ul>
                 </div>
 
                 <div className="mt-10 p-4 bg-emerald-50/30 rounded-xl border border-dashed border-emerald-200 text-xs text-slate-600 text-center leading-relaxed">
-                    Complies with EU specifications for carbon certificates XML schemas.
+                    Verified actual values keep your goods off punitive default values.
                 </div>
             </div>
         </section>

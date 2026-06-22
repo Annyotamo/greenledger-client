@@ -3,7 +3,7 @@ import DecorativeVideo from "@/components/landing/DecorativeVideo";
 import startupIndia from "@/assets/startupIndia.png";
 import IMKKolkata from "@/assets/IMIKolkata.jpg";
 import entrepreneurCafe from "@/assets/entrepreneurCafe.jpg";
-import rpsgLogo from "@/assets/rpsgrouplogo.jpg";
+import rpsgLogo from "@/assets/rpsgLogo2.jpg";
 
 export default function HeroSection() {
     return (

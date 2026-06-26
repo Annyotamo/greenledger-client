@@ -12,6 +12,7 @@ import SocialProofSection from "@/components/landing/sections/SocialProofSection
 import BenefitsSection from "@/components/landing/sections/BenefitsSection";
 import PricingSection from "@/components/landing/sections/PricingSection";
 import InsightsSection from "@/components/landing/sections/InsightsSection";
+import TeamSection from "@/components/landing/sections/TeamSection";
 import MotionInView from "@/components/landing/MotionInView";
 import NewsTicker from "@/components/landing/NewsTicker";
 import esgReportingImg from "@/assets/landing-images/esg-reporting.jpg";
@@ -133,6 +134,9 @@ export default function Home() {
                 </MotionInView>
                 <MotionInView className="mb-16 scroll-mt-24" delayMs={35}>
                     <InsightsSection />
+                </MotionInView>
+                <MotionInView className="mb-16 scroll-mt-24" delayMs={35}>
+                    <TeamSection />
                 </MotionInView>
                 <MotionInView className="mb-16 scroll-mt-24" delayMs={35}>
                     <PricingSection />

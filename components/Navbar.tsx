@@ -7,7 +7,6 @@ const navLinks = [
     { href: "/#deep-dive", label: "Solutions" },
     { href: "/cbam", label: "CBAM" },
     { href: "/#pricing", label: "Pricing" },
-    { href: "/#traceability", label: "Traceability" },
     { href: "/#cta", label: "Demo" },
 ];
 

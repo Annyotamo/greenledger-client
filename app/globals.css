@@ -361,3 +361,120 @@ body {
     display: block;
     width: 100%;
 }
+
+/* Card Flip styles */
+.perspective-1000 {
+    perspective: 1000px;
+}
+
+.preserve-3d {
+    transform-style: preserve-3d;
+}
+
+.backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+    transform: rotateY(180deg);
+}
+
+.card-flip-container {
+    perspective: 1500px;
+}
+
+.card-flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-style: preserve-3d;
+}
+
+.card-flip-container:hover .card-flip-inner {
+    transform: rotateY(180deg);
+}
+
+.card-flip-front,
+.card-flip-back {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+.card-flip-back {
+    transform: rotateY(180deg);
+}
+
+/* Helix Wave Animation */
+@keyframes helixFlow {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(-50%, 0, 0); /* Seamless 50% translation for side-by-side marquee */
+    }
+}
+
+@keyframes helixFloat {
+    0% {
+        transform: translateY(0px) scale(1) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-12px) scaleY(1.06) scaleX(1.02) rotate(0.5deg);
+    }
+    100% {
+        transform: translateY(0px) scale(1) rotate(0deg);
+    }
+}
+
+@keyframes glide {
+    0% {
+        offset-distance: 0%;
+    }
+    100% {
+        offset-distance: 100%;
+    }
+}
+
+.helix-container {
+    animation: helixFloat 12s ease-in-out infinite;
+    transform-origin: center;
+    transition: filter var(--anim-standard) ease;
+}
+
+.helix-track {
+    animation: helixFlow 36s linear infinite;
+    will-change: transform;
+}
+
+.helix-particle {
+    offset-rotate: auto;
+    animation: glide 20s linear infinite;
+    filter: drop-shadow(0 0 6px currentColor);
+    transition: filter var(--anim-fast) ease, r var(--anim-fast) ease;
+}
+
+/* Hover active state: double the speeds, expand loops, and bright glow */
+.helix-hovered .helix-track {
+    animation-duration: 8s;
+}
+
+.helix-hovered .helix-container {
+    animation: helixFloat 4s ease-in-out infinite;
+    filter: saturate(1.3);
+}
+
+.helix-hovered .helix-particle {
+    animation-duration: 5s;
+    filter: drop-shadow(0 0 10px currentColor);
+}
+
+
+

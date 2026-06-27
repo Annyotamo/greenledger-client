@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import team1 from "@/assets/team/team-1.jpg";
+import team1 from "@/assets/team/Carousel Sample SM1.png";
 import team2 from "@/assets/team/team-2.jpg";
 
 interface TeamMember {
@@ -58,12 +58,15 @@ for (let x = 0; x <= width; x += 10) {
     const modulation2 = Math.cos((x / width) * Math.PI * 4);
     const y2 = height / 2 + 10 + amplitude2 * Math.sin(radians2) * (0.7 + 0.3 * modulation2);
 
-    points1.push(`${x},${y1}`);
-    points2.push(`${x},${y2}`);
+    const y1Fixed = Number(y1.toFixed(3));
+    const y2Fixed = Number(y2.toFixed(3));
+
+    points1.push(`${x},${y1Fixed}`);
+    points2.push(`${x},${y2Fixed}`);
 
     // Create connector rungs every 40 units
     if (x % 40 === 0 && x > 0 && x < width) {
-        rungs.push({ x, y1, y2 });
+        rungs.push({ x, y1: y1Fixed, y2: y2Fixed });
     }
 }
 
@@ -72,13 +75,23 @@ const path2 = `M ${points2.join(" L ")}`;
 
 export default function TeamSection() {
     const [isAnyHovered, setIsAnyHovered] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
-    // Dynamic styles for the offset particles using generated paths
-    const particleStyles = {
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    // Dynamic styles for the offset particles using generated paths (apply client-side only to avoid browser style normalization mismatch during hydration)
+    const particleStyles = mounted ? {
         p1a: { offsetPath: `path('${path1}')`, animationDelay: '0s' },
         p1b: { offsetPath: `path('${path1}')`, animationDelay: '-10s' },
         p2a: { offsetPath: `path('${path2}')`, animationDelay: '-4s' },
         p2b: { offsetPath: `path('${path2}')`, animationDelay: '-14s' },
+    } : {
+        p1a: {},
+        p1b: {},
+        p2a: {},
+        p2b: {},
     };
 
     return (
@@ -90,7 +103,7 @@ export default function TeamSection() {
             {/* Helix Background Abstract Design */}
             <div className={`absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-screen h-80 pointer-events-none -z-10 overflow-hidden transition-all duration-700 ${isAnyHovered ? "opacity-65 scale-y-105" : "opacity-35"}`}>
                 <div className={`w-[200%] h-full flex flex-row helix-track ${isAnyHovered ? "helix-hovered" : ""}`}>
-                    
+
                     {/* Render two identical wave groups side by side for a seamless marquee loop */}
                     {[1, 2].map((groupNum) => (
                         <div key={groupNum} className="w-1/2 h-full flex-none relative helix-container">
@@ -225,7 +238,7 @@ export default function TeamSection() {
                                         alt={member.name}
                                         fill
                                         sizes="224px"
-                                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                                        className="object-cover scale-90 rounded-xl transition-transform duration-700 ease-out group-hover:scale-95"
                                         priority
                                     />
                                 </div>

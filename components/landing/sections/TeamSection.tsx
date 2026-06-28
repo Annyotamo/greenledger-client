@@ -17,7 +17,7 @@ interface TeamMember {
 const teamMembers: TeamMember[] = [
     {
         name: "Sayan Maitra",
-        role: "Founder & CEO, Red Switch | CEO, GreenLedger",
+        role: "Founder & CEO, GreenLedger, CEO",
         description:
             "Sayan Maitra is a sustainability and business intelligence leader with over a decade of experience helping organizations transform ESG reporting through technology and data-driven decision making. Recognized as Global Sustainability Leader 2026 by The CEO Magazine and Top Icon of India 2024 by Business Talkz, he has collaborated with organizations including PwC, CII, and Fujisoft to deliver ESG, sustainability, and digital transformation initiatives across India and the GCC. His expertise spans ESG intelligence, predictive analytics, carbon accounting, and scalable enterprise solutions.",
         image: team1,
@@ -26,7 +26,7 @@ const teamMembers: TeamMember[] = [
     },
     {
         name: "Subhash Kumar Das",
-        role: "Senior Sustainability, Industrial Strategy Advisor",
+        role: "Senior Sustainability Expert, Sustainability Strategy Advisor",
         description:
             "Subhash Kumar Das is the former Executive Director (Logistics & Infrastructure) at SAIL with over 35 years of leadership in steel manufacturing, sustainability, logistics, and industrial operations. A B.E. (BIT Mesra) and M.Tech (NIT Durgapur) graduate, he led SAIL's BRSR implementation, CO₂ reduction roadmap, and Green Steel initiatives under the Ministry of Steel. He is a recipient of the Kalinga Best Environment Engineer Award, Golden Peacock Sustainability Award, and serves as a Research Council Member at CSIR–NEERI.",
         image: team2,
@@ -238,7 +238,7 @@ export default function TeamSection() {
                                         alt={member.name}
                                         fill
                                         sizes="224px"
-                                        className="object-cover scale-90 rounded-xl transition-transform duration-700 ease-out group-hover:scale-95"
+                                        className="object-contain scale-90 rounded-xl transition-transform duration-700 ease-out group-hover:scale-95"
                                         priority
                                     />
                                 </div>

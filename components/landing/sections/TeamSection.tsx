@@ -5,6 +5,8 @@ import Image from "next/image";
 import team1 from "@/assets/team/Carousel Sample SM1.png";
 import team2 from "@/assets/team/team-2.jpg";
 import team3 from "@/assets/team/team-3.jpeg"
+import team4 from "@/assets/team/team-4.jpeg"
+
 
 interface TeamMember {
     name: string;
@@ -18,11 +20,11 @@ interface TeamMember {
 const teamMembers: TeamMember[] = [
     {
         name: "Sayan Maitra",
-        role: "Founder & CEO",
+        role: "Founder & CEO, GreenLedger",
         description:
             "Sayan Maitra is a sustainability and business intelligence leader with over a decade of experience helping organizations transform ESG reporting through technology and data-driven decision making. Recognized as Global Sustainability Leader 2026 by The CEO Magazine and Top Icon of India 2024 by Business Talkz, he has collaborated with organizations including PwC, CII, and Fujisoft to deliver ESG, sustainability, and digital transformation initiatives across India and the GCC. His expertise spans ESG intelligence, predictive analytics, carbon accounting, and scalable enterprise solutions.",
         image: team1,
-        linkedin: "https://linkedin.com/in/sayanmaitra",
+        linkedin: "https://www.linkedin.com/in/sayanmaitra",
     },
     {
         name: "Subhash Kumar Das",
@@ -39,6 +41,14 @@ const teamMembers: TeamMember[] = [
             "Annyotamo Barman is a Full Stack & Cloud Engineer specializing in scalable enterprise applications, cloud infrastructure, and production-grade backend systems. With experience delivering solutions for clients across Dubai, Germany, and New Zealand, he has built secure, high-performance platforms using Next.js, Node.js, FastAPI, AWS, PostgreSQL, and MongoDB. His expertise spans enterprise software architecture, cloud deployment, API design, multi-tenant SaaS systems, and ESG technology, driving the engineering behind GreenLedger's modern sustainability platform.",
         image: team3,
         linkedin: "https://www.linkedin.com/in/annyotamo-barman-030184391",
+    },
+    {
+        name: "Juhi Roy",
+        role: "ESG & Carbon Accounting Professional, ESG Specialist",
+        description:
+            "Juhi Roy is an ESG and Carbon Accounting professional specializing in Scope 1–3 emissions, CBAM, BRSR, Life Cycle Assessment (LCA), and sustainability reporting. She holds certifications in GHG Accounting Lead Verifier (TÜV SÜD), ISO 14001:2015 Lead Auditor (CQI IRCA), Integrated LCA & Product Carbon Footprint (ISO 14040/14044/14067), CSRD Fundamentals, and GRI Reporting. With expertise in greenhouse gas inventories, environmental compliance, and sustainability frameworks, she helps organizations build accurate, audit-ready ESG and carbon reporting systems.",
+        image: team4,
+        linkedin: "https://www.linkedin.com/in/juhiroyesg",
     },
 ];
 
@@ -222,7 +232,7 @@ export default function TeamSection() {
             </div>
 
             {/* Grid of Team Cards */}
-            <div className="flex flex-wrap justify-center gap-8 max-w-7xl mx-auto py-4 px-4">
+            <div className="flex flex-wrap justify-center gap-4 max-w-[1360px] mx-auto py-4 px-4">
                 {teamMembers.map((member) => (
                     <div
                         key={member.name}
@@ -233,7 +243,7 @@ export default function TeamSection() {
                         <div className="card-flip-inner preserve-3d w-full h-full duration-700 relative">
 
                             {/* Front Side */}
-                            <div className="card-flip-front backface-hidden absolute inset-0 w-full h-full border border-emerald-950/10 bg-white/75 shadow-lg backdrop-blur-md p-5 flex flex-col items-center text-center">
+                            <div className="card-flip-front backface-hidden absolute inset-0 w-full h-full border border-emerald-950/10 bg-white/61 shadow-lg backdrop-blur-md p-5 flex flex-col items-center text-center">
                                 {/* Elegant border shimmer */}
                                 <div className="gl-shimmer-border absolute inset-0 rounded-lg pointer-events-none" />
                                 <div className="gl-grain" />

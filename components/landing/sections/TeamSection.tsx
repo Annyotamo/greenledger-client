@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import team1 from "@/assets/team/Carousel Sample SM1.png";
 import team2 from "@/assets/team/team-2.jpg";
+import team3 from "@/assets/team/team-3.jpeg"
 
 interface TeamMember {
     name: string;
@@ -17,21 +18,27 @@ interface TeamMember {
 const teamMembers: TeamMember[] = [
     {
         name: "Sayan Maitra",
-        role: "Founder & CEO, GreenLedger, CEO",
+        role: "Founder & CEO",
         description:
             "Sayan Maitra is a sustainability and business intelligence leader with over a decade of experience helping organizations transform ESG reporting through technology and data-driven decision making. Recognized as Global Sustainability Leader 2026 by The CEO Magazine and Top Icon of India 2024 by Business Talkz, he has collaborated with organizations including PwC, CII, and Fujisoft to deliver ESG, sustainability, and digital transformation initiatives across India and the GCC. His expertise spans ESG intelligence, predictive analytics, carbon accounting, and scalable enterprise solutions.",
         image: team1,
         linkedin: "https://linkedin.com/in/sayanmaitra",
-        email: "sayan@redswitch.co",
     },
     {
         name: "Subhash Kumar Das",
-        role: "Senior Sustainability Expert, Sustainability Strategy Advisor",
+        role: "Senior Sustainability Expert, Strategic Advisor",
         description:
             "Subhash Kumar Das is the former Executive Director (Logistics & Infrastructure) at SAIL with over 35 years of leadership in steel manufacturing, sustainability, logistics, and industrial operations. A B.E. (BIT Mesra) and M.Tech (NIT Durgapur) graduate, he led SAIL's BRSR implementation, CO₂ reduction roadmap, and Green Steel initiatives under the Ministry of Steel. He is a recipient of the Kalinga Best Environment Engineer Award, Golden Peacock Sustainability Award, and serves as a Research Council Member at CSIR–NEERI.",
         image: team2,
         linkedin: "https://linkedin.com/in/subhashkumardas",
-        email: "subhash@redswitch.co",
+    },
+    {
+        name: "Annyotamo Barman",
+        role: "Lead Software Engineer, Full Stack Cloud Engineer",
+        description:
+            "Annyotamo Barman is a Full Stack & Cloud Engineer specializing in scalable enterprise applications, cloud infrastructure, and production-grade backend systems. With experience delivering solutions for clients across Dubai, Germany, and New Zealand, he has built secure, high-performance platforms using Next.js, Node.js, FastAPI, AWS, PostgreSQL, and MongoDB. His expertise spans enterprise software architecture, cloud deployment, API design, multi-tenant SaaS systems, and ESG technology, driving the engineering behind GreenLedger's modern sustainability platform.",
+        image: team3,
+        linkedin: "https://www.linkedin.com/in/annyotamo-barman-030184391",
     },
 ];
 
@@ -215,49 +222,49 @@ export default function TeamSection() {
             </div>
 
             {/* Grid of Team Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-4xl mx-auto py-4">
+            <div className="flex flex-wrap justify-center gap-8 max-w-7xl mx-auto py-4 px-4">
                 {teamMembers.map((member) => (
                     <div
                         key={member.name}
-                        className="card-flip-container w-full h-[520px] group cursor-pointer"
+                        className="card-flip-container w-full max-w-[320px] h-[430px] group cursor-pointer"
                         onMouseEnter={() => setIsAnyHovered(true)}
                         onMouseLeave={() => setIsAnyHovered(false)}
                     >
                         <div className="card-flip-inner preserve-3d w-full h-full duration-700 relative">
 
                             {/* Front Side */}
-                            <div className="card-flip-front backface-hidden absolute inset-0 w-full h-full border border-emerald-950/10 bg-white/75 shadow-lg backdrop-blur-md p-6 flex flex-col justify-between items-center text-center">
+                            <div className="card-flip-front backface-hidden absolute inset-0 w-full h-full border border-emerald-950/10 bg-white/75 shadow-lg backdrop-blur-md p-5 flex flex-col items-center text-center">
                                 {/* Elegant border shimmer */}
                                 <div className="gl-shimmer-border absolute inset-0 rounded-lg pointer-events-none" />
                                 <div className="gl-grain" />
 
                                 {/* Avatar Container */}
-                                <div className="w-56 h-56 rounded-xl overflow-hidden relative group-hover:border-emerald-400/40 transition-colors duration-500 mt-6 z-10">
+                                <div className="w-36 h-40 rounded-xl overflow-hidden relative group-hover:border-emerald-400/40 transition-colors duration-500 mt-6 z-10">
                                     <Image
                                         src={member.image}
                                         alt={member.name}
-                                        fill
-                                        sizes="224px"
-                                        className="object-contain scale-90 rounded-xl transition-transform duration-700 ease-out group-hover:scale-95"
+                                        // fill
+                                        height={400}
+                                        className="object-contain scale-100 rounded-xl transition-transform duration-700 ease-out group-hover:scale-95 rounded-md"
                                         priority
                                     />
                                 </div>
 
                                 {/* Typography / Details */}
-                                <div className="flex-1 flex flex-col justify-center px-2 z-10">
-                                    <h3 className="text-xl md:text-2xl font-bold text-emerald-950 font-headline-md tracking-tight">
+                                <div className="mt-4 px-2 z-10 flex flex-col items-center">
+                                    <h3 className="text-2xl font-bold text-emerald-950 tracking-tight whitespace-nowrap">
                                         {member.name}
                                     </h3>
-                                    <span className="text-xs font-semibold text-emerald-800 bg-emerald-50/80 border border-emerald-200/50 px-3 py-1 rounded-full uppercase tracking-wider font-mono inline-block mt-3 max-w-xs mx-auto text-center">
+                                    <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50/80 border border-emerald-200/50 px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono inline-block mt-2 max-w-xs mx-auto text-center">
                                         {member.role.split(",")[0]}
                                     </span>
-                                    <p className="text-[10px] text-emerald-600/70 font-mono tracking-wider mt-1.5 uppercase">
+                                    <p className="text-[9px] text-emerald-600/70 font-mono tracking-wider mt-1.5 uppercase">
                                         {member.role.split(",").slice(1).join(",") || ""}
                                     </p>
                                 </div>
 
                                 {/* Bottom flip prompt */}
-                                <div className="mb-4 flex items-center justify-center gap-1.5 text-[10px] tracking-widest text-emerald-700/60 font-mono uppercase z-10">
+                                <div className="mt-auto mb-2 flex items-center justify-center gap-1.5 text-[9px] tracking-widest text-emerald-700/60 font-mono uppercase z-10">
                                     <span>Hover to read profile</span>
                                     <svg
                                         className="h-3.5 w-3.5 fill-current animate-pulse text-emerald-600"
@@ -269,11 +276,11 @@ export default function TeamSection() {
                             </div>
 
                             {/* Back Side */}
-                            <div className="card-flip-back backface-hidden rotate-y-180 absolute inset-0 w-full h-full bg-gradient-to-br from-[#021f18] via-[#053226] to-[#0a4837] border border-emerald-500/25 shadow-2xl p-7 flex flex-col justify-between text-white">
+                            <div className="card-flip-back backface-hidden rotate-y-180 absolute inset-0 w-full h-full bg-gradient-to-br from-[#021f18] via-[#053226] to-[#0a4837] border border-emerald-500/25 shadow-2xl p-5 flex flex-col justify-between text-white">
                                 <div className="gl-grain" />
 
                                 {/* Upper Section Info */}
-                                <div className="flex items-center justify-between pb-3 border-b border-emerald-800/40 z-10">
+                                <div className="flex items-center justify-between pb-2 border-b border-emerald-800/40 z-10">
                                     <span className="text-[10px] font-mono tracking-widest text-emerald-400 uppercase">
                                         Leadership Profile
                                     </span>
@@ -283,19 +290,19 @@ export default function TeamSection() {
                                 </div>
 
                                 {/* Bio Scroll Pane */}
-                                <div className="flex-1 py-4 overflow-y-auto scrollbar-hide z-10 text-left">
-                                    <p className="text-xs sm:text-sm leading-relaxed text-emerald-100/90 font-sans font-normal antialiased">
+                                <div className="flex-1 py-3 overflow-y-auto scrollbar-hide z-10 text-left">
+                                    <p className="text-[11px] leading-relaxed text-emerald-100/90 font-sans font-normal antialiased">
                                         {member.description}
                                     </p>
                                 </div>
 
                                 {/* Bottom Info / Links */}
-                                <div className="pt-4 border-t border-emerald-800/40 z-10 flex items-center justify-between">
+                                <div className="pt-3 border-t border-emerald-800/40 z-10 flex items-center justify-between">
                                     <div className="min-w-0">
-                                        <h4 className="text-lg font-bold font-headline-md text-white truncate">
+                                        <h4 className="text-sm font-bold font-headline-md text-white truncate">
                                             {member.name}
                                         </h4>
-                                        <p className="text-[10px] text-emerald-300 font-mono tracking-wide mt-0.5 truncate uppercase">
+                                        <p className="text-[9px] text-emerald-300 font-mono tracking-wide mt-0.5 truncate uppercase">
                                             {member.role}
                                         </p>
                                     </div>

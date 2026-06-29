@@ -240,6 +240,7 @@ export default function TeamSection() {
 
                                 {/* Avatar Container */}
                                 <div className="w-36 h-40 rounded-xl overflow-hidden relative group-hover:border-emerald-400/40 transition-colors duration-500 mt-6 z-10">
+                                {/* avatar */}
                                     <Image
                                         src={member.image}
                                         alt={member.name}

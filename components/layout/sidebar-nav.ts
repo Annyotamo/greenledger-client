@@ -23,6 +23,10 @@ export const SCOPE_NAV_CHILDREN: NavScopeChild[] = [
     { label: "Electricity", href: "/activities/electricity" },
 ];
 
+export const BRSR_NAV_CHILDREN: NavScopeChild[] = [
+    { label: "Energy", href: "/brsr/energy" },
+];
+
 export const BOTTOM_NAV: NavItem[] = [
     { label: "Audit Logs", icon: "history", href: "/audit-logs" },
     { label: "Settings", icon: "settings", href: "#" },

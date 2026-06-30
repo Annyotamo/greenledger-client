@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { getCurrentUser, UserProfile } from "@/lib/user/api";
 import { cn } from "@/lib/utils/cn";
 import { useSidebarStore } from "@/stores/sidebar-store";
-import { BOTTOM_NAV, MAIN_NAV, SCOPE_NAV_CHILDREN } from "./sidebar-nav";
+import { BOTTOM_NAV, MAIN_NAV, SCOPE_NAV_CHILDREN, BRSR_NAV_CHILDREN } from "./sidebar-nav";
 
 const SIDEBAR_EXPANDED = 256;
 const SIDEBAR_COLLAPSED = 80;
@@ -19,6 +19,7 @@ export function Sidebar() {
     const collapsed = useSidebarStore((s) => s.collapsed);
     const toggle = useSidebarStore((s) => s.toggle);
     const [activitiesOpen, setActivitiesOpen] = useState(true);
+    const [brsrOpen, setBrsrOpen] = useState(true);
     const [user, setUser] = useState<UserProfile | null>(null);
     const pathname = usePathname();
 
@@ -93,6 +94,51 @@ export function Sidebar() {
                                 <div className="nav-connector nav-connector-glow absolute bottom-4 left-0 top-0 w-[2px]" />
                                 <div className="space-y-1 py-1">
                                     {SCOPE_NAV_CHILDREN.map((child) => {
+                                        const childActive = pathname?.startsWith(child.href);
+                                        return (
+                                            <Link
+                                                key={child.label}
+                                                href={child.href}
+                                                className={cn(
+                                                    "relative flex items-center gap-3 py-2 pl-6 transition-colors",
+                                                    childActive
+                                                        ? "text-on-surface font-semibold"
+                                                        : "text-on-surface-variant hover:text-on-surface",
+                                                )}>
+                                                <div className="absolute left-0 top-1/2 h-[2px] w-4 -translate-y-1/2 bg-secondary opacity-40" />
+                                                <span className="font-mono text-[11px]">{child.label}</span>
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="relative">
+                        <button
+                            type="button"
+                            onClick={() => !collapsed && setBrsrOpen((o) => !o)}
+                            className="flex w-full items-center justify-between px-4 py-3 text-on-surface transition-colors duration-200"
+                            title={collapsed ? "BRSR" : undefined}>
+                            <span className="flex items-center gap-3">
+                                <MaterialIcon name="analytics" />
+                                {!collapsed && <span className="font-mono text-label-md">BRSR</span>}
+                            </span>
+                            {!collapsed && (
+                                <MaterialIcon
+                                    name={brsrOpen ? "keyboard_arrow_down" : "keyboard_arrow_right"}
+                                    size="sm"
+                                    className="!text-[18px]"
+                                />
+                            )}
+                        </button>
+
+                        {brsrOpen && !collapsed && (
+                            <div className="relative ml-[1.625rem]">
+                                <div className="nav-connector nav-connector-glow absolute bottom-4 left-0 top-0 w-[2px]" />
+                                <div className="space-y-1 py-1">
+                                    {BRSR_NAV_CHILDREN.map((child) => {
                                         const childActive = pathname?.startsWith(child.href);
                                         return (
                                             <Link

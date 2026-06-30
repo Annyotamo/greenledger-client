@@ -1,8 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getBrsrEnergyConsumption } from "./api";
-import type { BrsrEnergyConsumptionData } from "./types";
+import { getBrsrEnergyConsumption, postBrsrWaterDisclosure } from "./api";
+import type { BrsrEnergyConsumptionData, BrsrWaterDisclosurePayload, BrsrWaterDisclosureData } from "./types";
 
 export function useBrsrEnergyConsumption(
     startDate?: string | null,
@@ -12,5 +12,12 @@ export function useBrsrEnergyConsumption(
     return useQuery<BrsrEnergyConsumptionData, Error>({
         queryKey: ["brsr-energy-consumption", { startDate, endDate, turnoverInr }],
         queryFn: () => getBrsrEnergyConsumption(startDate, endDate, turnoverInr),
+    });
+}
+
+export function useBrsrWaterDisclosure(payload: BrsrWaterDisclosurePayload) {
+    return useQuery<BrsrWaterDisclosureData, Error>({
+        queryKey: ["brsr-water-disclosure", payload],
+        queryFn: () => postBrsrWaterDisclosure(payload),
     });
 }

@@ -49,3 +49,37 @@ export type BrsrEnergyConsumptionResponse = {
     path: string;
     timestamp: string;
 };
+
+export type BrsrWaterDisclosurePayload = {
+    financial_year_label: string;
+    surface_water_kl: string;
+    groundwater_kl: string;
+    third_party_water_kl: string;
+    seawater_desalinated_kl: string;
+    others_kl: string;
+    total_water_consumption_kl: string;
+    turnover_inr: string;
+};
+
+export type BrsrWaterDisclosureData = {
+    financial_year_label: string;
+    surface_water_kl: string;
+    groundwater_kl: string;
+    third_party_water_kl: string;
+    seawater_desalinated_kl: string;
+    others_kl: string;
+    total_water_consumption_kl: string;
+    turnover_inr: string;
+    water_intensity_per_inr?: string | null;
+};
+
+export type BrsrWaterDisclosureResponse = {
+    success: boolean;
+    status_code: number;
+    message: string;
+    data: BrsrWaterDisclosureData;
+    error: null | unknown;
+    method: string;
+    path: string;
+    timestamp: string;
+};

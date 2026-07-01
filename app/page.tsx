@@ -122,7 +122,6 @@ export default function Home() {
                 <MotionInView className="mb-16 scroll-mt-24 mt-24" delayMs={80}>
                     <PillarsSection cards={sliderCards} />
                 </MotionInView>
-
                 <MotionInView className="mb-16" delayMs={45}>
                     <SocialProofSection />
                 </MotionInView>

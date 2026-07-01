@@ -476,5 +476,23 @@ body {
     filter: drop-shadow(0 0 10px currentColor);
 }
 
+/* Frameworks logo marquee */
+.frameworks-marquee-track {
+    animation: frameworks-marquee 25s linear infinite;
+    will-change: transform;
+}
 
+@keyframes frameworks-marquee {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
 
+@media (prefers-reduced-motion: reduce) {
+    .frameworks-marquee-track {
+        animation: none;
+    }
+}

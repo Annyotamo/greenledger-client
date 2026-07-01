@@ -44,7 +44,7 @@ const teamMembers: TeamMember[] = [
     },
     {
         name: "Juhi Roy",
-        role: "ESG & Carbon Accounting Professional, ESG Specialist",
+        role: "GHG Accounting Professional, ESG Specialist",
         description:
             "Juhi Roy is an ESG and Carbon Accounting professional specializing in Scope 1–3 emissions, CBAM, BRSR, Life Cycle Assessment (LCA), and sustainability reporting. She holds certifications in GHG Accounting Lead Verifier (TÜV SÜD), ISO 14001:2015 Lead Auditor (CQI IRCA), Integrated LCA & Product Carbon Footprint (ISO 14040/14044/14067), CSRD Fundamentals, and GRI Reporting. With expertise in greenhouse gas inventories, environmental compliance, and sustainability frameworks, she helps organizations build accurate, audit-ready ESG and carbon reporting systems.",
         image: team4,

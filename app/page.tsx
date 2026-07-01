@@ -118,7 +118,6 @@ export default function Home() {
 
             <Navbar />
             <div className="mx-6">
-                <NewsTicker />
                 <MotionInView className="mb-16 scroll-mt-24 mt-24" delayMs={80}>
                     <PillarsSection cards={sliderCards} />
                 </MotionInView>

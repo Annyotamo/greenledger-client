@@ -13,6 +13,7 @@ import BenefitsSection from "@/components/landing/sections/BenefitsSection";
 import PricingSection from "@/components/landing/sections/PricingSection";
 import InsightsSection from "@/components/landing/sections/InsightsSection";
 import TeamSection from "@/components/landing/sections/TeamSection";
+import FrameworksSection from "@/components/landing/sections/FrameworksSection";
 import MotionInView from "@/components/landing/MotionInView";
 import NewsTicker from "@/components/landing/NewsTicker";
 import esgReportingImg from "@/assets/landing-images/esg-reporting.jpg";
@@ -91,15 +92,19 @@ export default function Home() {
                 <HeroSection />
             </div>
 
-            <div className="min-h-screen lg:h-[125vh] w-full overflow-hidden bg-greenledger-blend">
+            <MotionInView delayMs={25}>
+                <FrameworksSection />
+            </MotionInView>
+
+            <div className="w-full overflow-hidden bg-greenledger-blend">
                 <SoftAurora
                     speed={1}
-                    scale={2.5}
-                    brightness={0.95}
+                    scale={1}
+                    brightness={0.85}
                     color1="#00C897"
                     color2="#094d3d"
-                    noiseFrequency={2.5}
-                    noiseAmplitude={3}
+                    noiseFrequency={1}
+                    noiseAmplitude={1}
                     bandHeight={0.5}
                     bandSpread={1}
                     octaveDecay={0.5}
@@ -114,10 +119,7 @@ export default function Home() {
             <Navbar />
             <div className="mx-6">
                 <NewsTicker />
-                <MotionInView className="mb-16" delayMs={25}>
-                    <DataVizStaticSection />
-                </MotionInView>
-                <MotionInView className="mb-16 scroll-mt-24" delayMs={80}>
+                <MotionInView className="mb-16 scroll-mt-24 mt-24" delayMs={80}>
                     <PillarsSection cards={sliderCards} />
                 </MotionInView>
                 <MotionInView className="mb-16 scroll-mt-24" delayMs={80}>

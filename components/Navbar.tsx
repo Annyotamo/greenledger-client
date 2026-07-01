@@ -6,6 +6,7 @@ const navLinks = [
     { href: "/#pillars", label: "Platform" },
     { href: "/#deep-dive", label: "Solutions" },
     { href: "/cbam", label: "CBAM" },
+    { href: "/#team", label: "Team" },
     { href: "/#pricing", label: "Pricing" },
     { href: "/#cta", label: "Demo" },
 ];

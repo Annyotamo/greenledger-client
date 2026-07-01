@@ -8,9 +8,10 @@ type MotionInViewProps = {
     className?: string;
     delayMs?: number;
     y?: number;
+    id?: string;
 };
 
-const MotionInViewInner = ({ children, className, delayMs = 0, y = 18 }: MotionInViewProps) => {
+const MotionInViewInner = ({ children, className, delayMs = 0, y = 18, id }: MotionInViewProps) => {
     const variants = useMemo<Variants>(
         () => ({
             hidden: { opacity: 0, y },
@@ -30,6 +31,7 @@ const MotionInViewInner = ({ children, className, delayMs = 0, y = 18 }: MotionI
     return (
         <LazyMotion features={domAnimation} strict>
             <m.div
+                id={id}
                 className={className}
                 style={{ willChange: "transform, opacity" }}
                 variants={variants}

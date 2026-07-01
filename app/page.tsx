@@ -122,12 +122,7 @@ export default function Home() {
                 <MotionInView className="mb-16 scroll-mt-24 mt-24" delayMs={80}>
                     <PillarsSection cards={sliderCards} />
                 </MotionInView>
-                <MotionInView className="mb-16 scroll-mt-24" delayMs={80}>
-                    <DeepDiveSection />
-                </MotionInView>
-                <MotionInView className="mb-16" delayMs={35}>
-                    <KickoffToReportingSection />
-                </MotionInView>
+
                 <MotionInView className="mb-16" delayMs={45}>
                     <SocialProofSection />
                 </MotionInView>
@@ -137,11 +132,14 @@ export default function Home() {
                 <MotionInView className="mb-16 scroll-mt-24" delayMs={35}>
                     <InsightsSection />
                 </MotionInView>
-                <MotionInView className="mb-16 scroll-mt-24" delayMs={35}>
+                <MotionInView className="mb-16 scroll-mt-24" delayMs={35} id="team">
                     <TeamSection />
                 </MotionInView>
                 <MotionInView className="mb-16 scroll-mt-24" delayMs={35}>
                     <PricingSection />
+                </MotionInView>
+                <MotionInView className="mb-16 scroll-mt-24" delayMs={80}>
+                    <DeepDiveSection />
                 </MotionInView>
                 <MotionInView delayMs={60}>
                     <section

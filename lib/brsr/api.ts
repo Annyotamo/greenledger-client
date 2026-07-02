@@ -5,6 +5,9 @@ import type {
     BrsrWaterDisclosurePayload,
     BrsrWaterDisclosureData,
     BrsrWaterDisclosureResponse,
+    BrsrWasteDisclosurePayload,
+    BrsrWasteDisclosureData,
+    BrsrWasteDisclosureResponse,
 } from "./types";
 
 export async function getBrsrEnergyConsumption(
@@ -60,6 +63,32 @@ export async function postBrsrWaterReport(
 ): Promise<Blob> {
     const response = await privateApi.post(
         "/tenant/brsr/water-disclosure/report",
+        payload,
+        {
+            responseType: "blob",
+        },
+    );
+    return response.data as Blob;
+}
+
+export async function postBrsrWasteDisclosure(
+    payload: BrsrWasteDisclosurePayload,
+): Promise<BrsrWasteDisclosureData> {
+    const response = await privateApi.post<BrsrWasteDisclosureResponse>(
+        "/tenant/brsr/waste",
+        payload,
+    );
+    if (!response.data?.success || !response.data?.data) {
+        throw new Error(response.data?.message ?? "Failed to save waste disclosure data.");
+    }
+    return response.data.data;
+}
+
+export async function postBrsrWasteReport(
+    payload: BrsrWasteDisclosurePayload,
+): Promise<Blob> {
+    const response = await privateApi.post(
+        "/tenant/brsr/waste/report",
         payload,
         {
             responseType: "blob",

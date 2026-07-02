@@ -18,8 +18,8 @@ const SIDEBAR_COLLAPSED = 80;
 export function Sidebar() {
     const collapsed = useSidebarStore((s) => s.collapsed);
     const toggle = useSidebarStore((s) => s.toggle);
-    const [activitiesOpen, setActivitiesOpen] = useState(true);
-    const [brsrOpen, setBrsrOpen] = useState(true);
+    const [activitiesOpen, setActivitiesOpen] = useState(false);
+    const [brsrOpen, setBrsrOpen] = useState(false);
     const [user, setUser] = useState<UserProfile | null>(null);
     const pathname = usePathname();
 

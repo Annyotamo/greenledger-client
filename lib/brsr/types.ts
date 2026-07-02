@@ -83,3 +83,79 @@ export type BrsrWaterDisclosureResponse = {
     path: string;
     timestamp: string;
 };
+
+export type BrsrWasteDisclosurePayload = {
+    financial_year_label: string;
+    plastic_waste_tonne: number;
+    ewaste_tonne: number;
+    bio_medical_waste_tonne: number;
+    construction_and_demolition_waste_tonne: number;
+    battery_waste_tonne: number;
+    radioactive_waste_tonne: number;
+    other_hazardous_waste_tonne: number;
+    recycled_tonne: number;
+    reused_tonne: number;
+    other_recovery_tonne: number;
+    incineration_tonne: number;
+    landfilling_tonne: number;
+    other_disposal_tonne: number;
+    turnover_inr: number;
+    physical_output_tonnes: number;
+};
+
+export type BrsrWasteTotals = {
+    plastic_waste_tonne: string;
+    ewaste_tonne: string;
+    bio_medical_waste_tonne: string;
+    construction_and_demolition_waste_tonne: string;
+    battery_waste_tonne: string;
+    radioactive_waste_tonne: string;
+    other_hazardous_waste_tonne: string;
+    total_waste_tonne: string;
+    recycled_tonne: string;
+    reused_tonne: string;
+    other_recovery_tonne: string;
+    total_recovered_tonne: string;
+    incineration_tonne: string;
+    landfilling_tonne: string;
+    other_disposal_tonne: string;
+    total_disposed_tonne: string;
+    waste_intensity_per_inr: string;
+    waste_intensity_per_physical_output: string;
+};
+
+export type BrsrWasteDisclosureData = {
+    financial_year_label: string;
+    turnover_inr: string;
+    physical_output_tonnes: string;
+    inputs: {
+        financial_year_label: string;
+        plastic_waste_tonne: string;
+        ewaste_tonne: string;
+        bio_medical_waste_tonne: string;
+        construction_and_demolition_waste_tonne: string;
+        battery_waste_tonne: string;
+        radioactive_waste_tonne: string;
+        other_hazardous_waste_tonne: string;
+        recycled_tonne: string;
+        reused_tonne: string;
+        other_recovery_tonne: string;
+        incineration_tonne: string;
+        landfilling_tonne: string;
+        other_disposal_tonne: string;
+        turnover_inr: string;
+        physical_output_tonnes: string;
+    };
+    totals: BrsrWasteTotals;
+};
+
+export type BrsrWasteDisclosureResponse = {
+    success: boolean;
+    status_code: number;
+    message: string;
+    data: BrsrWasteDisclosureData;
+    error: null | unknown;
+    method: string;
+    path: string;
+    timestamp: string;
+};

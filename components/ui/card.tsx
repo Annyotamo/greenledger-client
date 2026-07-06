@@ -12,7 +12,7 @@ export function Card({ children, className, interactive = false }: CardProps) {
     return (
         <div
             className={cn(
-                "overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest",
+                "rounded-lg border border-outline-variant bg-surface-container-lowest relative",
                 interactive && "cursor-default transition-[border-color] duration-200 hover:border-primary",
                 className,
             )}>
@@ -33,7 +33,7 @@ export function CardHeader({ children, className, bordered = true, tone = "strip
     return (
         <div
             className={cn(
-                "flex items-center justify-between px-card-padding py-2",
+                "flex items-center justify-between px-card-padding py-2 rounded-t-lg",
                 tone === "strip" ? "bg-surface-container" : "bg-surface-container-lowest",
                 bordered && "border-b border-outline-variant",
                 className,

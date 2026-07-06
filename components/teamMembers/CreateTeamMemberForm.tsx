@@ -1,19 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useState, useEffect } from "react";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useCreateTeamMember } from "@/lib/teamMembers/hooks";
+import { CustomSelect } from "@/components/ui/select";
+import { getCurrentUser, UserProfile } from "@/lib/user/api";
 
 const initialState = {
     first_name: "",
     last_name: "",
     email: "",
     password: "",
-    role: "TENANT_MEMBER",
+    role: "ESG_TEAM",
     phone_number: "",
     job_title: "",
 };
@@ -23,6 +25,45 @@ export function CreateTeamMemberForm() {
     const { mutate, isPending, isError, error } = useCreateTeamMember();
     const [form, setForm] = useState(initialState);
     const [validationError, setValidationError] = useState<string | null>(null);
+    const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                const profile = await getCurrentUser();
+                if (mounted) {
+                    setCurrentUser(profile);
+                    const isOwnerOrAdmin = profile.role === "TENANT_OWNER" || profile.role === "TENANT_ADMIN";
+                    if (!isOwnerOrAdmin) {
+                        setForm((c) => ({ ...c, role: "ESG_TEAM" }));
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load current user", err);
+            }
+        })();
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    const getRoleOptions = () => {
+        const options = [];
+        const isOwnerOrAdmin = currentUser?.role === "TENANT_OWNER" || currentUser?.role === "TENANT_ADMIN";
+        
+        if (isOwnerOrAdmin) {
+            options.push({ label: "Tenant Admin", value: "TENANT_ADMIN" });
+        }
+        
+        options.push(
+            { label: "ESG Team", value: "ESG_TEAM" },
+            { label: "Facility Head", value: "FACILITY_HEAD" },
+            { label: "Auditor", value: "AUDITOR" }
+        );
+        
+        return options;
+    };
 
     const handleChange = (key: keyof typeof initialState, value: string) => {
         setForm((c) => ({ ...c, [key]: value }));
@@ -89,75 +130,85 @@ export function CreateTeamMemberForm() {
                 <CardBody className="space-y-6">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div className="grid gap-2">
-                            <label className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface">
-                                First Name
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                First Name <span className="text-error">*</span>
                             </label>
                             <Input
                                 value={form.first_name}
                                 onChange={(e) => handleChange("first_name", e.target.value)}
+                                placeholder="e.g., Jane"
                             />
                         </div>
                         <div className="grid gap-2">
-                            <label className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface">
-                                Last Name
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                Last Name <span className="text-error">*</span>
                             </label>
-                            <Input value={form.last_name} onChange={(e) => handleChange("last_name", e.target.value)} />
+                            <Input
+                                value={form.last_name}
+                                onChange={(e) => handleChange("last_name", e.target.value)}
+                                placeholder="e.g., Doe"
+                            />
                         </div>
                     </div>
 
                     <div className="grid gap-2">
-                        <label className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface">
-                            Email
+                        <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                            Email <span className="text-error">*</span>
                         </label>
                         <Input
                             value={form.email}
                             onChange={(e) => handleChange("email", e.target.value)}
                             type="email"
+                            placeholder="e.g., jane.doe@company.com"
                         />
                     </div>
 
                     <div className="grid gap-2">
-                        <label className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface">
-                            Password
+                        <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                            Password <span className="text-error">*</span>
                         </label>
                         <Input
                             value={form.password}
                             onChange={(e) => handleChange("password", e.target.value)}
                             type="password"
+                            placeholder="••••••••"
                         />
                         <p className="text-body-md text-on-surface-variant">Min 8 characters.</p>
                     </div>
 
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div className="grid gap-2">
-                            <label className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface">
-                                Role
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                Role <span className="text-error">*</span>
                             </label>
-                            <select
-                                className="w-full rounded-lg border border-outline-variant bg-surface-container py-2 pl-3 pr-4 text-body-md"
+                            <CustomSelect
+                                options={getRoleOptions()}
                                 value={form.role}
-                                onChange={(e) => handleChange("role", e.target.value)}>
-                                <option value="TENANT_OWNER">TENANT_OWNER</option>
-                                <option value="TENANT_ADMIN">TENANT_ADMIN</option>
-                                <option value="TENANT_MEMBER">TENANT_MEMBER</option>
-                            </select>
+                                onChange={(val) => handleChange("role", val)}
+                                placeholder="Select role..."
+                            />
                         </div>
 
                         <div className="grid gap-2">
-                            <label className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface">
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Job Title
                             </label>
-                            <Input value={form.job_title} onChange={(e) => handleChange("job_title", e.target.value)} />
+                            <Input
+                                value={form.job_title}
+                                onChange={(e) => handleChange("job_title", e.target.value)}
+                                placeholder="e.g., Sustainability Manager"
+                            />
                         </div>
                     </div>
 
                     <div className="grid gap-2">
-                        <label className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface">
+                        <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                             Phone Number
                         </label>
                         <Input
                             value={form.phone_number}
                             onChange={(e) => handleChange("phone_number", e.target.value)}
+                            placeholder="e.g., +91 98765 43210"
                         />
                     </div>
                 </CardBody>

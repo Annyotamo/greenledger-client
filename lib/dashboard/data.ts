@@ -261,8 +261,8 @@ export const ENERGY_SOURCE_TREE: EnergySourceNode[] = [
                 value: 10200,
                 unit: "MWh",
                 children: [
-                    { label: "CFBC (Coal/Dolo)", value: 7000, unit: "MWh" },
-                    { label: "AFBC (Coal/Dolo)", value: 3200, unit: "MWh" },
+                    { label: "FBC Coal", value: 6600, unit: "MWh" },
+                    { label: "FBC Dolo", value: 3600, unit: "MWh" },
                 ],
             },
             {
@@ -282,17 +282,15 @@ export const ENERGY_SOURCE_TREE: EnergySourceNode[] = [
 
 export const ENERGY_GENERATION_SOURCES: EnergyBarItem[] = [
     { label: "WHRB Kiln 1-3", value: 20400, percent: 100, color: "var(--gl-secondary)" },
-    { label: "CFBC Coal", value: 4800, percent: 70, color: "#fb923c" },
-    { label: "Solar Rooftop", value: 1000, percent: 20, color: "#60a5fa" },
-    { label: "CFBC Dolochar", value: 2200, percent: 45, color: "#f59e0b" },
-    { label: "AFBC Coal", value: 1800, percent: 35, color: "#fb7185" },
+    { label: "FBC Coal", value: 6600, percent: 32, color: "#fb923c" },
+    { label: "FBC Dolo", value: 3600, percent: 18, color: "#f59e0b" },
+    { label: "Solar Rooftop", value: 1000, percent: 5, color: "#60a5fa" },
 ];
 
 export const ENERGY_BOILER_FUEL: EnergyBarItem[] = [
-    { label: "CFBC Coal", value: 4800, percent: 80, color: "#f59e0b" },
-    { label: "CFBC Dolo", value: 2200, percent: 40, color: "#fbbf24" },
-    { label: "AFBC Coal", value: 1800, percent: 30, color: "#fb7185" },
-    { label: "AFBC Dolo", value: 1400, percent: 25, color: "#a855f7" },
+    { label: "WHRB (Waste Heat)", value: 20400, percent: 100, color: "var(--gl-secondary)" },
+    { label: "FBC Coal", value: 6600, percent: 32, color: "#fb923c" },
+    { label: "FBC Dolo", value: 3600, percent: 18, color: "#fbbf24" },
 ];
 
 export const USER_PROFILE = {

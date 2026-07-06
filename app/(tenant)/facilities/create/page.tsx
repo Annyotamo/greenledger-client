@@ -6,6 +6,8 @@ import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Input } from "@/components/ui/input";
 import { useCreateFacility } from "@/lib/facility/hooks";
 import Link from "next/link";
+import { CustomSelect } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 
 const initialState = {
     name: "",
@@ -95,8 +97,8 @@ export default function CreateFacilityPage() {
             {/* Form */}
             <form className="space-y-8" onSubmit={handleSubmit}>
                 {/* Basic Information Section */}
-                <section className="bg-white rounded-xl border border-outline-variant overflow-hidden">
-                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant flex items-center justify-between">
+                <section className="bg-white rounded-xl border border-outline-variant relative">
+                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <MaterialIcon name="info" size="sm" className="text-primary" />
                             <h2 className="text-headline-sm font-headline-sm text-primary">Basic Information</h2>
@@ -107,7 +109,7 @@ export default function CreateFacilityPage() {
                     </div>
                     <div className="p-card-padding grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant">
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Facility Name <span className="text-error">*</span>
                             </label>
                             <Input
@@ -115,23 +117,23 @@ export default function CreateFacilityPage() {
                                 value={form.name}
                                 onChange={(event) => handleChange("name", event.target.value)}
                                 placeholder="e.g., GreenLedger Facility 001"
-                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none"
+                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant">
-                                Facility Code <span className="text-error">*</span>
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                Facility Unit (Code) <span className="text-error">*</span>
                             </label>
                             <Input
                                 required
                                 value={form.facilityCode}
                                 onChange={(event) => handleChange("facilityCode", event.target.value)}
                                 placeholder="e.g., GRNL-01/17"
-                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none"
+                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                             />
                         </div>
                         <div className="space-y-2 md:col-span-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant">
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Description
                             </label>
                             <textarea
@@ -143,23 +145,25 @@ export default function CreateFacilityPage() {
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant">
-                                Facility Type
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                Facility Type <span className="text-error">*</span>
                             </label>
-                            <select
+                            <CustomSelect
+                                options={[
+                                    { label: "Manufacturing", value: "manufacturing" },
+                                    { label: "Office", value: "office" },
+                                    { label: "Warehouse", value: "warehouse" },
+                                    { label: "Retail", value: "retail" },
+                                    { label: "Data Center", value: "data center" },
+                                ]}
                                 value={form.facilityType}
-                                onChange={(event) => handleChange("facilityType", event.target.value)}
-                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white">
-                                <option value="manufacturing">Manufacturing</option>
-                                <option value="office">Office</option>
-                                <option value="warehouse">Warehouse</option>
-                                <option value="retail">Retail</option>
-                                <option value="data center">Data Center</option>
-                            </select>
+                                onChange={(val) => handleChange("facilityType", val)}
+                                placeholder="Select type..."
+                            />
                         </div>
                         <div className="space-y-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant">
-                                Ownership Type
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                Ownership Type <span className="text-error">*</span>
                             </label>
                             <div className="flex gap-4 pt-2">
                                 <label className="flex items-center gap-2 cursor-pointer">
@@ -190,40 +194,40 @@ export default function CreateFacilityPage() {
                 </section>
 
                 {/* Location Details Section */}
-                <section className="bg-white rounded-xl border border-outline-variant overflow-hidden">
-                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant flex items-center gap-3">
+                <section className="bg-white rounded-xl border border-outline-variant relative">
+                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center gap-3">
                         <MaterialIcon name="location_on" size="sm" className="text-primary" />
                         <h2 className="text-headline-sm font-headline-sm text-primary">Location Details</h2>
                     </div>
                     <div className="p-card-padding grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="space-y-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant">Country</label>
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">Country</label>
                             <Input
                                 value={form.country}
                                 onChange={(event) => handleChange("country", event.target.value)}
-                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none"
+                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant">
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 State / Province
                             </label>
                             <Input
                                 value={form.state}
                                 onChange={(event) => handleChange("state", event.target.value)}
-                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none"
+                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant">City</label>
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">City</label>
                             <Input
                                 value={form.city}
                                 onChange={(event) => handleChange("city", event.target.value)}
-                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none"
+                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                             />
                         </div>
                         <div className="space-y-2 md:col-span-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant">
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Address Line 1 <span className="text-error">*</span>
                             </label>
                             <Input
@@ -231,92 +235,92 @@ export default function CreateFacilityPage() {
                                 value={form.addressLine1}
                                 onChange={(event) => handleChange("addressLine1", event.target.value)}
                                 placeholder="Street address, P.O. box"
-                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none"
+                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant">
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Postal Code
                             </label>
                             <Input
                                 value={form.postalCode}
                                 onChange={(event) => handleChange("postalCode", event.target.value)}
                                 placeholder="700001"
-                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none"
+                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                             />
                         </div>
                         <div className="space-y-2 md:col-span-3">
-                            <label className="block font-label-md text-label-md text-on-surface-variant">
-                                Timezone
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                Timezone <span className="text-error">*</span>
                             </label>
-                            <select
+                            <CustomSelect
+                                options={[
+                                    { label: "(GMT+05:30) Chennai, Kolkata, Mumbai, New Delhi", value: "Asia/Kolkata" },
+                                    { label: "(GMT+00:00) UTC", value: "UTC" },
+                                    { label: "(GMT-05:00) Eastern Time (US & Canada)", value: "America/New_York" },
+                                ]}
                                 value={form.timezone}
-                                onChange={(event) => handleChange("timezone", event.target.value)}
-                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white">
-                                <option value="Asia/Kolkata">(GMT+05:30) Chennai, Kolkata, Mumbai, New Delhi</option>
-                                <option value="UTC">(GMT+00:00) UTC</option>
-                                <option value="America/New_York">(GMT-05:00) Eastern Time (US &amp; Canada)</option>
-                            </select>
+                                onChange={(val) => handleChange("timezone", val)}
+                                placeholder="Select timezone..."
+                            />
                         </div>
                     </div>
                 </section>
 
                 {/* Operational Details Section */}
-                <section className="bg-white rounded-xl border border-outline-variant overflow-hidden">
-                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant flex items-center gap-3">
+                <section className="bg-white rounded-xl border border-outline-variant relative">
+                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center gap-3">
                         <MaterialIcon name="settings_input_component" size="sm" className="text-primary" />
                         <h2 className="text-headline-sm font-headline-sm text-primary">Operational Details</h2>
                     </div>
                     <div className="p-card-padding grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant">
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Operational Since
                             </label>
-                            <Input
-                                type="date"
+                            <DatePicker
                                 value={form.operationalSince}
-                                onChange={(event) => handleChange("operationalSince", event.target.value)}
-                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none"
+                                onChange={(val) => handleChange("operationalSince", val)}
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant">
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Operational Until (Optional)
                             </label>
-                            <Input
-                                type="date"
+                            <DatePicker
                                 value={form.operationalUntil}
-                                onChange={(event) => handleChange("operationalUntil", event.target.value)}
-                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none"
+                                onChange={(val) => handleChange("operationalUntil", val)}
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label className="block font-label-md text-label-md text-on-surface-variant">
+                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                     Floor Area
                                 </label>
                                 <Input
                                     value={form.floorArea}
                                     onChange={(event) => handleChange("floorArea", event.target.value)}
                                     placeholder="e.g., 1570"
-                                    className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none"
+                                    className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="block font-label-md text-label-md text-on-surface-variant">
+                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                     Unit
                                 </label>
-                                <select
+                                <CustomSelect
+                                    options={[
+                                        { label: "sqft", value: "sqft" },
+                                        { label: "sqm", value: "sqm" },
+                                    ]}
                                     value={form.floorAreaUnit}
-                                    onChange={(event) => handleChange("floorAreaUnit", event.target.value)}
-                                    className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white">
-                                    <option value="sqft">sqft</option>
-                                    <option value="sqm">sqm</option>
-                                </select>
+                                    onChange={(val) => handleChange("floorAreaUnit", val)}
+                                    placeholder="Unit"
+                                />
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant">
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Employee Count
                             </label>
                             <Input
@@ -324,15 +328,15 @@ export default function CreateFacilityPage() {
                                 value={form.employeeCount}
                                 onChange={(event) => handleChange("employeeCount", event.target.value)}
                                 placeholder="e.g., 250"
-                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none"
+                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                             />
                         </div>
                     </div>
                 </section>
 
                 {/* Scope Configuration Section */}
-                <section className="bg-white rounded-xl border border-outline-variant overflow-hidden">
-                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant flex items-center gap-3">
+                <section className="bg-white rounded-xl border border-outline-variant relative">
+                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center gap-3">
                         <MaterialIcon name="analytics" size="sm" className="text-primary" />
                         <h2 className="text-headline-sm font-headline-sm text-primary">Scope Configuration</h2>
                     </div>

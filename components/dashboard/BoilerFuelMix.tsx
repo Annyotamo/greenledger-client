@@ -10,7 +10,7 @@ export function BoilerFuelMix({ items }: BoilerFuelMixProps) {
         <Card className="h-full">
             <CardHeader tone="flat">
                 <div>
-                    <h3 className="text-headline-sm font-semibold text-primary">Fuel Mix: CFBC & AFBC Boilers</h3>
+                    <h3 className="text-headline-sm font-semibold text-primary">Fuel Mix: FBC & WHRB Boilers</h3>
                 </div>
             </CardHeader>
 

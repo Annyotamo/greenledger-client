@@ -642,7 +642,7 @@ export default function RegisterForm() {
                                         </div>
                                         <div className="grid gap-2">
                                             <label className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface">
-                                                Facility code
+                                                Facility Unit (code)
                                             </label>
                                             <Input
                                                 value={form.facilityCode}

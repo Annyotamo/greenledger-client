@@ -12,15 +12,45 @@ import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { useFacilities } from "@/lib/facility/hooks";
 import { useEmissionSources } from "@/lib/emissionSource/hooks";
 import { createElectricityActivity, uploadElectricityActivityDocument, uploadS3File } from "@/lib/activity/api";
+import { CustomSelect } from "@/components/ui/select";
+import { ActivityDocumentsManager } from "@/components/activity/ActivityDocumentsManager";
+import type { ActivityDocument } from "@/components/activity/ActivityDocumentsManager";
 
 const documentTypeOptions = [
     { label: "Invoice", value: "invoice" },
     { label: "Meter Read", value: "meter_read" },
     { label: "Delivery Note", value: "delivery_note" },
     { label: "Audit Report", value: "audit_report" },
+    { label: "Lab Report", value: "lab_report" },
     { label: "Internal Report", value: "internal_report" },
     { label: "Other", value: "other" },
 ];
+
+const activityTypeOptions = [
+    { label: "Grid Import", value: "grid_import" },
+    { label: "Renewable", value: "renewable" },
+    { label: "Captive", value: "captive" },
+    { label: "Other", value: "other" },
+];
+
+const sourceTypesByActivity: Record<string, { label: string; value: string }[]> = {
+    grid_import: [
+        { label: "National Grid", value: "national_grid" },
+    ],
+    renewable: [
+        { label: "Solar", value: "solar" },
+        { label: "Hydro", value: "hydro" },
+        { label: "Wind", value: "wind" },
+    ],
+    captive: [
+        { label: "WHRB", value: "whrb" },
+        { label: "FBC", value: "fbc" },
+        { label: "Captive Solar", value: "captive_solar" },
+    ],
+    other: [
+        { label: "Waste Fuel", value: "waste_fuel" },
+    ],
+};
 
 function formFieldClass(error?: boolean) {
     return `w-full rounded-lg border ${error ? "border-error" : "border-outline-variant"} bg-white px-3 py-2 text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary`;
@@ -39,16 +69,23 @@ export default function LogElectricityActivityPage() {
         activityStartDate: "",
         activityEndDate: "",
         notes: "",
-        documentType: "",
-        documentName: "",
-        documentLink: "",
-        documentDate: "",
-        attachmentName: "",
     });
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
 
-    const [documentFile, setDocumentFile] = useState<File | null>(null);
+    const [documents, setDocuments] = useState<ActivityDocument[]>([
+        {
+            id: "initial-doc",
+            documentType: "",
+            documentName: "",
+            documentLink: "",
+            documentDate: "",
+            file: null,
+            attachmentName: "",
+            sourceMode: "upload",
+            notes: "",
+        }
+    ]);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
@@ -62,11 +99,22 @@ export default function LogElectricityActivityPage() {
         setErrors((current) => ({ ...current, [field]: "" }));
     }
 
-    function handleDocumentLinkChange(value: string) {
-        setDocumentFile(null);
-        setForm((current) => ({ ...current, documentLink: value, attachmentName: "" }));
-        setErrors((current) => ({ ...current, documentLink: "" }));
+    function handleActivityTypeChange(value: string) {
+        setForm((current) => ({
+            ...current,
+            electricityActivityType: value,
+            sourceType: "",
+        }));
+        setErrors((current) => ({
+            ...current,
+            electricityActivityType: "",
+            sourceType: "",
+        }));
     }
+
+    const sourceOptions = form.electricityActivityType
+        ? sourceTypesByActivity[form.electricityActivityType] || []
+        : [];
 
     function handleStartDateChange(date: Date) {
         const nextEndDate = selectedEndDate && isAfter(date, selectedEndDate) ? date : selectedEndDate;
@@ -92,13 +140,6 @@ export default function LogElectricityActivityPage() {
         setErrors((current) => ({ ...current, activityEndDate: "" }));
     }
 
-    function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-        const file = event.target.files?.[0] ?? null;
-        setDocumentFile(file);
-        setForm((current) => ({ ...current, documentLink: "", attachmentName: file?.name ?? "" }));
-        setErrors((current) => ({ ...current, documentLink: "", documentType: "", documentName: "" }));
-    }
-
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const nextErrors: Record<string, string> = {};
@@ -112,9 +153,19 @@ export default function LogElectricityActivityPage() {
         if (!form.electricityActivityType) nextErrors.electricityActivityType = "Activity type is required.";
         if (!form.sourceType) nextErrors.sourceType = "Source type is required.";
         if (!form.dataQualityTier) nextErrors.dataQualityTier = "Data quality is required.";
-        if (!form.documentType) nextErrors.documentType = "Document type is required.";
-        if (!form.documentName) nextErrors.documentName = "Document name is required.";
-        if (!documentFile && !form.documentLink) nextErrors.documentLink = "A document URL or file upload is required.";
+
+        // Validate each document in the documents list
+        documents.forEach((doc) => {
+            if (!doc.documentType) nextErrors[`doc-${doc.id}-type`] = "Document type is required.";
+            if (!doc.documentName) nextErrors[`doc-${doc.id}-name`] = "Document name is required.";
+            if (!doc.documentDate) nextErrors[`doc-${doc.id}-date`] = "Document date is required.";
+            if (doc.sourceMode === "upload" && !doc.file && !doc.attachmentName) {
+                nextErrors[`doc-${doc.id}-source`] = "A document file upload is required.";
+            }
+            if (doc.sourceMode === "link" && !doc.documentLink) {
+                nextErrors[`doc-${doc.id}-source`] = "A document link is required.";
+            }
+        });
 
         setErrors(nextErrors);
         if (Object.keys(nextErrors).length > 0) return;
@@ -146,20 +197,23 @@ export default function LogElectricityActivityPage() {
 
             if (!activityId) throw new Error("Created activity ID not returned from API.");
 
-            let sourceUrl = form.documentLink;
-            if (documentFile) {
-                sourceUrl = await uploadS3File(documentFile);
-            }
+            // Upload all attached documents
+            for (const doc of documents) {
+                let sourceUrl = doc.documentLink;
+                if (doc.file) {
+                    sourceUrl = await uploadS3File(doc.file);
+                }
 
-            await uploadElectricityActivityDocument(activityId, {
-                fuel_activity_id: null,
-                electricity_activity_id: activityId,
-                document_type: form.documentType,
-                document_name: form.documentName,
-                source_url: sourceUrl,
-                notes: form.notes || null,
-                document_date: form.documentDate || null,
-            });
+                await uploadElectricityActivityDocument(activityId, {
+                    fuel_activity_id: null,
+                    electricity_activity_id: activityId,
+                    document_type: doc.documentType,
+                    document_name: doc.documentName,
+                    source_url: sourceUrl,
+                    notes: doc.notes || null,
+                    document_date: doc.documentDate || null,
+                });
+            }
 
             router.push("/activities/electricity");
         } catch (err) {
@@ -188,8 +242,8 @@ export default function LogElectricityActivityPage() {
             </header>
 
             <form id="logElectricityForm" onSubmit={handleSubmit} className="space-y-6">
-                <section className="bg-white rounded-xl border border-outline-variant overflow-hidden">
-                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant flex items-center justify-between">
+                <section className="bg-white rounded-xl border border-outline-variant relative">
+                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-container-high text-primary">
                                 <MaterialIcon name="bolt" size="sm" />
@@ -204,78 +258,76 @@ export default function LogElectricityActivityPage() {
                     </div>
                     <div className="p-card-padding grid gap-4 lg:grid-cols-2">
                         <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Reporting Period
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                Reporting Period <span className="text-error">*</span>
                             </label>
-                            <select
+                            <CustomSelect
+                                options={reportingPeriodsQuery.data?.map((p: any) => ({
+                                    label: p.name,
+                                    value: String(p.id)
+                                })) || []}
                                 value={form.reportingPeriod}
-                                onChange={(e) => handleChange("reportingPeriod", e.target.value)}
-                                className={formFieldClass(Boolean(errors.reportingPeriod))}>
-                                <option value="">Select period...</option>
-                                {reportingPeriodsQuery.data?.map((p: any) => (
-                                    <option key={p.id} value={p.id}>
-                                        {p.name}
-                                    </option>
-                                ))}
-                            </select>
+                                onChange={(val) => handleChange("reportingPeriod", val)}
+                                error={Boolean(errors.reportingPeriod)}
+                                placeholder="Select period..."
+                            />
                             {errors.reportingPeriod && (
                                 <p className="mt-2 text-xs text-error">{errors.reportingPeriod}</p>
                             )}
                         </div>
                         <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Facility
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                Facility <span className="text-error">*</span>
                             </label>
-                            <select
+                            <CustomSelect
+                                options={facilitiesQuery.data?.map((f: any) => ({
+                                    label: f.name,
+                                    value: String(f.id)
+                                })) || []}
                                 value={form.facility}
-                                onChange={(e) => handleChange("facility", e.target.value)}
-                                className={formFieldClass(Boolean(errors.facility))}>
-                                <option value="">Select facility...</option>
-                                {facilitiesQuery.data?.map((f: any) => (
-                                    <option key={f.id} value={f.id}>
-                                        {f.name}
-                                    </option>
-                                ))}
-                            </select>
+                                onChange={(val) => handleChange("facility", val)}
+                                error={Boolean(errors.facility)}
+                                placeholder="Select facility..."
+                            />
                             {errors.facility && <p className="mt-2 text-xs text-error">{errors.facility}</p>}
                         </div>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between gap-2">
-                                <label className="text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                    Activity Start Date
+                        <div className="space-y-3 flex flex-col items-center">
+                            <div className="flex items-center justify-between gap-2 w-full max-w-[340px]">
+                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                    Activity Start Date <span className="text-error">*</span>
                                 </label>
                                 {selectedStartDate ? (
-                                    <span className="text-xs text-on-surface-variant">
+                                    <span className="text-xs text-on-surface-variant mb-2">
                                         {format(selectedStartDate, "PPP")}
                                     </span>
                                 ) : null}
                             </div>
                             <Calendar date={selectedStartDate} onDateChange={handleStartDateChange} />
                             {errors.activityStartDate && (
-                                <p className="mt-2 text-xs text-error">{errors.activityStartDate}</p>
+                                <p className="mt-2 text-xs text-error w-full max-w-[340px]">{errors.activityStartDate}</p>
                             )}
                         </div>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between gap-2">
-                                <label className="text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                    Activity End Date
+                        <div className="space-y-3 flex flex-col items-center">
+                            <div className="flex items-center justify-between gap-2 w-full max-w-[340px]">
+                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                    Activity End Date <span className="text-error">*</span>
                                 </label>
                                 {selectedEndDate ? (
-                                    <span className="text-xs text-on-surface-variant">
+                                    <span className="text-xs text-on-surface-variant mb-2">
                                         {format(selectedEndDate, "PPP")}
                                     </span>
                                 ) : null}
                             </div>
                             <Calendar date={selectedEndDate} onDateChange={handleEndDateChange} />
                             {errors.activityEndDate && (
-                                <p className="mt-2 text-xs text-error">{errors.activityEndDate}</p>
+                                <p className="mt-2 text-xs text-error w-full max-w-[340px]">{errors.activityEndDate}</p>
                             )}
                         </div>
                     </div>
                 </section>
 
-                <section className="bg-white rounded-xl border border-outline-variant overflow-hidden">
-                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant flex items-center justify-between">
+                <section className="bg-white rounded-xl border border-outline-variant relative">
+                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-container-high text-primary">
                                 <MaterialIcon name="bolt" size="sm" />
@@ -290,24 +342,24 @@ export default function LogElectricityActivityPage() {
                     </div>
                     <div className="p-card-padding grid gap-4 lg:grid-cols-2">
                         <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Source
                             </label>
-                            <select
+                            <CustomSelect
+                                options={emissionSourcesQuery.data?.map((s: any) => ({
+                                    label: `${s.standard}${s.version ? ` (${s.version})` : ""}`,
+                                    value: String(s.id)
+                                })) || []}
                                 value={form.source}
-                                onChange={(e) => handleChange("source", e.target.value)}
-                                className={formFieldClass(Boolean(errors.source))}>
-                                <option value="">Select source...</option>
-                                {emissionSourcesQuery.data?.map((s: any) => (
-                                    <option key={s.id} value={s.id}>
-                                        {s.standard} {s.version ? `(${s.version})` : ""}
-                                    </option>
-                                ))}
-                            </select>
+                                onChange={(val) => handleChange("source", val)}
+                                error={Boolean(errors.source)}
+                                placeholder="Select source..."
+                                isClearable
+                            />
                         </div>
                         <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Electricity
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                Electricity <span className="text-error">*</span>
                             </label>
                             <div className="flex items-center gap-2">
                                 <Input
@@ -315,16 +367,20 @@ export default function LogElectricityActivityPage() {
                                     step="0.001"
                                     value={form.electricityKwh}
                                     onChange={(e) => handleChange("electricityKwh", e.target.value)}
-                                    className={`${formFieldClass(Boolean(errors.electricityKwh))} border border-outline-variant`}
+                                    className={`${formFieldClass(Boolean(errors.electricityKwh))} border border-outline-variant flex-1`}
                                     placeholder="0.00"
                                 />
-                                <select
+                                <CustomSelect
+                                    options={[
+                                        { label: "kWh", value: "kwh" },
+                                        { label: "MWh", value: "mwh" },
+                                    ]}
                                     value={form.electricityUnit}
-                                    onChange={(e) => handleChange("electricityUnit", e.target.value)}
-                                    className="rounded-lg border border-outline-variant bg-white px-3 py-2 text-body-md text-on-surface">
-                                    <option value="kwh">kWh</option>
-                                    <option value="mwh">MWh</option>
-                                </select>
+                                    onChange={(val) => handleChange("electricityUnit", val)}
+                                    error={Boolean(errors.electricityUnit)}
+                                    placeholder="Unit"
+                                    className="w-[110px]"
+                                />
                             </div>
                             {errors.electricityKwh && (
                                 <p className="mt-2 text-xs text-error">{errors.electricityKwh}</p>
@@ -334,56 +390,54 @@ export default function LogElectricityActivityPage() {
                             )}
                         </div>
                         <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Activity Type
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                Activity Type <span className="text-error">*</span>
                             </label>
-                            <select
+                            <CustomSelect
+                                options={activityTypeOptions}
                                 value={form.electricityActivityType}
-                                onChange={(e) => handleChange("electricityActivityType", e.target.value)}
-                                className={formFieldClass(Boolean(errors.electricityActivityType))}>
-                                <option value="">Select type...</option>
-                                <option value="grid_import">Grid Import</option>
-                                <option value="self_generated">Self Generated</option>
-                                <option value="other">Other</option>
-                            </select>
+                                onChange={handleActivityTypeChange}
+                                error={Boolean(errors.electricityActivityType)}
+                                placeholder="Select type..."
+                            />
                             {errors.electricityActivityType && (
                                 <p className="mt-2 text-xs text-error">{errors.electricityActivityType}</p>
                             )}
                         </div>
                         <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Source Type
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                Source Type <span className="text-error">*</span>
                             </label>
-                            <select
+                            <CustomSelect
+                                options={sourceOptions}
                                 value={form.sourceType}
-                                onChange={(e) => handleChange("sourceType", e.target.value)}
-                                className={formFieldClass(Boolean(errors.sourceType))}>
-                                <option value="">Select source type...</option>
-                                <option value="national_grid">National Grid</option>
-                                <option value="other_generator">Other Generator</option>
-                                <option value="solar">Solar</option>
-                                <option value="wind">Wind</option>
-                            </select>
+                                onChange={(val) => handleChange("sourceType", val)}
+                                error={Boolean(errors.sourceType)}
+                                placeholder={form.electricityActivityType ? "Select source type..." : "Select activity type first..."}
+                                isDisabled={!form.electricityActivityType}
+                            />
                             {errors.sourceType && <p className="mt-2 text-xs text-error">{errors.sourceType}</p>}
                         </div>
                         <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Data Quality
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                Data Quality <span className="text-error">*</span>
                             </label>
-                            <select
+                            <CustomSelect
+                                options={[
+                                    { label: "Measured", value: "measured" },
+                                    { label: "Estimated", value: "estimated" },
+                                ]}
                                 value={form.dataQualityTier}
-                                onChange={(e) => handleChange("dataQualityTier", e.target.value)}
-                                className={formFieldClass(Boolean(errors.dataQualityTier))}>
-                                <option value="">Select quality...</option>
-                                <option value="measured">Measured</option>
-                                <option value="estimated">Estimated</option>
-                            </select>
+                                onChange={(val) => handleChange("dataQualityTier", val)}
+                                error={Boolean(errors.dataQualityTier)}
+                                placeholder="Select quality..."
+                            />
                             {errors.dataQualityTier && (
                                 <p className="mt-2 text-xs text-error">{errors.dataQualityTier}</p>
                             )}
                         </div>
                         <div className="lg:col-span-2">
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Notes
                             </label>
                             <textarea
@@ -412,88 +466,13 @@ export default function LogElectricityActivityPage() {
                             </div>
                         </div>
                     </div>
-                    <div className="p-card-padding grid gap-4 lg:grid-cols-2">
-                        <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Document Type
-                            </label>
-                            <select
-                                value={form.documentType}
-                                onChange={(e) => handleChange("documentType", e.target.value)}
-                                className={formFieldClass(Boolean(errors.documentType))}>
-                                <option value="">Select type...</option>
-                                {documentTypeOptions.map((option) => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.documentType && <p className="mt-2 text-xs text-error">{errors.documentType}</p>}
-                        </div>
-                        <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Document Name
-                            </label>
-                            <Input
-                                type="text"
-                                value={form.documentName}
-                                onChange={(e) => handleChange("documentName", e.target.value)}
-                                className={`${formFieldClass()} border border-outline-variant`}
-                                placeholder="e.g. Q1_Electricity_Invoice"
-                            />
-                        </div>
-                        <div className="lg:col-span-2">
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Upload Supporting Evidence
-                            </label>
-                            <label className="flex min-h-[160px] flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-outline-variant bg-surface-container text-center text-on-surface-variant transition-colors hover:border-primary">
-                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-primary shadow-sm">
-                                    <MaterialIcon name="cloud_upload" size="sm" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-semibold text-primary">
-                                        Click to upload or drag and drop
-                                    </p>
-                                    <p className="text-xs text-on-surface-variant">PDF, PNG, JPG or CSV (max 10MB)</p>
-                                </div>
-                                <input type="file" className="hidden" onChange={handleFileChange} />
-                                {form.attachmentName && (
-                                    <p className="text-xs text-on-surface-variant">{form.attachmentName}</p>
-                                )}
-                            </label>
-                        </div>
-                        <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Documentation Link
-                            </label>
-                            <Input
-                                type="text"
-                                value={form.documentLink}
-                                onChange={(e) => handleDocumentLinkChange(e.target.value)}
-                                className={`${formFieldClass(Boolean(errors.documentLink))} border border-outline-variant`}
-                                placeholder={
-                                    documentFile ? "Upload file to provide link" : "https://sharepoint.com/doc..."
-                                }
-                                disabled={Boolean(documentFile)}
-                            />
-                            {documentFile && (
-                                <p className="mt-2 text-xs text-on-surface-variant">
-                                    Document URL is disabled because a file upload is selected.
-                                </p>
-                            )}
-                            {errors.documentLink && <p className="mt-2 text-xs text-error">{errors.documentLink}</p>}
-                        </div>
-                        <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Document Date
-                            </label>
-                            <Input
-                                type="date"
-                                value={form.documentDate}
-                                onChange={(e) => handleChange("documentDate", e.target.value)}
-                                className={`${formFieldClass()} border border-outline-variant`}
-                            />
-                        </div>
+                    <div className="p-card-padding">
+                        <ActivityDocumentsManager
+                            documents={documents}
+                            onChange={setDocuments}
+                            documentTypeOptions={documentTypeOptions}
+                            errors={errors}
+                        />
                     </div>
                 </section>
 

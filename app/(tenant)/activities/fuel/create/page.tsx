@@ -8,11 +8,14 @@ import { format, isAfter } from "date-fns";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
+import { CustomSelect } from "@/components/ui/select";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { useFacilities } from "@/lib/facility/hooks";
 import { useFuelCategories, useFuels, useFuelUnits } from "@/lib/fuel/hooks";
 import type { FuelCategoryDto, FuelDto, FuelUnitsDto, FuelQueryType } from "@/lib/fuel/api";
 import { createFuelActivity, uploadFuelActivityDocument, uploadS3File } from "@/lib/activity/api";
+import { ActivityDocumentsManager } from "@/components/activity/ActivityDocumentsManager";
+import type { ActivityDocument } from "@/components/activity/ActivityDocumentsManager";
 
 const usageTypeOptions = [
     { label: "Direct combustion", value: "direct_combustion" },
@@ -36,6 +39,7 @@ const documentTypeOptions = [
     { label: "Delivery Note", value: "delivery_note" },
     { label: "Estimation Basis", value: "estimation_basis" },
     { label: "Audit Report", value: "audit_report" },
+    { label: "Lab Report", value: "lab_report" },
     { label: "Internal Report", value: "internal_report" },
     { label: "Other", value: "other" },
 ];
@@ -66,12 +70,7 @@ type FuelActivityFormState = {
     generatorEfficiency: string;
     cost: string;
     isDraft: boolean;
-    documentType: string;
-    documentName: string;
-    documentLink: string;
-    documentDate: string;
     notes: string;
-    attachmentName: string;
     estimationBasis: string;
 };
 
@@ -92,18 +91,25 @@ const initialFormState: FuelActivityFormState = {
     generatorEfficiency: "",
     cost: "",
     isDraft: false,
-    documentType: "",
-    documentName: "",
-    documentLink: "",
-    documentDate: "",
     notes: "",
-    attachmentName: "",
     estimationBasis: "",
 };
 
 export default function LogFuelActivityPage() {
     const [form, setForm] = useState<FuelActivityFormState>(initialFormState);
-    const [documentFile, setDocumentFile] = useState<File | null>(null);
+    const [documents, setDocuments] = useState<ActivityDocument[]>([
+        {
+            id: "initial-doc",
+            documentType: "",
+            documentName: "",
+            documentLink: "",
+            documentDate: "",
+            file: null,
+            attachmentName: "",
+            sourceMode: "upload",
+            notes: "",
+        }
+    ]);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
@@ -186,22 +192,6 @@ export default function LogFuelActivityPage() {
         setErrors((current) => ({ ...current, activityEndDate: "" }));
     }
 
-    function handleDocumentLinkChange(value: string) {
-        setDocumentFile(null);
-        setForm((current) => ({ ...current, documentLink: value, attachmentName: "" }));
-        setErrors((current) => ({ ...current, documentLink: "" }));
-    }
-
-    function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-        const file = event.target.files?.[0] ?? null;
-        setDocumentFile(file);
-        setForm((current) => ({
-            ...current,
-            documentLink: "",
-            attachmentName: file?.name ?? "",
-        }));
-        setErrors((current) => ({ ...current, documentLink: "", documentType: "", documentName: "" }));
-    }
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -224,12 +214,22 @@ export default function LogFuelActivityPage() {
         if (!form.collectionType) nextErrors.collectionType = "Collection type is required.";
         if (!form.quantity) nextErrors.quantity = "Quantity is required.";
         if (!form.unit) nextErrors.unit = "Unit is required.";
-        if (!form.documentType) nextErrors.documentType = "Document type is required.";
-        if (!form.documentName) nextErrors.documentName = "Document name is required.";
-        if (!documentFile && !form.documentLink) nextErrors.documentLink = "A document URL or file upload is required.";
         if (form.collectionType === "estimated" && !form.estimationBasis) {
             nextErrors.estimationBasis = "Estimation basis is required for estimated collection type.";
         }
+
+        // Validate each document in the documents list
+        documents.forEach((doc) => {
+            if (!doc.documentType) nextErrors[`doc-${doc.id}-type`] = "Document type is required.";
+            if (!doc.documentName) nextErrors[`doc-${doc.id}-name`] = "Document name is required.";
+            if (!doc.documentDate) nextErrors[`doc-${doc.id}-date`] = "Document date is required.";
+            if (doc.sourceMode === "upload" && !doc.file && !doc.attachmentName) {
+                nextErrors[`doc-${doc.id}-source`] = "A document file upload is required.";
+            }
+            if (doc.sourceMode === "link" && !doc.documentLink) {
+                nextErrors[`doc-${doc.id}-source`] = "A document link is required.";
+            }
+        });
 
         setErrors(nextErrors);
         if (Object.keys(nextErrors).length > 0) return;
@@ -269,20 +269,23 @@ export default function LogFuelActivityPage() {
                 throw new Error("Created activity ID not returned from API.");
             }
 
-            let sourceUrl = form.documentLink;
-            if (documentFile) {
-                sourceUrl = await uploadS3File(documentFile);
-            }
+            // Upload all attached documents
+            for (const doc of documents) {
+                let sourceUrl = doc.documentLink;
+                if (doc.file) {
+                    sourceUrl = await uploadS3File(doc.file);
+                }
 
-            await uploadFuelActivityDocument(activityId, {
-                fuel_activity_id: activityId,
-                electricity_activity_id: null,
-                document_type: form.documentType,
-                document_name: form.documentName,
-                source_url: sourceUrl,
-                notes: form.notes || null,
-                document_date: form.documentDate || null,
-            });
+                await uploadFuelActivityDocument(activityId, {
+                    fuel_activity_id: activityId,
+                    electricity_activity_id: null,
+                    document_type: doc.documentType,
+                    document_name: doc.documentName,
+                    source_url: sourceUrl,
+                    notes: doc.notes || null,
+                    document_date: doc.documentDate || null,
+                });
+            }
 
             router.push("/activities/fuel");
         } catch (err) {
@@ -312,8 +315,8 @@ export default function LogFuelActivityPage() {
             </header>
 
             <form id="logFuelForm" onSubmit={handleSubmit} className="space-y-6">
-                <section className="bg-white rounded-xl border border-outline-variant overflow-hidden">
-                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant flex items-center justify-between">
+                <section className="bg-white rounded-xl border border-outline-variant relative">
+                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-container-high text-primary">
                                 <MaterialIcon name="inventory_2" size="sm" />
@@ -329,76 +332,66 @@ export default function LogFuelActivityPage() {
                     <div className="p-card-padding space-y-6">
                         <div className="grid gap-4 lg:grid-cols-2">
                             <div>
-                                <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                    Reporting Period
+                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                    Reporting Period <span className="text-error">*</span>
                                 </label>
-                                <select
+                                <CustomSelect
+                                    options={reportingPeriodsQuery.data?.map((p: any) => ({
+                                        label: p.name,
+                                        value: String(p.id)
+                                    })) || []}
                                     value={form.reportingPeriod}
-                                    onChange={(event) => handleChange("reportingPeriod", event.target.value)}
-                                    className={formFieldClass(Boolean(errors.reportingPeriod))}>
-                                    <option value="">Select period...</option>
-                                    {reportingPeriodsQuery.data?.map((p: any) => (
-                                        <option key={p.id} value={p.id}>
-                                            {p.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => handleChange("reportingPeriod", val)}
+                                    error={Boolean(errors.reportingPeriod)}
+                                    placeholder="Select period..."
+                                />
                                 {errors.reportingPeriod && (
                                     <p className="mt-2 text-xs text-error">{errors.reportingPeriod}</p>
                                 )}
                             </div>
                             <div>
-                                <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                    Facility
+                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                    Facility <span className="text-error">*</span>
                                 </label>
-                                <select
+                                <CustomSelect
+                                    options={facilitiesQuery.data?.map((f: any) => ({
+                                        label: f.name,
+                                        value: String(f.id)
+                                    })) || []}
                                     value={form.facility}
-                                    onChange={(event) => handleChange("facility", event.target.value)}
-                                    className={formFieldClass(Boolean(errors.facility))}>
-                                    <option value="">Select facility...</option>
-                                    {facilitiesQuery.data?.map((f: any) => (
-                                        <option key={f.id} value={f.id}>
-                                            {f.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => handleChange("facility", val)}
+                                    error={Boolean(errors.facility)}
+                                    placeholder="Select facility..."
+                                />
                                 {errors.facility && <p className="mt-2 text-xs text-error">{errors.facility}</p>}
                             </div>
                         </div>
 
                         <div className="grid gap-4 lg:grid-cols-2">
                             <div>
-                                <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                    Usage Type
+                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                    Usage Type <span className="text-error">*</span>
                                 </label>
-                                <select
+                                <CustomSelect
+                                    options={usageTypeOptions}
                                     value={form.usageType}
-                                    onChange={(event) => handleChange("usageType", event.target.value)}
-                                    className={formFieldClass(Boolean(errors.usageType))}>
-                                    <option value="">Select usage type...</option>
-                                    {usageTypeOptions.map((option) => (
-                                        <option key={option.value} value={option.value}>
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => handleChange("usageType", val)}
+                                    error={Boolean(errors.usageType)}
+                                    placeholder="Select usage type..."
+                                />
                                 {errors.usageType && <p className="mt-2 text-xs text-error">{errors.usageType}</p>}
                             </div>
                             <div>
-                                <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                    Emission Type
+                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                    Emission Type <span className="text-error">*</span>
                                 </label>
-                                <select
+                                <CustomSelect
+                                    options={emissionTypeOptions}
                                     value={form.emissionType}
-                                    onChange={(event) => handleChange("emissionType", event.target.value)}
-                                    className={formFieldClass(Boolean(errors.emissionType))}>
-                                    <option value="">Select emission type...</option>
-                                    {emissionTypeOptions.map((option) => (
-                                        <option key={option.value} value={option.value}>
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => handleChange("emissionType", val)}
+                                    error={Boolean(errors.emissionType)}
+                                    placeholder="Select emission type..."
+                                />
                                 {errors.emissionType && (
                                     <p className="mt-2 text-xs text-error">{errors.emissionType}</p>
                                 )}
@@ -407,8 +400,8 @@ export default function LogFuelActivityPage() {
                         {(form.usageType === "electricity_generation" || form.usageType === "steam_generation") && (
                             <div className="grid gap-4 lg:grid-cols-1">
                                 <div>
-                                    <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                        Generator Efficiency (%)
+                                    <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                        Generator Efficiency (%) <span className="text-error">*</span>
                                     </label>
                                     <Input
                                         type="number"
@@ -426,44 +419,44 @@ export default function LogFuelActivityPage() {
                         )}
 
                         <div className="grid gap-6 lg:grid-cols-2">
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between gap-2">
-                                    <label className="text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                        Activity Start Date
+                            <div className="space-y-3 flex flex-col items-center">
+                                <div className="flex items-center justify-between gap-2 w-full max-w-[340px]">
+                                    <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                        Activity Start Date <span className="text-error">*</span>
                                     </label>
                                     {selectedStartDate ? (
-                                        <span className="text-xs text-on-surface-variant">
+                                        <span className="text-xs text-on-surface-variant mb-2">
                                             {format(selectedStartDate, "PPP")}
                                         </span>
                                     ) : null}
                                 </div>
                                 <Calendar date={selectedStartDate} onDateChange={handleStartDateChange} />
                                 {errors.activityStartDate && (
-                                    <p className="mt-2 text-xs text-error">{errors.activityStartDate}</p>
+                                    <p className="mt-2 text-xs text-error w-full max-w-[340px]">{errors.activityStartDate}</p>
                                 )}
                             </div>
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between gap-2">
-                                    <label className="text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                        Activity End Date
+                            <div className="space-y-3 flex flex-col items-center">
+                                <div className="flex items-center justify-between gap-2 w-full max-w-[340px]">
+                                    <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                        Activity End Date <span className="text-error">*</span>
                                     </label>
                                     {selectedEndDate ? (
-                                        <span className="text-xs text-on-surface-variant">
+                                        <span className="text-xs text-on-surface-variant mb-2">
                                             {format(selectedEndDate, "PPP")}
                                         </span>
                                     ) : null}
                                 </div>
                                 <Calendar date={selectedEndDate} onDateChange={handleEndDateChange} />
                                 {errors.activityEndDate && (
-                                    <p className="mt-2 text-xs text-error">{errors.activityEndDate}</p>
+                                    <p className="mt-2 text-xs text-error w-full max-w-[340px]">{errors.activityEndDate}</p>
                                 )}
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <section className="bg-white rounded-xl border border-outline-variant overflow-hidden">
-                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant flex items-center justify-between">
+                <section className="bg-white rounded-xl border border-outline-variant relative">
+                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-container-high text-primary">
                                 <MaterialIcon name="local_gas_station" size="sm" />
@@ -478,26 +471,20 @@ export default function LogFuelActivityPage() {
                     </div>
                     <div className="p-card-padding grid gap-4 lg:grid-cols-2">
                         <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                {fuelCategoryLabel}
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                {fuelCategoryLabel} <span className="text-error">*</span>
                             </label>
-                            <select
+                            <CustomSelect
+                                options={fuelCategoriesQuery.data?.map((c: any) => ({
+                                    label: c.name,
+                                    value: String(c.id)
+                                })) || []}
                                 value={form.fuelCategory}
-                                onChange={(event) => handleChange("fuelCategory", event.target.value)}
-                                className={formFieldClass(Boolean(errors.fuelType))}>
-                                <option value="">Select category...</option>
-                                {fuelCategoriesQuery.isLoading && <option value="">Loading categories...</option>}
-                                {Array.isArray(fuelCategoriesQuery.data) && fuelCategoriesQuery.data.length === 0 && (
-                                    <option value="" disabled>
-                                        No categories available
-                                    </option>
-                                )}
-                                {fuelCategoriesQuery.data?.map((c: any) => (
-                                    <option key={c.id} value={c.id}>
-                                        {c.name}
-                                    </option>
-                                ))}
-                            </select>
+                                onChange={(val) => handleChange("fuelCategory", val)}
+                                error={Boolean(errors.fuelType)}
+                                placeholder={fuelCategoriesQuery.isLoading ? "Loading categories..." : "Select category..."}
+                                isLoading={fuelCategoriesQuery.isLoading}
+                            />
                             {!fuelCategoriesQuery.isLoading &&
                                 Array.isArray(fuelCategoriesQuery.data) &&
                                 fuelCategoriesQuery.data.length === 0 && (
@@ -507,42 +494,36 @@ export default function LogFuelActivityPage() {
                                 )}
                         </div>
                         <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                {fuelLabel}
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                {fuelLabel} <span className="text-error">*</span>
                             </label>
-                            <select
+                            <CustomSelect
+                                options={fuelsQuery.data?.map((f: any) => ({
+                                    label: f.name,
+                                    value: String(f.id)
+                                })) || []}
                                 value={form.fuelType}
-                                onChange={(event) => handleChange("fuelType", event.target.value)}
-                                className={formFieldClass(Boolean(errors.fuelType))}
-                                disabled={
+                                onChange={(val) => handleChange("fuelType", val)}
+                                error={Boolean(errors.fuelType)}
+                                placeholder={
+                                    fuelsQuery.isLoading
+                                        ? `Loading ${fuelLabel.toLowerCase()}s...`
+                                        : !form.fuelCategory
+                                        ? `Select ${fuelCategoryLabel.toLowerCase()} first`
+                                        : `Select ${fuelLabel.toLowerCase()}...`
+                                }
+                                isDisabled={
                                     !form.fuelCategory ||
                                     fuelsQuery.isLoading ||
                                     (Array.isArray(fuelsQuery.data) && fuelsQuery.data.length === 0)
-                                }>
-                                <option value="">
-                                    {!form.fuelCategory
-                                        ? `Select ${fuelCategoryLabel.toLowerCase()} first`
-                                        : `Select ${fuelLabel.toLowerCase()}...`}
-                                </option>
-                                {fuelsQuery.isLoading && (
-                                    <option value="">Loading {fuelLabel.toLowerCase()}s...</option>
-                                )}
-                                {Array.isArray(fuelsQuery.data) && fuelsQuery.data.length === 0 && (
-                                    <option value="" disabled>
-                                        No {fuelLabel.toLowerCase()}s for selected category
-                                    </option>
-                                )}
-                                {fuelsQuery.data?.map((f: any) => (
-                                    <option key={f.id} value={f.id}>
-                                        {f.name}
-                                    </option>
-                                ))}
-                            </select>
+                                }
+                                isLoading={fuelsQuery.isLoading}
+                            />
                             {errors.fuelType && <p className="mt-2 text-xs text-error">{errors.fuelType}</p>}
                         </div>
                         <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Quantity
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                Quantity <span className="text-error">*</span>
                             </label>
                             <Input
                                 type="number"
@@ -556,8 +537,8 @@ export default function LogFuelActivityPage() {
                         </div>
                         {form.emissionType !== "fugitive" && (
                             <div>
-                                <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                    Price / Cost
+                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                    Price / Cost <span className="text-error">*</span>
                                 </label>
                                 <Input
                                     type="number"
@@ -571,38 +552,38 @@ export default function LogFuelActivityPage() {
                             </div>
                         )}
                         <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Unit
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                Unit <span className="text-error">*</span>
                             </label>
-                            <select
+                            <CustomSelect
+                                options={unitsQuery.data?.map((u: any) => ({
+                                    label: u.name,
+                                    value: String(u.id)
+                                })) || []}
                                 value={form.unit}
-                                onChange={(event) => handleChange("unit", event.target.value)}
-                                className={formFieldClass(Boolean(errors.unit))}
-                                disabled={
+                                onChange={(val) => handleChange("unit", val)}
+                                error={Boolean(errors.unit)}
+                                placeholder={
+                                    unitsQuery.isLoading
+                                        ? "Loading units..."
+                                        : !form.fuelType
+                                        ? "Select fuel first"
+                                        : "Select unit..."
+                                }
+                                isDisabled={
                                     !form.fuelType ||
                                     unitsQuery.isLoading ||
                                     (Array.isArray(unitsQuery.data) && unitsQuery.data.length === 0)
-                                }>
-                                <option value="">{!form.fuelType ? "Select fuel first" : "Select unit..."}</option>
-                                {unitsQuery.isLoading && <option value="">Loading units...</option>}
-                                {Array.isArray(unitsQuery.data) && unitsQuery.data.length === 0 && (
-                                    <option value="" disabled>
-                                        No units available for selected fuel
-                                    </option>
-                                )}
-                                {unitsQuery.data?.map((u: any) => (
-                                    <option key={u.id} value={u.id}>
-                                        {u.name}
-                                    </option>
-                                ))}
-                            </select>
+                                }
+                                isLoading={unitsQuery.isLoading}
+                            />
                             {errors.unit && <p className="mt-2 text-xs text-error">{errors.unit}</p>}
                         </div>
                     </div>
                 </section>
 
-                <section className="bg-white rounded-xl border border-outline-variant overflow-hidden">
-                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant flex items-center justify-between">
+                <section className="bg-white rounded-xl border border-outline-variant relative">
+                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-container-high text-primary">
                                 <MaterialIcon name="insights" size="sm" />
@@ -617,28 +598,24 @@ export default function LogFuelActivityPage() {
                     </div>
                     <div className="p-card-padding grid gap-4 lg:grid-cols-2">
                         <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Collection Type
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                Collection Type <span className="text-error">*</span>
                             </label>
-                            <select
+                            <CustomSelect
+                                options={collectionTypeOptions}
                                 value={form.collectionType}
-                                onChange={(event) => handleChange("collectionType", event.target.value)}
-                                className={formFieldClass(Boolean(errors.collectionType))}>
-                                <option value="">Select collection type...</option>
-                                {collectionTypeOptions.map((option) => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
+                                onChange={(val) => handleChange("collectionType", val)}
+                                error={Boolean(errors.collectionType)}
+                                placeholder="Select collection type..."
+                            />
                             {errors.collectionType && (
                                 <p className="mt-2 text-xs text-error">{errors.collectionType}</p>
                             )}
                         </div>
                         {form.collectionType === "estimated" && (
                             <div className="lg:col-span-2">
-                                <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                    Estimation Basis
+                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                    Estimation Basis <span className="text-error">*</span>
                                 </label>
                                 <textarea
                                     value={form.estimationBasis}
@@ -669,8 +646,8 @@ export default function LogFuelActivityPage() {
                     </div>
                 </section>
 
-                <section className="bg-white rounded-xl border border-outline-variant overflow-hidden">
-                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant flex items-center justify-between">
+                <section className="bg-white rounded-xl border border-outline-variant relative">
+                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-container-high text-primary">
                                 <MaterialIcon name="attach_file" size="sm" />
@@ -685,99 +662,13 @@ export default function LogFuelActivityPage() {
                             </div>
                         </div>
                     </div>
-                    <div className="p-card-padding grid gap-4 lg:grid-cols-2">
-                        <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Document Type
-                            </label>
-                            <select
-                                value={form.documentType}
-                                onChange={(event) => handleChange("documentType", event.target.value)}
-                                className={formFieldClass(Boolean(errors.documentType))}>
-                                <option value="">Select type...</option>
-                                {documentTypeOptions.map((option) => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.documentType && <p className="mt-2 text-xs text-error">{errors.documentType}</p>}
-                        </div>
-                        <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Document Name
-                            </label>
-                            <Input
-                                type="text"
-                                value={form.documentName}
-                                onChange={(event) => handleChange("documentName", event.target.value)}
-                                className={`${formFieldClass()} border border-outline-variant`}
-                                placeholder="e.g. Q1_Diesel_Invoice_NorthHub"
-                            />
-                        </div>
-                        <div className="lg:col-span-2">
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Upload Supporting Evidence
-                            </label>
-                            <label className="flex min-h-[160px] flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-outline-variant bg-surface-container text-center text-on-surface-variant transition-colors hover:border-primary">
-                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-primary shadow-sm">
-                                    <MaterialIcon name="cloud_upload" size="sm" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-semibold text-primary">
-                                        Click to upload or drag and drop
-                                    </p>
-                                    <p className="text-xs text-on-surface-variant">PDF, PNG, JPG or CSV (max 10MB)</p>
-                                </div>
-                                <input type="file" className="hidden" onChange={handleFileChange} />
-                                {form.attachmentName && (
-                                    <p className="text-xs text-on-surface-variant">{form.attachmentName}</p>
-                                )}
-                            </label>
-                        </div>
-                        <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Documentation Link
-                            </label>
-                            <Input
-                                type="text"
-                                value={form.documentLink}
-                                onChange={(event) => handleDocumentLinkChange(event.target.value)}
-                                className={`${formFieldClass(Boolean(errors.documentLink))} border border-outline-variant`}
-                                placeholder={
-                                    documentFile ? "Upload file to provide link" : "https://sharepoint.com/doc..."
-                                }
-                                disabled={Boolean(documentFile)}
-                            />
-                            {documentFile && (
-                                <p className="mt-2 text-xs text-on-surface-variant">
-                                    Document URL is disabled because a file upload is selected.
-                                </p>
-                            )}
-                            {errors.documentLink && <p className="mt-2 text-xs text-error">{errors.documentLink}</p>}
-                        </div>
-                        <div>
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Document Date
-                            </label>
-                            <Input
-                                type="date"
-                                value={form.documentDate}
-                                onChange={(event) => handleChange("documentDate", event.target.value)}
-                                className={`${formFieldClass()} border border-outline-variant`}
-                            />
-                        </div>
-                        <div className="lg:col-span-2">
-                            <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                                Notes
-                            </label>
-                            <textarea
-                                value={form.notes}
-                                onChange={(event) => handleChange("notes", event.target.value)}
-                                className="min-h-[128px] w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
-                                placeholder="Add any clarifying remarks..."
-                            />
-                        </div>
+                    <div className="p-card-padding">
+                        <ActivityDocumentsManager
+                            documents={documents}
+                            onChange={setDocuments}
+                            documentTypeOptions={documentTypeOptions}
+                            errors={errors}
+                        />
                     </div>
                 </section>
 

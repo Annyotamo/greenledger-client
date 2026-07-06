@@ -75,7 +75,7 @@ export function EnergyTrendChart({ data }: EnergyTrendChartProps) {
             </CardHeader>
 
             <CardBody className="p-0">
-                <div className="chart-grid-bg relative flex h-96 w-full items-end overflow-hidden rounded-b-lg border border-t-0 border-outline-variant bg-surface-container-low px-4 py-4">
+                <div className="chart-grid-bg relative flex h-64 w-full items-end overflow-hidden rounded-b-lg border border-t-0 border-outline-variant bg-surface-container-low px-4 py-4">
                     <svg
                         className="absolute inset-0 h-full w-full"
                         preserveAspectRatio="none"

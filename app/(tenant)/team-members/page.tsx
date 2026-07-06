@@ -44,39 +44,6 @@ export default function TeamMembersPage() {
                 </Link>
             </div>
 
-            <div className="grid gap-4 xl:grid-cols-[1fr_260px] items-end">
-                <div className="relative">
-                    <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">
-                        <MaterialIcon name="search" size="sm" />
-                    </div>
-                    <Input
-                        placeholder="Search by name or email"
-                        value={searchTerm}
-                        onChange={(event) => setSearchTerm(event.target.value)}
-                        className="pl-10"
-                    />
-                </div>
-                <div className="grid gap-2">
-                    <label
-                        htmlFor="role-filter"
-                        className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface-variant">
-                        Role
-                    </label>
-                    <select
-                        id="role-filter"
-                        value={selectedRole}
-                        onChange={(event) => setSelectedRole(event.target.value)}
-                        className="w-full rounded-lg border border-outline-variant bg-surface-container py-2 px-3 text-body-md text-on-surface focus:ring-1 focus:ring-primary">
-                        <option value="">All roles</option>
-                        {roleOptions.map((role) => (
-                            <option key={role} value={role}>
-                                {role}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            </div>
-
             <TeamMembersSummary members={members} />
 
             <TeamMembersTable members={filtered} isLoading={isPending} isError={isError} />

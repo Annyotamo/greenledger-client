@@ -32,7 +32,7 @@ const gridItemVariants = {
 
 export function EnergyDashboardView() {
     return (
-        <div className="relative mx-auto max-w-350 space-y-6">
+        <div className="relative mx-auto max-w-[1400px] space-y-6">
             <EnergyHeader />
 
             <motion.div

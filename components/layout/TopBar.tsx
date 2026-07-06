@@ -54,7 +54,7 @@ export function TopBar({ activeTab, onTabChange, searchPlaceholder }: TopBarProp
                     />
                     <Input
                         placeholder={searchPlaceholder ?? "Search emissions data..."}
-                        className="h-auto lg:h-[35px] bg-gray-50"
+                        className="h-auto lg:h-[35px] bg-gray-50 pl-10"
                     />
                 </div>
             </div>

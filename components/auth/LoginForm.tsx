@@ -165,7 +165,7 @@ export default function LoginForm() {
     const router = useRouter();
 
     function handleCredentialsSuccess() {
-        router.push("/dashboard");
+        router.push("/initializing");
     }
 
     return (

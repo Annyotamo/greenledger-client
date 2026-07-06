@@ -25,6 +25,14 @@ export function TenantShell({ children }: TenantShellProps) {
     const mainMargin = collapsed ? "5rem" : "16rem";
     const mainPaddingTop = "6rem";
 
+    if (pathname === "/initializing") {
+        return (
+            <div className="h-screen w-screen overflow-hidden">
+                {children}
+            </div>
+        );
+    }
+
     const activeTab = useMemo<DashboardTab>(() => {
         return pathname === "/energy-dashboard" ? "energy" : "emissions";
     }, [pathname]);

@@ -116,7 +116,6 @@ export default function ElectricityActivitiesPage() {
                         onChange={(e) => setDataQualityTier(e.target.value)}>
                         <option value="">All quality tiers</option>
                         <option value="measured">Measured</option>
-                        <option value="calculated">Calculated</option>
                         <option value="estimated">Estimated</option>
                     </select>
                     <select

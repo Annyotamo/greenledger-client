@@ -45,6 +45,7 @@ export default function BrsrEnergyPage() {
     );
 
     const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
 
     // Prepopulate default filters when data is first fetched
     useEffect(() => {
@@ -163,7 +164,14 @@ export default function BrsrEnergyPage() {
                         Principle 6 (Environmental Performance) energy usage metrics and intensity audit.
                     </p>
                 </div>
-                <div>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="secondary"
+                        onClick={() => setIsFilterOpen((prev) => !prev)}
+                        className="flex items-center gap-2 px-4 py-2.5">
+                        <MaterialIcon name={isFilterOpen ? "filter_alt_off" : "filter_alt"} size="sm" />
+                        <span>{isFilterOpen ? "Hide Controls" : "Energy Controls"}</span>
+                    </Button>
                     <Button
                         variant="primary"
                         onClick={() => setIsDownloadOpen(true)}
@@ -174,6 +182,8 @@ export default function BrsrEnergyPage() {
                 </div>
             </div>
 
+            {/* Inputs & Parameters Panel */}
+            {isFilterOpen && (
             <Card>
                 <CardHeader tone="strip" className="py-2.5 bg-white">
                     <div className="flex items-center gap-2">
@@ -296,6 +306,7 @@ export default function BrsrEnergyPage() {
                     </div>
                 </CardBody>
             </Card>
+            )}
 
             {/* Reporting Period Summary Bar */}
             <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">

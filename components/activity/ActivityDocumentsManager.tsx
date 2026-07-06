@@ -32,13 +32,17 @@ export function ActivityDocumentsManager({
     errors,
 }: ActivityDocumentsManagerProps) {
     function handleUpdateDoc(id: string, field: keyof ActivityDocument, value: any) {
+        handleUpdateDocFields(id, { [field]: value });
+    }
+
+    function handleUpdateDocFields(id: string, updates: Partial<ActivityDocument>) {
         const next = documents.map((doc) => {
             if (doc.id === id) {
-                const updated = { ...doc, [field]: value } as ActivityDocument;
+                const updated = { ...doc, ...updates } as ActivityDocument;
 
                 // Reset alternate source values when switching mode
-                if (field === "sourceMode") {
-                    if (value === "upload") {
+                if ("sourceMode" in updates) {
+                    if (updates.sourceMode === "upload") {
                         updated.documentLink = "";
                     } else {
                         updated.file = null;
@@ -192,8 +196,10 @@ export function ActivityDocumentsManager({
                                             <button
                                                 type="button"
                                                 onClick={() => {
-                                                    handleUpdateDoc(doc.id, "file", null);
-                                                    handleUpdateDoc(doc.id, "attachmentName", "");
+                                                    handleUpdateDocFields(doc.id, {
+                                                        file: null,
+                                                        attachmentName: "",
+                                                    });
                                                 }}
                                                 className="text-on-surface-variant hover:text-error transition cursor-pointer"
                                             >
@@ -214,13 +220,18 @@ export function ActivityDocumentsManager({
                                                 className="hidden"
                                                 onChange={(e) => {
                                                     const file = e.target.files?.[0] ?? null;
-                                                    handleUpdateDoc(doc.id, "file", file);
-                                                    handleUpdateDoc(doc.id, "attachmentName", file?.name ?? "");
+                                                    const updates: Partial<ActivityDocument> = {
+                                                        file,
+                                                        attachmentName: file?.name ?? "",
+                                                    };
+                                                    
                                                     // Auto fill document name if empty
                                                     if (file && !doc.documentName) {
                                                         const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-                                                        handleUpdateDoc(doc.id, "documentName", nameWithoutExt);
+                                                        updates.documentName = nameWithoutExt;
                                                     }
+                                                    
+                                                    handleUpdateDocFields(doc.id, updates);
                                                 }}
                                             />
                                         </label>

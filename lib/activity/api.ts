@@ -112,7 +112,11 @@ export async function uploadS3File(file: File) {
         },
     });
 
-    return response.data.data?.url as string;
+    const data = response.data?.data;
+    if (typeof data === "string") {
+        return data;
+    }
+    return data?.url as string;
 }
 
 export async function uploadFuelActivityDocument(activityId: string, payload: Record<string, unknown>) {

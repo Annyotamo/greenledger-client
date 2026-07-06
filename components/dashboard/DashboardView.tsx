@@ -12,6 +12,7 @@ import {
 } from "@/lib/dashboard/data";
 import { AiAssistantFAB } from "./AiAssistantFAB";
 import { DashboardHeader } from "./DashboardHeader";
+import { TenantDashboardBanner } from "./TenantDashboardBanner";
 import { EmissionsTrendChart } from "./EmissionsTrendChart";
 import { FacilityTable } from "./FacilityTable";
 import { MetricCard } from "./MetricCard";
@@ -34,6 +35,7 @@ export function DashboardView() {
     return (
         <div className="relative mx-auto max-w-[1400px] space-y-6">
             <DashboardHeader />
+            <TenantDashboardBanner />
 
             <motion.div
                 className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"

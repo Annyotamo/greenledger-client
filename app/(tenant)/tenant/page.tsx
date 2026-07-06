@@ -37,6 +37,87 @@ export default function TenantProfilePage() {
                 </div>
             </div>
 
+            {/* Elegant Cover & Logo Card */}
+            <div className="relative overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+                {/* Banner Cover Image / Gradient */}
+                <div className="relative h-48 w-full md:h-64">
+                    {profile.bannerImageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                            src={profile.bannerImageUrl}
+                            alt={`${profile.companyName} Cover`}
+                            className="h-full w-full object-cover select-none pointer-events-none"
+                        />
+                    ) : (
+                        <div className="h-full w-full bg-gradient-to-r from-emerald-950 via-teal-950 to-emerald-900" />
+                    )}
+                    {/* Subtle Overlay */}
+                    <div className="absolute inset-0 bg-black/25" />
+                </div>
+
+                {/* Logo & Basic Info Container (Flex-based overlap layout) */}
+                <div className="px-6 pb-6 pt-4">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-6">
+                        {/* Overlapping Logo */}
+                        <div className="-mt-16 relative z-10 flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border-4 border-white bg-white p-1.5 shadow-md md:-mt-24 md:h-32 md:w-32">
+                            {profile.logoUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                    src={profile.logoUrl}
+                                    alt={`${profile.companyName} Logo`}
+                                    className="h-full w-full object-contain select-none"
+                                />
+                            ) : (
+                                <div className="flex h-full w-full items-center justify-center bg-secondary-container text-on-secondary-container text-2xl font-bold">
+                                    {profile.companyName.charAt(0)}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Text Details next to Logo */}
+                        <div className="flex flex-1 flex-col gap-4 md:flex-row md:items-end md:justify-between pb-1">
+                            <div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <h1 className="text-2xl font-bold tracking-tight text-primary md:text-3xl">
+                                        {profile.companyName}
+                                    </h1>
+                                    {profile.isVerified && (
+                                        <span className="inline-flex items-center gap-1 rounded bg-secondary-container/20 px-2 py-0.5 font-mono text-[10px] font-semibold text-on-secondary-container">
+                                            <MaterialIcon name="verified" size="sm" className="text-secondary" />
+                                            VERIFIED
+                                        </span>
+                                    )}
+                                    <span className="inline-flex items-center rounded bg-surface-container-high px-2 py-0.5 font-mono text-[10px] font-semibold text-on-surface-variant">
+                                        {profile.tenantStatus}
+                                    </span>
+                                </div>
+                                <p className="mt-1 font-mono text-xs text-on-surface-variant">
+                                    {profile.sector} • {profile.industryType}
+                                </p>
+                            </div>
+                            <div className="flex flex-wrap gap-2 shrink-0">
+                                {profile.website && (
+                                    <a
+                                        href={profile.website}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1.5 rounded border border-outline-variant bg-surface-container-low px-3 py-1.5 font-mono text-label-md text-on-surface transition-colors hover:bg-surface-container-high">
+                                        <MaterialIcon name="language" size="sm" />
+                                        Website
+                                    </a>
+                                )}
+                                <a
+                                    href={`mailto:${profile.companyEmail}`}
+                                    className="inline-flex items-center gap-1.5 rounded border border-outline-variant bg-surface-container-low px-3 py-1.5 font-mono text-label-md text-on-surface transition-colors hover:bg-surface-container-high">
+                                    <MaterialIcon name="mail" size="sm" />
+                                    Contact
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <TenantProfileSummary profile={profile} />
 
             <div className="grid gap-6 xl:grid-cols-[1.45fr_0.95fr]">

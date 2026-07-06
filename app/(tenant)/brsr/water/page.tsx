@@ -35,6 +35,7 @@ export default function BrsrWaterPage() {
 
     const { data, isPending, isError, error } = useBrsrWaterDisclosure(activePayload);
     const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
 
     // Auto-update total water consumption input as components change
     useEffect(() => {
@@ -113,7 +114,14 @@ export default function BrsrWaterPage() {
                         Principle 6 (Environmental Performance) water consumption accounting and intensity metrics.
                     </p>
                 </div>
-                <div>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="secondary"
+                        onClick={() => setIsFilterOpen((prev) => !prev)}
+                        className="flex items-center gap-2 px-4 py-2.5">
+                        <MaterialIcon name={isFilterOpen ? "filter_alt_off" : "filter_alt"} size="sm" />
+                        <span>{isFilterOpen ? "Hide Controls" : "Water Controls"}</span>
+                    </Button>
                     <Button
                         variant="primary"
                         onClick={() => setIsDownloadOpen(true)}
@@ -125,6 +133,7 @@ export default function BrsrWaterPage() {
             </div>
 
             {/* Inputs & Parameters Panel */}
+            {isFilterOpen && (
             <Card>
                 <CardHeader tone="strip" className="py-2.5 bg-white">
                     <div className="flex items-center gap-2">
@@ -267,6 +276,7 @@ export default function BrsrWaterPage() {
                     </div>
                 </CardBody>
             </Card>
+            )}
 
             {/* Content Loading State */}
             {isPending ? (

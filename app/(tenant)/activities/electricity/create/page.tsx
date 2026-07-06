@@ -1,7 +1,7 @@
 "use client";
 
 import type { ChangeEvent, FormEvent } from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { format, isAfter } from "date-fns";
@@ -45,7 +45,6 @@ const sourceTypesByActivity: Record<string, { label: string; value: string }[]> 
     captive: [
         { label: "WHRB", value: "whrb" },
         { label: "FBC", value: "fbc" },
-        { label: "Captive Solar", value: "captive_solar" },
     ],
     other: [
         { label: "Waste Fuel", value: "waste_fuel" },
@@ -93,6 +92,19 @@ export default function LogElectricityActivityPage() {
     const reportingPeriodsQuery = useReportingPeriods();
     const facilitiesQuery = useFacilities();
     const emissionSourcesQuery = useEmissionSources();
+
+    useEffect(() => {
+        if (emissionSourcesQuery.data && emissionSourcesQuery.data.length > 0) {
+            const ceaSource = emissionSourcesQuery.data.find(
+                (s: any) =>
+                    s.standard.toLowerCase().includes("cea") ||
+                    s.standard.toLowerCase().includes("central electricity authority")
+            );
+            if (ceaSource) {
+                setForm((current) => ({ ...current, source: String(ceaSource.id) }));
+            }
+        }
+    }, [emissionSourcesQuery.data]);
 
     function handleChange(field: string, value: string) {
         setForm((current) => ({ ...current, [field]: value }) as typeof form);
@@ -199,9 +211,12 @@ export default function LogElectricityActivityPage() {
 
             // Upload all attached documents
             for (const doc of documents) {
-                let sourceUrl = doc.documentLink;
-                if (doc.file) {
-                    sourceUrl = await uploadS3File(doc.file);
+                let sourceUrl = "";
+                if (doc.sourceMode === "upload" && doc.file) {
+                    const uploadedUrl = await uploadS3File(doc.file);
+                    sourceUrl = uploadedUrl || "";
+                } else if (doc.sourceMode === "link") {
+                    sourceUrl = doc.documentLink || "";
                 }
 
                 await uploadElectricityActivityDocument(activityId, {
@@ -209,7 +224,7 @@ export default function LogElectricityActivityPage() {
                     electricity_activity_id: activityId,
                     document_type: doc.documentType,
                     document_name: doc.documentName,
-                    source_url: sourceUrl,
+                    source_url: sourceUrl || undefined,
                     notes: doc.notes || null,
                     document_date: doc.documentDate || null,
                 });
@@ -341,22 +356,6 @@ export default function LogElectricityActivityPage() {
                         </div>
                     </div>
                     <div className="p-card-padding grid gap-4 lg:grid-cols-2">
-                        <div>
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                Source
-                            </label>
-                            <CustomSelect
-                                options={emissionSourcesQuery.data?.map((s: any) => ({
-                                    label: `${s.standard}${s.version ? ` (${s.version})` : ""}`,
-                                    value: String(s.id)
-                                })) || []}
-                                value={form.source}
-                                onChange={(val) => handleChange("source", val)}
-                                error={Boolean(errors.source)}
-                                placeholder="Select source..."
-                                isClearable
-                            />
-                        </div>
                         <div>
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Electricity <span className="text-error">*</span>

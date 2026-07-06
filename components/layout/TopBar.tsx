@@ -46,7 +46,7 @@ export function TopBar({ activeTab, onTabChange, searchPlaceholder }: TopBarProp
                     ))}
                 </div>
 
-                <div className="relative flex-1">
+                {/* <div className="relative flex-1">
                     <MaterialIcon
                         name="search"
                         size="sm"
@@ -56,7 +56,7 @@ export function TopBar({ activeTab, onTabChange, searchPlaceholder }: TopBarProp
                         placeholder={searchPlaceholder ?? "Search emissions data..."}
                         className="h-auto lg:h-[35px] bg-gray-50 pl-10"
                     />
-                </div>
+                </div> */}
             </div>
 
             <div className="flex items-center gap-4">
@@ -74,7 +74,7 @@ export function TopBar({ activeTab, onTabChange, searchPlaceholder }: TopBarProp
                         aria-label="Help">
                         <MaterialIcon name="help_outline" className="text-on-surface-variant" />
                     </button>
-                    <button
+                    {/* <button
                         type="button"
                         className="rounded-full p-2 pb-0 transition-colors hover:bg-surface-container-high"
                         aria-label="Toggle theme"
@@ -83,7 +83,7 @@ export function TopBar({ activeTab, onTabChange, searchPlaceholder }: TopBarProp
                             name={mounted && resolvedTheme === "dark" ? "light_mode" : "dark_mode"}
                             className="text-on-surface-variant"
                         />
-                    </button>
+                    </button> */}
                 </div>
             </div>
         </header>

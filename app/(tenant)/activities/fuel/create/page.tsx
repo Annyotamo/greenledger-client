@@ -45,7 +45,6 @@ const documentTypeOptions = [
 ];
 const collectionTypeOptions = [
     { label: "Measured", value: "measured" },
-    { label: "Calculated", value: "calculated" },
     { label: "Estimated", value: "estimated" },
 ];
 
@@ -271,9 +270,12 @@ export default function LogFuelActivityPage() {
 
             // Upload all attached documents
             for (const doc of documents) {
-                let sourceUrl = doc.documentLink;
-                if (doc.file) {
-                    sourceUrl = await uploadS3File(doc.file);
+                let sourceUrl = "";
+                if (doc.sourceMode === "upload" && doc.file) {
+                    const uploadedUrl = await uploadS3File(doc.file);
+                    sourceUrl = uploadedUrl || "";
+                } else if (doc.sourceMode === "link") {
+                    sourceUrl = doc.documentLink || "";
                 }
 
                 await uploadFuelActivityDocument(activityId, {
@@ -281,7 +283,7 @@ export default function LogFuelActivityPage() {
                     electricity_activity_id: null,
                     document_type: doc.documentType,
                     document_name: doc.documentName,
-                    source_url: sourceUrl,
+                    source_url: sourceUrl || undefined,
                     notes: doc.notes || null,
                     document_date: doc.documentDate || null,
                 });

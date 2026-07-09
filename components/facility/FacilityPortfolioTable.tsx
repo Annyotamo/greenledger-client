@@ -117,8 +117,8 @@ export function FacilityPortfolioTable({ facilities, isLoading, isError }: Facil
                                                 </span>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="py-3 px-4 text-body-md capitalize">
-                                            {facility.ownershipType}
+                                        <TableCell className="py-3 px-4 text-body-md">
+                                            {facility.ownershipPercent !== undefined ? `${facility.ownershipPercent}%` : "100%"}
                                         </TableCell>
                                         <TableCell className="py-3 px-4">
                                             <div className="flex items-center gap-2">

@@ -30,6 +30,21 @@ const DEFAULT_FIELD_LABELS: Record<string, string> = {
     sourceType: "Source Type",
     dataQualityTier: "Data Quality",
     notes: "Notes",
+    // Facility registration labels
+    name: "Facility Name",
+    facilityCode: "Facility Code",
+    facilityType: "Facility Type",
+    operationalControl: "Operational Control",
+    financialControl: "Financial Control",
+    ownershipPercent: "Ownership Percentage",
+    country: "Country",
+    city: "City",
+    addressLine1: "Address Line 1",
+    operationalSince: "Operational Since",
+    operationalUntil: "Operational Until",
+    floorArea: "Floor Area",
+    floorAreaUnit: "Floor Area Unit",
+    employeeCount: "Employee Count",
 };
 
 function getFieldLabel(key: string, labels?: Record<string, string>): string {
@@ -48,7 +63,7 @@ function getFieldLabel(key: string, labels?: Record<string, string>): string {
 }
 
 export function FormErrorSummary({ errors, submitError, fieldLabels }: FormErrorSummaryProps) {
-    const errorKeys = Object.keys(errors).filter((k) => k !== "submit");
+    const errorKeys = Object.keys(errors).filter((k) => k !== "submit" && errors[k]);
     const hasErrors = errorKeys.length > 0;
     const displaySubmitError = submitError || errors.submit;
 

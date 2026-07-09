@@ -8,13 +8,17 @@ import { useCreateFacility } from "@/lib/facility/hooks";
 import Link from "next/link";
 import { CustomSelect } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
+import { FormErrorSummary } from "@/components/ui/FormErrorSummary";
+import { getErrorMessage } from "@/lib/utils/error";
 
 const initialState = {
     name: "",
     facilityCode: "",
     description: "",
     facilityType: "manufacturing",
-    ownershipType: "owned",
+    operationalControl: true,
+    financialControl: false,
+    ownershipPercent: "100.00",
     country: "India",
     state: "West Bengal",
     city: "Kolkata",
@@ -34,15 +38,65 @@ const initialState = {
 
 export default function CreateFacilityPage() {
     const router = useRouter();
-    const { mutate, isPending, isError } = useCreateFacility();
+    const { mutate, isPending } = useCreateFacility();
     const [form, setForm] = useState(initialState);
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     const handleChange = (key: keyof typeof initialState, value: string | boolean) => {
         setForm((current) => ({ ...current, [key]: value }));
+        setErrors((current) => ({ ...current, [key]: "" }));
     };
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        const nextErrors: Record<string, string> = {};
+
+        // 1. Mandatory fields validation
+        if (!form.name.trim()) nextErrors.name = "Facility name is required.";
+        if (!form.facilityType) nextErrors.facilityType = "Facility type is required.";
+        if (!form.country.trim()) nextErrors.country = "Country is required.";
+        if (!form.city.trim()) nextErrors.city = "City is required.";
+        if (!form.addressLine1.trim()) nextErrors.addressLine1 = "Address Line 1 is required.";
+
+        // 2. operational_control and financial_control cannot both be True
+        if (form.operationalControl && form.financialControl) {
+            nextErrors.operationalControl = "Operational control and financial control cannot both be enabled.";
+            nextErrors.financialControl = "Operational control and financial control cannot both be enabled.";
+        }
+
+        // 3. operational_until must be after operational_since
+        if (form.operationalSince && form.operationalUntil) {
+            const since = new Date(form.operationalSince);
+            const until = new Date(form.operationalUntil);
+            if (until < since) {
+                nextErrors.operationalUntil = "Operational until date must be after operational since date.";
+            }
+        }
+
+        // 4. floor_area_unit is required when floor_area is provided
+        if (form.floorArea.trim() && !form.floorAreaUnit) {
+            nextErrors.floorAreaUnit = "Floor area unit is required when floor area is specified.";
+        }
+
+        // 5. ownershipPercent validation
+        if (form.ownershipPercent) {
+            const pct = Number(form.ownershipPercent);
+            if (isNaN(pct) || pct < 0 || pct > 100) {
+                nextErrors.ownershipPercent = "Ownership percentage must be a number between 0 and 100.";
+            }
+        }
+
+        setErrors(nextErrors);
+        if (Object.keys(nextErrors).length > 0) {
+            const firstErrorKey = Object.keys(nextErrors)[0];
+            setTimeout(() => {
+                const element = document.getElementById(`form-field-${firstErrorKey}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+            }, 100);
+            return;
+        }
 
         mutate(
             {
@@ -50,7 +104,9 @@ export default function CreateFacilityPage() {
                 description: form.description,
                 facilityCode: form.facilityCode,
                 facilityType: form.facilityType,
-                ownershipType: form.ownershipType,
+                operationalControl: form.operationalControl,
+                financialControl: form.financialControl,
+                ownershipPercent: Number(form.ownershipPercent),
                 country: form.country,
                 state: form.state,
                 city: form.city,
@@ -71,6 +127,17 @@ export default function CreateFacilityPage() {
                 onSuccess: () => {
                     router.push("/facilities");
                 },
+                onError: (err) => {
+                    console.error(err);
+                    const message = getErrorMessage(err, "Failed to create facility. Please try again.");
+                    setErrors({ submit: message });
+                    setTimeout(() => {
+                        const element = document.getElementById("logFacilityForm");
+                        if (element) {
+                            element.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }
+                    }, 100);
+                }
             },
         );
     };
@@ -94,8 +161,10 @@ export default function CreateFacilityPage() {
                 </p>
             </header>
 
+            <FormErrorSummary errors={errors} />
+
             {/* Form */}
-            <form className="space-y-8" onSubmit={handleSubmit}>
+            <form id="logFacilityForm" className="space-y-8" onSubmit={handleSubmit}>
                 {/* Basic Information Section */}
                 <section className="bg-white rounded-xl border border-outline-variant relative">
                     <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center justify-between">
@@ -108,31 +177,30 @@ export default function CreateFacilityPage() {
                         </span>
                     </div>
                     <div className="p-card-padding grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
+                        <div id="form-field-name" className="space-y-2">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Facility Name <span className="text-error">*</span>
                             </label>
                             <Input
-                                required
                                 value={form.name}
                                 onChange={(event) => handleChange("name", event.target.value)}
                                 placeholder="e.g., GreenLedger Facility 001"
                                 className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                             />
+                            {errors.name && <p className="text-xs text-error mt-1">{errors.name}</p>}
                         </div>
-                        <div className="space-y-2">
+                        <div id="form-field-facilityCode" className="space-y-2">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                Facility Unit (Code) <span className="text-error">*</span>
+                                Facility Unit (Code)
                             </label>
                             <Input
-                                required
                                 value={form.facilityCode}
                                 onChange={(event) => handleChange("facilityCode", event.target.value)}
-                                placeholder="e.g., GRNL-01/17"
+                                placeholder="e.g., GRNL-01/17 (optional)"
                                 className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                             />
                         </div>
-                        <div className="space-y-2 md:col-span-2">
+                        <div id="form-field-description" className="space-y-2 md:col-span-2">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Description
                             </label>
@@ -144,7 +212,7 @@ export default function CreateFacilityPage() {
                                 placeholder="Briefly describe the facility's core function..."
                             />
                         </div>
-                        <div className="space-y-2">
+                        <div id="form-field-facilityType" className="space-y-2">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Facility Type <span className="text-error">*</span>
                             </label>
@@ -154,41 +222,67 @@ export default function CreateFacilityPage() {
                                     { label: "Office", value: "office" },
                                     { label: "Warehouse", value: "warehouse" },
                                     { label: "Retail", value: "retail" },
-                                    { label: "Data Center", value: "data center" },
+                                    { label: "Data Center", value: "data_center" },
                                 ]}
                                 value={form.facilityType}
                                 onChange={(val) => handleChange("facilityType", val)}
                                 placeholder="Select type..."
                             />
+                            {errors.facilityType && <p className="text-xs text-error mt-1">{errors.facilityType}</p>}
                         </div>
-                        <div className="space-y-2">
+                        <div id="form-field-operationalControl" className="space-y-2 md:col-span-2">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                Ownership Type <span className="text-error">*</span>
+                                Control & Ownership Settings
                             </label>
-                            <div className="flex gap-4 pt-2">
-                                <label className="flex items-center gap-2 cursor-pointer">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                                <label className="flex items-center gap-3 cursor-pointer rounded-lg border border-outline-variant bg-white p-3 select-none">
                                     <input
-                                        type="radio"
-                                        name="ownership"
-                                        value="owned"
-                                        checked={form.ownershipType === "owned"}
-                                        onChange={(event) => handleChange("ownershipType", event.target.value)}
-                                        className="w-4 h-4 text-primary focus:ring-primary"
+                                        type="checkbox"
+                                        checked={form.operationalControl}
+                                        onChange={(event) => handleChange("operationalControl", event.target.checked)}
+                                        className="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
                                     />
-                                    <span className="font-body-md text-body-md">Owned</span>
+                                    <div>
+                                        <span className="font-body-md text-body-md font-semibold text-primary block">Operational Control</span>
+                                        <span className="text-[10px] text-on-surface-variant">Authority to introduce policies</span>
+                                    </div>
                                 </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
+
+                                <label className="flex items-center gap-3 cursor-pointer rounded-lg border border-outline-variant bg-white p-3 select-none">
                                     <input
-                                        type="radio"
-                                        name="ownership"
-                                        value="leased"
-                                        checked={form.ownershipType === "leased"}
-                                        onChange={(event) => handleChange("ownershipType", event.target.value)}
-                                        className="w-4 h-4 text-primary focus:ring-primary"
+                                        type="checkbox"
+                                        checked={form.financialControl}
+                                        onChange={(event) => handleChange("financialControl", event.target.checked)}
+                                        className="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
                                     />
-                                    <span className="font-body-md text-body-md">Leased</span>
+                                    <div>
+                                        <span className="font-body-md text-body-md font-semibold text-primary block">Financial Control</span>
+                                        <span className="text-[10px] text-on-surface-variant">Direct financial benefits and risks</span>
+                                    </div>
                                 </label>
+
+                                <div id="form-field-ownershipPercent" className="space-y-1 bg-white border border-outline-variant rounded-lg p-3">
+                                    <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+                                        Ownership Percentage (%)
+                                    </label>
+                                    <Input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        max="100"
+                                        value={form.ownershipPercent}
+                                        onChange={(event) => handleChange("ownershipPercent", event.target.value)}
+                                        placeholder="100.00"
+                                        className="w-full px-2.5 py-1.5 border border-outline-variant rounded bg-white font-body-md text-on-surface focus:ring-1 focus:ring-primary outline-none"
+                                    />
+                                    {errors.ownershipPercent && (
+                                        <p className="text-[10px] text-error mt-0.5">{errors.ownershipPercent}</p>
+                                    )}
+                                </div>
                             </div>
+                            {(errors.operationalControl || errors.financialControl) && (
+                                <p className="text-xs text-error mt-1">{errors.operationalControl || errors.financialControl}</p>
+                            )}
                         </div>
                     </div>
                 </section>
@@ -200,15 +294,16 @@ export default function CreateFacilityPage() {
                         <h2 className="text-headline-sm font-headline-sm text-primary">Location Details</h2>
                     </div>
                     <div className="p-card-padding grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="space-y-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">Country</label>
+                        <div id="form-field-country" className="space-y-2">
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">Country <span className="text-error">*</span></label>
                             <Input
                                 value={form.country}
                                 onChange={(event) => handleChange("country", event.target.value)}
                                 className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                             />
+                            {errors.country && <p className="text-xs text-error mt-1">{errors.country}</p>}
                         </div>
-                        <div className="space-y-2">
+                        <div id="form-field-state" className="space-y-2">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 State / Province
                             </label>
@@ -218,27 +313,39 @@ export default function CreateFacilityPage() {
                                 className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                             />
                         </div>
-                        <div className="space-y-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">City</label>
+                        <div id="form-field-city" className="space-y-2">
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">City <span className="text-error">*</span></label>
                             <Input
                                 value={form.city}
                                 onChange={(event) => handleChange("city", event.target.value)}
                                 className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                             />
+                            {errors.city && <p className="text-xs text-error mt-1">{errors.city}</p>}
                         </div>
-                        <div className="space-y-2 md:col-span-2">
+                        <div id="form-field-addressLine1" className="space-y-2 md:col-span-2">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Address Line 1 <span className="text-error">*</span>
                             </label>
                             <Input
-                                required
                                 value={form.addressLine1}
                                 onChange={(event) => handleChange("addressLine1", event.target.value)}
                                 placeholder="Street address, P.O. box"
                                 className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                             />
+                            {errors.addressLine1 && <p className="text-xs text-error mt-1">{errors.addressLine1}</p>}
                         </div>
-                        <div className="space-y-2">
+                        <div id="form-field-addressLine2" className="space-y-2">
+                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                Address Line 2
+                            </label>
+                            <Input
+                                value={form.addressLine2}
+                                onChange={(event) => handleChange("addressLine2", event.target.value)}
+                                placeholder="Apartment, suite, unit, building (optional)"
+                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
+                            />
+                        </div>
+                        <div id="form-field-postalCode" className="space-y-2">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Postal Code
                             </label>
@@ -249,7 +356,7 @@ export default function CreateFacilityPage() {
                                 className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                             />
                         </div>
-                        <div className="space-y-2 md:col-span-3">
+                        <div id="form-field-timezone" className="space-y-2 md:col-span-3">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Timezone <span className="text-error">*</span>
                             </label>
@@ -274,7 +381,7 @@ export default function CreateFacilityPage() {
                         <h2 className="text-headline-sm font-headline-sm text-primary">Operational Details</h2>
                     </div>
                     <div className="p-card-padding grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
+                        <div id="form-field-operationalSince" className="space-y-2">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Operational Since
                             </label>
@@ -283,7 +390,7 @@ export default function CreateFacilityPage() {
                                 onChange={(val) => handleChange("operationalSince", val)}
                             />
                         </div>
-                        <div className="space-y-2">
+                        <div id="form-field-operationalUntil" className="space-y-2">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Operational Until (Optional)
                             </label>
@@ -291,9 +398,10 @@ export default function CreateFacilityPage() {
                                 value={form.operationalUntil}
                                 onChange={(val) => handleChange("operationalUntil", val)}
                             />
+                            {errors.operationalUntil && <p className="text-xs text-error mt-1">{errors.operationalUntil}</p>}
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
+                            <div id="form-field-floorArea" className="space-y-2">
                                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                     Floor Area
                                 </label>
@@ -304,7 +412,7 @@ export default function CreateFacilityPage() {
                                     className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
                                 />
                             </div>
-                            <div className="space-y-2">
+                            <div id="form-field-floorAreaUnit" className="space-y-2">
                                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                     Unit
                                 </label>
@@ -317,9 +425,10 @@ export default function CreateFacilityPage() {
                                     onChange={(val) => handleChange("floorAreaUnit", val)}
                                     placeholder="Unit"
                                 />
+                                {errors.floorAreaUnit && <p className="text-xs text-error mt-1">{errors.floorAreaUnit}</p>}
                             </div>
                         </div>
-                        <div className="space-y-2">
+                        <div id="form-field-employeeCount" className="space-y-2">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Employee Count
                             </label>
@@ -387,13 +496,6 @@ export default function CreateFacilityPage() {
                         {isPending ? "Saving..." : "Save Facility"}
                     </button>
                 </footer>
-
-                {/* Error Message */}
-                {isError && (
-                    <div className="rounded-lg border border-error/20 bg-error/10 px-4 py-3 text-error font-body-md">
-                        Something went wrong while creating the facility. Please try again.
-                    </div>
-                )}
             </form>
         </div>
     );

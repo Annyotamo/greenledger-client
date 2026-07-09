@@ -446,12 +446,12 @@ export default function BrsrWastePage() {
                                     <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                                         Total Recovered
                                     </p>
-                                    <h3 className="text-lg font-bold text-emerald-600 dark:text-emerald-500 font-mono">
+                                    <h3 className="text-lg font-bold text-emerald-600 font-mono">
                                         {formatTonne(data.totals.total_recovered_tonne)} <span className="text-[10px] font-sans font-medium text-on-surface-variant">t</span>
                                     </h3>
                                     <p className="text-xs text-on-surface-variant">Recycled/Reused</p>
                                 </div>
-                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-500">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
                                     <MaterialIcon name="recycling" size="md" />
                                 </div>
                             </CardBody>
@@ -464,12 +464,12 @@ export default function BrsrWastePage() {
                                     <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                                         Total Disposed
                                     </p>
-                                    <h3 className="text-lg font-bold text-amber-600 dark:text-amber-500 font-mono">
+                                    <h3 className="text-lg font-bold text-amber-600 font-mono">
                                         {formatTonne(data.totals.total_disposed_tonne)} <span className="text-[10px] font-sans font-medium text-on-surface-variant">t</span>
                                     </h3>
                                     <p className="text-xs text-on-surface-variant">Landfilled/Incinerated</p>
                                 </div>
-                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-500">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
                                     <MaterialIcon name="delete_outline" size="md" />
                                 </div>
                             </CardBody>
@@ -482,13 +482,13 @@ export default function BrsrWastePage() {
                                     <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">
                                         Intensity / Turnover
                                     </p>
-                                    <h3 className="text-lg font-bold text-indigo-600 dark:text-indigo-400 font-mono">
+                                    <h3 className="text-lg font-bold text-indigo-600 font-mono">
                                         {Number(data.totals.waste_intensity_per_inr).toFixed(8)}
                                         <span className="text-[9px] font-sans font-medium text-on-surface-variant block mt-0.5">tonnes / INR</span>
                                     </h3>
                                     <p className="text-xs text-on-surface-variant">Turnover ratio</p>
                                 </div>
-                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
                                     <MaterialIcon name="trending_up" size="md" />
                                 </div>
                             </CardBody>
@@ -501,13 +501,13 @@ export default function BrsrWastePage() {
                                     <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">
                                         Intensity / Output
                                     </p>
-                                    <h3 className="text-lg font-bold text-teal-600 dark:text-teal-400 font-mono">
+                                    <h3 className="text-lg font-bold text-teal-600 font-mono">
                                         {Number(data.totals.waste_intensity_per_physical_output).toFixed(4)}
                                         <span className="text-[9px] font-sans font-medium text-on-surface-variant block mt-0.5">t / output t</span>
                                     </h3>
                                     <p className="text-xs text-on-surface-variant">Production ratio</p>
                                 </div>
-                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500/10 text-teal-600">
                                     <MaterialIcon name="scale" size="md" />
                                 </div>
                             </CardBody>

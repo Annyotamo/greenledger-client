@@ -103,7 +103,7 @@ export function ActivityDocumentsManager({
                     </div>
 
                     <div className="grid gap-4 lg:grid-cols-2">
-                        <div>
+                        <div id={`form-field-doc-${doc.id}-type`}>
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Document Type
                             </label>
@@ -119,7 +119,7 @@ export function ActivityDocumentsManager({
                             )}
                         </div>
 
-                        <div>
+                        <div id={`form-field-doc-${doc.id}-name`}>
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Document Name
                             </label>
@@ -135,7 +135,7 @@ export function ActivityDocumentsManager({
                             )}
                         </div>
 
-                        <div>
+                        <div id={`form-field-doc-${doc.id}-date`}>
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Document Date
                             </label>
@@ -181,7 +181,7 @@ export function ActivityDocumentsManager({
                             </div>
                         </div>
 
-                        <div className="lg:col-span-2">
+                        <div id={`form-field-doc-${doc.id}-source`} className="lg:col-span-2">
                             {doc.sourceMode === "upload" ? (
                                 <div className="space-y-2">
                                     <label className="block font-label-md text-label-md text-on-surface-variant mb-2">

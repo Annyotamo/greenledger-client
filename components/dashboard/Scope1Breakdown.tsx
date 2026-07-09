@@ -48,8 +48,8 @@ export function Scope1Breakdown({ fuels }: Scope1BreakdownProps) {
                             </div>
                             <ProgressBar
                                 percent={fuel.percent}
-                                trackClassName="bg-surface-container dark:bg-surface-container-high"
-                                className="bg-primary-container dark:bg-secondary dark:shadow-[0_0_4px_rgba(16,185,129,0.5)]"
+                                trackClassName="bg-surface-container"
+                                className="bg-primary-container"
                             />
                         </div>
                     ))}

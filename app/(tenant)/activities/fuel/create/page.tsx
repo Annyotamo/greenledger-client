@@ -16,6 +16,8 @@ import type { FuelCategoryDto, FuelDto, FuelUnitsDto, FuelQueryType } from "@/li
 import { createFuelActivity, uploadFuelActivityDocument, uploadS3File } from "@/lib/activity/api";
 import { ActivityDocumentsManager } from "@/components/activity/ActivityDocumentsManager";
 import type { ActivityDocument } from "@/components/activity/ActivityDocumentsManager";
+import { FormErrorSummary } from "@/components/ui/FormErrorSummary";
+import { getErrorMessage } from "@/lib/utils/error";
 
 const usageTypeOptions = [
     { label: "Direct combustion", value: "direct_combustion" },
@@ -231,7 +233,16 @@ export default function LogFuelActivityPage() {
         });
 
         setErrors(nextErrors);
-        if (Object.keys(nextErrors).length > 0) return;
+        if (Object.keys(nextErrors).length > 0) {
+            const firstErrorKey = Object.keys(nextErrors)[0];
+            setTimeout(() => {
+                const element = document.getElementById(`form-field-${firstErrorKey}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+            }, 100);
+            return;
+        }
 
         setIsSubmitting(true);
 
@@ -292,7 +303,14 @@ export default function LogFuelActivityPage() {
             router.push("/activities/fuel");
         } catch (err) {
             console.error(err);
-            setErrors({ submit: "Failed to submit activity. Please try again." });
+            const message = getErrorMessage(err, "Failed to submit activity. Please try again.");
+            setErrors({ submit: message });
+            setTimeout(() => {
+                const element = document.getElementById("logFuelForm");
+                if (element) {
+                    element.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+            }, 100);
         } finally {
             setIsSubmitting(false);
         }
@@ -316,6 +334,8 @@ export default function LogFuelActivityPage() {
                 </p>
             </header>
 
+            <FormErrorSummary errors={errors} />
+
             <form id="logFuelForm" onSubmit={handleSubmit} className="space-y-6">
                 <section className="bg-white rounded-xl border border-outline-variant relative">
                     <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center justify-between">
@@ -333,7 +353,7 @@ export default function LogFuelActivityPage() {
                     </div>
                     <div className="p-card-padding space-y-6">
                         <div className="grid gap-4 lg:grid-cols-2">
-                            <div>
+                            <div id="form-field-reportingPeriod">
                                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                     Reporting Period <span className="text-error">*</span>
                                 </label>
@@ -351,7 +371,7 @@ export default function LogFuelActivityPage() {
                                     <p className="mt-2 text-xs text-error">{errors.reportingPeriod}</p>
                                 )}
                             </div>
-                            <div>
+                            <div id="form-field-facility">
                                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                     Facility <span className="text-error">*</span>
                                 </label>
@@ -370,7 +390,7 @@ export default function LogFuelActivityPage() {
                         </div>
 
                         <div className="grid gap-4 lg:grid-cols-2">
-                            <div>
+                            <div id="form-field-usageType">
                                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                     Usage Type <span className="text-error">*</span>
                                 </label>
@@ -383,7 +403,7 @@ export default function LogFuelActivityPage() {
                                 />
                                 {errors.usageType && <p className="mt-2 text-xs text-error">{errors.usageType}</p>}
                             </div>
-                            <div>
+                            <div id="form-field-emissionType">
                                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                     Emission Type <span className="text-error">*</span>
                                 </label>
@@ -400,7 +420,7 @@ export default function LogFuelActivityPage() {
                             </div>
                         </div>
                         {(form.usageType === "electricity_generation" || form.usageType === "steam_generation") && (
-                            <div className="grid gap-4 lg:grid-cols-1">
+                            <div id="form-field-generatorEfficiency" className="grid gap-4 lg:grid-cols-1">
                                 <div>
                                     <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                         Generator Efficiency (%) <span className="text-error">*</span>
@@ -421,7 +441,7 @@ export default function LogFuelActivityPage() {
                         )}
 
                         <div className="grid gap-6 lg:grid-cols-2">
-                            <div className="space-y-3 flex flex-col items-center">
+                            <div id="form-field-activityStartDate" className="space-y-3 flex flex-col items-center">
                                 <div className="flex items-center justify-between gap-2 w-full max-w-[340px]">
                                     <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                         Activity Start Date <span className="text-error">*</span>
@@ -432,12 +452,12 @@ export default function LogFuelActivityPage() {
                                         </span>
                                     ) : null}
                                 </div>
-                                <Calendar date={selectedStartDate} onDateChange={handleStartDateChange} />
+                                <Calendar date={selectedStartDate} onDateChange={handleStartDateChange} className={errors.activityStartDate ? "border-error" : ""} />
                                 {errors.activityStartDate && (
                                     <p className="mt-2 text-xs text-error w-full max-w-[340px]">{errors.activityStartDate}</p>
                                 )}
                             </div>
-                            <div className="space-y-3 flex flex-col items-center">
+                            <div id="form-field-activityEndDate" className="space-y-3 flex flex-col items-center">
                                 <div className="flex items-center justify-between gap-2 w-full max-w-[340px]">
                                     <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                         Activity End Date <span className="text-error">*</span>
@@ -448,7 +468,7 @@ export default function LogFuelActivityPage() {
                                         </span>
                                     ) : null}
                                 </div>
-                                <Calendar date={selectedEndDate} onDateChange={handleEndDateChange} />
+                                <Calendar date={selectedEndDate} onDateChange={handleEndDateChange} className={errors.activityEndDate ? "border-error" : ""} />
                                 {errors.activityEndDate && (
                                     <p className="mt-2 text-xs text-error w-full max-w-[340px]">{errors.activityEndDate}</p>
                                 )}
@@ -472,7 +492,7 @@ export default function LogFuelActivityPage() {
                         </div>
                     </div>
                     <div className="p-card-padding grid gap-4 lg:grid-cols-2">
-                        <div>
+                        <div id="form-field-fuelCategory">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 {fuelCategoryLabel} <span className="text-error">*</span>
                             </label>
@@ -495,7 +515,7 @@ export default function LogFuelActivityPage() {
                                     </p>
                                 )}
                         </div>
-                        <div>
+                        <div id="form-field-fuelType">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 {fuelLabel} <span className="text-error">*</span>
                             </label>
@@ -523,7 +543,7 @@ export default function LogFuelActivityPage() {
                             />
                             {errors.fuelType && <p className="mt-2 text-xs text-error">{errors.fuelType}</p>}
                         </div>
-                        <div>
+                        <div id="form-field-quantity">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Quantity <span className="text-error">*</span>
                             </label>
@@ -538,7 +558,7 @@ export default function LogFuelActivityPage() {
                             {errors.quantity && <p className="mt-2 text-xs text-error">{errors.quantity}</p>}
                         </div>
                         {form.emissionType !== "fugitive" && (
-                            <div>
+                            <div id="form-field-cost">
                                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                     Price / Cost <span className="text-error">*</span>
                                 </label>
@@ -553,7 +573,7 @@ export default function LogFuelActivityPage() {
                                 {errors.cost && <p className="mt-2 text-xs text-error">{errors.cost}</p>}
                             </div>
                         )}
-                        <div>
+                        <div id="form-field-unit">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Unit <span className="text-error">*</span>
                             </label>
@@ -599,7 +619,7 @@ export default function LogFuelActivityPage() {
                         </div>
                     </div>
                     <div className="p-card-padding grid gap-4 lg:grid-cols-2">
-                        <div>
+                        <div id="form-field-collectionType">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Collection Type <span className="text-error">*</span>
                             </label>
@@ -615,7 +635,7 @@ export default function LogFuelActivityPage() {
                             )}
                         </div>
                         {form.collectionType === "estimated" && (
-                            <div className="lg:col-span-2">
+                            <div id="form-field-estimationBasis" className="lg:col-span-2">
                                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                     Estimation Basis <span className="text-error">*</span>
                                 </label>

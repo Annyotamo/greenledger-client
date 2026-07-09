@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Suspense } from "react";
 import Footer from "@/components/Footer";
@@ -23,6 +25,7 @@ import sustainableFinanceImg from "@/assets/landing-images/ESG-Courses-Sustainab
 import type { SliderCard } from "@/components/landing/FeatureSlider";
 import SoftAurora from "@/components/designs/SoftAurora";
 import AuroraCarousel from "@/components/landing/AuroraCarousel";
+import LandingLoader from "@/components/landing/LandingLoader";
 
 const sliderCards: SliderCard[] = [
     {
@@ -88,6 +91,7 @@ export default function Home() {
     return (
         /* Removed overflow-x: hidden from main to keep page calculations clean */
         <main className="w-full text-slate-900 font-[var(--font-hanken),Inter,system-ui,sans-serif]">
+            <LandingLoader />
             <div className="mx-auto w-full max-w-400 px-4 sm:px-5 md:px-6 lg:px-7 h-full">
                 <HeroSection />
             </div>

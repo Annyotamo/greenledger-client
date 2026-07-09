@@ -383,14 +383,14 @@ export default function BrsrEnergyPage() {
                             <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                                 Non-Renewable Total
                             </p>
-                            <h3 className="text-headline-md font-bold text-amber-600 dark:text-amber-500 font-mono">
+                            <h3 className="text-headline-md font-bold text-amber-600 font-mono">
                                 {formatGj(totals.non_renewable_total_gj)} <span className="text-sm font-sans font-medium text-on-surface-variant">GJ</span>
                             </h3>
                             <p className="text-xs text-on-surface-variant">
                                 Conventional utility power
                             </p>
                         </div>
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-500">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
                             <MaterialIcon name="oil_barrel" size="md" />
                         </div>
                     </CardBody>
@@ -403,7 +403,7 @@ export default function BrsrEnergyPage() {
                             <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                                 Intensity / INR
                             </p>
-                            <h3 className="text-headline-md font-bold text-indigo-600 dark:text-indigo-400 font-mono">
+                            <h3 className="text-headline-md font-bold text-indigo-600 font-mono">
                                 {totals.energy_intensity_per_inr !== null ? (
                                     <>
                                         {Number(totals.energy_intensity_per_inr).toFixed(6)}
@@ -417,7 +417,7 @@ export default function BrsrEnergyPage() {
                                 {turnover_inr !== null ? `Based on ₹${Number(turnover_inr).toLocaleString()} turnover` : "Turnover not configured"}
                             </p>
                         </div>
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
                             <MaterialIcon name="analytics" size="md" />
                         </div>
                     </CardBody>

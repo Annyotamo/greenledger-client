@@ -15,6 +15,8 @@ import { createElectricityActivity, uploadElectricityActivityDocument, uploadS3F
 import { CustomSelect } from "@/components/ui/select";
 import { ActivityDocumentsManager } from "@/components/activity/ActivityDocumentsManager";
 import type { ActivityDocument } from "@/components/activity/ActivityDocumentsManager";
+import { FormErrorSummary } from "@/components/ui/FormErrorSummary";
+import { getErrorMessage } from "@/lib/utils/error";
 
 const documentTypeOptions = [
     { label: "Invoice", value: "invoice" },
@@ -180,7 +182,16 @@ export default function LogElectricityActivityPage() {
         });
 
         setErrors(nextErrors);
-        if (Object.keys(nextErrors).length > 0) return;
+        if (Object.keys(nextErrors).length > 0) {
+            const firstErrorKey = Object.keys(nextErrors)[0];
+            setTimeout(() => {
+                const element = document.getElementById(`form-field-${firstErrorKey}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+            }, 100);
+            return;
+        }
 
         setIsSubmitting(true);
         try {
@@ -233,7 +244,14 @@ export default function LogElectricityActivityPage() {
             router.push("/activities/electricity");
         } catch (err) {
             console.error(err);
-            setErrors({ submit: "Failed to submit activity. Please try again." });
+            const message = getErrorMessage(err, "Failed to submit activity. Please try again.");
+            setErrors({ submit: message });
+            setTimeout(() => {
+                const element = document.getElementById("logElectricityForm");
+                if (element) {
+                    element.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+            }, 100);
         } finally {
             setIsSubmitting(false);
         }
@@ -256,6 +274,8 @@ export default function LogElectricityActivityPage() {
                 </p>
             </header>
 
+            <FormErrorSummary errors={errors} />
+
             <form id="logElectricityForm" onSubmit={handleSubmit} className="space-y-6">
                 <section className="bg-white rounded-xl border border-outline-variant relative">
                     <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center justify-between">
@@ -272,7 +292,7 @@ export default function LogElectricityActivityPage() {
                         </div>
                     </div>
                     <div className="p-card-padding grid gap-4 lg:grid-cols-2">
-                        <div>
+                        <div id="form-field-reportingPeriod">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Reporting Period <span className="text-error">*</span>
                             </label>
@@ -290,7 +310,7 @@ export default function LogElectricityActivityPage() {
                                 <p className="mt-2 text-xs text-error">{errors.reportingPeriod}</p>
                             )}
                         </div>
-                        <div>
+                        <div id="form-field-facility">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Facility <span className="text-error">*</span>
                             </label>
@@ -306,7 +326,7 @@ export default function LogElectricityActivityPage() {
                             />
                             {errors.facility && <p className="mt-2 text-xs text-error">{errors.facility}</p>}
                         </div>
-                        <div className="space-y-3 flex flex-col items-center">
+                        <div id="form-field-activityStartDate" className="space-y-3 flex flex-col items-center">
                             <div className="flex items-center justify-between gap-2 w-full max-w-[340px]">
                                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                     Activity Start Date <span className="text-error">*</span>
@@ -317,12 +337,12 @@ export default function LogElectricityActivityPage() {
                                     </span>
                                 ) : null}
                             </div>
-                            <Calendar date={selectedStartDate} onDateChange={handleStartDateChange} />
+                            <Calendar date={selectedStartDate} onDateChange={handleStartDateChange} className={errors.activityStartDate ? "border-error" : ""} />
                             {errors.activityStartDate && (
                                 <p className="mt-2 text-xs text-error w-full max-w-[340px]">{errors.activityStartDate}</p>
                             )}
                         </div>
-                        <div className="space-y-3 flex flex-col items-center">
+                        <div id="form-field-activityEndDate" className="space-y-3 flex flex-col items-center">
                             <div className="flex items-center justify-between gap-2 w-full max-w-[340px]">
                                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                     Activity End Date <span className="text-error">*</span>
@@ -333,7 +353,7 @@ export default function LogElectricityActivityPage() {
                                     </span>
                                 ) : null}
                             </div>
-                            <Calendar date={selectedEndDate} onDateChange={handleEndDateChange} />
+                            <Calendar date={selectedEndDate} onDateChange={handleEndDateChange} className={errors.activityEndDate ? "border-error" : ""} />
                             {errors.activityEndDate && (
                                 <p className="mt-2 text-xs text-error w-full max-w-[340px]">{errors.activityEndDate}</p>
                             )}
@@ -356,7 +376,7 @@ export default function LogElectricityActivityPage() {
                         </div>
                     </div>
                     <div className="p-card-padding grid gap-4 lg:grid-cols-2">
-                        <div>
+                        <div id="form-field-electricityKwh">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Electricity <span className="text-error">*</span>
                             </label>
@@ -388,7 +408,7 @@ export default function LogElectricityActivityPage() {
                                 <p className="mt-2 text-xs text-error">{errors.electricityUnit}</p>
                             )}
                         </div>
-                        <div>
+                        <div id="form-field-electricityActivityType">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Activity Type <span className="text-error">*</span>
                             </label>
@@ -403,7 +423,7 @@ export default function LogElectricityActivityPage() {
                                 <p className="mt-2 text-xs text-error">{errors.electricityActivityType}</p>
                             )}
                         </div>
-                        <div>
+                        <div id="form-field-sourceType">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Source Type <span className="text-error">*</span>
                             </label>
@@ -417,7 +437,7 @@ export default function LogElectricityActivityPage() {
                             />
                             {errors.sourceType && <p className="mt-2 text-xs text-error">{errors.sourceType}</p>}
                         </div>
-                        <div>
+                        <div id="form-field-dataQualityTier">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Data Quality <span className="text-error">*</span>
                             </label>
@@ -435,7 +455,7 @@ export default function LogElectricityActivityPage() {
                                 <p className="mt-2 text-xs text-error">{errors.dataQualityTier}</p>
                             )}
                         </div>
-                        <div className="lg:col-span-2">
+                        <div id="form-field-notes" className="lg:col-span-2">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                 Notes
                             </label>

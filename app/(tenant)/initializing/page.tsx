@@ -114,7 +114,7 @@ export default function InitializingPage() {
 
                 return next;
             });
-        }, 130); // ~10 seconds total duration
+        }, 90); // Speed up loader to take ~6 seconds total instead of ~10 seconds
 
         return () => clearInterval(progressInterval);
     }, [isLoading, tenant, imagesLoaded]);
@@ -144,7 +144,7 @@ export default function InitializingPage() {
             } else {
                 logIndex = 0;
             }
-        }, 400);
+        }, 270); // Speed up log feed ticks from 400ms to 270ms to match progress loader
 
         return () => clearInterval(terminalInterval);
     }, [isLoading, tenant, imagesLoaded]);
@@ -154,7 +154,7 @@ export default function InitializingPage() {
         if (progress === 100) {
             const timeout = setTimeout(() => {
                 router.push("/dashboard");
-            }, 600);
+            }, 300); // Shave redirect delay to 300ms
             return () => clearTimeout(timeout);
         }
     }, [progress, router]);

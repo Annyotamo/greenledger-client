@@ -14,41 +14,21 @@ type ThemeContextValue = {
 };
 
 const storageKey = "gl-dashboard-theme";
-const defaultTheme: Theme = "dark";
+const defaultTheme: Theme = "light";
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 function getInitialTheme(): Theme {
-    if (typeof window === "undefined") {
-        return defaultTheme;
-    }
-
-    try {
-        const storedTheme = window.localStorage.getItem(storageKey) as Theme | null;
-        return storedTheme === "light" || storedTheme === "dark" ? storedTheme : defaultTheme;
-    } catch {
-        return defaultTheme;
-    }
+    return "light";
 }
 
 export default function ThemeProvider({ children }: ThemeProviderProps) {
-    const [resolvedTheme, setResolvedTheme] = useState<Theme>(getInitialTheme);
+    const [resolvedTheme, setResolvedTheme] = useState<Theme>("light");
 
     useEffect(() => {
         const root = document.documentElement;
-
-        if (resolvedTheme === "dark") {
-            root.classList.add("dark");
-        } else {
-            root.classList.remove("dark");
-        }
-
-        try {
-            window.localStorage.setItem(storageKey, resolvedTheme);
-        } catch {
-            // Ignore localStorage write failures in private mode or restricted browsers.
-        }
-    }, [resolvedTheme]);
+        root.classList.remove("dark");
+    }, []);
 
     const value = useMemo(
         () => ({

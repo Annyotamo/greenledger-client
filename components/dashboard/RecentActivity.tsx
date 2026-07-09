@@ -68,7 +68,7 @@ export function RecentActivity({ items, className }: RecentActivityProps) {
             <div className="border-t border-outline-variant bg-surface-container-lowest p-4">
                 <button
                     type="button"
-                    className="w-full rounded bg-surface-container-low dark:bg-surface-container-high py-2 text-label-md font-mono text-on-surface transition-colors hover:bg-surface-container-high dark:hover:bg-surface-container-highest">
+                    className="w-full rounded bg-surface-container-low py-2 text-label-md font-mono text-on-surface transition-colors hover:bg-surface-container-high">
                     View History
                 </button>
             </div>

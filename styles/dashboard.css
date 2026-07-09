@@ -53,47 +53,6 @@
     --gl-chart-wind: #3b82f6;
 }
 
-/* ─── Dark theme ─── */
-.dark {
-    --gl-surface: #111827;
-    --gl-surface-dim: #0b0f19;
-    --gl-surface-bright: #1f2937;
-    --gl-surface-container-lowest: #0b0f19;
-    --gl-surface-container-low: #111827;
-    --gl-surface-container: #1f2937;
-    --gl-surface-container-high: #374151;
-    --gl-surface-container-highest: #4b5563;
-    --gl-on-surface: #f3f4f6;
-    --gl-on-surface-variant: #9ca3af;
-    --gl-inverse-surface: #f3f4f6;
-    --gl-inverse-on-surface: #191c1d;
-    --gl-outline: #4b5563;
-    --gl-outline-variant: #374151;
-    --gl-surface-tint: #9ca3af;
-    --gl-primary: #ffffff;
-    --gl-on-primary: #111827;
-    --gl-primary-container: #1e293b;
-    --gl-on-primary-container: #94a3b8;
-    --gl-inverse-primary: #000000;
-    --gl-secondary: #10b981;
-    --gl-on-secondary: #111827;
-    --gl-secondary-container: #064e3b;
-    --gl-on-secondary-container: #4ade80;
-    --gl-tertiary: #ffffff;
-    --gl-on-tertiary: #111827;
-    --gl-tertiary-container: #1e3a8a;
-    --gl-on-tertiary-container: #60a5fa;
-    --gl-error: #ef4444;
-    --gl-on-error: #ffffff;
-    --gl-error-container: #7f1d1d;
-    --gl-on-error-container: #ffdad6;
-    --gl-secondary-fixed-dim: #4edea3;
-    --gl-background: #111827;
-    --gl-on-background: #f3f4f6;
-    --gl-surface-variant: #374151;
-    --gl-chart-grid: #334155;
-    --gl-nav-connector: #10b981;
-}
 
 @theme inline {
     --color-surface: var(--gl-surface);

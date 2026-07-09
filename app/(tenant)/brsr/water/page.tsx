@@ -341,7 +341,7 @@ export default function BrsrWaterPage() {
                                     <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                                         Water Intensity / INR
                                     </p>
-                                    <h3 className="text-headline-md font-bold text-indigo-600 dark:text-indigo-400 font-mono">
+                                    <h3 className="text-headline-md font-bold text-indigo-600 font-mono">
                                         {data.water_intensity_per_inr !== null && data.water_intensity_per_inr !== undefined ? (
                                             <>
                                                 {Number(data.water_intensity_per_inr).toFixed(6)}
@@ -355,7 +355,7 @@ export default function BrsrWaterPage() {
                                         Intensity ratio based on ₹{Number(data.turnover_inr).toLocaleString()} turnover
                                     </p>
                                 </div>
-                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
                                     <MaterialIcon name="analytics" size="md" />
                                 </div>
                             </CardBody>

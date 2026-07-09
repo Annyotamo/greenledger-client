@@ -44,9 +44,9 @@ export const SEVERITY_COLOR_MAP: Record<AuditSeverity, { bg: string; text: strin
         badge: "border-tertiary-fixed/30 bg-tertiary-fixed/10 text-on-tertiary-fixed-variant",
     },
     warning: {
-        bg: "bg-yellow-100 dark:bg-yellow-900/30",
-        text: "text-yellow-700 dark:text-yellow-300",
-        badge: "border-yellow-300/50 bg-yellow-100/50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300",
+        bg: "bg-yellow-100",
+        text: "text-yellow-700",
+        badge: "border-yellow-300/50 bg-yellow-100/50 text-yellow-700",
     },
     error: {
         bg: "bg-error-container/30",

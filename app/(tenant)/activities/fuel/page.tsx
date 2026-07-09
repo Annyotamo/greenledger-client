@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
+import { AnimatePresence, motion } from "framer-motion";
 import { FuelActivitySummary } from "@/components/activity/FuelActivitySummary";
 import { FuelActivityTable } from "@/components/activity/FuelActivityTable";
 import { useFuelActivities } from "@/lib/activity/hooks";
@@ -16,6 +17,7 @@ export default function FuelActivitiesPage() {
     const [selectedFacility, setSelectedFacility] = useState("");
     const [selectedFuel, setSelectedFuel] = useState("");
     const [showFilters, setShowFilters] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const filterParams = useMemo(
         () => ({
@@ -67,12 +69,52 @@ export default function FuelActivitiesPage() {
                         <MaterialIcon name="filter_list" size="sm" />
                         Filter
                     </Button>
-                    <Link href="/activities/fuel/create">
-                        <button className="bg-primary text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm">
-                            <MaterialIcon name="add" size="sm" />
+                    <div className="relative">
+                        <button
+                            onClick={() => setDropdownOpen((prev) => !prev)}
+                            className="bg-primary text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm"
+                        >
                             <span className="font-label-md text-label-md uppercase">New Fuel Activity</span>
+                            <MaterialIcon name="arrow_drop_down" size="sm" className={`transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
                         </button>
-                    </Link>
+
+                        <AnimatePresence>
+                            {dropdownOpen && (
+                                <>
+                                    <div
+                                        className="fixed inset-0 z-10"
+                                        onClick={() => setDropdownOpen(false)}
+                                    />
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                                        transition={{ duration: 0.15 }}
+                                        className="absolute right-0 mt-2 w-56 rounded-lg border border-outline-variant bg-white p-1.5 shadow-lg z-20"
+                                    >
+                                        <Link href="/activities/fuel/create">
+                                            <button
+                                                onClick={() => setDropdownOpen(false)}
+                                                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-on-surface hover:bg-surface-container-low transition-colors"
+                                            >
+                                                <MaterialIcon name="description" size="sm" className="text-primary" />
+                                                <span className="font-medium">Individual Entry</span>
+                                            </button>
+                                        </Link>
+                                        <Link href="/activities/fuel/bulk">
+                                            <button
+                                                onClick={() => setDropdownOpen(false)}
+                                                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-on-surface hover:bg-surface-container-low transition-colors"
+                                            >
+                                                <MaterialIcon name="upload_file" size="sm" className="text-primary" />
+                                                <span className="font-medium">Bulk Upload (Excel)</span>
+                                            </button>
+                                        </Link>
+                                    </motion.div>
+                                </>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
             </div>
 

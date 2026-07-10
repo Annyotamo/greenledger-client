@@ -82,8 +82,7 @@ export default function FrameworksSection() {
                     whileInView="visible"
                     viewport={{ once: true, amount: 0.5 }}
                 >
-                    Ensure seamless alignment, continuous validation, and absolute audit readiness across all
-                    major climate, greenhouse gas, and sustainability disclosure models.
+                    Stay informed with guidance inspired by leading climate, greenhouse gas, and sustainability disclosure frameworks.
                 </m.p>
             </div>
 

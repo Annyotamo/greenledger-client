@@ -16,38 +16,38 @@ interface Industry {
 export default function SocialProofSection() {
     const industries: Industry[] = useMemo(
         () => [
-            {
-                id: "steel",
-                label: "Steel",
-                icon: <LuFlame className="w-4 h-4" />,
-                title: "Steel Carbon Accounting",
-                description:
-                    "Track direct furnace emissions and coal inputs with real-time sensor integration and CBAM-ready declaration logging.",
-            },
-            {
-                id: "cement",
-                label: "Cement",
-                icon: <LuLayers className="w-4 h-4" />,
-                title: "Cement & Minerals Calcination",
-                description:
-                    "Model raw meal stoichiometry and optimize clinker ratios. Validate alternative biomass fuels with trace-to-laboratory validation.",
-            },
-            {
-                id: "finance",
-                label: "Finance",
-                icon: <LuTrendingUp className="w-4 h-4" />,
-                title: "PCAF Financed Emissions",
-                description:
-                    "Bridge investments with carbon impact. Reconcile loan books with actual, audit-proven borrower data instead of estimates.",
-            },
-            {
-                id: "logistics",
-                label: "Logistics",
-                icon: <LuTruck className="w-4 h-4" />,
-                title: "Carrier & Freight GHG Ledger",
-                description:
-                    "Automate Scope 3 shipping calculations. Ingest telematics and fuel card invoices for precise well-to-wheel analytics.",
-            },
+           {
+    id: "steel",
+    label: "Steel",
+    icon: <LuFlame className="w-4 h-4" />,
+    title: "Steel Emissions & Carbon Insights",
+    description:
+        "Explore key emission sources, production processes, and carbon accounting concepts relevant to the steel industry.",
+},
+{
+    id: "cement",
+    label: "Cement",
+    icon: <LuLayers className="w-4 h-4" />,
+    title: "Cement Manufacturing & Emissions",
+    description:
+        "Learn about calcination emissions, clinker production, alternative fuels, and sustainability considerations across cement operations.",
+},
+{
+    id: "finance",
+    label: "Finance",
+    icon: <LuTrendingUp className="w-4 h-4" />,
+    title: "Financed Emissions & Sustainable Finance",
+    description:
+        "Understand financed emissions, portfolio carbon exposure, and the principles behind climate-focused financial reporting.",
+},
+{
+    id: "logistics",
+    label: "Logistics",
+    icon: <LuTruck className="w-4 h-4" />,
+    title: "Freight & Transport Emissions",
+    description:
+        "Discover how freight operations contribute to emissions and explore common methodologies used to estimate transportation impacts.",
+},
         ],
         [],
     );
@@ -59,7 +59,7 @@ export default function SocialProofSection() {
     }, [activeTab, industries]);
 
     return (
-        <section className="section-bg relative rounded-3xl border border-white/80 p-6 shadow-xl backdrop-blur-md sm:p-8 md:p-10 overflow-hidden">
+        <section className="section-bg relative rounded-3xl border border-white/80 p-6 shadow-xl backdrop-blur-md sm:p-8 md:p-10 overflow-hidden mt-15">
             {/* Ambient glows behind layout to feel high-end */}
             <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
             <div className="pointer-events-none absolute -left-24 -bottom-24 h-64 w-64 rounded-full bg-teal-400/8 blur-3xl" />
@@ -131,7 +131,7 @@ export default function SocialProofSection() {
 
                 {/* Right Column: Larger Mock Loop Video Frame */}
                 <div className="md:col-span-7 flex items-center justify-center">
-                    <div className="w-full rounded-2xl border border-white/90 bg-white/45 p-2 shadow-2xl backdrop-blur-md relative overflow-hidden flex flex-col justify-between ring-1 ring-emerald-950/10">
+                    <div className="w-full p-2 relative overflow-hidden flex flex-col justify-between">
                         {/* Mock App Header */}
                         <div className="flex items-center justify-between px-2 pb-2 border-b border-emerald-900/5 mb-2">
                             <div className="flex items-center gap-1.5">
@@ -139,13 +139,6 @@ export default function SocialProofSection() {
                                 <span className="w-1.5 h-1.5 rounded-full bg-slate-300/80" />
                                 <span className="w-1.5 h-1.5 rounded-full bg-slate-300/80" />
                             </div>
-                            <span className="text-[9px] font-mono text-slate-400 tracking-wider">
-                                live_industry_data_simulation
-                            </span>
-                            <span className="inline-flex items-center gap-1.5 text-[9px] font-bold text-emerald-700 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-sm">
-                                <span className="w-1 h-1 rounded-full bg-emerald-600 animate-ping" />
-                                STREAMING
-                            </span>
                         </div>
 
                         {/* Video Element */}

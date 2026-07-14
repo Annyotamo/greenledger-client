@@ -31,7 +31,7 @@ export function ActivityDocumentsManager({
     documentTypeOptions,
     errors,
 }: ActivityDocumentsManagerProps) {
-    function handleUpdateDoc(id: string, field: keyof ActivityDocument, value: any) {
+    function handleUpdateDoc<K extends keyof ActivityDocument>(id: string, field: K, value: ActivityDocument[K]) {
         handleUpdateDocFields(id, { [field]: value });
     }
 
@@ -213,11 +213,12 @@ export function ActivityDocumentsManager({
                                             </div>
                                             <div>
                                                 <p className="text-sm font-semibold text-primary">Click to upload files</p>
-                                                <p className="text-xs text-on-surface-variant">PDF, PNG, JPG or CSV (max 10MB)</p>
+                                                <p className="text-xs text-on-surface-variant">Excel, PDF, Word, PNG, JPG or CSV (max 10MB)</p>
                                             </div>
                                             <input
                                                 type="file"
                                                 className="hidden"
+                                                accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.csv,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/png,image/jpeg,text/csv"
                                                 onChange={(e) => {
                                                     const file = e.target.files?.[0] ?? null;
                                                     const updates: Partial<ActivityDocument> = {

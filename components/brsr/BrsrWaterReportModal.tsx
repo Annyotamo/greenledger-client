@@ -14,13 +14,40 @@ type BrsrWaterReportModalProps = {
 
 export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterReportModalProps) {
     const [fyLabel, setFyLabel] = useState("");
+    const [turnover, setTurnover] = useState("");
+    const [pppFactor, setPppFactor] = useState("");
+    const [physicalOutput, setPhysicalOutput] = useState("");
+    const [physicalOutputUnit, setPhysicalOutputUnit] = useState("");
+
+    // Withdrawal
     const [surfaceWater, setSurfaceWater] = useState("");
     const [groundwater, setGroundwater] = useState("");
     const [thirdParty, setThirdParty] = useState("");
     const [seawater, setSeawater] = useState("");
     const [others, setOthers] = useState("");
+
+    // Discharge
+    const [dischargeSurfaceNoTreatment, setDischargeSurfaceNoTreatment] = useState("");
+    const [dischargeSurfaceWithTreatment, setDischargeSurfaceWithTreatment] = useState("");
+    const [dischargeSurfaceLevel, setDischargeSurfaceLevel] = useState("");
+
+    const [dischargeGroundNoTreatment, setDischargeGroundNoTreatment] = useState("");
+    const [dischargeGroundWithTreatment, setDischargeGroundWithTreatment] = useState("");
+    const [dischargeGroundLevel, setDischargeGroundLevel] = useState("");
+
+    const [dischargeSeawaterNoTreatment, setDischargeSeawaterNoTreatment] = useState("");
+    const [dischargeSeawaterWithTreatment, setDischargeSeawaterWithTreatment] = useState("");
+    const [dischargeSeawaterLevel, setDischargeSeawaterLevel] = useState("");
+
+    const [dischargeThirdPartyNoTreatment, setDischargeThirdPartyNoTreatment] = useState("");
+    const [dischargeThirdPartyWithTreatment, setDischargeThirdPartyWithTreatment] = useState("");
+    const [dischargeThirdPartyLevel, setDischargeThirdPartyLevel] = useState("");
+
+    const [dischargeOthersNoTreatment, setDischargeOthersNoTreatment] = useState("");
+    const [dischargeOthersWithTreatment, setDischargeOthersWithTreatment] = useState("");
+    const [dischargeOthersLevel, setDischargeOthersLevel] = useState("");
+
     const [totalWater, setTotalWater] = useState("");
-    const [turnover, setTurnover] = useState("");
 
     const [isDownloading, setIsDownloading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -51,23 +78,16 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
         
         if (sum > 0) {
             setTotalWater(String(sum));
+        } else {
+            setTotalWater("");
         }
     }, [surfaceWater, groundwater, thirdParty, seawater, others]);
 
     if (!mounted || !isOpen) return null;
 
     const handleDownload = async () => {
-        if (
-            !fyLabel ||
-            !surfaceWater ||
-            !groundwater ||
-            !thirdParty ||
-            !seawater ||
-            !others ||
-            !totalWater ||
-            !turnover
-        ) {
-            setError("All fields are mandatory.");
+        if (!fyLabel || !turnover) {
+            setError("Financial Year Label and Turnover are required.");
             return;
         }
 
@@ -77,13 +97,45 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
         try {
             await onDownload({
                 financial_year_label: fyLabel,
-                surface_water_kl: surfaceWater,
-                groundwater_kl: groundwater,
-                third_party_water_kl: thirdParty,
-                seawater_desalinated_kl: seawater,
-                others_kl: others,
-                total_water_consumption_kl: totalWater,
-                turnover_inr: turnover,
+                turnover_inr: Number(turnover) || 0,
+                ppp_conversion_factor: pppFactor ? Number(pppFactor) : undefined,
+                physical_output: physicalOutput ? Number(physicalOutput) : null,
+                physical_output_unit: physicalOutputUnit || null,
+                withdrawal: {
+                    surface_water_kl: Number(surfaceWater) || 0,
+                    groundwater_kl: Number(groundwater) || 0,
+                    third_party_water_kl: Number(thirdParty) || 0,
+                    seawater_desalinated_kl: Number(seawater) || 0,
+                    others_kl: Number(others) || 0,
+                },
+                discharge: {
+                    surface_water: {
+                        no_treatment_kl: Number(dischargeSurfaceNoTreatment) || 0,
+                        with_treatment_kl: Number(dischargeSurfaceWithTreatment) || 0,
+                        treatment_level: dischargeSurfaceLevel || null,
+                    },
+                    groundwater: {
+                        no_treatment_kl: Number(dischargeGroundNoTreatment) || 0,
+                        with_treatment_kl: Number(dischargeGroundWithTreatment) || 0,
+                        treatment_level: dischargeGroundLevel || null,
+                    },
+                    seawater: {
+                        no_treatment_kl: Number(dischargeSeawaterNoTreatment) || 0,
+                        with_treatment_kl: Number(dischargeSeawaterWithTreatment) || 0,
+                        treatment_level: dischargeSeawaterLevel || null,
+                    },
+                    third_party: {
+                        no_treatment_kl: Number(dischargeThirdPartyNoTreatment) || 0,
+                        with_treatment_kl: Number(dischargeThirdPartyWithTreatment) || 0,
+                        treatment_level: dischargeThirdPartyLevel || null,
+                    },
+                    others: {
+                        no_treatment_kl: Number(dischargeOthersNoTreatment) || 0,
+                        with_treatment_kl: Number(dischargeOthersWithTreatment) || 0,
+                        treatment_level: dischargeOthersLevel || null,
+                    },
+                },
+                total_water_consumption_kl: totalWater ? Number(totalWater) : null,
             });
             onClose();
         } catch (err) {
@@ -94,16 +146,7 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
         }
     };
 
-    const isFormValid =
-        fyLabel.trim() !== "" &&
-        surfaceWater.trim() !== "" &&
-        groundwater.trim() !== "" &&
-        thirdParty.trim() !== "" &&
-        seawater.trim() !== "" &&
-        others.trim() !== "" &&
-        totalWater.trim() !== "" &&
-        turnover.trim() !== "" &&
-        !isDownloading;
+    const isFormValid = fyLabel.trim() !== "" && turnover.trim() !== "" && !isDownloading;
 
     return createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4 overflow-y-auto py-8">
@@ -140,50 +183,98 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
 
                 {/* Form Fields */}
                 <div className="p-6 space-y-4 overflow-y-auto flex-1 font-sans text-body-md text-on-surface">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {/* Financial Year */}
-                        <div className="space-y-1">
-                            <label htmlFor="fy-label" className="text-xs font-semibold text-on-surface-variant">
-                                Financial Year Label <span className="text-error">*</span>
-                            </label>
-                            <input
-                                id="fy-label"
-                                type="text"
-                                placeholder="e.g. FY 2024-2025"
-                                value={fyLabel}
-                                onChange={(e) => setFyLabel(e.target.value)}
-                                disabled={isDownloading}
-                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-                            />
-                        </div>
+                    {/* General & Intensity Parameters */}
+                    <div className="border-b border-outline-variant/60 pb-4">
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-3">General & Intensity Parameters</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            <div className="space-y-1">
+                                <label htmlFor="fy-label" className="text-xs font-semibold text-on-surface-variant">
+                                    Financial Year Label <span className="text-error">*</span>
+                                </label>
+                                <input
+                                    id="fy-label"
+                                    type="text"
+                                    placeholder="e.g. FY 2025-26"
+                                    value={fyLabel}
+                                    onChange={(e) => setFyLabel(e.target.value)}
+                                    disabled={isDownloading}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                />
+                            </div>
 
-                        {/* Turnover */}
-                        <div className="space-y-1">
-                            <label htmlFor="modal-turnover" className="text-xs font-semibold text-on-surface-variant">
-                                Turnover (INR) <span className="text-error">*</span>
-                            </label>
-                            <input
-                                id="modal-turnover"
-                                type="number"
-                                placeholder="e.g. 50000"
-                                value={turnover}
-                                onChange={(e) => setTurnover(e.target.value)}
-                                disabled={isDownloading}
-                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-                            />
+                            <div className="space-y-1">
+                                <label htmlFor="modal-turnover" className="text-xs font-semibold text-on-surface-variant">
+                                    Turnover (INR) <span className="text-error">*</span>
+                                </label>
+                                <input
+                                    id="modal-turnover"
+                                    type="number"
+                                    placeholder="e.g. 50000"
+                                    value={turnover}
+                                    onChange={(e) => setTurnover(e.target.value)}
+                                    disabled={isDownloading}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <label htmlFor="modal-ppp" className="text-xs font-semibold text-on-surface-variant">
+                                    PPP Conversion Factor
+                                </label>
+                                <input
+                                    id="modal-ppp"
+                                    type="number"
+                                    step="any"
+                                    placeholder="e.g. 20.00"
+                                    value={pppFactor}
+                                    onChange={(e) => setPppFactor(e.target.value)}
+                                    disabled={isDownloading}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <label htmlFor="modal-physical" className="text-xs font-semibold text-on-surface-variant">
+                                    Physical Output
+                                </label>
+                                <input
+                                    id="modal-physical"
+                                    type="number"
+                                    step="any"
+                                    placeholder="e.g. 100"
+                                    value={physicalOutput}
+                                    onChange={(e) => setPhysicalOutput(e.target.value)}
+                                    disabled={isDownloading}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <label htmlFor="modal-physical-unit" className="text-xs font-semibold text-on-surface-variant">
+                                    Physical Output Unit
+                                </label>
+                                <input
+                                    id="modal-physical-unit"
+                                    type="text"
+                                    placeholder="e.g. litres"
+                                    value={physicalOutputUnit}
+                                    onChange={(e) => setPhysicalOutputUnit(e.target.value)}
+                                    disabled={isDownloading}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    <div className="border-t border-outline-variant/60 my-2 pt-3">
+                    {/* Water Withdrawal by Source */}
+                    <div className="border-b border-outline-variant/60 pb-4">
                         <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-3">
                             Water Source Quantities (kL)
                         </span>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {/* Surface water */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                             <div className="space-y-1">
                                 <label htmlFor="surface" className="text-xs font-semibold text-on-surface-variant">
-                                    Surface Water (kL) <span className="text-error">*</span>
+                                    Surface Water (kL)
                                 </label>
                                 <input
                                     id="surface"
@@ -196,10 +287,9 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                 />
                             </div>
 
-                            {/* Groundwater */}
                             <div className="space-y-1">
                                 <label htmlFor="groundwater" className="text-xs font-semibold text-on-surface-variant">
-                                    Groundwater (kL) <span className="text-error">*</span>
+                                    Groundwater (kL)
                                 </label>
                                 <input
                                     id="groundwater"
@@ -212,10 +302,9 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                 />
                             </div>
 
-                            {/* Third Party Water */}
                             <div className="space-y-1">
                                 <label htmlFor="thirdparty" className="text-xs font-semibold text-on-surface-variant">
-                                    Third Party Water (kL) <span className="text-error">*</span>
+                                    Third Party Water (kL)
                                 </label>
                                 <input
                                     id="thirdparty"
@@ -228,10 +317,9 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                 />
                             </div>
 
-                            {/* Seawater Desalinated */}
                             <div className="space-y-1">
                                 <label htmlFor="seawater" className="text-xs font-semibold text-on-surface-variant">
-                                    Seawater / Desalinated (kL) <span className="text-error">*</span>
+                                    Seawater / Desalinated (kL)
                                 </label>
                                 <input
                                     id="seawater"
@@ -244,10 +332,9 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                 />
                             </div>
 
-                            {/* Others */}
                             <div className="space-y-1">
                                 <label htmlFor="others" className="text-xs font-semibold text-on-surface-variant">
-                                    Others (kL) <span className="text-error">*</span>
+                                    Others (kL)
                                 </label>
                                 <input
                                     id="others"
@@ -260,10 +347,9 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                 />
                             </div>
 
-                            {/* Total Water */}
                             <div className="space-y-1">
                                 <label htmlFor="total-water" className="text-xs font-semibold text-on-surface-variant">
-                                    Total Water Consumption (kL) <span className="text-error">*</span>
+                                    Total Water Consumption (kL)
                                 </label>
                                 <input
                                     id="total-water"
@@ -275,6 +361,59 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                     className="w-full rounded-lg border border-primary/40 bg-surface-container-low px-3 py-2 text-on-surface font-semibold focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Water Discharge by Destination */}
+                    <div>
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-3">
+                            Water Discharge by Destination (kL)
+                        </span>
+                        <div className="space-y-3">
+                            {[
+                                { key: "Surface Water", no: dischargeSurfaceNoTreatment, setNo: setDischargeSurfaceNoTreatment, with: dischargeSurfaceWithTreatment, setWith: setDischargeSurfaceWithTreatment, lvl: dischargeSurfaceLevel, setLvl: setDischargeSurfaceLevel },
+                                { key: "Groundwater", no: dischargeGroundNoTreatment, setNo: setDischargeGroundNoTreatment, with: dischargeGroundWithTreatment, setWith: setDischargeGroundWithTreatment, lvl: dischargeGroundLevel, setLvl: setDischargeGroundLevel },
+                                { key: "Seawater", no: dischargeSeawaterNoTreatment, setNo: setDischargeSeawaterNoTreatment, with: dischargeSeawaterWithTreatment, setWith: setDischargeSeawaterWithTreatment, lvl: dischargeSeawaterLevel, setLvl: setDischargeSeawaterLevel },
+                                { key: "Third Party Water", no: dischargeThirdPartyNoTreatment, setNo: setDischargeThirdPartyNoTreatment, with: dischargeThirdPartyWithTreatment, setWith: setDischargeThirdPartyWithTreatment, lvl: dischargeThirdPartyLevel, setLvl: setDischargeThirdPartyLevel },
+                                { key: "Others", no: dischargeOthersNoTreatment, setNo: setDischargeOthersNoTreatment, with: dischargeOthersWithTreatment, setWith: setDischargeOthersWithTreatment, lvl: dischargeOthersLevel, setLvl: setDischargeOthersLevel },
+                            ].map((dest) => (
+                                <div key={dest.key} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-center border border-outline-variant/40 p-3 rounded-xl bg-surface-container-lowest">
+                                    <span className="text-xs font-bold text-on-surface-variant">{dest.key}</span>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-semibold text-on-surface-variant block">No Treatment (kL)</label>
+                                        <input
+                                            type="number"
+                                            value={dest.no}
+                                            onChange={(e) => dest.setNo(e.target.value)}
+                                            disabled={isDownloading}
+                                            className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-2 py-1 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-semibold text-on-surface-variant block">With Treatment (kL)</label>
+                                        <input
+                                            type="number"
+                                            value={dest.with}
+                                            onChange={(e) => dest.setWith(e.target.value)}
+                                            disabled={isDownloading}
+                                            className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-2 py-1 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-semibold text-on-surface-variant block">Treatment Level</label>
+                                        <input
+                                            type="text"
+                                            value={dest.lvl}
+                                            onChange={(e) => dest.setLvl(e.target.value)}
+                                            disabled={isDownloading}
+                                            className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-2 py-1 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                            placeholder="e.g. Primary, RO"
+                                        />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
 

@@ -18,6 +18,9 @@ export type BrsrEnergyTotals = {
     non_renewable_total_gj: string;
     grand_total_gj: string;
     energy_intensity_per_inr: string | null;
+    energy_intensity_ppp: string | null;
+    energy_intensity_physical: string | null;
+    energy_intensity_physical_unit: string | null;
     fuel_activity_count: number;
     electricity_activity_count: number;
     skipped_fuel_activity_count: number;
@@ -50,27 +53,84 @@ export type BrsrEnergyConsumptionResponse = {
     timestamp: string;
 };
 
+export type BrsrWaterDischargeDestinationInput = {
+    no_treatment_kl: number;
+    with_treatment_kl: number;
+    treatment_level?: string | null;
+};
+
 export type BrsrWaterDisclosurePayload = {
     financial_year_label: string;
-    surface_water_kl: string;
-    groundwater_kl: string;
-    third_party_water_kl: string;
-    seawater_desalinated_kl: string;
-    others_kl: string;
+    turnover_inr: number;
+    ppp_conversion_factor?: number;
+    physical_output?: number | null;
+    physical_output_unit?: string | null;
+    withdrawal: {
+        surface_water_kl: number;
+        groundwater_kl: number;
+        third_party_water_kl: number;
+        seawater_desalinated_kl: number;
+        others_kl: number;
+    };
+    discharge: {
+        surface_water: BrsrWaterDischargeDestinationInput;
+        groundwater: BrsrWaterDischargeDestinationInput;
+        seawater: BrsrWaterDischargeDestinationInput;
+        third_party: BrsrWaterDischargeDestinationInput;
+        others: BrsrWaterDischargeDestinationInput;
+    };
+    total_water_consumption_kl?: number | null;
+};
+
+export type BrsrWaterTotals = {
+    withdrawal: {
+        surface_water_kl: string;
+        groundwater_kl: string;
+        third_party_water_kl: string;
+        seawater_desalinated_kl: string;
+        others_kl: string;
+    };
+    total_water_withdrawal_kl: string;
+    discharge: {
+        surface_water: {
+            no_treatment_kl: string;
+            with_treatment_kl: string;
+            treatment_level?: string | null;
+        };
+        groundwater: {
+            no_treatment_kl: string;
+            with_treatment_kl: string;
+            treatment_level?: string | null;
+        };
+        seawater: {
+            no_treatment_kl: string;
+            with_treatment_kl: string;
+            treatment_level?: string | null;
+        };
+        third_party: {
+            no_treatment_kl: string;
+            with_treatment_kl: string;
+            treatment_level?: string | null;
+        };
+        others: {
+            no_treatment_kl: string;
+            with_treatment_kl: string;
+            treatment_level?: string | null;
+        };
+    };
+    total_water_discharge_kl: string;
     total_water_consumption_kl: string;
-    turnover_inr: string;
+    water_intensity_per_inr: string | null;
+    water_intensity_ppp: string | null;
+    water_intensity_physical: string | null;
+    water_intensity_physical_unit: string | null;
 };
 
 export type BrsrWaterDisclosureData = {
     financial_year_label: string;
-    surface_water_kl: string;
-    groundwater_kl: string;
-    third_party_water_kl: string;
-    seawater_desalinated_kl: string;
-    others_kl: string;
-    total_water_consumption_kl: string;
-    turnover_inr: string;
-    water_intensity_per_inr?: string | null;
+    turnover_inr: number;
+    inputs: BrsrWaterDisclosurePayload;
+    totals: BrsrWaterTotals;
 };
 
 export type BrsrWaterDisclosureResponse = {
@@ -86,6 +146,10 @@ export type BrsrWaterDisclosureResponse = {
 
 export type BrsrWasteDisclosurePayload = {
     financial_year_label: string;
+    turnover_inr: number;
+    physical_output_tonnes: number;
+    ppp_conversion_factor?: number;
+    physical_output_unit?: string | null;
     plastic_waste_tonne: number;
     ewaste_tonne: number;
     bio_medical_waste_tonne: number;
@@ -93,14 +157,14 @@ export type BrsrWasteDisclosurePayload = {
     battery_waste_tonne: number;
     radioactive_waste_tonne: number;
     other_hazardous_waste_tonne: number;
+    fly_ash_tonne?: number;
+    non_hazardous_solid_waste_tonne?: number;
     recycled_tonne: number;
     reused_tonne: number;
     other_recovery_tonne: number;
     incineration_tonne: number;
     landfilling_tonne: number;
     other_disposal_tonne: number;
-    turnover_inr: number;
-    physical_output_tonnes: number;
 };
 
 export type BrsrWasteTotals = {
@@ -111,6 +175,9 @@ export type BrsrWasteTotals = {
     battery_waste_tonne: string;
     radioactive_waste_tonne: string;
     other_hazardous_waste_tonne: string;
+    fly_ash_tonne: string;
+    non_hazardous_solid_waste_tonne: string;
+    other_non_hazardous_waste_tonne: string;
     total_waste_tonne: string;
     recycled_tonne: string;
     reused_tonne: string;
@@ -122,6 +189,8 @@ export type BrsrWasteTotals = {
     total_disposed_tonne: string;
     waste_intensity_per_inr: string;
     waste_intensity_per_physical_output: string;
+    waste_intensity_ppp: string | null;
+    waste_intensity_physical_unit: string | null;
 };
 
 export type BrsrWasteDisclosureData = {
@@ -137,6 +206,8 @@ export type BrsrWasteDisclosureData = {
         battery_waste_tonne: string;
         radioactive_waste_tonne: string;
         other_hazardous_waste_tonne: string;
+        fly_ash_tonne: string;
+        non_hazardous_solid_waste_tonne: string;
         recycled_tonne: string;
         reused_tonne: string;
         other_recovery_tonne: string;

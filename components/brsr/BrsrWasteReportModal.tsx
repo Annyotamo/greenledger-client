@@ -21,6 +21,8 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
     const [battery, setBattery] = useState("");
     const [radioactive, setRadioactive] = useState("");
     const [otherHazardous, setOtherHazardous] = useState("");
+    const [flyAsh, setFlyAsh] = useState("");
+    const [nonHazardousSolid, setNonHazardousSolid] = useState("");
     
     const [recycled, setRecycled] = useState("");
     const [reused, setReused] = useState("");
@@ -31,7 +33,9 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
     const [otherDisposal, setOtherDisposal] = useState("");
     
     const [turnover, setTurnover] = useState("");
+    const [pppFactor, setPppFactor] = useState("");
     const [physicalOutput, setPhysicalOutput] = useState("");
+    const [physicalOutputUnit, setPhysicalOutputUnit] = useState("");
 
     const [isDownloading, setIsDownloading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -54,25 +58,8 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
     if (!mounted || !isOpen) return null;
 
     const handleDownload = async () => {
-        if (
-            !fyLabel ||
-            plastic === "" ||
-            ewaste === "" ||
-            bioMedical === "" ||
-            construction === "" ||
-            battery === "" ||
-            radioactive === "" ||
-            otherHazardous === "" ||
-            recycled === "" ||
-            reused === "" ||
-            otherRecovery === "" ||
-            incineration === "" ||
-            landfilling === "" ||
-            otherDisposal === "" ||
-            turnover === "" ||
-            physicalOutput === ""
-        ) {
-            setError("All fields are mandatory.");
+        if (!fyLabel || !turnover) {
+            setError("Financial Year Label and Turnover are required.");
             return;
         }
 
@@ -82,21 +69,25 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
         try {
             await onDownload({
                 financial_year_label: fyLabel,
-                plastic_waste_tonne: Number(plastic),
-                ewaste_tonne: Number(ewaste),
-                bio_medical_waste_tonne: Number(bioMedical),
-                construction_and_demolition_waste_tonne: Number(construction),
-                battery_waste_tonne: Number(battery),
-                radioactive_waste_tonne: Number(radioactive),
-                other_hazardous_waste_tonne: Number(otherHazardous),
-                recycled_tonne: Number(recycled),
-                reused_tonne: Number(reused),
-                other_recovery_tonne: Number(otherRecovery),
-                incineration_tonne: Number(incineration),
-                landfilling_tonne: Number(landfilling),
-                other_disposal_tonne: Number(otherDisposal),
-                turnover_inr: Number(turnover),
-                physical_output_tonnes: Number(physicalOutput),
+                turnover_inr: Number(turnover) || 0,
+                ppp_conversion_factor: pppFactor ? Number(pppFactor) : undefined,
+                physical_output_tonnes: Number(physicalOutput) || 0,
+                physical_output_unit: physicalOutputUnit || undefined,
+                plastic_waste_tonne: Number(plastic) || 0,
+                ewaste_tonne: Number(ewaste) || 0,
+                bio_medical_waste_tonne: Number(bioMedical) || 0,
+                construction_and_demolition_waste_tonne: Number(construction) || 0,
+                battery_waste_tonne: Number(battery) || 0,
+                radioactive_waste_tonne: Number(radioactive) || 0,
+                other_hazardous_waste_tonne: Number(otherHazardous) || 0,
+                fly_ash_tonne: Number(flyAsh) || 0,
+                non_hazardous_solid_waste_tonne: Number(nonHazardousSolid) || 0,
+                recycled_tonne: Number(recycled) || 0,
+                reused_tonne: Number(reused) || 0,
+                other_recovery_tonne: Number(otherRecovery) || 0,
+                incineration_tonne: Number(incineration) || 0,
+                landfilling_tonne: Number(landfilling) || 0,
+                other_disposal_tonne: Number(otherDisposal) || 0,
             });
             onClose();
         } catch (err) {
@@ -107,24 +98,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
         }
     };
 
-    const isFormValid =
-        fyLabel.trim() !== "" &&
-        plastic !== "" &&
-        ewaste !== "" &&
-        bioMedical !== "" &&
-        construction !== "" &&
-        battery !== "" &&
-        radioactive !== "" &&
-        otherHazardous !== "" &&
-        recycled !== "" &&
-        reused !== "" &&
-        otherRecovery !== "" &&
-        incineration !== "" &&
-        landfilling !== "" &&
-        otherDisposal !== "" &&
-        turnover !== "" &&
-        physicalOutput !== "" &&
-        !isDownloading;
+    const isFormValid = fyLabel.trim() !== "" && turnover.trim() !== "" && !isDownloading;
 
     return createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4 overflow-y-auto py-8">
@@ -167,7 +141,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                         <span className="text-xs font-bold text-primary uppercase tracking-wider block">
                             General Parameters
                         </span>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
                             <div className="space-y-1">
                                 <label htmlFor="modal-fy" className="text-xs font-semibold text-on-surface-variant">
                                     Financial Year Label <span className="text-error">*</span>
@@ -175,7 +149,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                 <input
                                     id="modal-fy"
                                     type="text"
-                                    placeholder="e.g. FY 2024-25"
+                                    placeholder="e.g. FY 2025-26"
                                     value={fyLabel}
                                     onChange={(e) => setFyLabel(e.target.value)}
                                     disabled={isDownloading}
@@ -200,7 +174,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
 
                             <div className="space-y-1">
                                 <label htmlFor="modal-output" className="text-xs font-semibold text-on-surface-variant">
-                                    Physical Output (Tonnes) <span className="text-error">*</span>
+                                    Physical Output <span className="text-error">*</span>
                                 </label>
                                 <input
                                     id="modal-output"
@@ -208,6 +182,37 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     placeholder="e.g. 850"
                                     value={physicalOutput}
                                     onChange={(e) => setPhysicalOutput(e.target.value)}
+                                    disabled={isDownloading}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <label htmlFor="modal-ppp" className="text-xs font-semibold text-on-surface-variant">
+                                    PPP Factor
+                                </label>
+                                <input
+                                    id="modal-ppp"
+                                    type="number"
+                                    step="any"
+                                    placeholder="e.g. 20.00"
+                                    value={pppFactor}
+                                    onChange={(e) => setPppFactor(e.target.value)}
+                                    disabled={isDownloading}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <label htmlFor="modal-physical-unit" className="text-xs font-semibold text-on-surface-variant">
+                                    Output Unit
+                                </label>
+                                <input
+                                    id="modal-physical-unit"
+                                    type="text"
+                                    placeholder="e.g. tonnes"
+                                    value={physicalOutputUnit}
+                                    onChange={(e) => setPhysicalOutputUnit(e.target.value)}
                                     disabled={isDownloading}
                                     className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
@@ -223,7 +228,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div className="space-y-1">
                                 <label htmlFor="modal-plastic" className="text-xs font-semibold text-on-surface-variant">
-                                    Plastic Waste <span className="text-error">*</span>
+                                    Plastic Waste
                                 </label>
                                 <input
                                     id="modal-plastic"
@@ -239,7 +244,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
 
                             <div className="space-y-1">
                                 <label htmlFor="modal-ewaste" className="text-xs font-semibold text-on-surface-variant">
-                                    E-waste <span className="text-error">*</span>
+                                    E-waste
                                 </label>
                                 <input
                                     id="modal-ewaste"
@@ -255,7 +260,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
 
                             <div className="space-y-1">
                                 <label htmlFor="modal-biomed" className="text-xs font-semibold text-on-surface-variant">
-                                    Bio-medical Waste <span className="text-error">*</span>
+                                    Bio-medical Waste
                                 </label>
                                 <input
                                     id="modal-biomed"
@@ -271,7 +276,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
 
                             <div className="space-y-1">
                                 <label htmlFor="modal-construction" className="text-xs font-semibold text-on-surface-variant">
-                                    Construction/Demolition <span className="text-error">*</span>
+                                    Construction/Demolition
                                 </label>
                                 <input
                                     id="modal-construction"
@@ -287,7 +292,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
 
                             <div className="space-y-1">
                                 <label htmlFor="modal-battery" className="text-xs font-semibold text-on-surface-variant">
-                                    Battery Waste <span className="text-error">*</span>
+                                    Battery Waste
                                 </label>
                                 <input
                                     id="modal-battery"
@@ -303,7 +308,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
 
                             <div className="space-y-1">
                                 <label htmlFor="modal-radioactive" className="text-xs font-semibold text-on-surface-variant">
-                                    Radioactive Waste <span className="text-error">*</span>
+                                    Radioactive Waste
                                 </label>
                                 <input
                                     id="modal-radioactive"
@@ -317,9 +322,9 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                 />
                             </div>
 
-                            <div className="space-y-1 sm:col-span-3">
+                            <div className="space-y-1">
                                 <label htmlFor="modal-hazardous" className="text-xs font-semibold text-on-surface-variant">
-                                    Other Hazardous Waste <span className="text-error">*</span>
+                                    Other Hazardous Waste
                                 </label>
                                 <input
                                     id="modal-hazardous"
@@ -328,6 +333,38 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     placeholder="e.g. 1548.148181"
                                     value={otherHazardous}
                                     onChange={(e) => setOtherHazardous(e.target.value)}
+                                    disabled={isDownloading}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <label htmlFor="modal-flyash" className="text-xs font-semibold text-on-surface-variant">
+                                    Fly Ash
+                                </label>
+                                <input
+                                    id="modal-flyash"
+                                    type="number"
+                                    step="any"
+                                    placeholder="e.g. 0.0"
+                                    value={flyAsh}
+                                    onChange={(e) => setFlyAsh(e.target.value)}
+                                    disabled={isDownloading}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                />
+                            </div>
+
+                            <div className="space-y-1 sm:col-span-1">
+                                <label htmlFor="modal-solid" className="text-xs font-semibold text-on-surface-variant">
+                                    Non-hazardous Solid
+                                </label>
+                                <input
+                                    id="modal-solid"
+                                    type="number"
+                                    step="any"
+                                    placeholder="e.g. 0.0"
+                                    value={nonHazardousSolid}
+                                    onChange={(e) => setNonHazardousSolid(e.target.value)}
                                     disabled={isDownloading}
                                     className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />

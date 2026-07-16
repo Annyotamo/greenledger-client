@@ -23,123 +23,112 @@ export default function BrsrEnergyPage() {
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [turnover, setTurnover] = useState<number | null>(null);
+    const [pppFactor, setPppFactor] = useState<number | null>(null);
+    const [physicalOutput, setPhysicalOutput] = useState<number | null>(null);
+    const [physicalOutputUnit, setPhysicalOutputUnit] = useState<string>("");
 
     const [isStartOpen, setIsStartOpen] = useState(false);
     const [isEndOpen, setIsEndOpen] = useState(false);
 
     // Active filters used for the API query
     const [activeFilters, setActiveFilters] = useState<{
-        startDate: string | null;
-        endDate: string | null;
-        turnover: number | null;
+        start_date: string | null;
+        end_date: string | null;
+        turnover_inr: number | null;
+        ppp_conversion_factor?: number;
+        physical_output?: number | null;
+        physical_output_unit?: string | null;
     }>({
-        startDate: null,
-        endDate: null,
-        turnover: null,
+        start_date: "2025-04-01",
+        end_date: "2026-04-30",
+        turnover_inr: 1000000.00,
+        ppp_conversion_factor: 20.00,
+        physical_output: 100.00,
+        physical_output_unit: "tcs",
     });
 
-    const { data, isPending, isError, error } = useBrsrEnergyConsumption(
-        activeFilters.startDate,
-        activeFilters.endDate,
-        activeFilters.turnover,
-    );
+    const { data, isPending, isError, error } = useBrsrEnergyConsumption(activeFilters);
 
     const [isDownloadOpen, setIsDownloadOpen] = useState(false);
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [isFilterOpen, setIsFilterOpen] = useState(false); // Collapsed by default
 
-    // Prepopulate default filters when data is first fetched
+    // Disabled prepopulating default filters to keep inputs empty initially
     useEffect(() => {
-        if (data && !activeFilters.startDate && !activeFilters.endDate) {
-            const start = new Date(data.reporting_period.period_start);
-            const end = new Date(data.reporting_period.period_end);
-            setStartDate(start);
-            setEndDate(end);
-            if (data.turnover_inr !== null) {
-                setTurnover(data.turnover_inr);
-            }
-            setActiveFilters({
-                startDate: data.reporting_period.period_start,
-                endDate: data.reporting_period.period_end,
-                turnover: data.turnover_inr,
-            });
-        }
-    }, [data, activeFilters.startDate, activeFilters.endDate]);
-
-    if (isPending) {
-        return (
-            <div className="flex h-[60vh] flex-col items-center justify-center gap-4">
-                <div className="h-10 w-10 animate-spin rounded-full border-4 border-secondary border-t-transparent" />
-                <p className="font-mono text-label-md text-on-surface-variant animate-pulse">
-                    Loading BRSR energy data...
-                </p>
-            </div>
-        );
-    }
-
-    if (isError) {
-        return (
-            <div className="space-y-6 max-w-4xl mx-auto mt-12 animate-fade-up">
-                <div className="rounded-2xl border border-error/20 bg-error-container/10 p-8 text-center text-error shadow-lg backdrop-blur-md">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-error/10 text-error">
-                        <MaterialIcon name="error" size="lg" className="!text-[28px]" />
-                    </div>
-                    <h3 className="mt-4 text-headline-sm font-bold text-primary">
-                        Failed to Load BRSR Metrics
-                    </h3>
-                    <p className="mt-2 text-body-md text-on-surface-variant">
-                        {error instanceof Error ? error.message : "An unexpected server error occurred."}
-                    </p>
-                    <div className="mt-6 flex justify-center">
-                        <Button
-                            variant="primary"
-                            onClick={() => window.location.reload()}
-                            className="flex items-center gap-2">
-                            <MaterialIcon name="refresh" size="sm" />
-                            Retry Loading
-                        </Button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+        // Keeps fields empty
+    }, []);
 
     const {
-        reporting_period,
-        totals,
-        skipped_fuel_activities,
-        generated_at,
-        turnover_inr,
-    } = data;
+        reporting_period = {
+            name: "",
+            period_status: "",
+            period_start: "1970-01-01",
+            period_end: "1970-01-01",
+            reporting_year: ""
+        },
+        totals = {
+            renewable_electricity_gj: "0",
+            renewable_fuel_gj: "0",
+            renewable_other_gj: "0",
+            renewable_total_gj: "0",
+            non_renewable_electricity_gj: "0",
+            non_renewable_fuel_gj: "0",
+            non_renewable_other_gj: "0",
+            non_renewable_total_gj: "0",
+            grand_total_gj: "0",
+            energy_intensity_per_inr: null,
+            energy_intensity_ppp: null,
+            energy_intensity_physical: null,
+            energy_intensity_physical_unit: null,
+            fuel_activity_count: 0,
+            electricity_activity_count: 0,
+            skipped_fuel_activity_count: 0
+        },
+        skipped_fuel_activities = [],
+        generated_at = "1970-01-01T00:00:00.000Z",
+        turnover_inr = null
+    } = data || {};
 
     const handleApplyFilters = () => {
         setActiveFilters({
-            startDate: startDate ? format(startDate, "yyyy-MM-dd") : null,
-            endDate: endDate ? format(endDate, "yyyy-MM-dd") : null,
-            turnover: turnover,
+            start_date: startDate ? format(startDate, "yyyy-MM-dd") : null,
+            end_date: endDate ? format(endDate, "yyyy-MM-dd") : null,
+            turnover_inr: turnover,
+            ppp_conversion_factor: pppFactor !== null ? pppFactor : undefined,
+            physical_output: physicalOutput,
+            physical_output_unit: physicalOutputUnit || undefined,
         });
     };
 
     const handleResetFilters = () => {
-        if (data) {
-            const start = new Date(data.reporting_period.period_start);
-            const end = new Date(data.reporting_period.period_end);
-            setStartDate(start);
-            setEndDate(end);
-            setTurnover(data.turnover_inr);
-            setActiveFilters({
-                startDate: data.reporting_period.period_start,
-                endDate: data.reporting_period.period_end,
-                turnover: data.turnover_inr,
-            });
-        }
+        setStartDate(null);
+        setEndDate(null);
+        setTurnover(null);
+        setPppFactor(null);
+        setPhysicalOutput(null);
+        setPhysicalOutputUnit("");
+        setActiveFilters({
+            start_date: null,
+            end_date: null,
+            turnover_inr: null,
+            ppp_conversion_factor: undefined,
+            physical_output: null,
+            physical_output_unit: "",
+        });
     };
 
-    const handleDownloadReport = async (startDateStr: string, endDateStr: string, turnoverVal: number) => {
-        const blob = await getBrsrEnergyReport(startDateStr, endDateStr, turnoverVal);
+    const handleDownloadReport = async (payload: {
+        start_date: string;
+        end_date: string;
+        turnover_inr: number;
+        ppp_conversion_factor?: number;
+        physical_output?: number | null;
+        physical_output_unit?: string | null;
+    }) => {
+        const blob = await getBrsrEnergyReport(payload);
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `brsr-energy-report-${startDateStr}-to-${endDateStr}.xlsx`;
+        a.download = `brsr-energy-report-${payload.start_date}-to-${payload.end_date}.xlsx`;
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -191,111 +180,161 @@ export default function BrsrEnergyPage() {
                         <span className="font-sans text-body-sm font-bold text-on-surfac">Filter Energy Consumption Parameters</span>
                     </div>
                 </CardHeader>
-                <CardBody className="grid grid-cols-1 gap-4 md:grid-cols-4 items-end">
-                    {/* Start Date Selector */}
-                    <div className="space-y-1.5 relative">
-                        <label className="text-xs font-semibold text-on-surface-variant block">Start Date</label>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setIsStartOpen(!isStartOpen);
-                                setIsEndOpen(false);
-                            }}
-                            className="w-full flex items-center justify-between gap-2 rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-left font-mono text-[12px] text-on-surface hover:bg-surface-container-high transition duration-150 bg-white">
-                            <span className="flex items-center gap-2">
-                                <MaterialIcon name="calendar_today" size="sm" className="text-on-surface-variant" />
-                                {startDate ? format(startDate, "yyyy-MM-dd") : "Select Start Date"}
-                            </span>
-                            <MaterialIcon name="arrow_drop_down" size="sm" />
-                        </button>
-                        {isStartOpen && (
-                            <>
-                                <button
-                                    type="button"
-                                    className="fixed inset-0 z-10 cursor-default bg-transparent"
-                                    onClick={() => setIsStartOpen(false)}
-                                    aria-label="Close calendar"
-                                />
-                                <div className="absolute left-0 top-full z-20 mt-1 shadow-2xl animate-fade-up">
-                                    <Calendar
-                                        date={startDate}
-                                        onDateChange={(date) => {
-                                            setStartDate(date);
-                                            setIsStartOpen(false);
-                                        }}
+                <CardBody className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+                        {/* Start Date Selector */}
+                        <div className="space-y-1.5 relative">
+                            <label className="text-xs font-semibold text-on-surface-variant block">Start Date</label>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsStartOpen(!isStartOpen);
+                                    setIsEndOpen(false);
+                                }}
+                                className="w-full flex items-center justify-between gap-2 rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-left font-mono text-[12px] text-on-surface hover:bg-surface-container-high transition duration-150 bg-white">
+                                <span className="flex items-center gap-2">
+                                    <MaterialIcon name="calendar_today" size="sm" className="text-on-surface-variant" />
+                                    {startDate ? format(startDate, "yyyy-MM-dd") : "Select Start Date"}
+                                </span>
+                                <MaterialIcon name="arrow_drop_down" size="sm" />
+                            </button>
+                            {isStartOpen && (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="fixed inset-0 z-10 cursor-default bg-transparent"
+                                        onClick={() => setIsStartOpen(false)}
+                                        aria-label="Close calendar"
                                     />
-                                </div>
-                            </>
-                        )}
-                    </div>
+                                    <div className="absolute left-0 top-full z-20 mt-1 shadow-2xl animate-fade-up">
+                                        <Calendar
+                                            date={startDate}
+                                            onDateChange={(date) => {
+                                                setStartDate(date);
+                                                setIsStartOpen(false);
+                                            }}
+                                        />
+                                    </div>
+                                </>
+                            )}
+                        </div>
 
-                    {/* End Date Selector */}
-                    <div className="space-y-1.5 relative">
-                        <label className="text-xs font-semibold text-on-surface-variant block">End Date</label>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setIsEndOpen(!isEndOpen);
-                                setIsStartOpen(false);
-                            }}
-                            className="w-full flex items-center justify-between gap-2 rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-left font-mono text-[12px] text-on-surface hover:bg-surface-container-high transition duration-150 bg-white">
-                            <span className="flex items-center gap-2">
-                                <MaterialIcon name="calendar_today" size="sm" className="text-on-surface-variant" />
-                                {endDate ? format(endDate, "yyyy-MM-dd") : "Select End Date"}
-                            </span>
-                            <MaterialIcon name="arrow_drop_down" size="sm" />
-                        </button>
-                        {isEndOpen && (
-                            <>
-                                <button
-                                    type="button"
-                                    className="fixed inset-0 z-10 cursor-default bg-transparent"
-                                    onClick={() => setIsEndOpen(false)}
-                                    aria-label="Close calendar"
-                                />
-                                <div className="absolute left-0 top-full z-20 mt-1 shadow-2xl animate-fade-up">
-                                    <Calendar
-                                        date={endDate}
-                                        onDateChange={(date) => {
-                                            setEndDate(date);
-                                            setIsEndOpen(false);
-                                        }}
+                        {/* End Date Selector */}
+                        <div className="space-y-1.5 relative">
+                            <label className="text-xs font-semibold text-on-surface-variant block">End Date</label>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsEndOpen(!isEndOpen);
+                                    setIsStartOpen(false);
+                                }}
+                                className="w-full flex items-center justify-between gap-2 rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-left font-mono text-[12px] text-on-surface hover:bg-surface-container-high transition duration-150 bg-white">
+                                <span className="flex items-center gap-2">
+                                    <MaterialIcon name="calendar_today" size="sm" className="text-on-surface-variant" />
+                                    {endDate ? format(endDate, "yyyy-MM-dd") : "Select End Date"}
+                                </span>
+                                <MaterialIcon name="arrow_drop_down" size="sm" />
+                            </button>
+                            {isEndOpen && (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="fixed inset-0 z-10 cursor-default bg-transparent"
+                                        onClick={() => setIsEndOpen(false)}
+                                        aria-label="Close calendar"
                                     />
-                                </div>
-                            </>
-                        )}
-                    </div>
+                                    <div className="absolute left-0 top-full z-20 mt-1 shadow-2xl animate-fade-up">
+                                        <Calendar
+                                            date={endDate}
+                                            onDateChange={(date) => {
+                                                setEndDate(date);
+                                                setIsEndOpen(false);
+                                            }}
+                                        />
+                                    </div>
+                                </>
+                            )}
+                        </div>
 
-                    {/* Turnover INR Input */}
-                    <div className="space-y-1.5">
-                        <label htmlFor="filter-turnover" className="text-xs font-semibold text-on-surface-variant block">
-                            Turnover (INR)
-                        </label>
-                        <div className="relative flex items-center">
-                            <div className="pointer-events-none absolute left-3 text-on-surface-variant/60 text-[12px] font-mono">₹</div>
+                        {/* Turnover INR Input */}
+                        <div className="space-y-1.5">
+                            <label htmlFor="filter-turnover" className="text-xs font-semibold text-on-surface-variant block">
+                                Turnover (INR)
+                            </label>
+                            <div className="relative flex items-center">
+                                <div className="pointer-events-none absolute left-3 text-on-surface-variant/60 text-[12px] font-mono">₹</div>
+                                <input
+                                    id="filter-turnover"
+                                    type="number"
+                                    placeholder="Enter turnover..."
+                                    value={turnover === null ? "" : turnover}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setTurnover(val === "" ? null : Number(val));
+                                    }}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low py-1.5 pl-8 pr-3 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                />
+                            </div>
+                        </div>
+
+                        {/* PPP Conversion Factor Input */}
+                        <div className="space-y-1.5">
+                            <label htmlFor="filter-ppp" className="text-xs font-semibold text-on-surface-variant block">
+                                PPP Conversion Factor
+                            </label>
                             <input
-                                id="filter-turnover"
+                                id="filter-ppp"
                                 type="number"
-                                placeholder="Enter turnover..."
-                                value={turnover === null ? "" : turnover}
+                                step="any"
+                                placeholder="Enter PPP factor..."
+                                value={pppFactor === null ? "" : pppFactor}
                                 onChange={(e) => {
                                     const val = e.target.value;
-                                    setTurnover(val === "" ? null : Number(val));
+                                    setPppFactor(val === "" ? null : Number(val));
                                 }}
-                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low py-1.5 pl-8 pr-3 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low py-1.5 px-3 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                            />
+                        </div>
+
+                        {/* Physical Output Input */}
+                        <div className="space-y-1.5">
+                            <label htmlFor="filter-physical" className="text-xs font-semibold text-on-surface-variant block">
+                                Physical Output
+                            </label>
+                            <input
+                                id="filter-physical"
+                                type="number"
+                                step="any"
+                                placeholder="Enter physical output..."
+                                value={physicalOutput === null ? "" : physicalOutput}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setPhysicalOutput(val === "" ? null : Number(val));
+                                }}
+                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low py-1.5 px-3 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                            />
+                        </div>
+
+                        {/* Physical Output Unit Input */}
+                        <div className="space-y-1.5">
+                            <label htmlFor="filter-physical-unit" className="text-xs font-semibold text-on-surface-variant block">
+                                Physical Output Unit
+                            </label>
+                            <input
+                                id="filter-physical-unit"
+                                type="text"
+                                placeholder="e.g. tonnes, tcs"
+                                value={physicalOutputUnit}
+                                onChange={(e) => {
+                                    setPhysicalOutputUnit(e.target.value);
+                                }}
+                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low py-1.5 px-3 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
                             />
                         </div>
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-2">
-                        <Button
-                            variant="primary"
-                            size="md"
-                            onClick={handleApplyFilters}
-                            className="flex-1 py-1.5">
-                            Apply
-                        </Button>
+                    <div className="flex justify-end gap-2 border-t border-outline-variant/60 pt-3">
                         <Button
                             variant="secondary"
                             size="md"
@@ -303,11 +342,43 @@ export default function BrsrEnergyPage() {
                             className="py-1.5">
                             Reset
                         </Button>
+                        <Button
+                            variant="primary"
+                            size="md"
+                            onClick={handleApplyFilters}
+                            className="min-w-[100px] py-1.5">
+                            Apply
+                        </Button>
                     </div>
                 </CardBody>
             </Card>
             )}
 
+            {!data && !isPending && !isError ? (
+                <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-8 text-center text-on-surface-variant shadow-lg backdrop-blur-md max-w-4xl mx-auto mt-6">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <MaterialIcon name="info" size="lg" className="!text-[28px]" />
+                    </div>
+                    <h3 className="mt-4 text-headline-sm font-bold text-primary">
+                        Configure BRSR Parameters
+                    </h3>
+                    <p className="mt-2 text-body-md text-on-surface-variant max-w-md mx-auto">
+                        Please specify a Start Date, End Date, and Turnover in the controls panel above, then click Apply to calculate energy consumption and intensity ratios.
+                    </p>
+                </div>
+            ) : isPending ? (
+                <div className="flex h-48 flex-col items-center justify-center gap-2">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                    <p className="font-mono text-label-md text-on-surface-variant animate-pulse">Calculating energy metrics...</p>
+                </div>
+            ) : isError ? (
+                <div className="rounded-2xl border border-error/20 bg-error-container/10 p-6 text-center text-error shadow-sm">
+                    <MaterialIcon name="warning" className="mx-auto mb-2 text-error" />
+                    <h5 className="font-bold">Computation Error</h5>
+                    <p className="text-xs mt-1 text-on-surface-variant">{error instanceof Error ? error.message : "Failed to calculate energy metrics."}</p>
+                </div>
+            ) : (
+                <>
             {/* Reporting Period Summary Bar */}
             <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -599,6 +670,8 @@ export default function BrsrEnergyPage() {
                     )}
                 </CardBody>
             </Card>
+            </>
+            )}
 
             {/* Download Dialog Modal */}
             <BrsrEnergyReportModal

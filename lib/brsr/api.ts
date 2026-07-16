@@ -10,36 +10,30 @@ import type {
     BrsrWasteDisclosureResponse,
 } from "./types";
 
-export async function getBrsrEnergyConsumption(
-    startDate?: string | null,
-    endDate?: string | null,
-    turnoverInr?: number | null,
-): Promise<BrsrEnergyConsumptionData> {
-    const params: Record<string, string | number> = {};
-    if (startDate) params.start_date = startDate;
-    if (endDate) params.end_date = endDate;
-    if (turnoverInr !== undefined && turnoverInr !== null) params.turnover_inr = turnoverInr;
-
-    const response = await privateApi.get<BrsrEnergyConsumptionResponse>("/tenant/brsr/energy-consumption", {
-        params,
-    });
+export async function getBrsrEnergyConsumption(payload: {
+    start_date: string;
+    end_date: string;
+    turnover_inr: number;
+    ppp_conversion_factor?: number;
+    physical_output?: number | null;
+    physical_output_unit?: string | null;
+}): Promise<BrsrEnergyConsumptionData> {
+    const response = await privateApi.post<BrsrEnergyConsumptionResponse>("/tenant/brsr/energy-consumption", payload);
     if (!response.data?.success || !response.data?.data) {
         throw new Error(response.data?.message ?? "Failed to fetch energy consumption data.");
     }
     return response.data.data;
 }
 
-export async function getBrsrEnergyReport(
-    startDate: string,
-    endDate: string,
-    turnoverInr: number,
-): Promise<Blob> {
-    const response = await privateApi.get("/tenant/brsr/energy-consumption/report", {
-        params: {
-            start_date: startDate,
-            end_date: endDate,
-            turnover_inr: turnoverInr,
-        },
+export async function getBrsrEnergyReport(payload: {
+    start_date: string;
+    end_date: string;
+    turnover_inr: number;
+    ppp_conversion_factor?: number;
+    physical_output?: number | null;
+    physical_output_unit?: string | null;
+}): Promise<Blob> {
+    const response = await privateApi.post("/tenant/brsr/energy-consumption/report", payload, {
         responseType: "blob",
     });
     return response.data as Blob;

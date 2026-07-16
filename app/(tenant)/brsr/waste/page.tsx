@@ -11,57 +11,69 @@ import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import type { BrsrWasteDisclosurePayload } from "@/lib/brsr/types";
 
 export default function BrsrWastePage() {
-    // General parameters
-    const [fyLabel, setFyLabel] = useState("FY 2024-25");
-    const [turnover, setTurnover] = useState("100000000");
-    const [physicalOutput, setPhysicalOutput] = useState("850");
+    // General parameters (empty initially)
+    const [fyLabel, setFyLabel] = useState("");
+    const [turnover, setTurnover] = useState("");
+    const [pppFactor, setPppFactor] = useState("");
+    const [physicalOutput, setPhysicalOutput] = useState("");
+    const [physicalOutputUnit, setPhysicalOutputUnit] = useState("");
 
     // Waste generation
-    const [plastic, setPlastic] = useState("591.05");
-    const [ewaste, setEwaste] = useState("155.02");
-    const [bioMedical, setBioMedical] = useState("0.1958");
-    const [construction, setConstruction] = useState("0.0");
-    const [battery, setBattery] = useState("158.57");
-    const [radioactive, setRadioactive] = useState("0.0");
-    const [otherHazardous, setOtherHazardous] = useState("1548.148181");
+    const [plastic, setPlastic] = useState("");
+    const [ewaste, setEwaste] = useState("");
+    const [bioMedical, setBioMedical] = useState("");
+    const [construction, setConstruction] = useState("");
+    const [battery, setBattery] = useState("");
+    const [radioactive, setRadioactive] = useState("");
+    const [otherHazardous, setOtherHazardous] = useState("");
+    const [flyAsh, setFlyAsh] = useState("");
+    const [nonHazardousSolid, setNonHazardousSolid] = useState("");
 
     // Waste recovery
-    const [recycled, setRecycled] = useState("16546749.8412");
-    const [reused, setReused] = useState("0.0");
-    const [otherRecovery, setOtherRecovery] = useState("0.0");
+    const [recycled, setRecycled] = useState("");
+    const [reused, setReused] = useState("");
+    const [otherRecovery, setOtherRecovery] = useState("");
 
     // Waste disposal
-    const [incineration, setIncineration] = useState("154.02");
-    const [landfilling, setLandfilling] = useState("3221.8350");
-    const [otherDisposal, setOtherDisposal] = useState("0.0");
+    const [incineration, setIncineration] = useState("");
+    const [landfilling, setLandfilling] = useState("");
+    const [otherDisposal, setOtherDisposal] = useState("");
 
-    // Payload for query caching
+    // Payload for query caching initialized with dummy data
     const [activePayload, setActivePayload] = useState<BrsrWasteDisclosurePayload>({
-        financial_year_label: "FY 2024-25",
-        plastic_waste_tonne: 591.05,
-        ewaste_tonne: 155.02,
-        bio_medical_waste_tonne: 0.1958,
-        construction_and_demolition_waste_tonne: 0.0,
-        battery_waste_tonne: 158.57,
-        radioactive_waste_tonne: 0.0,
-        other_hazardous_waste_tonne: 1548.148181,
-        recycled_tonne: 16546749.8412,
-        reused_tonne: 0.0,
-        other_recovery_tonne: 0.0,
-        incineration_tonne: 154.02,
-        landfilling_tonne: 3221.8350,
-        other_disposal_tonne: 0.0,
-        turnover_inr: 100000000,
-        physical_output_tonnes: 850,
+        financial_year_label: "FY 2025-26",
+        turnover_inr: 1000000.00,
+        physical_output_tonnes: 100.00,
+        ppp_conversion_factor: 20.00,
+        physical_output_unit: "tcs",
+        plastic_waste_tonne: 10.00,
+        ewaste_tonne: 5.00,
+        bio_medical_waste_tonne: 2.00,
+        construction_and_demolition_waste_tonne: 1.00,
+        battery_waste_tonne: 0.50,
+        radioactive_waste_tonne: 0.00,
+        other_hazardous_waste_tonne: 1.50,
+        fly_ash_tonne: 15.00,
+        non_hazardous_solid_waste_tonne: 5.00,
+        recycled_tonne: 8.00,
+        reused_tonne: 4.00,
+        other_recovery_tonne: 2.00,
+        incineration_tonne: 3.00,
+        landfilling_tonne: 2.00,
+        other_disposal_tonne: 1.00,
     });
 
     const { data, isPending, isError, error } = useBrsrWasteDisclosure(activePayload);
     const [isDownloadOpen, setIsDownloadOpen] = useState(false);
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [isFilterOpen, setIsFilterOpen] = useState(false); // Collapsed by default
 
     const handleGenerate = () => {
         setActivePayload({
             financial_year_label: fyLabel,
+            turnover_inr: Number(turnover) || 0,
+            physical_output_tonnes: Number(physicalOutput) || 0,
+            ppp_conversion_factor: pppFactor ? Number(pppFactor) : undefined,
+            physical_output_unit: physicalOutputUnit || undefined,
             plastic_waste_tonne: Number(plastic) || 0,
             ewaste_tonne: Number(ewaste) || 0,
             bio_medical_waste_tonne: Number(bioMedical) || 0,
@@ -69,52 +81,56 @@ export default function BrsrWastePage() {
             battery_waste_tonne: Number(battery) || 0,
             radioactive_waste_tonne: Number(radioactive) || 0,
             other_hazardous_waste_tonne: Number(otherHazardous) || 0,
+            fly_ash_tonne: Number(flyAsh) || 0,
+            non_hazardous_solid_waste_tonne: Number(nonHazardousSolid) || 0,
             recycled_tonne: Number(recycled) || 0,
             reused_tonne: Number(reused) || 0,
             other_recovery_tonne: Number(otherRecovery) || 0,
             incineration_tonne: Number(incineration) || 0,
             landfilling_tonne: Number(landfilling) || 0,
             other_disposal_tonne: Number(otherDisposal) || 0,
-            turnover_inr: Number(turnover) || 0,
-            physical_output_tonnes: Number(physicalOutput) || 0,
         });
     };
 
     const handleReset = () => {
-        setFyLabel("FY 2024-25");
-        setTurnover("100000000");
-        setPhysicalOutput("850");
-        setPlastic("591.05");
-        setEwaste("155.02");
-        setBioMedical("0.1958");
-        setConstruction("0.0");
-        setBattery("158.57");
-        setRadioactive("0.0");
-        setOtherHazardous("1548.148181");
-        setRecycled("16546749.8412");
-        setReused("0.0");
-        setOtherRecovery("0.0");
-        setIncineration("154.02");
-        setLandfilling("3221.8350");
-        setOtherDisposal("0.0");
+        setFyLabel("");
+        setTurnover("");
+        setPppFactor("");
+        setPhysicalOutput("");
+        setPhysicalOutputUnit("");
+        setPlastic("");
+        setEwaste("");
+        setBioMedical("");
+        setConstruction("");
+        setBattery("");
+        setRadioactive("");
+        setOtherHazardous("");
+        setFlyAsh("");
+        setNonHazardousSolid("");
+        setRecycled("");
+        setReused("");
+        setOtherRecovery("");
+        setIncineration("");
+        setLandfilling("");
+        setOtherDisposal("");
 
         setActivePayload({
-            financial_year_label: "FY 2024-25",
-            plastic_waste_tonne: 591.05,
-            ewaste_tonne: 155.02,
-            bio_medical_waste_tonne: 0.1958,
-            construction_and_demolition_waste_tonne: 0.0,
-            battery_waste_tonne: 158.57,
-            radioactive_waste_tonne: 0.0,
-            other_hazardous_waste_tonne: 1548.148181,
-            recycled_tonne: 16546749.8412,
-            reused_tonne: 0.0,
-            other_recovery_tonne: 0.0,
-            incineration_tonne: 154.02,
-            landfilling_tonne: 3221.8350,
-            other_disposal_tonne: 0.0,
-            turnover_inr: 100000000,
-            physical_output_tonnes: 850,
+            financial_year_label: "",
+            turnover_inr: 0,
+            physical_output_tonnes: 0,
+            plastic_waste_tonne: 0,
+            ewaste_tonne: 0,
+            bio_medical_waste_tonne: 0,
+            construction_and_demolition_waste_tonne: 0,
+            battery_waste_tonne: 0,
+            radioactive_waste_tonne: 0,
+            other_hazardous_waste_tonne: 0,
+            recycled_tonne: 0,
+            reused_tonne: 0,
+            other_recovery_tonne: 0,
+            incineration_tonne: 0,
+            landfilling_tonne: 0,
+            other_disposal_tonne: 0,
         });
     };
 
@@ -181,34 +197,60 @@ export default function BrsrWastePage() {
                         <span className="text-xs font-bold text-primary/80 uppercase tracking-wider block">
                             General Info
                         </span>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
                             <div className="space-y-1">
-                                <label htmlFor="fy-lbl" className="text-xs font-semibold text-on-surface-variant block">FY Label</label>
+                                <label htmlFor="fy-lbl" className="text-xs font-semibold text-on-surface-variant block">FY Label <span className="text-error">*</span></label>
                                 <input
                                     id="fy-lbl"
                                     type="text"
+                                    placeholder="e.g. FY 2025-26"
                                     value={fyLabel}
                                     onChange={(e) => setFyLabel(e.target.value)}
                                     className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label htmlFor="turnover-in" className="text-xs font-semibold text-on-surface-variant block">Turnover (INR)</label>
+                                <label htmlFor="turnover-in" className="text-xs font-semibold text-on-surface-variant block">Turnover (INR) <span className="text-error">*</span></label>
                                 <input
                                     id="turnover-in"
                                     type="number"
+                                    placeholder="e.g. 1000000"
                                     value={turnover}
                                     onChange={(e) => setTurnover(e.target.value)}
                                     className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label htmlFor="output-in" className="text-xs font-semibold text-on-surface-variant block">Physical Output (Tonnes)</label>
+                                <label htmlFor="output-in" className="text-xs font-semibold text-on-surface-variant block">Physical Output <span className="text-error">*</span></label>
                                 <input
                                     id="output-in"
                                     type="number"
+                                    placeholder="e.g. 200"
                                     value={physicalOutput}
                                     onChange={(e) => setPhysicalOutput(e.target.value)}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label htmlFor="ppp-factor-in" className="text-xs font-semibold text-on-surface-variant block">PPP Factor</label>
+                                <input
+                                    id="ppp-factor-in"
+                                    type="number"
+                                    step="any"
+                                    placeholder="e.g. 20.00"
+                                    value={pppFactor}
+                                    onChange={(e) => setPppFactor(e.target.value)}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label htmlFor="physical-unit-in" className="text-xs font-semibold text-on-surface-variant block">Output Unit</label>
+                                <input
+                                    id="physical-unit-in"
+                                    type="text"
+                                    placeholder="e.g. tonnes, pcs"
+                                    value={physicalOutputUnit}
+                                    onChange={(e) => setPhysicalOutputUnit(e.target.value)}
                                     className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
                                 />
                             </div>
@@ -281,13 +323,33 @@ export default function BrsrWastePage() {
                                     className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
                                 />
                             </div>
-                            <div className="space-y-1 sm:col-span-2">
+                            <div className="space-y-1">
                                 <label htmlFor="haz-in" className="text-xs font-semibold text-on-surface-variant block">Other Hazardous</label>
                                 <input
                                     id="haz-in"
                                     type="number"
                                     value={otherHazardous}
                                     onChange={(e) => setOtherHazardous(e.target.value)}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label htmlFor="fly-ash-in" className="text-xs font-semibold text-on-surface-variant block">Fly Ash</label>
+                                <input
+                                    id="fly-ash-in"
+                                    type="number"
+                                    value={flyAsh}
+                                    onChange={(e) => setFlyAsh(e.target.value)}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                />
+                            </div>
+                            <div className="space-y-1 sm:col-span-2">
+                                <label htmlFor="solid-waste-in" className="text-xs font-semibold text-on-surface-variant block">Non-hazardous Solid</label>
+                                <input
+                                    id="solid-waste-in"
+                                    type="number"
+                                    value={nonHazardousSolid}
+                                    onChange={(e) => setNonHazardousSolid(e.target.value)}
                                     className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
                                 />
                             </div>
@@ -386,7 +448,19 @@ export default function BrsrWastePage() {
             )}
 
             {/* Content Display */}
-            {isPending ? (
+            {!data && !isPending && !isError ? (
+                <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-8 text-center text-on-surface-variant shadow-lg backdrop-blur-md max-w-4xl mx-auto mt-6">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <MaterialIcon name="info" size="lg" className="!text-[28px]" />
+                    </div>
+                    <h3 className="mt-4 text-headline-sm font-bold text-primary">
+                        Configure Waste Parameters
+                    </h3>
+                    <p className="mt-2 text-body-md text-on-surface-variant max-w-md mx-auto">
+                        Please specify the Financial Year, Turnover, and waste quantities in the panel above, then click Generate Metrics to calculate waste totals and intensity ratios.
+                    </p>
+                </div>
+            ) : isPending ? (
                 <div className="flex h-48 flex-col items-center justify-center gap-2">
                     <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
                     <p className="font-mono text-label-md text-on-surface-variant animate-pulse">Calculating waste metrics...</p>

@@ -11,31 +11,97 @@ import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import type { BrsrWaterDisclosurePayload } from "@/lib/brsr/types";
 
 export default function BrsrWaterPage() {
-    // Input states on the page
-    const [fyLabel, setFyLabel] = useState("FY 2024-2025");
-    const [surfaceWater, setSurfaceWater] = useState("2500");
-    const [groundwater, setGroundwater] = useState("1200");
-    const [thirdParty, setThirdParty] = useState("5600");
-    const [seawater, setSeawater] = useState("2000");
-    const [others, setOthers] = useState("500");
-    const [totalWater, setTotalWater] = useState("11800");
-    const [turnover, setTurnover] = useState("50000");
+    // Input states on the page (empty per user request)
+    const [fyLabel, setFyLabel] = useState("");
+    const [turnover, setTurnover] = useState("");
+    const [pppFactor, setPppFactor] = useState("");
+    const [physicalOutput, setPhysicalOutput] = useState("");
+    const [physicalOutputUnit, setPhysicalOutputUnit] = useState("");
 
-    // Active payload that feeds React Query
+    // Withdrawal
+    const [surfaceWater, setSurfaceWater] = useState("");
+    const [groundwater, setGroundwater] = useState("");
+    const [thirdParty, setThirdParty] = useState("");
+    const [seawater, setSeawater] = useState("");
+    const [others, setOthers] = useState("");
+
+    // Discharge
+    const [dischargeSurfaceNoTreatment, setDischargeSurfaceNoTreatment] = useState("");
+    const [dischargeSurfaceWithTreatment, setDischargeSurfaceWithTreatment] = useState("");
+    const [dischargeSurfaceLevel, setDischargeSurfaceLevel] = useState("");
+
+    const [dischargeGroundNoTreatment, setDischargeGroundNoTreatment] = useState("");
+    const [dischargeGroundWithTreatment, setDischargeGroundWithTreatment] = useState("");
+    const [dischargeGroundLevel, setDischargeGroundLevel] = useState("");
+
+    const [dischargeSeawaterNoTreatment, setDischargeSeawaterNoTreatment] = useState("");
+    const [dischargeSeawaterWithTreatment, setDischargeSeawaterWithTreatment] = useState("");
+    const [dischargeSeawaterLevel, setDischargeSeawaterLevel] = useState("");
+
+    const [dischargeThirdPartyNoTreatment, setDischargeThirdPartyNoTreatment] = useState("");
+    const [dischargeThirdPartyWithTreatment, setDischargeThirdPartyWithTreatment] = useState("");
+    const [dischargeThirdPartyLevel, setDischargeThirdPartyLevel] = useState("");
+
+    const [dischargeOthersNoTreatment, setDischargeOthersNoTreatment] = useState("");
+    const [dischargeOthersWithTreatment, setDischargeOthersWithTreatment] = useState("");
+    const [dischargeOthersLevel, setDischargeOthersLevel] = useState("");
+
+    const [totalWater, setTotalWater] = useState("");
+
+    // Active payload that feeds React Query with dummy data initially
     const [activePayload, setActivePayload] = useState<BrsrWaterDisclosurePayload>({
-        financial_year_label: "FY 2024-2025",
-        surface_water_kl: "2500",
-        groundwater_kl: "1200",
-        third_party_water_kl: "5600",
-        seawater_desalinated_kl: "2000",
-        others_kl: "500",
-        total_water_consumption_kl: "11800",
-        turnover_inr: "50000",
+        financial_year_label: "FY 2025-26",
+        turnover_inr: 1000000.00,
+        ppp_conversion_factor: 20.00,
+        physical_output: 100.00,
+        physical_output_unit: "tcs",
+        withdrawal: {
+            surface_water_kl: 100.50,
+            groundwater_kl: 50.00,
+            third_party_water_kl: 25.00,
+            seawater_desalinated_kl: 10.00,
+            others_kl: 5.00,
+        },
+        discharge: {
+            surface_water: { no_treatment_kl: 10.00, with_treatment_kl: 15.00, treatment_level: "RO" },
+            groundwater: { no_treatment_kl: 5.00, with_treatment_kl: 10.00, treatment_level: "RO" },
+            seawater: { no_treatment_kl: 2.00, with_treatment_kl: 4.00, treatment_level: "STP" },
+            third_party: { no_treatment_kl: 5.00, with_treatment_kl: 8.00, treatment_level: "RO" },
+            others: { no_treatment_kl: 1.00, with_treatment_kl: 2.00, treatment_level: "RO" },
+        },
+        total_water_consumption_kl: 190.50,
     });
 
     const { data, isPending, isError, error } = useBrsrWaterDisclosure(activePayload);
+    const {
+        financial_year_label = "",
+        turnover_inr = 0,
+        totals = {
+            withdrawal: {
+                surface_water_kl: "0",
+                groundwater_kl: "0",
+                third_party_water_kl: "0",
+                seawater_desalinated_kl: "0",
+                others_kl: "0",
+            },
+            total_water_withdrawal_kl: "0",
+            discharge: {
+                surface_water: { no_treatment_kl: "0", with_treatment_kl: "0", treatment_level: null },
+                groundwater: { no_treatment_kl: "0", with_treatment_kl: "0", treatment_level: null },
+                seawater: { no_treatment_kl: "0", with_treatment_kl: "0", treatment_level: null },
+                third_party: { no_treatment_kl: "0", with_treatment_kl: "0", treatment_level: null },
+                others: { no_treatment_kl: "0", with_treatment_kl: "0", treatment_level: null },
+            },
+            total_water_discharge_kl: "0",
+            total_water_consumption_kl: "0",
+            water_intensity_per_inr: null,
+            water_intensity_ppp: null,
+            water_intensity_physical: null,
+            water_intensity_physical_unit: null,
+        }
+    } = data || {};
     const [isDownloadOpen, setIsDownloadOpen] = useState(false);
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [isFilterOpen, setIsFilterOpen] = useState(false); // Collapsed by default
 
     // Auto-update total water consumption input as components change
     useEffect(() => {
@@ -47,40 +113,101 @@ export default function BrsrWaterPage() {
             (Number(others) || 0);
         if (sum > 0) {
             setTotalWater(String(sum));
+        } else {
+            setTotalWater("");
         }
     }, [surfaceWater, groundwater, thirdParty, seawater, others]);
 
     const handleGenerate = () => {
         setActivePayload({
             financial_year_label: fyLabel,
-            surface_water_kl: surfaceWater,
-            groundwater_kl: groundwater,
-            third_party_water_kl: thirdParty,
-            seawater_desalinated_kl: seawater,
-            others_kl: others,
-            total_water_consumption_kl: totalWater,
-            turnover_inr: turnover,
+            turnover_inr: Number(turnover) || 0,
+            ppp_conversion_factor: pppFactor ? Number(pppFactor) : undefined,
+            physical_output: physicalOutput ? Number(physicalOutput) : null,
+            physical_output_unit: physicalOutputUnit || null,
+            withdrawal: {
+                surface_water_kl: Number(surfaceWater) || 0,
+                groundwater_kl: Number(groundwater) || 0,
+                third_party_water_kl: Number(thirdParty) || 0,
+                seawater_desalinated_kl: Number(seawater) || 0,
+                others_kl: Number(others) || 0,
+            },
+            discharge: {
+                surface_water: {
+                    no_treatment_kl: Number(dischargeSurfaceNoTreatment) || 0,
+                    with_treatment_kl: Number(dischargeSurfaceWithTreatment) || 0,
+                    treatment_level: dischargeSurfaceLevel || null,
+                },
+                groundwater: {
+                    no_treatment_kl: Number(dischargeGroundNoTreatment) || 0,
+                    with_treatment_kl: Number(dischargeGroundWithTreatment) || 0,
+                    treatment_level: dischargeGroundLevel || null,
+                },
+                seawater: {
+                    no_treatment_kl: Number(dischargeSeawaterNoTreatment) || 0,
+                    with_treatment_kl: Number(dischargeSeawaterWithTreatment) || 0,
+                    treatment_level: dischargeSeawaterLevel || null,
+                },
+                third_party: {
+                    no_treatment_kl: Number(dischargeThirdPartyNoTreatment) || 0,
+                    with_treatment_kl: Number(dischargeThirdPartyWithTreatment) || 0,
+                    treatment_level: dischargeThirdPartyLevel || null,
+                },
+                others: {
+                    no_treatment_kl: Number(dischargeOthersNoTreatment) || 0,
+                    with_treatment_kl: Number(dischargeOthersWithTreatment) || 0,
+                    treatment_level: dischargeOthersLevel || null,
+                },
+            },
+            total_water_consumption_kl: totalWater ? Number(totalWater) : null,
         });
     };
 
     const handleReset = () => {
-        setFyLabel("FY 2024-2025");
-        setSurfaceWater("2500");
-        setGroundwater("1200");
-        setThirdParty("5600");
-        setSeawater("2000");
-        setOthers("500");
-        setTotalWater("11800");
-        setTurnover("50000");
+        setFyLabel("");
+        setTurnover("");
+        setPppFactor("");
+        setPhysicalOutput("");
+        setPhysicalOutputUnit("");
+        setSurfaceWater("");
+        setGroundwater("");
+        setThirdParty("");
+        setSeawater("");
+        setOthers("");
+        setDischargeSurfaceNoTreatment("");
+        setDischargeSurfaceWithTreatment("");
+        setDischargeSurfaceLevel("");
+        setDischargeGroundNoTreatment("");
+        setDischargeGroundWithTreatment("");
+        setDischargeGroundLevel("");
+        setDischargeSeawaterNoTreatment("");
+        setDischargeSeawaterWithTreatment("");
+        setDischargeSeawaterLevel("");
+        setDischargeThirdPartyNoTreatment("");
+        setDischargeThirdPartyWithTreatment("");
+        setDischargeThirdPartyLevel("");
+        setDischargeOthersNoTreatment("");
+        setDischargeOthersWithTreatment("");
+        setDischargeOthersLevel("");
+        setTotalWater("");
+
         setActivePayload({
-            financial_year_label: "FY 2024-2025",
-            surface_water_kl: "2500",
-            groundwater_kl: "1200",
-            third_party_water_kl: "5600",
-            seawater_desalinated_kl: "2000",
-            others_kl: "500",
-            total_water_consumption_kl: "11800",
-            turnover_inr: "50000",
+            financial_year_label: "",
+            turnover_inr: 0,
+            withdrawal: {
+                surface_water_kl: 0,
+                groundwater_kl: 0,
+                third_party_water_kl: 0,
+                seawater_desalinated_kl: 0,
+                others_kl: 0,
+            },
+            discharge: {
+                surface_water: { no_treatment_kl: 0, with_treatment_kl: 0 },
+                groundwater: { no_treatment_kl: 0, with_treatment_kl: 0 },
+                seawater: { no_treatment_kl: 0, with_treatment_kl: 0 },
+                third_party: { no_treatment_kl: 0, with_treatment_kl: 0 },
+                others: { no_treatment_kl: 0, with_treatment_kl: 0 },
+            },
         });
     };
 
@@ -142,117 +269,230 @@ export default function BrsrWaterPage() {
                     </div>
                 </CardHeader>
                 <CardBody className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                        {/* Financial Year Label */}
-                        <div className="space-y-1">
-                            <label htmlFor="fy-filter" className="text-xs font-semibold text-on-surface-variant block">
-                                FY Label
-                            </label>
-                            <input
-                                id="fy-filter"
-                                type="text"
-                                value={fyLabel}
-                                onChange={(e) => setFyLabel(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
-                            />
-                        </div>
+                    {/* General & Intensity Parameters */}
+                    <div className="border-b border-outline-variant/60 pb-5">
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-3">General & Intensity Parameters</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+                            {/* FY Label */}
+                            <div className="space-y-1">
+                                <label htmlFor="fy-filter" className="text-xs font-semibold text-on-surface-variant block">
+                                    FY Label <span className="text-error">*</span>
+                                </label>
+                                <input
+                                    id="fy-filter"
+                                    type="text"
+                                    placeholder="e.g. FY 2025-26"
+                                    value={fyLabel}
+                                    onChange={(e) => setFyLabel(e.target.value)}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                />
+                            </div>
 
-                        {/* Turnover */}
-                        <div className="space-y-1">
-                            <label htmlFor="turnover-filter" className="text-xs font-semibold text-on-surface-variant block">
-                                Turnover (INR)
-                            </label>
-                            <input
-                                id="turnover-filter"
-                                type="number"
-                                value={turnover}
-                                onChange={(e) => setTurnover(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
-                            />
-                        </div>
+                            {/* Turnover */}
+                            <div className="space-y-1">
+                                <label htmlFor="turnover-filter" className="text-xs font-semibold text-on-surface-variant block">
+                                    Turnover (INR) <span className="text-error">*</span>
+                                </label>
+                                <input
+                                    id="turnover-filter"
+                                    type="number"
+                                    placeholder="e.g. 1000000"
+                                    value={turnover}
+                                    onChange={(e) => setTurnover(e.target.value)}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                />
+                            </div>
 
-                        {/* Surface Water */}
-                        <div className="space-y-1">
-                            <label htmlFor="surface-filter" className="text-xs font-semibold text-on-surface-variant block">
-                                Surface Water (kL)
-                            </label>
-                            <input
-                                id="surface-filter"
-                                type="number"
-                                value={surfaceWater}
-                                onChange={(e) => setSurfaceWater(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
-                            />
-                        </div>
+                            {/* PPP Conversion Factor */}
+                            <div className="space-y-1">
+                                <label htmlFor="ppp-filter" className="text-xs font-semibold text-on-surface-variant block">
+                                    PPP Conversion Factor
+                                </label>
+                                <input
+                                    id="ppp-filter"
+                                    type="number"
+                                    step="any"
+                                    placeholder="e.g. 20.00"
+                                    value={pppFactor}
+                                    onChange={(e) => setPppFactor(e.target.value)}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                />
+                            </div>
 
-                        {/* Groundwater */}
-                        <div className="space-y-1">
-                            <label htmlFor="ground-filter" className="text-xs font-semibold text-on-surface-variant block">
-                                Groundwater (kL)
-                            </label>
-                            <input
-                                id="ground-filter"
-                                type="number"
-                                value={groundwater}
-                                onChange={(e) => setGroundwater(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
-                            />
-                        </div>
+                            {/* Physical Output */}
+                            <div className="space-y-1">
+                                <label htmlFor="physical-filter" className="text-xs font-semibold text-on-surface-variant block">
+                                    Physical Output
+                                </label>
+                                <input
+                                    id="physical-filter"
+                                    type="number"
+                                    step="any"
+                                    placeholder="e.g. 100"
+                                    value={physicalOutput}
+                                    onChange={(e) => setPhysicalOutput(e.target.value)}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                />
+                            </div>
 
-                        {/* Third Party Water */}
-                        <div className="space-y-1">
-                            <label htmlFor="thirdparty-filter" className="text-xs font-semibold text-on-surface-variant block">
-                                Third Party Water (kL)
-                            </label>
-                            <input
-                                id="thirdparty-filter"
-                                type="number"
-                                value={thirdParty}
-                                onChange={(e) => setThirdParty(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
-                            />
+                            {/* Physical Output Unit */}
+                            <div className="space-y-1">
+                                <label htmlFor="physical-unit-filter" className="text-xs font-semibold text-on-surface-variant block">
+                                    Physical Output Unit
+                                </label>
+                                <input
+                                    id="physical-unit-filter"
+                                    type="text"
+                                    placeholder="e.g. litres, tcs"
+                                    value={physicalOutputUnit}
+                                    onChange={(e) => setPhysicalOutputUnit(e.target.value)}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                />
+                            </div>
                         </div>
+                    </div>
 
-                        {/* Seawater / Desalinated */}
-                        <div className="space-y-1">
-                            <label htmlFor="seawater-filter" className="text-xs font-semibold text-on-surface-variant block">
-                                Seawater/Desalinated (kL)
-                            </label>
-                            <input
-                                id="seawater-filter"
-                                type="number"
-                                value={seawater}
-                                onChange={(e) => setSeawater(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
-                            />
+                    {/* Water Withdrawal by Source */}
+                    <div className="border-b border-outline-variant/60 pb-5">
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-3">Water Withdrawal by Source (kL)</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-4">
+                            {/* Surface Water */}
+                            <div className="space-y-1">
+                                <label htmlFor="surface-filter" className="text-xs font-semibold text-on-surface-variant block">
+                                    Surface Water
+                                </label>
+                                <input
+                                    id="surface-filter"
+                                    type="number"
+                                    placeholder="0.00"
+                                    value={surfaceWater}
+                                    onChange={(e) => setSurfaceWater(e.target.value)}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                />
+                            </div>
+
+                            {/* Groundwater */}
+                            <div className="space-y-1">
+                                <label htmlFor="ground-filter" className="text-xs font-semibold text-on-surface-variant block">
+                                    Groundwater
+                                </label>
+                                <input
+                                    id="ground-filter"
+                                    type="number"
+                                    placeholder="0.00"
+                                    value={groundwater}
+                                    onChange={(e) => setGroundwater(e.target.value)}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                />
+                            </div>
+
+                            {/* Third Party Water */}
+                            <div className="space-y-1">
+                                <label htmlFor="thirdparty-filter" className="text-xs font-semibold text-on-surface-variant block">
+                                    Third Party Water
+                                </label>
+                                <input
+                                    id="thirdparty-filter"
+                                    type="number"
+                                    placeholder="0.00"
+                                    value={thirdParty}
+                                    onChange={(e) => setThirdParty(e.target.value)}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                />
+                            </div>
+
+                            {/* Seawater / Desalinated */}
+                            <div className="space-y-1">
+                                <label htmlFor="seawater-filter" className="text-xs font-semibold text-on-surface-variant block">
+                                    Seawater/Desalinated
+                                </label>
+                                <input
+                                    id="seawater-filter"
+                                    type="number"
+                                    placeholder="0.00"
+                                    value={seawater}
+                                    onChange={(e) => setSeawater(e.target.value)}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                />
+                            </div>
+
+                            {/* Others */}
+                            <div className="space-y-1">
+                                <label htmlFor="others-filter" className="text-xs font-semibold text-on-surface-variant block">
+                                    Others
+                                </label>
+                                <input
+                                    id="others-filter"
+                                    type="number"
+                                    placeholder="0.00"
+                                    value={others}
+                                    onChange={(e) => setOthers(e.target.value)}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                />
+                            </div>
+
+                            {/* Total Consumption (Calculated / Editable) */}
+                            <div className="space-y-1">
+                                <label htmlFor="total-filter" className="text-xs font-semibold text-on-surface-variant block">
+                                    Total Consumption
+                                </label>
+                                <input
+                                    id="total-filter"
+                                    type="number"
+                                    placeholder="0.00"
+                                    value={totalWater}
+                                    onChange={(e) => setTotalWater(e.target.value)}
+                                    className="w-full rounded-lg border border-primary bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface font-semibold focus:outline-none focus:ring-1 focus:ring-primary text-[12px]"
+                                />
+                            </div>
                         </div>
+                    </div>
 
-                        {/* Others */}
-                        <div className="space-y-1">
-                            <label htmlFor="others-filter" className="text-xs font-semibold text-on-surface-variant block">
-                                Others (kL)
-                            </label>
-                            <input
-                                id="others-filter"
-                                type="number"
-                                value={others}
-                                onChange={(e) => setOthers(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
-                            />
-                        </div>
-
-                        {/* Total Consumption (Calculated / Editable) */}
-                        <div className="space-y-1">
-                            <label htmlFor="total-filter" className="text-xs font-semibold text-on-surface-variant block">
-                                Total Consumption (kL)
-                            </label>
-                            <input
-                                id="total-filter"
-                                type="number"
-                                value={totalWater}
-                                onChange={(e) => setTotalWater(e.target.value)}
-                                className="w-full rounded-lg border border-primary bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface font-semibold focus:outline-none focus:ring-1 focus:ring-primary text-[12px]"
-                            />
+                    {/* Water Discharge by Destination */}
+                    <div>
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-3">Water Discharge by Destination (kL)</span>
+                        <div className="space-y-3">
+                            {[
+                                { key: "Surface Water", no: dischargeSurfaceNoTreatment, setNo: setDischargeSurfaceNoTreatment, with: dischargeSurfaceWithTreatment, setWith: setDischargeSurfaceWithTreatment, lvl: dischargeSurfaceLevel, setLvl: setDischargeSurfaceLevel },
+                                { key: "Groundwater", no: dischargeGroundNoTreatment, setNo: setDischargeGroundNoTreatment, with: dischargeGroundWithTreatment, setWith: setDischargeGroundWithTreatment, lvl: dischargeGroundLevel, setLvl: setDischargeGroundLevel },
+                                { key: "Seawater", no: dischargeSeawaterNoTreatment, setNo: setDischargeSeawaterNoTreatment, with: dischargeSeawaterWithTreatment, setWith: setDischargeSeawaterWithTreatment, lvl: dischargeSeawaterLevel, setLvl: setDischargeSeawaterLevel },
+                                { key: "Third Party Water", no: dischargeThirdPartyNoTreatment, setNo: setDischargeThirdPartyNoTreatment, with: dischargeThirdPartyWithTreatment, setWith: setDischargeThirdPartyWithTreatment, lvl: dischargeThirdPartyLevel, setLvl: setDischargeThirdPartyLevel },
+                                { key: "Others", no: dischargeOthersNoTreatment, setNo: setDischargeOthersNoTreatment, with: dischargeOthersWithTreatment, setWith: setDischargeOthersWithTreatment, lvl: dischargeOthersLevel, setLvl: setDischargeOthersLevel },
+                            ].map((dest) => (
+                                <div key={dest.key} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-center border border-outline-variant/40 p-3 rounded-xl bg-surface-container-lowest">
+                                    <span className="text-xs font-bold text-on-surface-variant">{dest.key}</span>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-semibold text-on-surface-variant block">No Treatment (kL)</label>
+                                        <input
+                                            type="number"
+                                            value={dest.no}
+                                            onChange={(e) => dest.setNo(e.target.value)}
+                                            className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-2 py-1 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-semibold text-on-surface-variant block">With Treatment (kL)</label>
+                                        <input
+                                            type="number"
+                                            value={dest.with}
+                                            onChange={(e) => dest.setWith(e.target.value)}
+                                            className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-2 py-1 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-semibold text-on-surface-variant block">Treatment Level</label>
+                                        <input
+                                            type="text"
+                                            value={dest.lvl}
+                                            onChange={(e) => dest.setLvl(e.target.value)}
+                                            className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-2 py-1 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                            placeholder="e.g. Primary, RO"
+                                        />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
@@ -279,7 +519,19 @@ export default function BrsrWaterPage() {
             )}
 
             {/* Content Loading State */}
-            {isPending ? (
+            {!data && !isPending && !isError ? (
+                <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-8 text-center text-on-surface-variant shadow-lg backdrop-blur-md max-w-4xl mx-auto mt-6">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <MaterialIcon name="info" size="lg" className="!text-[28px]" />
+                    </div>
+                    <h3 className="mt-4 text-headline-sm font-bold text-primary">
+                        Configure Water Disclosure Parameters
+                    </h3>
+                    <p className="mt-2 text-body-md text-on-surface-variant max-w-md mx-auto">
+                        Please enter the Financial Year, Turnover, and water withdrawal/discharge quantities in the controls panel above, then click Generate Metrics to calculate water accounting details.
+                    </p>
+                </div>
+            ) : isPending ? (
                 <div className="flex h-48 flex-col items-center justify-center gap-2">
                     <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
                     <p className="font-mono text-label-md text-on-surface-variant animate-pulse">Calculating water metrics...</p>
@@ -303,7 +555,7 @@ export default function BrsrWaterPage() {
                                     Water Disclosure Status
                                 </span>
                                 <p className="text-xs text-on-surface-variant font-mono mt-0.5">
-                                    Active Financial Year: {data.financial_year_label}
+                                    Active Financial Year: {financial_year_label}
                                 </p>
                             </div>
                         </div>
@@ -322,7 +574,7 @@ export default function BrsrWaterPage() {
                                         Total Water Consumption
                                     </p>
                                     <h3 className="text-headline-md font-bold text-on-surface font-mono">
-                                        {formatKl(data.total_water_consumption_kl)} <span className="text-sm font-sans font-medium text-on-surface-variant">kL</span>
+                                        {formatKl(totals.total_water_consumption_kl)} <span className="text-sm font-sans font-medium text-on-surface-variant">kL</span>
                                     </h3>
                                     <p className="text-xs text-on-surface-variant">
                                         All source withdrawals combined
@@ -342,9 +594,9 @@ export default function BrsrWaterPage() {
                                         Water Intensity / INR
                                     </p>
                                     <h3 className="text-headline-md font-bold text-indigo-600 font-mono">
-                                        {data.water_intensity_per_inr !== null && data.water_intensity_per_inr !== undefined ? (
+                                        {totals.water_intensity_per_inr !== null && totals.water_intensity_per_inr !== undefined ? (
                                             <>
-                                                {Number(data.water_intensity_per_inr).toFixed(6)}
+                                                {Number(totals.water_intensity_per_inr).toFixed(6)}
                                                 <span className="text-[10px] font-sans font-medium text-on-surface-variant block mt-0.5">kL / INR</span>
                                             </>
                                         ) : (
@@ -352,7 +604,7 @@ export default function BrsrWaterPage() {
                                         )}
                                     </h3>
                                     <p className="text-xs text-on-surface-variant">
-                                        Intensity ratio based on ₹{Number(data.turnover_inr).toLocaleString()} turnover
+                                        Intensity ratio based on ₹{Number(turnover_inr).toLocaleString()} turnover
                                     </p>
                                 </div>
                                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
@@ -396,19 +648,19 @@ export default function BrsrWaterPage() {
                                 <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
                                     <span className="text-body-sm text-on-surface-variant font-medium">Surface Water Withdrawals</span>
                                     <span className="font-mono text-body-md font-bold text-on-surface">
-                                        {formatKl(data.surface_water_kl)} <span className="text-xs text-on-surface-variant font-sans font-normal">kL</span>
+                                        {formatKl(totals.withdrawal.surface_water_kl)} <span className="text-xs text-on-surface-variant font-sans font-normal">kL</span>
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
                                     <span className="text-body-sm text-on-surface-variant font-medium">Groundwater Withdrawals</span>
                                     <span className="font-mono text-body-md font-bold text-on-surface">
-                                        {formatKl(data.groundwater_kl)} <span className="text-xs text-on-surface-variant font-sans font-normal">kL</span>
+                                        {formatKl(totals.withdrawal.groundwater_kl)} <span className="text-xs text-on-surface-variant font-sans font-normal">kL</span>
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between pb-1">
                                     <span className="text-body-sm text-on-surface-variant font-medium">Third-Party Water Withdrawals</span>
                                     <span className="font-mono text-body-md font-bold text-on-surface">
-                                        {formatKl(data.third_party_water_kl)} <span className="text-xs text-on-surface-variant font-sans font-normal">kL</span>
+                                        {formatKl(totals.withdrawal.third_party_water_kl)} <span className="text-xs text-on-surface-variant font-sans font-normal">kL</span>
                                     </span>
                                 </div>
                             </div>
@@ -417,19 +669,19 @@ export default function BrsrWaterPage() {
                                 <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
                                     <span className="text-body-sm text-on-surface-variant font-medium">Seawater Desalination</span>
                                     <span className="font-mono text-body-md font-bold text-on-surface">
-                                        {formatKl(data.seawater_desalinated_kl)} <span className="text-xs text-on-surface-variant font-sans font-normal">kL</span>
+                                        {formatKl(totals.withdrawal.seawater_desalinated_kl)} <span className="text-xs text-on-surface-variant font-sans font-normal">kL</span>
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
                                     <span className="text-body-sm text-on-surface-variant font-medium">Other Withdrawals</span>
                                     <span className="font-mono text-body-md font-bold text-on-surface">
-                                        {formatKl(data.others_kl)} <span className="text-xs text-on-surface-variant font-sans font-normal">kL</span>
+                                        {formatKl(totals.withdrawal.others_kl)} <span className="text-xs text-on-surface-variant font-sans font-normal">kL</span>
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between pb-1 bg-surface-container/30 px-3 py-1.5 rounded-lg border border-primary/20">
                                     <span className="text-body-sm font-bold text-primary">Total Water Consumption</span>
                                     <span className="font-mono text-body-md font-bold text-primary">
-                                        {formatKl(data.total_water_consumption_kl)} <span className="text-xs font-sans font-normal">kL</span>
+                                        {formatKl(totals.total_water_consumption_kl)} <span className="text-xs font-sans font-normal">kL</span>
                                     </span>
                                 </div>
                             </div>

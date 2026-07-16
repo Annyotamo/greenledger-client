@@ -10,13 +10,24 @@ import { MaterialIcon } from "@/components/icons/MaterialIcon";
 type BrsrEnergyReportModalProps = {
     isOpen: boolean;
     onClose: () => void;
-    onDownload: (startDate: string, endDate: string, turnover: number) => Promise<void>;
+    onDownload: (payload: {
+        start_date: string;
+        end_date: string;
+        turnover_inr: number;
+        ppp_conversion_factor?: number;
+        physical_output?: number | null;
+        physical_output_unit?: string | null;
+    }) => Promise<void>;
 };
 
 export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnergyReportModalProps) {
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [turnover, setTurnover] = useState<number | null>(null);
+    const [pppFactor, setPppFactor] = useState<number | null>(null);
+    const [physicalOutput, setPhysicalOutput] = useState<number | null>(null);
+    const [physicalOutputUnit, setPhysicalOutputUnit] = useState<string>("");
+    
     const [isDownloading, setIsDownloading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [mounted, setMounted] = useState(false);
@@ -38,7 +49,7 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
 
     const handleDownload = async () => {
         if (!startDate || !endDate || turnover === null || turnover === undefined) {
-            setError("All fields are mandatory.");
+            setError("Start Date, End Date, and Turnover are required.");
             return;
         }
 
@@ -53,7 +64,14 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
         try {
             const formattedStart = format(startDate, "yyyy-MM-dd");
             const formattedEnd = format(endDate, "yyyy-MM-dd");
-            await onDownload(formattedStart, formattedEnd, turnover);
+            await onDownload({
+                start_date: formattedStart,
+                end_date: formattedEnd,
+                turnover_inr: turnover,
+                ppp_conversion_factor: pppFactor !== null ? pppFactor : undefined,
+                physical_output: physicalOutput,
+                physical_output_unit: physicalOutputUnit || undefined,
+            });
             onClose();
         } catch (err) {
             console.error("Failed to download report:", err);
@@ -145,35 +163,96 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
                     </div>
                 </div>
 
-                {/* Turnover Inputs */}
-                <div className="border-t border-outline-variant p-6 space-y-3">
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="turnover" className="text-sm font-semibold text-on-surface">
-                            Turnover (INR) <span className="text-error">*</span>
-                        </label>
-                        <div className="relative flex items-center">
-                            <div className="pointer-events-none absolute left-3 text-on-surface-variant/70">
-                                <span className="font-mono text-body-md">₹</span>
+                {/* Turnover & Optional Intensity inputs */}
+                <div className="border-t border-outline-variant p-6 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-2">
+                            <label htmlFor="turnover" className="text-sm font-semibold text-on-surface">
+                                Turnover (INR) <span className="text-error">*</span>
+                            </label>
+                            <div className="relative flex items-center">
+                                <div className="pointer-events-none absolute left-3 text-on-surface-variant/70">
+                                    <span className="font-mono text-body-md">₹</span>
+                                </div>
+                                <input
+                                    id="turnover"
+                                    type="number"
+                                    min="1"
+                                    placeholder="Enter total turnover in INR"
+                                    value={turnover === null ? "" : turnover}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setTurnover(val === "" ? null : Number(val));
+                                        setError(null);
+                                    }}
+                                    disabled={isDownloading}
+                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low py-2.5 pl-8 pr-4 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                />
                             </div>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <label htmlFor="pppFactor" className="text-sm font-semibold text-on-surface">
+                                PPP Conversion Factor
+                            </label>
                             <input
-                                id="turnover"
+                                id="pppFactor"
                                 type="number"
-                                min="1"
-                                placeholder="Enter total turnover in INR (e.g. 50000)"
-                                value={turnover === null ? "" : turnover}
+                                step="any"
+                                placeholder="Enter conversion factor (default: 1.0)"
+                                value={pppFactor === null ? "" : pppFactor}
                                 onChange={(e) => {
                                     const val = e.target.value;
-                                    setTurnover(val === "" ? null : Number(val));
+                                    setPppFactor(val === "" ? null : Number(val));
                                     setError(null);
                                 }}
                                 disabled={isDownloading}
-                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low py-2.5 pl-8 pr-4 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low py-2.5 px-4 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                             />
                         </div>
-                        <p className="text-xs text-on-surface-variant">
-                            Turnover value is required to calculate output energy intensity metrics.
-                        </p>
+
+                        <div className="flex flex-col gap-2">
+                            <label htmlFor="physicalOutput" className="text-sm font-semibold text-on-surface">
+                                Physical Output
+                            </label>
+                            <input
+                                id="physicalOutput"
+                                type="number"
+                                step="any"
+                                placeholder="Enter physical output amount"
+                                value={physicalOutput === null ? "" : physicalOutput}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setPhysicalOutput(val === "" ? null : Number(val));
+                                    setError(null);
+                                }}
+                                disabled={isDownloading}
+                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low py-2.5 px-4 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                            />
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <label htmlFor="physicalOutputUnit" className="text-sm font-semibold text-on-surface">
+                                Physical Output Unit
+                            </label>
+                            <input
+                                id="physicalOutputUnit"
+                                type="text"
+                                placeholder="e.g. tonnes, tcs, pcs"
+                                value={physicalOutputUnit}
+                                onChange={(e) => {
+                                    setPhysicalOutputUnit(e.target.value);
+                                    setError(null);
+                                }}
+                                disabled={isDownloading}
+                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low py-2.5 px-4 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                            />
+                        </div>
                     </div>
+                    <p className="text-xs text-on-surface-variant">
+                        Turnover value is required to calculate output energy intensity metrics. Conversion factor and physical output options are optional.
+                    </p>
+                </div>
 
                     {/* Error Banner */}
                     {error && (
@@ -182,7 +261,6 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
                             <span>{error}</span>
                         </div>
                     )}
-                </div>
 
                 {/* Footer Controls */}
                 <div className="flex flex-col gap-3 border-t border-outline-variant bg-surface p-5 sm:flex-row sm:justify-end">

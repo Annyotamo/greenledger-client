@@ -11,7 +11,6 @@ export default function ActivitiesPage() {
     const [selectedFacility, setSelectedFacility] = useState("");
     const [selectedFuel, setSelectedFuel] = useState("");
     const [status, setStatus] = useState("");
-    const [usageType, setUsageType] = useState("");
     const [emissionType, setEmissionType] = useState("");
 
     const facilityOptions = useMemo(
@@ -34,7 +33,6 @@ export default function ActivitiesPage() {
                 !searchLower ||
                 activity.fuelName.toLowerCase().includes(searchLower) ||
                 activity.facilityId.toLowerCase().includes(searchLower) ||
-                activity.usageType.toLowerCase().includes(searchLower) ||
                 activity.workflowStatus.toLowerCase().includes(searchLower);
 
             const matchesFacility = !selectedFacility || activity.facilityId === selectedFacility;
@@ -55,13 +53,11 @@ export default function ActivitiesPage() {
                 selectedFacility={selectedFacility}
                 selectedFuel={selectedFuel}
                 status={status}
-                usageType={usageType}
                 emissionType={emissionType}
                 onSearchChange={setSearchTerm}
                 onFacilityChange={setSelectedFacility}
                 onFuelChange={setSelectedFuel}
                 onStatusChange={setStatus}
-                onUsageTypeChange={setUsageType}
                 onEmissionTypeChange={setEmissionType}
                 facilityOptions={facilityOptions}
                 fuelOptions={fuelOptions}

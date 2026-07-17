@@ -72,13 +72,11 @@ export function FuelActivityTable({
     selectedFacility,
     selectedFuel,
     status,
-    usageType,
     emissionType,
     onSearchChange,
     onFacilityChange,
     onFuelChange,
     onStatusChange,
-    onUsageTypeChange,
     onEmissionTypeChange,
     facilityOptions,
     fuelOptions,
@@ -92,13 +90,11 @@ export function FuelActivityTable({
     selectedFacility: string;
     selectedFuel: string;
     status: string;
-    usageType: string;
     emissionType: string;
     onSearchChange?: (value: string) => void;
     onFacilityChange: (value: string) => void;
     onFuelChange: (value: string) => void;
     onStatusChange: (value: string) => void;
-    onUsageTypeChange: (value: string) => void;
     onEmissionTypeChange: (value: string) => void;
     facilityOptions: Array<{ id: string; name: string }>;
     fuelOptions: string[];
@@ -428,9 +424,6 @@ export function FuelActivityTable({
                                         <TableCell>
                                             <div className="inline-flex rounded-full border border-outline-variant bg-surface-container-high px-3 py-1 text-[11px] font-semibold text-on-surface-variant">
                                                 {activity.fuelName}
-                                            </div>
-                                            <div className="mt-2 text-body-md text-primary capitalize">
-                                                {activity.usageType.replaceAll("_", " ")}
                                             </div>
                                             <div className="mt-1 text-[11px] text-on-surface-variant">
                                                 {activity.fuelFactorStandard} • {activity.fuelFactorVersion}

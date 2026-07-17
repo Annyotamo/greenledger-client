@@ -18,7 +18,7 @@ function mapFuelActivityItem(dto: FuelActivityItemDto): FuelActivity {
         quantityUnitId: dto.activity.quantity_unit_id,
         unitName: dto.factor.unit.name,
         unitSymbol: dto.factor.unit.symbol,
-        usageType: dto.activity.usage_type,
+        usageType: dto.activity.usage_type || undefined,
         emissionType: dto.activity.emission_type,
         energyContentGJ: Number(dto.activity.energy_content_gj),
         generatorEfficiencyPercentage: Number(dto.activity.generator_efficiency_percentage),
@@ -66,14 +66,12 @@ function mapFuelActivityItem(dto: FuelActivityItemDto): FuelActivity {
 
 export async function getFuelActivities(filters?: {
     status?: string;
-    usage_type?: string;
     emission_type?: string;
     facility_id?: string;
     page?: number;
 }): Promise<FuelActivity[]> {
     const params = new URLSearchParams();
     if (filters?.status) params.append("status", filters.status);
-    if (filters?.usage_type) params.append("usage_type", filters.usage_type);
     if (filters?.emission_type) params.append("emission_type", filters.emission_type);
     if (filters?.facility_id) params.append("facility_id", filters.facility_id);
     if (filters?.page) params.append("page", String(filters.page));

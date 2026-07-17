@@ -106,7 +106,6 @@ export function FuelActivityDetailModal({
                         {(
                             [
                                 { label: "Fuel", value: activity.fuelName },
-                                { label: "Usage Type", value: activity.usageType.replace(/_/g, " ") },
                                 { label: "Quantity", value: `${activity.quantity.toFixed(2)} ${activity.unitSymbol}` },
                                 { label: "Scope", value: activity.scopeType },
                             ] as const

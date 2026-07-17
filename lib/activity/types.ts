@@ -24,7 +24,7 @@ export type FuelActivityItemDto = {
         fuel_id: string;
         quantity: string;
         quantity_unit_id: string;
-        usage_type: string;
+        usage_type?: string;
         emission_type: string;
         energy_content_gj: string;
         generator_efficiency_percentage: string;
@@ -118,7 +118,7 @@ export type FuelActivity = {
     quantityUnitId: string;
     unitName: string;
     unitSymbol: string;
-    usageType: string;
+    usageType?: string;
     emissionType: string;
     energyContentGJ: number;
     generatorEfficiencyPercentage: number;

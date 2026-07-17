@@ -12,7 +12,6 @@ import { useFacilities } from "@/lib/facility/hooks";
 
 export default function FuelActivitiesPage() {
     const [status, setStatus] = useState("");
-    const [usageType, setUsageType] = useState("");
     const [emissionType, setEmissionType] = useState("");
     const [selectedFacility, setSelectedFacility] = useState("");
     const [selectedFuel, setSelectedFuel] = useState("");
@@ -22,11 +21,10 @@ export default function FuelActivitiesPage() {
     const filterParams = useMemo(
         () => ({
             status: status || undefined,
-            usage_type: usageType || undefined,
             emission_type: emissionType || undefined,
             facility_id: selectedFacility || undefined,
         }),
-        [status, usageType, emissionType, selectedFacility],
+        [status, emissionType, selectedFacility],
     );
 
     const { data: activities = [], isPending, isError } = useFuelActivities(filterParams);
@@ -42,7 +40,6 @@ export default function FuelActivitiesPage() {
 
     function handleRefresh() {
         setStatus("");
-        setUsageType("");
         setEmissionType("");
         setSelectedFacility("");
         setSelectedFuel("");
@@ -143,19 +140,7 @@ export default function FuelActivitiesPage() {
                             </option>
                         ))}
                     </select>
-                    <select
-                        className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
-                        aria-label="Usage type"
-                        value={usageType}
-                        onChange={(e) => setUsageType(e.target.value)}>
-                        <option value="">All usage types</option>
-                        <option value="direct_combustion">Direct Combustion</option>
-                        <option value="electricity_generation">Electricity Generation</option>
-                        <option value="steam_generation">Steam Generation</option>
-                        <option value="heating">Heating</option>
-                        <option value="vehicle_fuel">Vehicle Fuel</option>
-                        <option value="other">Other</option>
-                    </select>
+
                     <select
                         className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                         aria-label="Emission type"
@@ -202,14 +187,12 @@ export default function FuelActivitiesPage() {
                 selectedFacility={selectedFacility}
                 selectedFuel={selectedFuel}
                 status={status}
-                usageType={usageType}
                 emissionType={emissionType}
                 showFilters={showFilters}
                 onToggleFilters={setShowFilters}
                 onFacilityChange={setSelectedFacility}
                 onFuelChange={setSelectedFuel}
                 onStatusChange={setStatus}
-                onUsageTypeChange={setUsageType}
                 onEmissionTypeChange={setEmissionType}
                 facilityOptions={facilityOptions}
                 fuelOptions={fuelOptions}

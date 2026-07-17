@@ -19,14 +19,7 @@ import type { ActivityDocument } from "@/components/activity/ActivityDocumentsMa
 import { FormErrorSummary } from "@/components/ui/FormErrorSummary";
 import { getErrorMessage } from "@/lib/utils/error";
 
-const usageTypeOptions = [
-    { label: "Direct combustion", value: "direct_combustion" },
-    { label: "Electricity generation", value: "electricity_generation" },
-    { label: "Steam generation", value: "steam_generation" },
-    { label: "Heating", value: "heating" },
-    { label: "Vehicle fuel", value: "vehicle_fuel" },
-    { label: "Other", value: "other" },
-];
+
 
 const emissionTypeOptions = [
     { label: "Stationary", value: "stationary" },
@@ -65,10 +58,8 @@ type FuelActivityFormState = {
     meterId: string;
     quantity: string;
     unit: string;
-    usageType: string;
     emissionType: string;
     collectionType: string;
-    generatorEfficiency: string;
     cost: string;
     isDraft: boolean;
     notes: string;
@@ -86,14 +77,24 @@ const initialFormState: FuelActivityFormState = {
     meterId: "",
     quantity: "",
     unit: "",
-    usageType: "direct_combustion",
     emissionType: "stationary",
     collectionType: "",
-    generatorEfficiency: "",
     cost: "",
     isDraft: false,
     notes: "",
     estimationBasis: "",
+};
+
+const isDocEmpty = (doc: ActivityDocument) => {
+    return (
+        !doc.documentType &&
+        !doc.documentName &&
+        !doc.documentDate &&
+        !doc.file &&
+        !doc.attachmentName &&
+        !doc.documentLink &&
+        !doc.notes
+    );
 };
 
 export default function LogFuelActivityPage() {
@@ -144,9 +145,7 @@ export default function LogFuelActivityPage() {
                 next.unit = "";
             }
 
-            if (field === "usageType" && value !== "electricity_generation" && value !== "steam_generation") {
-                next.generatorEfficiency = "";
-            }
+
 
             if (field === "emissionType") {
                 next.fuelCategory = "";
@@ -202,14 +201,7 @@ export default function LogFuelActivityPage() {
         if (!form.facility) nextErrors.facility = "Facility is required.";
         if (!form.activityStartDate) nextErrors.activityStartDate = "Start date is required.";
         if (!form.activityEndDate) nextErrors.activityEndDate = "End date is required.";
-        if (!form.usageType) nextErrors.usageType = "Usage type is required.";
         if (!form.emissionType) nextErrors.emissionType = "Emission type is required.";
-        if (
-            (form.usageType === "electricity_generation" || form.usageType === "steam_generation") &&
-            !form.generatorEfficiency
-        ) {
-            nextErrors.generatorEfficiency = "Generator efficiency is required for the selected usage type.";
-        }
         if (!form.fuelType) nextErrors.fuelType = "Fuel type is required.";
         if (form.emissionType !== "fugitive" && !form.cost) nextErrors.cost = "Cost is required.";
         if (!form.collectionType) nextErrors.collectionType = "Collection type is required.";
@@ -221,6 +213,8 @@ export default function LogFuelActivityPage() {
 
         // Validate each document in the documents list
         documents.forEach((doc) => {
+            if (isDocEmpty(doc)) return;
+
             if (!doc.documentType) nextErrors[`doc-${doc.id}-type`] = "Document type is required.";
             if (!doc.documentName) nextErrors[`doc-${doc.id}-name`] = "Document name is required.";
             if (!doc.documentDate) nextErrors[`doc-${doc.id}-date`] = "Document date is required.";
@@ -252,11 +246,6 @@ export default function LogFuelActivityPage() {
                 facility_id: form.facility,
                 source_id: form.source,
                 status: form.isDraft ? "draft" : undefined,
-                usage_type: form.usageType,
-                generator_efficiency:
-                    form.usageType === "electricity_generation" || form.usageType === "steam_generation"
-                        ? Number(form.generatorEfficiency)
-                        : null,
                 emission_type: form.emissionType,
                 fuel_id: form.fuelType,
                 quantity: form.quantity ? Number(form.quantity) : null,
@@ -281,6 +270,8 @@ export default function LogFuelActivityPage() {
 
             // Upload all attached documents
             for (const doc of documents) {
+                if (isDocEmpty(doc)) continue;
+
                 let sourceUrl = "";
                 if (doc.sourceMode === "upload" && doc.file) {
                     const uploadedUrl = await uploadS3File(doc.file);
@@ -390,19 +381,6 @@ export default function LogFuelActivityPage() {
                         </div>
 
                         <div className="grid gap-4 lg:grid-cols-2">
-                            <div id="form-field-usageType">
-                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                    Usage Type <span className="text-error">*</span>
-                                </label>
-                                <CustomSelect
-                                    options={usageTypeOptions}
-                                    value={form.usageType}
-                                    onChange={(val) => handleChange("usageType", val)}
-                                    error={Boolean(errors.usageType)}
-                                    placeholder="Select usage type..."
-                                />
-                                {errors.usageType && <p className="mt-2 text-xs text-error">{errors.usageType}</p>}
-                            </div>
                             <div id="form-field-emissionType">
                                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                     Emission Type <span className="text-error">*</span>
@@ -419,26 +397,6 @@ export default function LogFuelActivityPage() {
                                 )}
                             </div>
                         </div>
-                        {(form.usageType === "electricity_generation" || form.usageType === "steam_generation") && (
-                            <div id="form-field-generatorEfficiency" className="grid gap-4 lg:grid-cols-1">
-                                <div>
-                                    <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                        Generator Efficiency (%) <span className="text-error">*</span>
-                                    </label>
-                                    <Input
-                                        type="number"
-                                        step="0.1"
-                                        value={form.generatorEfficiency}
-                                        onChange={(event) => handleChange("generatorEfficiency", event.target.value)}
-                                        className={formFieldClass(Boolean(errors.generatorEfficiency))}
-                                        placeholder="0.0"
-                                    />
-                                    {errors.generatorEfficiency && (
-                                        <p className="mt-2 text-xs text-error">{errors.generatorEfficiency}</p>
-                                    )}
-                                </div>
-                            </div>
-                        )}
 
                         <div className="grid gap-6 lg:grid-cols-2">
                             <div id="form-field-activityStartDate" className="space-y-3 flex flex-col items-center">

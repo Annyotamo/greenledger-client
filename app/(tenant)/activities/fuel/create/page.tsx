@@ -28,16 +28,6 @@ const emissionTypeOptions = [
     { label: "Fugitive", value: "fugitive" },
 ];
 
-const documentTypeOptions = [
-    { label: "Invoice", value: "invoice" },
-    { label: "Meter Read", value: "meter_read" },
-    { label: "Delivery Note", value: "delivery_note" },
-    { label: "Estimation Basis", value: "estimation_basis" },
-    { label: "Audit Report", value: "audit_report" },
-    { label: "Lab Report", value: "lab_report" },
-    { label: "Internal Report", value: "internal_report" },
-    { label: "Other", value: "other" },
-];
 const collectionTypeOptions = [
     { label: "Measured", value: "measured" },
     { label: "Estimated", value: "estimated" },
@@ -646,7 +636,6 @@ export default function LogFuelActivityPage() {
                         <ActivityDocumentsManager
                             documents={documents}
                             onChange={setDocuments}
-                            documentTypeOptions={documentTypeOptions}
                             errors={errors}
                         />
                     </div>

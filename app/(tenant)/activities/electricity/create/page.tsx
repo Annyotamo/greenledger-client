@@ -26,16 +26,6 @@ import type { ActivityDocument } from "@/components/activity/ActivityDocumentsMa
 import { FormErrorSummary } from "@/components/ui/FormErrorSummary";
 import { getErrorMessage } from "@/lib/utils/error";
 
-const documentTypeOptions = [
-    { label: "Invoice", value: "invoice" },
-    { label: "Meter Read", value: "meter_read" },
-    { label: "Delivery Note", value: "delivery_note" },
-    { label: "Audit Report", value: "audit_report" },
-    { label: "Lab Report", value: "lab_report" },
-    { label: "Internal Report", value: "internal_report" },
-    { label: "Other", value: "other" },
-];
-
 const activityTypeOptions = [
     { label: "Grid Import", value: "grid_import" },
     { label: "Renewable", value: "renewable" },
@@ -728,7 +718,6 @@ export default function LogElectricityActivityPage() {
                         <ActivityDocumentsManager
                             documents={documents}
                             onChange={setDocuments}
-                            documentTypeOptions={documentTypeOptions}
                             errors={errors}
                         />
                     </div>

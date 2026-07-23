@@ -18,17 +18,41 @@ export interface ActivityDocument {
     notes: string;
 }
 
+export enum ActivityDocumentType {
+    INVOICE = "invoice",
+    DELIVERY_NOTE = "delivery_note",
+    WEIGHBRIDGE_TICKET = "weighbridge_ticket",
+    FLOW_METER_READING = "flow_meter_reading",
+    UTILITY_BILL = "utility_bill",
+    LAB_REPORT = "lab_report",
+    AUDIT_REPORT = "audit_report",
+    ESTIMATION_BASIS = "estimation_basis",
+    OTHER = "other",
+}
+
+export const ACTIVITY_DOCUMENT_TYPE_OPTIONS: CustomSelectOption[] = [
+    { label: "Invoice", value: ActivityDocumentType.INVOICE },
+    { label: "Delivery Note", value: ActivityDocumentType.DELIVERY_NOTE },
+    { label: "Weighbridge Ticket", value: ActivityDocumentType.WEIGHBRIDGE_TICKET },
+    { label: "Flow Meter Reading", value: ActivityDocumentType.FLOW_METER_READING },
+    { label: "Utility Bill", value: ActivityDocumentType.UTILITY_BILL },
+    { label: "Lab Report", value: ActivityDocumentType.LAB_REPORT },
+    { label: "Audit Report", value: ActivityDocumentType.AUDIT_REPORT },
+    { label: "Estimation Basis", value: ActivityDocumentType.ESTIMATION_BASIS },
+    { label: "Other", value: ActivityDocumentType.OTHER },
+];
+
 interface ActivityDocumentsManagerProps {
     documents: ActivityDocument[];
     onChange: (documents: ActivityDocument[]) => void;
-    documentTypeOptions: CustomSelectOption[];
+    documentTypeOptions?: CustomSelectOption[];
     errors: Record<string, string>;
 }
 
 export function ActivityDocumentsManager({
     documents,
     onChange,
-    documentTypeOptions,
+    documentTypeOptions = ACTIVITY_DOCUMENT_TYPE_OPTIONS,
     errors,
 }: ActivityDocumentsManagerProps) {
     function handleUpdateDoc<K extends keyof ActivityDocument>(id: string, field: K, value: ActivityDocument[K]) {

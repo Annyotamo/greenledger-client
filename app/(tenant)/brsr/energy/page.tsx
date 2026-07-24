@@ -23,7 +23,6 @@ export default function BrsrEnergyPage() {
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [turnover, setTurnover] = useState<number | null>(null);
-    const [pppFactor, setPppFactor] = useState<number | null>(null);
     const [physicalOutput, setPhysicalOutput] = useState<number | null>(null);
     const [physicalOutputUnit, setPhysicalOutputUnit] = useState<string>("");
 
@@ -35,14 +34,12 @@ export default function BrsrEnergyPage() {
         start_date: string | null;
         end_date: string | null;
         turnover_inr: number | null;
-        ppp_conversion_factor?: number;
         physical_output?: number | null;
         physical_output_unit?: string | null;
     }>({
         start_date: "2025-04-01",
         end_date: "2026-04-30",
         turnover_inr: 1000000.00,
-        ppp_conversion_factor: 20.00,
         physical_output: 100.00,
         physical_output_unit: "tcs",
     });
@@ -93,7 +90,6 @@ export default function BrsrEnergyPage() {
             start_date: startDate ? format(startDate, "yyyy-MM-dd") : null,
             end_date: endDate ? format(endDate, "yyyy-MM-dd") : null,
             turnover_inr: turnover,
-            ppp_conversion_factor: pppFactor !== null ? pppFactor : undefined,
             physical_output: physicalOutput,
             physical_output_unit: physicalOutputUnit || undefined,
         });
@@ -103,14 +99,12 @@ export default function BrsrEnergyPage() {
         setStartDate(null);
         setEndDate(null);
         setTurnover(null);
-        setPppFactor(null);
         setPhysicalOutput(null);
         setPhysicalOutputUnit("");
         setActiveFilters({
             start_date: null,
             end_date: null,
             turnover_inr: null,
-            ppp_conversion_factor: undefined,
             physical_output: null,
             physical_output_unit: "",
         });
@@ -181,7 +175,7 @@ export default function BrsrEnergyPage() {
                     </div>
                 </CardHeader>
                 <CardBody className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
                         {/* Start Date Selector */}
                         <div className="space-y-1.5 relative">
                             <label className="text-xs font-semibold text-on-surface-variant block">Start Date</label>
@@ -275,25 +269,6 @@ export default function BrsrEnergyPage() {
                                     className="w-full rounded-lg border border-outline-variant bg-surface-container-low py-1.5 pl-8 pr-3 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
                                 />
                             </div>
-                        </div>
-
-                        {/* PPP Conversion Factor Input */}
-                        <div className="space-y-1.5">
-                            <label htmlFor="filter-ppp" className="text-xs font-semibold text-on-surface-variant block">
-                                PPP Conversion Factor
-                            </label>
-                            <input
-                                id="filter-ppp"
-                                type="number"
-                                step="any"
-                                placeholder="Enter PPP factor..."
-                                value={pppFactor === null ? "" : pppFactor}
-                                onChange={(e) => {
-                                    const val = e.target.value;
-                                    setPppFactor(val === "" ? null : Number(val));
-                                }}
-                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low py-1.5 px-3 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
-                            />
                         </div>
 
                         {/* Physical Output Input */}

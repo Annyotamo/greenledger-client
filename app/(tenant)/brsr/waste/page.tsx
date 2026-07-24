@@ -14,7 +14,6 @@ export default function BrsrWastePage() {
     // General parameters (empty initially)
     const [fyLabel, setFyLabel] = useState("");
     const [turnover, setTurnover] = useState("");
-    const [pppFactor, setPppFactor] = useState("");
     const [physicalOutput, setPhysicalOutput] = useState("");
     const [physicalOutputUnit, setPhysicalOutputUnit] = useState("");
 
@@ -44,7 +43,6 @@ export default function BrsrWastePage() {
         financial_year_label: "FY 2025-26",
         turnover_inr: 1000000.00,
         physical_output_tonnes: 100.00,
-        ppp_conversion_factor: 20.00,
         physical_output_unit: "tcs",
         plastic_waste_tonne: 10.00,
         ewaste_tonne: 5.00,
@@ -72,7 +70,6 @@ export default function BrsrWastePage() {
             financial_year_label: fyLabel,
             turnover_inr: Number(turnover) || 0,
             physical_output_tonnes: Number(physicalOutput) || 0,
-            ppp_conversion_factor: pppFactor ? Number(pppFactor) : undefined,
             physical_output_unit: physicalOutputUnit || undefined,
             plastic_waste_tonne: Number(plastic) || 0,
             ewaste_tonne: Number(ewaste) || 0,
@@ -95,7 +92,6 @@ export default function BrsrWastePage() {
     const handleReset = () => {
         setFyLabel("");
         setTurnover("");
-        setPppFactor("");
         setPhysicalOutput("");
         setPhysicalOutputUnit("");
         setPlastic("");
@@ -197,7 +193,7 @@ export default function BrsrWastePage() {
                         <span className="text-xs font-bold text-primary/80 uppercase tracking-wider block">
                             General Info
                         </span>
-                        <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                             <div className="space-y-1">
                                 <label htmlFor="fy-lbl" className="text-xs font-semibold text-on-surface-variant block">FY Label <span className="text-error">*</span></label>
                                 <input
@@ -228,18 +224,6 @@ export default function BrsrWastePage() {
                                     placeholder="e.g. 200"
                                     value={physicalOutput}
                                     onChange={(e) => setPhysicalOutput(e.target.value)}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
-                                />
-                            </div>
-                            <div className="space-y-1">
-                                <label htmlFor="ppp-factor-in" className="text-xs font-semibold text-on-surface-variant block">PPP Factor</label>
-                                <input
-                                    id="ppp-factor-in"
-                                    type="number"
-                                    step="any"
-                                    placeholder="e.g. 20.00"
-                                    value={pppFactor}
-                                    onChange={(e) => setPppFactor(e.target.value)}
                                     className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
                                 />
                             </div>

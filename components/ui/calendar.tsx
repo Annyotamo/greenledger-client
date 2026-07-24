@@ -68,7 +68,7 @@ export function Calendar({ date, onDateChange, className, size = "basic" }: Cale
 
     return (
         <div className={cn(
-            "rounded-md border border-outline-variant bg-surface-container-lowest",
+            "rounded-md border border-outline-variant bg-white",
             size === "small" ? "p-1.5 w-[250px]" : "p-2 w-full max-w-[340px]",
             className
         )}>

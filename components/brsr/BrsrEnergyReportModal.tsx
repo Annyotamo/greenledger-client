@@ -14,9 +14,6 @@ type BrsrEnergyReportModalProps = {
         start_date: string;
         end_date: string;
         turnover_inr: number;
-        ppp_conversion_factor?: number;
-        physical_output?: number | null;
-        physical_output_unit?: string | null;
     }) => Promise<void>;
 };
 
@@ -24,9 +21,6 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [turnover, setTurnover] = useState<number | null>(null);
-    const [pppFactor, setPppFactor] = useState<number | null>(null);
-    const [physicalOutput, setPhysicalOutput] = useState<number | null>(null);
-    const [physicalOutputUnit, setPhysicalOutputUnit] = useState<string>("");
     
     const [isDownloading, setIsDownloading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -68,9 +62,6 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
                 start_date: formattedStart,
                 end_date: formattedEnd,
                 turnover_inr: turnover,
-                ppp_conversion_factor: pppFactor !== null ? pppFactor : undefined,
-                physical_output: physicalOutput,
-                physical_output_unit: physicalOutputUnit || undefined,
             });
             onClose();
         } catch (err) {
@@ -84,20 +75,20 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
     const isFormValid = startDate && endDate && turnover !== null && turnover > 0 && !isDownloading;
 
     return createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-y-auto">
             {/* Backdrop underlay */}
             <button
                 type="button"
-                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+                className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
                 aria-label="Close download options"
                 disabled={isDownloading}
             />
 
             {/* Modal Body */}
-            <div className="relative w-full max-w-4xl overflow-hidden rounded-3xl border border-outline-variant bg-surface-container-lowest shadow-2xl animate-fade-up">
+            <div className="relative w-full max-w-3xl max-h-[85vh] my-auto flex flex-col rounded-3xl border border-outline-variant bg-surface-container-lowest shadow-2xl animate-fade-up overflow-hidden">
                 {/* Header */}
-                <div className="flex flex-col gap-3 border-b border-outline-variant px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 border-b border-outline-variant px-6 py-4 sm:flex-row sm:items-center sm:justify-between shrink-0 bg-white">
                     <div>
                         <h2 className="text-headline-sm font-semibold text-primary">
                             Download BRSR Energy Report
@@ -110,64 +101,65 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
                         type="button"
                         onClick={onClose}
                         disabled={isDownloading}
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant transition hover:bg-surface-container-high disabled:opacity-50"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-full text-on-surface-variant transition hover:bg-surface-container-high disabled:opacity-50"
                         aria-label="Close dialog">
                         <MaterialIcon name="close" size="sm" />
                     </button>
                 </div>
 
-                {/* Date Selectors (Calendars Side-by-Side) */}
-                <div className="grid gap-6 p-6 md:grid-cols-2">
-                    {/* Start Date */}
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <label className="text-sm font-semibold text-on-surface">Start Date</label>
-                            {startDate ? (
-                                <time className="text-xs text-on-surface-variant font-mono">
-                                    {format(startDate, "PPP")}
-                                </time>
-                            ) : (
-                                <span className="text-xs text-on-surface-variant/60">Not selected</span>
-                            )}
+                {/* Scrollable Modal Content */}
+                <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-white">
+                    {/* Date Selectors (Calendars Side-by-Side, Centered) */}
+                    <div className="grid gap-6 md:grid-cols-2 justify-items-center">
+                        {/* Start Date */}
+                        <div className="flex flex-col items-center space-y-3 w-full max-w-[320px]">
+                            <div className="flex items-center justify-between w-full">
+                                <label className="text-sm font-semibold text-on-surface">Start Date</label>
+                                {startDate ? (
+                                    <time className="text-xs text-on-surface-variant font-mono">
+                                        {format(startDate, "PPP")}
+                                    </time>
+                                ) : (
+                                    <span className="text-xs text-on-surface-variant/60">Not selected</span>
+                                )}
+                            </div>
+                            <Calendar
+                                date={startDate}
+                                onDateChange={(date) => {
+                                    setStartDate(date);
+                                    setError(null);
+                                }}
+                                className="bg-white shadow-sm border border-outline-variant/70"
+                            />
                         </div>
-                        <Calendar
-                            date={startDate}
-                            onDateChange={(date) => {
-                                setStartDate(date);
-                                setError(null);
-                            }}
-                            className="bg-surface-container-low"
-                        />
+
+                        {/* End Date */}
+                        <div className="flex flex-col items-center space-y-3 w-full max-w-[320px]">
+                            <div className="flex items-center justify-between w-full">
+                                <label className="text-sm font-semibold text-on-surface">End Date</label>
+                                {endDate ? (
+                                    <time className="text-xs text-on-surface-variant font-mono">
+                                        {format(endDate, "PPP")}
+                                    </time>
+                                ) : (
+                                    <span className="text-xs text-on-surface-variant/60">Not selected</span>
+                                )}
+                            </div>
+                            <Calendar
+                                date={endDate}
+                                onDateChange={(date) => {
+                                    setEndDate(date);
+                                    setError(null);
+                                }}
+                                className="bg-white shadow-sm border border-outline-variant/70"
+                            />
+                        </div>
                     </div>
 
-                    {/* End Date */}
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <label className="text-sm font-semibold text-on-surface">End Date</label>
-                            {endDate ? (
-                                <time className="text-xs text-on-surface-variant font-mono">
-                                    {format(endDate, "PPP")}
-                                </time>
-                            ) : (
-                                <span className="text-xs text-on-surface-variant/60">Not selected</span>
-                            )}
-                        </div>
-                        <Calendar
-                            date={endDate}
-                            onDateChange={(date) => {
-                                setEndDate(date);
-                                setError(null);
-                            }}
-                            className="bg-surface-container-low"
-                        />
-                    </div>
-                </div>
-
-                {/* Turnover & Optional Intensity inputs */}
-                <div className="border-t border-outline-variant p-6 space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-2">
-                            <label htmlFor="turnover" className="text-sm font-semibold text-on-surface">
+                    {/* Turnover input */}
+                    <div className="border-t border-outline-variant/60 pt-5 space-y-2">
+                        <div className="flex flex-col gap-2 max-w-md mx-auto">
+                            <label htmlFor="turnover" className="text-sm font-semibold text-on-surface text-center">
                                 Turnover (INR) <span className="text-error">*</span>
                             </label>
                             <div className="relative flex items-center">
@@ -186,73 +178,14 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
                                         setError(null);
                                     }}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low py-2.5 pl-8 pr-4 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white py-2.5 pl-8 pr-4 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 text-center"
                                 />
                             </div>
                         </div>
-
-                        <div className="flex flex-col gap-2">
-                            <label htmlFor="pppFactor" className="text-sm font-semibold text-on-surface">
-                                PPP Conversion Factor
-                            </label>
-                            <input
-                                id="pppFactor"
-                                type="number"
-                                step="any"
-                                placeholder="Enter conversion factor (default: 1.0)"
-                                value={pppFactor === null ? "" : pppFactor}
-                                onChange={(e) => {
-                                    const val = e.target.value;
-                                    setPppFactor(val === "" ? null : Number(val));
-                                    setError(null);
-                                }}
-                                disabled={isDownloading}
-                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low py-2.5 px-4 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-                            />
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                            <label htmlFor="physicalOutput" className="text-sm font-semibold text-on-surface">
-                                Physical Output
-                            </label>
-                            <input
-                                id="physicalOutput"
-                                type="number"
-                                step="any"
-                                placeholder="Enter physical output amount"
-                                value={physicalOutput === null ? "" : physicalOutput}
-                                onChange={(e) => {
-                                    const val = e.target.value;
-                                    setPhysicalOutput(val === "" ? null : Number(val));
-                                    setError(null);
-                                }}
-                                disabled={isDownloading}
-                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low py-2.5 px-4 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-                            />
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                            <label htmlFor="physicalOutputUnit" className="text-sm font-semibold text-on-surface">
-                                Physical Output Unit
-                            </label>
-                            <input
-                                id="physicalOutputUnit"
-                                type="text"
-                                placeholder="e.g. tonnes, tcs, pcs"
-                                value={physicalOutputUnit}
-                                onChange={(e) => {
-                                    setPhysicalOutputUnit(e.target.value);
-                                    setError(null);
-                                }}
-                                disabled={isDownloading}
-                                className="w-full rounded-lg border border-outline-variant bg-surface-container-low py-2.5 px-4 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-                            />
-                        </div>
+                        <p className="text-xs text-on-surface-variant text-center">
+                            Turnover value is required to calculate output energy intensity metrics.
+                        </p>
                     </div>
-                    <p className="text-xs text-on-surface-variant">
-                        Turnover value is required to calculate output energy intensity metrics. Conversion factor and physical output options are optional.
-                    </p>
-                </div>
 
                     {/* Error Banner */}
                     {error && (
@@ -261,9 +194,10 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
                             <span>{error}</span>
                         </div>
                     )}
+                </div>
 
                 {/* Footer Controls */}
-                <div className="flex flex-col gap-3 border-t border-outline-variant bg-surface p-5 sm:flex-row sm:justify-end">
+                <div className="flex flex-col gap-3 border-t border-outline-variant bg-white p-5 sm:flex-row sm:justify-end shrink-0">
                     <Button
                         variant="secondary"
                         size="md"

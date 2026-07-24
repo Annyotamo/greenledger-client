@@ -14,7 +14,6 @@ export default function BrsrWaterPage() {
     // Input states on the page (empty per user request)
     const [fyLabel, setFyLabel] = useState("");
     const [turnover, setTurnover] = useState("");
-    const [pppFactor, setPppFactor] = useState("");
     const [physicalOutput, setPhysicalOutput] = useState("");
     const [physicalOutputUnit, setPhysicalOutputUnit] = useState("");
 
@@ -52,7 +51,6 @@ export default function BrsrWaterPage() {
     const [activePayload, setActivePayload] = useState<BrsrWaterDisclosurePayload>({
         financial_year_label: "FY 2025-26",
         turnover_inr: 1000000.00,
-        ppp_conversion_factor: 20.00,
         physical_output: 100.00,
         physical_output_unit: "tcs",
         withdrawal: {
@@ -122,7 +120,6 @@ export default function BrsrWaterPage() {
         setActivePayload({
             financial_year_label: fyLabel,
             turnover_inr: Number(turnover) || 0,
-            ppp_conversion_factor: pppFactor ? Number(pppFactor) : undefined,
             physical_output: physicalOutput ? Number(physicalOutput) : null,
             physical_output_unit: physicalOutputUnit || null,
             withdrawal: {
@@ -166,7 +163,6 @@ export default function BrsrWaterPage() {
     const handleReset = () => {
         setFyLabel("");
         setTurnover("");
-        setPppFactor("");
         setPhysicalOutput("");
         setPhysicalOutputUnit("");
         setSurfaceWater("");
@@ -272,7 +268,7 @@ export default function BrsrWaterPage() {
                     {/* General & Intensity Parameters */}
                     <div className="border-b border-outline-variant/60 pb-5">
                         <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-3">General & Intensity Parameters</span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                             {/* FY Label */}
                             <div className="space-y-1">
                                 <label htmlFor="fy-filter" className="text-xs font-semibold text-on-surface-variant block">
@@ -299,22 +295,6 @@ export default function BrsrWaterPage() {
                                     placeholder="e.g. 1000000"
                                     value={turnover}
                                     onChange={(e) => setTurnover(e.target.value)}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
-                                />
-                            </div>
-
-                            {/* PPP Conversion Factor */}
-                            <div className="space-y-1">
-                                <label htmlFor="ppp-filter" className="text-xs font-semibold text-on-surface-variant block">
-                                    PPP Conversion Factor
-                                </label>
-                                <input
-                                    id="ppp-filter"
-                                    type="number"
-                                    step="any"
-                                    placeholder="e.g. 20.00"
-                                    value={pppFactor}
-                                    onChange={(e) => setPppFactor(e.target.value)}
                                     className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
                                 />
                             </div>

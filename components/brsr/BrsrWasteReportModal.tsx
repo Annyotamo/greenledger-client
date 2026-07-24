@@ -33,9 +33,6 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
     const [otherDisposal, setOtherDisposal] = useState("");
     
     const [turnover, setTurnover] = useState("");
-    const [pppFactor, setPppFactor] = useState("");
-    const [physicalOutput, setPhysicalOutput] = useState("");
-    const [physicalOutputUnit, setPhysicalOutputUnit] = useState("");
 
     const [isDownloading, setIsDownloading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -70,9 +67,6 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
             await onDownload({
                 financial_year_label: fyLabel,
                 turnover_inr: Number(turnover) || 0,
-                ppp_conversion_factor: pppFactor ? Number(pppFactor) : undefined,
-                physical_output_tonnes: Number(physicalOutput) || 0,
-                physical_output_unit: physicalOutputUnit || undefined,
                 plastic_waste_tonne: Number(plastic) || 0,
                 ewaste_tonne: Number(ewaste) || 0,
                 bio_medical_waste_tonne: Number(bioMedical) || 0,
@@ -101,20 +95,20 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
     const isFormValid = fyLabel.trim() !== "" && turnover.trim() !== "" && !isDownloading;
 
     return createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4 overflow-y-auto py-8">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-y-auto">
             {/* Backdrop underlay */}
             <button
                 type="button"
-                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm cursor-default"
+                className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
                 aria-label="Close download options"
                 disabled={isDownloading}
             />
 
             {/* Modal Body */}
-            <div className="relative w-full max-w-3xl overflow-y-auto max-h-[90vh] rounded-3xl border border-outline-variant bg-surface-container-lowest shadow-2xl animate-fade-up flex flex-col">
+            <div className="relative w-full max-w-3xl max-h-[85vh] my-auto flex flex-col rounded-3xl border border-outline-variant bg-surface-container-lowest shadow-2xl animate-fade-up overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-outline-variant px-6 py-4 shrink-0">
+                <div className="flex items-center justify-between border-b border-outline-variant px-6 py-4 shrink-0 bg-white">
                     <div>
                         <h2 className="text-headline-sm font-semibold text-primary">
                             Download BRSR Waste Report
@@ -127,21 +121,21 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                         type="button"
                         onClick={onClose}
                         disabled={isDownloading}
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant transition hover:bg-surface-container-high disabled:opacity-50"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-full text-on-surface-variant transition hover:bg-surface-container-high disabled:opacity-50"
                         aria-label="Close dialog">
                         <MaterialIcon name="close" size="sm" />
                     </button>
                 </div>
 
                 {/* Form Fields */}
-                <div className="p-6 space-y-5 overflow-y-auto flex-1 font-sans text-body-md text-on-surface">
+                <div className="p-6 space-y-5 overflow-y-auto flex-1 font-sans text-body-md text-on-surface bg-white">
                     
                     {/* General Information */}
                     <div className="space-y-3">
                         <span className="text-xs font-bold text-primary uppercase tracking-wider block">
                             General Parameters
                         </span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <label htmlFor="modal-fy" className="text-xs font-semibold text-on-surface-variant">
                                     Financial Year Label <span className="text-error">*</span>
@@ -153,7 +147,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={fyLabel}
                                     onChange={(e) => setFyLabel(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -168,53 +162,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={turnover}
                                     onChange={(e) => setTurnover(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-                                />
-                            </div>
-
-                            <div className="space-y-1">
-                                <label htmlFor="modal-output" className="text-xs font-semibold text-on-surface-variant">
-                                    Physical Output <span className="text-error">*</span>
-                                </label>
-                                <input
-                                    id="modal-output"
-                                    type="number"
-                                    placeholder="e.g. 850"
-                                    value={physicalOutput}
-                                    onChange={(e) => setPhysicalOutput(e.target.value)}
-                                    disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-                                />
-                            </div>
-
-                            <div className="space-y-1">
-                                <label htmlFor="modal-ppp" className="text-xs font-semibold text-on-surface-variant">
-                                    PPP Factor
-                                </label>
-                                <input
-                                    id="modal-ppp"
-                                    type="number"
-                                    step="any"
-                                    placeholder="e.g. 20.00"
-                                    value={pppFactor}
-                                    onChange={(e) => setPppFactor(e.target.value)}
-                                    disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-                                />
-                            </div>
-
-                            <div className="space-y-1">
-                                <label htmlFor="modal-physical-unit" className="text-xs font-semibold text-on-surface-variant">
-                                    Output Unit
-                                </label>
-                                <input
-                                    id="modal-physical-unit"
-                                    type="text"
-                                    placeholder="e.g. tonnes"
-                                    value={physicalOutputUnit}
-                                    onChange={(e) => setPhysicalOutputUnit(e.target.value)}
-                                    disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
                         </div>
@@ -229,7 +177,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                             <div className="space-y-1">
                                 <label htmlFor="modal-plastic" className="text-xs font-semibold text-on-surface-variant">
                                     Plastic Waste
-                                </label>
+                                 </label>
                                 <input
                                     id="modal-plastic"
                                     type="number"
@@ -238,7 +186,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={plastic}
                                     onChange={(e) => setPlastic(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -254,7 +202,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={ewaste}
                                     onChange={(e) => setEwaste(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -270,7 +218,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={bioMedical}
                                     onChange={(e) => setBioMedical(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -286,7 +234,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={construction}
                                     onChange={(e) => setConstruction(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -302,7 +250,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={battery}
                                     onChange={(e) => setBattery(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -318,7 +266,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={radioactive}
                                     onChange={(e) => setRadioactive(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -334,7 +282,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={otherHazardous}
                                     onChange={(e) => setOtherHazardous(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -350,7 +298,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={flyAsh}
                                     onChange={(e) => setFlyAsh(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -366,7 +314,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={nonHazardousSolid}
                                     onChange={(e) => setNonHazardousSolid(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
                         </div>
@@ -390,7 +338,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={recycled}
                                     onChange={(e) => setRecycled(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -406,7 +354,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={reused}
                                     onChange={(e) => setReused(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -422,7 +370,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={otherRecovery}
                                     onChange={(e) => setOtherRecovery(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -438,7 +386,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={incineration}
                                     onChange={(e) => setIncineration(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -454,7 +402,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={landfilling}
                                     onChange={(e) => setLandfilling(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -470,7 +418,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     value={otherDisposal}
                                     onChange={(e) => setOtherDisposal(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
                         </div>
@@ -486,7 +434,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                 </div>
 
                 {/* Footer */}
-                <div className="flex flex-col gap-3 border-t border-outline-variant bg-surface p-5 sm:flex-row sm:justify-end shrink-0">
+                <div className="flex flex-col gap-3 border-t border-outline-variant bg-white p-5 sm:flex-row sm:justify-end shrink-0">
                     <Button
                         variant="secondary"
                         size="md"

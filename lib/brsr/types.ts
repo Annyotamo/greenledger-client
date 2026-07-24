@@ -147,7 +147,7 @@ export type BrsrWaterDisclosureResponse = {
 export type BrsrWasteDisclosurePayload = {
     financial_year_label: string;
     turnover_inr: number;
-    physical_output_tonnes: number;
+    physical_output_tonnes?: number | null;
     ppp_conversion_factor?: number;
     physical_output_unit?: string | null;
     plastic_waste_tonne: number;

@@ -15,9 +15,6 @@ type BrsrWaterReportModalProps = {
 export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterReportModalProps) {
     const [fyLabel, setFyLabel] = useState("");
     const [turnover, setTurnover] = useState("");
-    const [pppFactor, setPppFactor] = useState("");
-    const [physicalOutput, setPhysicalOutput] = useState("");
-    const [physicalOutputUnit, setPhysicalOutputUnit] = useState("");
 
     // Withdrawal
     const [surfaceWater, setSurfaceWater] = useState("");
@@ -98,9 +95,6 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
             await onDownload({
                 financial_year_label: fyLabel,
                 turnover_inr: Number(turnover) || 0,
-                ppp_conversion_factor: pppFactor ? Number(pppFactor) : undefined,
-                physical_output: physicalOutput ? Number(physicalOutput) : null,
-                physical_output_unit: physicalOutputUnit || null,
                 withdrawal: {
                     surface_water_kl: Number(surfaceWater) || 0,
                     groundwater_kl: Number(groundwater) || 0,
@@ -149,20 +143,20 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
     const isFormValid = fyLabel.trim() !== "" && turnover.trim() !== "" && !isDownloading;
 
     return createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4 overflow-y-auto py-8">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-y-auto">
             {/* Backdrop underlay */}
             <button
                 type="button"
-                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm cursor-default"
+                className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
                 aria-label="Close download options"
                 disabled={isDownloading}
             />
 
             {/* Modal Body */}
-            <div className="relative w-full max-w-2xl overflow-y-auto max-h-[90vh] rounded-3xl border border-outline-variant bg-surface-container-lowest shadow-2xl animate-fade-up flex flex-col">
+            <div className="relative w-full max-w-3xl max-h-[85vh] my-auto flex flex-col rounded-3xl border border-outline-variant bg-surface-container-lowest shadow-2xl animate-fade-up overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-outline-variant px-6 py-4 shrink-0">
+                <div className="flex items-center justify-between border-b border-outline-variant px-6 py-4 shrink-0 bg-white">
                     <div>
                         <h2 className="text-headline-sm font-semibold text-primary">
                             Download BRSR Water Report
@@ -175,18 +169,18 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                         type="button"
                         onClick={onClose}
                         disabled={isDownloading}
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant transition hover:bg-surface-container-high disabled:opacity-50"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-full text-on-surface-variant transition hover:bg-surface-container-high disabled:opacity-50"
                         aria-label="Close dialog">
                         <MaterialIcon name="close" size="sm" />
                     </button>
                 </div>
 
                 {/* Form Fields */}
-                <div className="p-6 space-y-4 overflow-y-auto flex-1 font-sans text-body-md text-on-surface">
-                    {/* General & Intensity Parameters */}
+                <div className="p-6 space-y-4 overflow-y-auto flex-1 font-sans text-body-md text-on-surface bg-white">
+                    {/* General Parameters */}
                     <div className="border-b border-outline-variant/60 pb-4">
-                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-3">General & Intensity Parameters</span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-3">General Parameters</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <label htmlFor="fy-label" className="text-xs font-semibold text-on-surface-variant">
                                     Financial Year Label <span className="text-error">*</span>
@@ -198,7 +192,7 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                     value={fyLabel}
                                     onChange={(e) => setFyLabel(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -213,54 +207,7 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                     value={turnover}
                                     onChange={(e) => setTurnover(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-                                />
-                            </div>
-
-                            <div className="space-y-1">
-                                <label htmlFor="modal-ppp" className="text-xs font-semibold text-on-surface-variant">
-                                    PPP Conversion Factor
-                                </label>
-                                <input
-                                    id="modal-ppp"
-                                    type="number"
-                                    step="any"
-                                    placeholder="e.g. 20.00"
-                                    value={pppFactor}
-                                    onChange={(e) => setPppFactor(e.target.value)}
-                                    disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-                                />
-                            </div>
-
-                            <div className="space-y-1">
-                                <label htmlFor="modal-physical" className="text-xs font-semibold text-on-surface-variant">
-                                    Physical Output
-                                </label>
-                                <input
-                                    id="modal-physical"
-                                    type="number"
-                                    step="any"
-                                    placeholder="e.g. 100"
-                                    value={physicalOutput}
-                                    onChange={(e) => setPhysicalOutput(e.target.value)}
-                                    disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-                                />
-                            </div>
-
-                            <div className="space-y-1">
-                                <label htmlFor="modal-physical-unit" className="text-xs font-semibold text-on-surface-variant">
-                                    Physical Output Unit
-                                </label>
-                                <input
-                                    id="modal-physical-unit"
-                                    type="text"
-                                    placeholder="e.g. litres"
-                                    value={physicalOutputUnit}
-                                    onChange={(e) => setPhysicalOutputUnit(e.target.value)}
-                                    disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
                         </div>
@@ -283,7 +230,7 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                     value={surfaceWater}
                                     onChange={(e) => setSurfaceWater(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -298,7 +245,7 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                     value={groundwater}
                                     onChange={(e) => setGroundwater(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -313,7 +260,7 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                     value={thirdParty}
                                     onChange={(e) => setThirdParty(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -328,7 +275,7 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                     value={seawater}
                                     onChange={(e) => setSeawater(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -343,7 +290,7 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                     value={others}
                                     onChange={(e) => setOthers(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
 
@@ -358,7 +305,7 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                     value={totalWater}
                                     onChange={(e) => setTotalWater(e.target.value)}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-primary/40 bg-surface-container-low px-3 py-2 text-on-surface font-semibold focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    className="w-full rounded-lg border border-primary/40 bg-white px-3 py-2 text-on-surface font-semibold focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
                         </div>
@@ -386,7 +333,7 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                             value={dest.no}
                                             onChange={(e) => dest.setNo(e.target.value)}
                                             disabled={isDownloading}
-                                            className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-2 py-1 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                            className="w-full rounded-lg border border-outline-variant bg-white px-2 py-1 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px]"
                                             placeholder="0.00"
                                         />
                                     </div>
@@ -397,7 +344,7 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                             value={dest.with}
                                             onChange={(e) => dest.setWith(e.target.value)}
                                             disabled={isDownloading}
-                                            className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-2 py-1 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                            className="w-full rounded-lg border border-outline-variant bg-white px-2 py-1 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px]"
                                             placeholder="0.00"
                                         />
                                     </div>
@@ -408,7 +355,7 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                                             value={dest.lvl}
                                             onChange={(e) => dest.setLvl(e.target.value)}
                                             disabled={isDownloading}
-                                            className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-2 py-1 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px] bg-white"
+                                            className="w-full rounded-lg border border-outline-variant bg-white px-2 py-1 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-[12px]"
                                             placeholder="e.g. Primary, RO"
                                         />
                                     </div>
@@ -427,7 +374,7 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                 </div>
 
                 {/* Footer */}
-                <div className="flex flex-col gap-3 border-t border-outline-variant bg-surface p-5 sm:flex-row sm:justify-end shrink-0">
+                <div className="flex flex-col gap-3 border-t border-outline-variant bg-white p-5 sm:flex-row sm:justify-end shrink-0">
                     <Button
                         variant="secondary"
                         size="md"

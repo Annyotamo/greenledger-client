@@ -14,6 +14,10 @@ type BrsrWasteReportModalProps = {
 
 export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteReportModalProps) {
     const [fyLabel, setFyLabel] = useState("");
+    const [turnover, setTurnover] = useState("");
+    const [physicalOutputTonnes, setPhysicalOutputTonnes] = useState("");
+    const [physicalOutputUnit, setPhysicalOutputUnit] = useState("");
+
     const [plastic, setPlastic] = useState("");
     const [ewaste, setEwaste] = useState("");
     const [bioMedical, setBioMedical] = useState("");
@@ -31,8 +35,6 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
     const [incineration, setIncineration] = useState("");
     const [landfilling, setLandfilling] = useState("");
     const [otherDisposal, setOtherDisposal] = useState("");
-    
-    const [turnover, setTurnover] = useState("");
 
     const [isDownloading, setIsDownloading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -67,6 +69,8 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
             await onDownload({
                 financial_year_label: fyLabel,
                 turnover_inr: Number(turnover) || 0,
+                physical_output_tonnes: Number(physicalOutputTonnes) || 0,
+                physical_output_unit: physicalOutputUnit || undefined,
                 plastic_waste_tonne: Number(plastic) || 0,
                 ewaste_tonne: Number(ewaste) || 0,
                 bio_medical_waste_tonne: Number(bioMedical) || 0,
@@ -135,7 +139,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                         <span className="text-xs font-bold text-primary uppercase tracking-wider block">
                             General Parameters
                         </span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                             <div className="space-y-1">
                                 <label htmlFor="modal-fy" className="text-xs font-semibold text-on-surface-variant">
                                     Financial Year Label <span className="text-error">*</span>
@@ -161,6 +165,37 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                                     placeholder="e.g. 100000000"
                                     value={turnover}
                                     onChange={(e) => setTurnover(e.target.value)}
+                                    disabled={isDownloading}
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <label htmlFor="modal-physical-output" className="text-xs font-semibold text-on-surface-variant">
+                                    Physical Output (Tonnes)
+                                </label>
+                                <input
+                                    id="modal-physical-output"
+                                    type="number"
+                                    step="any"
+                                    placeholder="e.g. 200"
+                                    value={physicalOutputTonnes}
+                                    onChange={(e) => setPhysicalOutputTonnes(e.target.value)}
+                                    disabled={isDownloading}
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <label htmlFor="modal-physical-unit" className="text-xs font-semibold text-on-surface-variant">
+                                    Output Unit
+                                </label>
+                                <input
+                                    id="modal-physical-unit"
+                                    type="text"
+                                    placeholder="e.g. tonnes, pcs"
+                                    value={physicalOutputUnit}
+                                    onChange={(e) => setPhysicalOutputUnit(e.target.value)}
                                     disabled={isDownloading}
                                     className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />

@@ -10,30 +10,40 @@ import type {
     BrsrWasteDisclosureResponse,
 } from "./types";
 
-export async function getBrsrEnergyConsumption(payload: {
+export type BrsrEnergyConsumptionPayload = {
     start_date: string;
     end_date: string;
     turnover_inr: number;
     ppp_conversion_factor?: number;
     physical_output?: number | null;
+    physical_output_tonnes?: number | null;
     physical_output_unit?: string | null;
-}): Promise<BrsrEnergyConsumptionData> {
-    const response = await privateApi.post<BrsrEnergyConsumptionResponse>("/tenant/brsr/energy-consumption", payload);
+};
+
+export async function getBrsrEnergyConsumption(
+    payload: BrsrEnergyConsumptionPayload
+): Promise<BrsrEnergyConsumptionData> {
+    const body = {
+        ...payload,
+        physical_output: payload.physical_output ?? payload.physical_output_tonnes ?? null,
+        physical_output_tonnes: payload.physical_output_tonnes ?? payload.physical_output ?? null,
+    };
+    const response = await privateApi.post<BrsrEnergyConsumptionResponse>("/tenant/brsr/energy-consumption", body);
     if (!response.data?.success || !response.data?.data) {
         throw new Error(response.data?.message ?? "Failed to fetch energy consumption data.");
     }
     return response.data.data;
 }
 
-export async function getBrsrEnergyReport(payload: {
-    start_date: string;
-    end_date: string;
-    turnover_inr: number;
-    ppp_conversion_factor?: number;
-    physical_output?: number | null;
-    physical_output_unit?: string | null;
-}): Promise<Blob> {
-    const response = await privateApi.post("/tenant/brsr/energy-consumption/report", payload, {
+export async function getBrsrEnergyReport(
+    payload: BrsrEnergyConsumptionPayload
+): Promise<Blob> {
+    const body = {
+        ...payload,
+        physical_output: payload.physical_output ?? payload.physical_output_tonnes ?? null,
+        physical_output_tonnes: payload.physical_output_tonnes ?? payload.physical_output ?? null,
+    };
+    const response = await privateApi.post("/tenant/brsr/energy-consumption/report", body, {
         responseType: "blob",
     });
     return response.data as Blob;

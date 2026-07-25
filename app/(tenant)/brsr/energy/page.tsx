@@ -35,12 +35,14 @@ export default function BrsrEnergyPage() {
         end_date: string | null;
         turnover_inr: number | null;
         physical_output?: number | null;
+        physical_output_tonnes?: number | null;
         physical_output_unit?: string | null;
     }>({
         start_date: "2025-04-01",
         end_date: "2026-04-30",
         turnover_inr: 1000000.00,
         physical_output: 100.00,
+        physical_output_tonnes: 100.00,
         physical_output_unit: "tcs",
     });
 
@@ -91,6 +93,7 @@ export default function BrsrEnergyPage() {
             end_date: endDate ? format(endDate, "yyyy-MM-dd") : null,
             turnover_inr: turnover,
             physical_output: physicalOutput,
+            physical_output_tonnes: physicalOutput,
             physical_output_unit: physicalOutputUnit || undefined,
         });
     };
@@ -106,6 +109,7 @@ export default function BrsrEnergyPage() {
             end_date: null,
             turnover_inr: null,
             physical_output: null,
+            physical_output_tonnes: null,
             physical_output_unit: "",
         });
     };
@@ -116,6 +120,7 @@ export default function BrsrEnergyPage() {
         turnover_inr: number;
         ppp_conversion_factor?: number;
         physical_output?: number | null;
+        physical_output_tonnes?: number | null;
         physical_output_unit?: string | null;
     }) => {
         const blob = await getBrsrEnergyReport(payload);

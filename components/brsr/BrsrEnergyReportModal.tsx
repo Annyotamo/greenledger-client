@@ -14,6 +14,10 @@ type BrsrEnergyReportModalProps = {
         start_date: string;
         end_date: string;
         turnover_inr: number;
+        ppp_conversion_factor?: number;
+        physical_output?: number | null;
+        physical_output_tonnes?: number | null;
+        physical_output_unit?: string | null;
     }) => Promise<void>;
 };
 
@@ -21,6 +25,8 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [turnover, setTurnover] = useState<number | null>(null);
+    const [physicalOutputTonnes, setPhysicalOutputTonnes] = useState<number | null>(null);
+    const [physicalOutputUnit, setPhysicalOutputUnit] = useState<string>("");
     
     const [isDownloading, setIsDownloading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -62,6 +68,9 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
                 start_date: formattedStart,
                 end_date: formattedEnd,
                 turnover_inr: turnover,
+                physical_output: physicalOutputTonnes,
+                physical_output_tonnes: physicalOutputTonnes,
+                physical_output_unit: physicalOutputUnit || undefined,
             });
             onClose();
         } catch (err) {
@@ -94,7 +103,7 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
                             Download BRSR Energy Report
                         </h2>
                         <p className="text-body-sm text-on-surface-variant">
-                            Choose a date range and specify the turnover to download the XLSX report.
+                            Choose a date range and specify the parameters to download the XLSX report.
                         </p>
                     </div>
                     <button
@@ -156,34 +165,74 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
                         </div>
                     </div>
 
-                    {/* Turnover input */}
-                    <div className="border-t border-outline-variant/60 pt-5 space-y-2">
-                        <div className="flex flex-col gap-2 max-w-md mx-auto">
-                            <label htmlFor="turnover" className="text-sm font-semibold text-on-surface text-center">
-                                Turnover (INR) <span className="text-error">*</span>
-                            </label>
-                            <div className="relative flex items-center">
-                                <div className="pointer-events-none absolute left-3 text-on-surface-variant/70">
-                                    <span className="font-mono text-body-md">₹</span>
+                    {/* Turnover & Physical Output inputs */}
+                    <div className="border-t border-outline-variant/60 pt-5 space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="turnover" className="text-xs font-semibold text-on-surface">
+                                    Turnover (INR) <span className="text-error">*</span>
+                                </label>
+                                <div className="relative flex items-center">
+                                    <div className="pointer-events-none absolute left-3 text-on-surface-variant/70">
+                                        <span className="font-mono text-xs">₹</span>
+                                    </div>
+                                    <input
+                                        id="turnover"
+                                        type="number"
+                                        min="1"
+                                        placeholder="Enter turnover"
+                                        value={turnover === null ? "" : turnover}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setTurnover(val === "" ? null : Number(val));
+                                            setError(null);
+                                        }}
+                                        disabled={isDownloading}
+                                        className="w-full rounded-lg border border-outline-variant bg-white py-2 pl-7 pr-3 font-sans text-xs text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                    />
                                 </div>
+                            </div>
+
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="physical_output_tonnes" className="text-xs font-semibold text-on-surface">
+                                    Physical Output (Tonnes)
+                                </label>
                                 <input
-                                    id="turnover"
+                                    id="physical_output_tonnes"
                                     type="number"
-                                    min="1"
-                                    placeholder="Enter total turnover in INR"
-                                    value={turnover === null ? "" : turnover}
+                                    step="any"
+                                    placeholder="e.g. 100"
+                                    value={physicalOutputTonnes === null ? "" : physicalOutputTonnes}
                                     onChange={(e) => {
                                         const val = e.target.value;
-                                        setTurnover(val === "" ? null : Number(val));
+                                        setPhysicalOutputTonnes(val === "" ? null : Number(val));
                                         setError(null);
                                     }}
                                     disabled={isDownloading}
-                                    className="w-full rounded-lg border border-outline-variant bg-white py-2.5 pl-8 pr-4 font-sans text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 text-center"
+                                    className="w-full rounded-lg border border-outline-variant bg-white py-2 px-3 font-sans text-xs text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                                />
+                            </div>
+
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="physical_output_unit" className="text-xs font-semibold text-on-surface">
+                                    Output Unit
+                                </label>
+                                <input
+                                    id="physical_output_unit"
+                                    type="text"
+                                    placeholder="e.g. tonnes, tcs"
+                                    value={physicalOutputUnit}
+                                    onChange={(e) => {
+                                        setPhysicalOutputUnit(e.target.value);
+                                        setError(null);
+                                    }}
+                                    disabled={isDownloading}
+                                    className="w-full rounded-lg border border-outline-variant bg-white py-2 px-3 font-sans text-xs text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                                 />
                             </div>
                         </div>
                         <p className="text-xs text-on-surface-variant text-center">
-                            Turnover value is required to calculate output energy intensity metrics.
+                            Turnover and physical output tonnes are used to calculate output energy intensity metrics.
                         </p>
                     </div>
 

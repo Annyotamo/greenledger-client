@@ -137,6 +137,10 @@ export function CustomSelect({
             width: variant === "compact" ? "120px" : "100%",
             right: variant === "compact" ? 0 : "auto",
         }),
+        menuPortal: (provided) => ({
+            ...provided,
+            zIndex: 99999,
+        }),
         menuList: (provided) => ({
             ...provided,
             padding: "4px 0",
@@ -187,6 +191,7 @@ export function CustomSelect({
             styles={styles}
             placeholder={placeholder}
             className={className}
+            menuPortalTarget={isMounted && typeof document !== "undefined" ? document.body : undefined}
         />
     );
 }

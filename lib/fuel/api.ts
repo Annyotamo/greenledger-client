@@ -25,20 +25,23 @@ export type FuelUnitsDto = {
 
 export type FuelQueryType = "FUEL" | "REFRIGERANT";
 
-export async function getFuelCategories(type: FuelQueryType = "FUEL") {
+export async function getFuelCategories(type: FuelQueryType = "FUEL", sourceId?: string) {
+    const query = new URLSearchParams({ type });
+    if (sourceId) query.append("source_id", sourceId);
     const response = await privateApi.get<{
         success: boolean;
         status_code: number;
         message: string;
         data: FuelCategoryDto[];
-    }>(`/user/fuel-categories?type=${type}`);
+    }>(`/user/fuel-categories?${query.toString()}`);
 
     return response.data.data ?? [];
 }
 
-export async function getFuels(type: FuelQueryType = "FUEL", categoryId?: string) {
+export async function getFuels(type: FuelQueryType = "FUEL", categoryId?: string, sourceId?: string) {
     const query = new URLSearchParams({ type });
     if (categoryId) query.append("category_id", categoryId);
+    if (sourceId) query.append("source_id", sourceId);
     const response = await privateApi.get<{
         success: boolean;
         status_code: number;
@@ -49,14 +52,26 @@ export async function getFuels(type: FuelQueryType = "FUEL", categoryId?: string
     return response.data.data ?? [];
 }
 
-export async function getUnitsForFuel(fuelId: string) {
+export async function getUnitsForFuel(fuelId: string, customFuel?: boolean): Promise<FuelUnitsDto[]> {
+    const query = new URLSearchParams();
+    if (customFuel) {
+        query.append("custom_fuel", "true");
+    }
+    const queryString = query.toString() ? `?${query.toString()}` : "";
     const response = await privateApi.get<{
         success: boolean;
         status_code: number;
         message: string;
-        data: { available_units: FuelUnitsDto[] } | { available_units?: FuelUnitsDto[] } | any;
-    }>(`/user/fuels/${fuelId}/units`);
+        data: { available_units?: FuelUnitsDto[] } | FuelUnitsDto[];
+    }>(`/user/fuels/${fuelId}/units${queryString}`);
 
-    // API returns object with available_units inside data
-    return response.data.data?.available_units ?? response.data.data ?? [];
+    const data = response.data.data;
+    if (Array.isArray(data)) {
+        return data;
+    }
+    if (data && typeof data === "object" && "available_units" in data && Array.isArray(data.available_units)) {
+        return data.available_units;
+    }
+    return [];
 }
+

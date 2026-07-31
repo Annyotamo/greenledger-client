@@ -285,7 +285,7 @@ export default function BulkUploadFuelPage() {
                                     <CustomSelect
                                         options={
                                             sourcesQuery.data?.map((s) => ({
-                                                label: `${s.standard} (${s.version} - ${s.region})`,
+                                                label: s.standard,
                                                 value: s.id,
                                             })) || []
                                         }

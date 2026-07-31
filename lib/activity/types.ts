@@ -21,20 +21,27 @@ export type FuelActivityItemDto = {
     };
     activity: {
         scope_type: string;
-        fuel_id: string;
+        fuel_id: string | null;
+        custom_fuel_id?: string | null;
         quantity: string;
         quantity_unit_id: string;
         usage_type?: string;
         emission_type: string;
-        energy_content_gj: string;
-        generator_efficiency_percentage: string;
-        generated_electricity_kwh: string;
-        generated_electricity_mwh: string;
-        generated_steam_gj: string | null;
+        energy_content_gj: string | null;
+        generator_efficiency_percentage?: string | null;
+        generated_electricity_kwh?: string | null;
+        generated_electricity_mwh?: string | null;
+        generated_steam_gj?: string | null;
         data_quality_tier: string;
         estimation_basis: string | null;
         notes: string | null;
     };
+    quantity_unit?: {
+        id: string;
+        name: string;
+        symbol: string;
+        unit_type: string;
+    } | null;
     calculated: {
         calculated_kg_co2e: string;
         calculated_t_co2e: string;
@@ -49,11 +56,11 @@ export type FuelActivityItemDto = {
         calculation_method: string | null;
         calculation_details: string | null;
     };
-    factor: {
+    factor?: {
         id: string;
         created_at: string;
         updated_at: string;
-        fuel: {
+        fuel?: {
             id: string;
             name: string;
             slug: string;

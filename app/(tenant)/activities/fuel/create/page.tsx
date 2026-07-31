@@ -1,25 +1,23 @@
 "use client";
 
-import type { ChangeEvent, FormEvent } from "react";
-import { useMemo, useState } from "react";
+import type { FormEvent } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { format, isAfter } from "date-fns";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
 import { CustomSelect } from "@/components/ui/select";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { useFacilities } from "@/lib/facility/hooks";
-import { useFuelCategories, useFuels, useFuelUnits } from "@/lib/fuel/hooks";
-import type { FuelCategoryDto, FuelDto, FuelUnitsDto, FuelQueryType } from "@/lib/fuel/api";
+import { useEmissionSources } from "@/lib/emissionSource/hooks";
 import { createFuelActivity, uploadFuelActivityDocument, uploadS3File } from "@/lib/activity/api";
 import { ActivityDocumentsManager } from "@/components/activity/ActivityDocumentsManager";
 import type { ActivityDocument } from "@/components/activity/ActivityDocumentsManager";
 import { FormErrorSummary } from "@/components/ui/FormErrorSummary";
 import { getErrorMessage } from "@/lib/utils/error";
-
-
+import { CustomFuelSection } from "@/components/activity/CustomFuelSection";
+import { useCustomFuelUnits } from "@/lib/customFuel/hooks";
 
 const emissionTypeOptions = [
     { label: "Stationary", value: "stationary" },
@@ -34,7 +32,9 @@ const collectionTypeOptions = [
 ];
 
 function formFieldClass(error?: boolean) {
-    return `w-full rounded-lg border ${error ? "border-error" : "border-outline-variant"} bg-white px-3 py-2 text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary`;
+    return `w-full rounded-lg border ${
+        error ? "border-error" : "border-outline-variant"
+    } bg-white px-3 py-2 text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary`;
 }
 
 type FuelActivityFormState = {
@@ -44,6 +44,7 @@ type FuelActivityFormState = {
     activityEndDate: string;
     fuelType: string;
     fuelCategory: string;
+    customFuelId: string;
     source: string;
     meterId: string;
     quantity: string;
@@ -63,7 +64,8 @@ const initialFormState: FuelActivityFormState = {
     activityEndDate: "",
     fuelType: "",
     fuelCategory: "",
-    source: "ceea4ef9-1120-4c0f-9325-b5c5fca66400",
+    customFuelId: "",
+    source: "",
     meterId: "",
     quantity: "",
     unit: "",
@@ -100,7 +102,7 @@ export default function LogFuelActivityPage() {
             attachmentName: "",
             sourceMode: "upload",
             notes: "",
-        }
+        },
     ]);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -110,21 +112,26 @@ export default function LogFuelActivityPage() {
     const router = useRouter();
     const reportingPeriodsQuery = useReportingPeriods();
     const facilitiesQuery = useFacilities();
+    const emissionSourcesQuery = useEmissionSources("fuel");
+    const customFuelUnitsQuery = useCustomFuelUnits(Boolean(form.customFuelId));
 
-    const fuelQueryType = useMemo<FuelQueryType>(() => {
-        return form.emissionType === "process" || form.emissionType === "fugitive" ? "REFRIGERANT" : "FUEL";
-    }, [form.emissionType]);
+    // Default to first loaded emission source if none selected
+    useEffect(() => {
+        if (!form.source && emissionSourcesQuery.data && emissionSourcesQuery.data.length > 0) {
+            setForm((current) => ({ ...current, source: emissionSourcesQuery.data[0].id }));
+        }
+    }, [form.source, emissionSourcesQuery.data]);
 
-    const fuelCategoriesQuery = useFuelCategories(fuelQueryType);
-    const fuelsQuery = useFuels(fuelQueryType, form.fuelCategory);
-    const unitsQuery = useFuelUnits(form.fuelType);
-
-    const fuelCategoryLabel = fuelQueryType === "REFRIGERANT" ? "Refrigerant Category" : "Fuel Category";
-    const fuelLabel = fuelQueryType === "REFRIGERANT" ? "Refrigerant" : "Fuel";
-
-    function handleChange(field: keyof FuelActivityFormState, value: string) {
+    function handleChange(field: string, value: string) {
         setForm((current) => {
             const next = { ...current, [field]: value } as FuelActivityFormState;
+
+            if (field === "source") {
+                next.fuelCategory = "";
+                next.fuelType = "";
+                next.customFuelId = "";
+                next.unit = "";
+            }
 
             if (field === "fuelCategory") {
                 next.fuelType = "";
@@ -132,14 +139,14 @@ export default function LogFuelActivityPage() {
             }
 
             if (field === "fuelType") {
+                next.customFuelId = "";
                 next.unit = "";
             }
-
-
 
             if (field === "emissionType") {
                 next.fuelCategory = "";
                 next.fuelType = "";
+                next.customFuelId = "";
                 next.unit = "";
             }
 
@@ -150,6 +157,16 @@ export default function LogFuelActivityPage() {
             return next;
         });
         setErrors((current) => ({ ...current, [field]: "" }));
+    }
+
+    function handleCustomFuelSelect(customFuelId: string) {
+        setForm((current) => ({
+            ...current,
+            customFuelId,
+            fuelType: customFuelId ? "" : current.fuelType,
+            unit: "",
+        }));
+        setErrors((current) => ({ ...current, fuelType: "", customFuelId: "" }));
     }
 
     function handleStartDateChange(date: Date) {
@@ -182,17 +199,21 @@ export default function LogFuelActivityPage() {
         setErrors((current) => ({ ...current, activityEndDate: "" }));
     }
 
-
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const nextErrors: Record<string, string> = {};
 
         if (!form.reportingPeriod) nextErrors.reportingPeriod = "Reporting period is required.";
         if (!form.facility) nextErrors.facility = "Facility is required.";
+        if (!form.source) nextErrors.source = "Emission standard / source is required.";
         if (!form.activityStartDate) nextErrors.activityStartDate = "Start date is required.";
         if (!form.activityEndDate) nextErrors.activityEndDate = "End date is required.";
         if (!form.emissionType) nextErrors.emissionType = "Emission type is required.";
-        if (!form.fuelType) nextErrors.fuelType = "Fuel type is required.";
+
+        if (!form.customFuelId && !form.fuelType) {
+            nextErrors.fuelType = "Fuel type or Custom Fuel is required.";
+        }
+
         if (form.emissionType !== "fugitive" && !form.cost) nextErrors.cost = "Cost is required.";
         if (!form.collectionType) nextErrors.collectionType = "Collection type is required.";
         if (!form.quantity) nextErrors.quantity = "Quantity is required.";
@@ -231,21 +252,51 @@ export default function LogFuelActivityPage() {
         setIsSubmitting(true);
 
         try {
+            let finalQuantity = form.quantity ? Number(form.quantity) : null;
+            let finalUnitId = form.unit;
+
+            if (form.customFuelId && customFuelUnitsQuery.data && customFuelUnitsQuery.data.length > 0) {
+                const unitsList = customFuelUnitsQuery.data;
+                const kgUnit = unitsList.find(
+                    (u) => u.symbol.toLowerCase() === "kg" || u.name.toLowerCase().includes("kilograms")
+                );
+                const tonneUnit = unitsList.find(
+                    (u) =>
+                        u.symbol.toLowerCase().includes("tonne") ||
+                        u.symbol.toLowerCase() === "t" ||
+                        u.name.toLowerCase().includes("tonne")
+                );
+
+                if (tonneUnit) {
+                    // If user selected Kilograms, convert quantity from kg into tonnes
+                    if (kgUnit && form.unit === kgUnit.id && finalQuantity !== null) {
+                        finalQuantity = finalQuantity / 1000;
+                    }
+                    // Always send the Tonne unit ID for custom fuel
+                    finalUnitId = tonneUnit.id;
+                }
+            }
+
             const payload: Record<string, unknown> = {
                 reporting_period_id: form.reportingPeriod,
                 facility_id: form.facility,
                 source_id: form.source,
                 status: form.isDraft ? "draft" : undefined,
                 emission_type: form.emissionType,
-                fuel_id: form.fuelType,
-                quantity: form.quantity ? Number(form.quantity) : null,
-                quantity_unit_id: form.unit,
+                quantity: finalQuantity,
+                quantity_unit_id: finalUnitId,
                 cost: form.emissionType !== "fugitive" && form.cost ? Number(form.cost) : null,
                 data_quality_tier: form.collectionType,
                 estimation_basis: form.collectionType === "estimated" ? form.estimationBasis : undefined,
                 activity_start_date: form.activityStartDate,
                 activity_end_date: form.activityEndDate,
             };
+
+            if (form.customFuelId) {
+                payload.custom_fuel_id = form.customFuelId;
+            } else {
+                payload.fuel_id = form.fuelType;
+            }
 
             if (form.meterId) {
                 payload.meter_id = form.meterId;
@@ -297,6 +348,12 @@ export default function LogFuelActivityPage() {
         }
     }
 
+    const emissionSourceOptions =
+        emissionSourcesQuery.data?.map((s) => ({
+            label: s.standard,
+            value: String(s.id),
+        })) || [];
+
     return (
         <div className="max-w-4xl mx-auto py-12 px-container-margin">
             {/* Breadcrumbs */}
@@ -327,7 +384,7 @@ export default function LogFuelActivityPage() {
                             <div>
                                 <h2 className="text-headline-sm font-semibold text-primary">Activity Context</h2>
                                 <p className="text-xs text-on-surface-variant">
-                                    Select period, facility and activity dates.
+                                    Select period, facility, source and activity dates.
                                 </p>
                             </div>
                         </div>
@@ -339,10 +396,12 @@ export default function LogFuelActivityPage() {
                                     Reporting Period <span className="text-error">*</span>
                                 </label>
                                 <CustomSelect
-                                    options={reportingPeriodsQuery.data?.map((p: any) => ({
-                                        label: p.name,
-                                        value: String(p.id)
-                                    })) || []}
+                                    options={
+                                        reportingPeriodsQuery.data?.map((p: { id: string; name: string }) => ({
+                                            label: p.name,
+                                            value: String(p.id),
+                                        })) || []
+                                    }
                                     value={form.reportingPeriod}
                                     onChange={(val) => handleChange("reportingPeriod", val)}
                                     error={Boolean(errors.reportingPeriod)}
@@ -357,10 +416,12 @@ export default function LogFuelActivityPage() {
                                     Facility <span className="text-error">*</span>
                                 </label>
                                 <CustomSelect
-                                    options={facilitiesQuery.data?.map((f: any) => ({
-                                        label: f.name,
-                                        value: String(f.id)
-                                    })) || []}
+                                    options={
+                                        facilitiesQuery.data?.map((f: { id: string; name: string }) => ({
+                                            label: f.name,
+                                            value: String(f.id),
+                                        })) || []
+                                    }
                                     value={form.facility}
                                     onChange={(val) => handleChange("facility", val)}
                                     error={Boolean(errors.facility)}
@@ -386,6 +447,23 @@ export default function LogFuelActivityPage() {
                                     <p className="mt-2 text-xs text-error">{errors.emissionType}</p>
                                 )}
                             </div>
+
+                            <div id="form-field-source">
+                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                    Emission Standard / Source <span className="text-error">*</span>
+                                </label>
+                                <CustomSelect
+                                    options={emissionSourceOptions}
+                                    value={form.source}
+                                    onChange={(val) => handleChange("source", val)}
+                                    error={Boolean(errors.source)}
+                                    placeholder={
+                                        emissionSourcesQuery.isLoading ? "Loading sources..." : "Select source..."
+                                    }
+                                    isLoading={emissionSourcesQuery.isLoading}
+                                />
+                                {errors.source && <p className="mt-2 text-xs text-error">{errors.source}</p>}
+                            </div>
                         </div>
 
                         <div className="grid gap-6 lg:grid-cols-2">
@@ -400,9 +478,15 @@ export default function LogFuelActivityPage() {
                                         </span>
                                     ) : null}
                                 </div>
-                                <Calendar date={selectedStartDate} onDateChange={handleStartDateChange} className={errors.activityStartDate ? "border-error" : ""} />
+                                <Calendar
+                                    date={selectedStartDate}
+                                    onDateChange={handleStartDateChange}
+                                    className={errors.activityStartDate ? "border-error" : ""}
+                                />
                                 {errors.activityStartDate && (
-                                    <p className="mt-2 text-xs text-error w-full max-w-[340px]">{errors.activityStartDate}</p>
+                                    <p className="mt-2 text-xs text-error w-full max-w-[340px]">
+                                        {errors.activityStartDate}
+                                    </p>
                                 )}
                             </div>
                             <div id="form-field-activityEndDate" className="space-y-3 flex flex-col items-center">
@@ -416,141 +500,35 @@ export default function LogFuelActivityPage() {
                                         </span>
                                     ) : null}
                                 </div>
-                                <Calendar date={selectedEndDate} onDateChange={handleEndDateChange} className={errors.activityEndDate ? "border-error" : ""} />
+                                <Calendar
+                                    date={selectedEndDate}
+                                    onDateChange={handleEndDateChange}
+                                    className={errors.activityEndDate ? "border-error" : ""}
+                                />
                                 {errors.activityEndDate && (
-                                    <p className="mt-2 text-xs text-error w-full max-w-[340px]">{errors.activityEndDate}</p>
+                                    <p className="mt-2 text-xs text-error w-full max-w-[340px]">
+                                        {errors.activityEndDate}
+                                    </p>
                                 )}
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <section className="bg-white rounded-xl border border-outline-variant relative">
-                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-container-high text-primary">
-                                <MaterialIcon name="local_gas_station" size="sm" />
-                            </div>
-                            <div>
-                                <h2 className="text-headline-sm font-semibold text-primary">Fuel Details</h2>
-                                <p className="text-xs text-on-surface-variant">
-                                    Choose fuel type, quantity and measurement unit.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="p-card-padding grid gap-4 lg:grid-cols-2">
-                        <div id="form-field-fuelCategory">
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                {fuelCategoryLabel} <span className="text-error">*</span>
-                            </label>
-                            <CustomSelect
-                                options={fuelCategoriesQuery.data?.map((c: any) => ({
-                                    label: c.name,
-                                    value: String(c.id)
-                                })) || []}
-                                value={form.fuelCategory}
-                                onChange={(val) => handleChange("fuelCategory", val)}
-                                error={Boolean(errors.fuelType)}
-                                placeholder={fuelCategoriesQuery.isLoading ? "Loading categories..." : "Select category..."}
-                                isLoading={fuelCategoriesQuery.isLoading}
-                            />
-                            {!fuelCategoriesQuery.isLoading &&
-                                Array.isArray(fuelCategoriesQuery.data) &&
-                                fuelCategoriesQuery.data.length === 0 && (
-                                    <p className="mt-2 text-xs text-on-surface-variant">
-                                        No {fuelCategoryLabel.toLowerCase()}s configured for this tenant.
-                                    </p>
-                                )}
-                        </div>
-                        <div id="form-field-fuelType">
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                {fuelLabel} <span className="text-error">*</span>
-                            </label>
-                            <CustomSelect
-                                options={fuelsQuery.data?.map((f: any) => ({
-                                    label: f.name,
-                                    value: String(f.id)
-                                })) || []}
-                                value={form.fuelType}
-                                onChange={(val) => handleChange("fuelType", val)}
-                                error={Boolean(errors.fuelType)}
-                                placeholder={
-                                    fuelsQuery.isLoading
-                                        ? `Loading ${fuelLabel.toLowerCase()}s...`
-                                        : !form.fuelCategory
-                                        ? `Select ${fuelCategoryLabel.toLowerCase()} first`
-                                        : `Select ${fuelLabel.toLowerCase()}...`
-                                }
-                                isDisabled={
-                                    !form.fuelCategory ||
-                                    fuelsQuery.isLoading ||
-                                    (Array.isArray(fuelsQuery.data) && fuelsQuery.data.length === 0)
-                                }
-                                isLoading={fuelsQuery.isLoading}
-                            />
-                            {errors.fuelType && <p className="mt-2 text-xs text-error">{errors.fuelType}</p>}
-                        </div>
-                        <div id="form-field-quantity">
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                Quantity <span className="text-error">*</span>
-                            </label>
-                            <Input
-                                type="number"
-                                step="0.01"
-                                value={form.quantity}
-                                onChange={(event) => handleChange("quantity", event.target.value)}
-                                className={`${formFieldClass(Boolean(errors.quantity))} border border-outline-variant`}
-                                placeholder="0.00"
-                            />
-                            {errors.quantity && <p className="mt-2 text-xs text-error">{errors.quantity}</p>}
-                        </div>
-                        {form.emissionType !== "fugitive" && (
-                            <div id="form-field-cost">
-                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                    Price / Cost <span className="text-error">*</span>
-                                </label>
-                                <Input
-                                    type="number"
-                                    step="0.01"
-                                    value={form.cost}
-                                    onChange={(event) => handleChange("cost", event.target.value)}
-                                    className={`${formFieldClass(Boolean(errors.cost))} border border-outline-variant`}
-                                    placeholder="12000"
-                                />
-                                {errors.cost && <p className="mt-2 text-xs text-error">{errors.cost}</p>}
-                            </div>
-                        )}
-                        <div id="form-field-unit">
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                Unit <span className="text-error">*</span>
-                            </label>
-                            <CustomSelect
-                                options={unitsQuery.data?.map((u: any) => ({
-                                    label: u.name,
-                                    value: String(u.id)
-                                })) || []}
-                                value={form.unit}
-                                onChange={(val) => handleChange("unit", val)}
-                                error={Boolean(errors.unit)}
-                                placeholder={
-                                    unitsQuery.isLoading
-                                        ? "Loading units..."
-                                        : !form.fuelType
-                                        ? "Select fuel first"
-                                        : "Select unit..."
-                                }
-                                isDisabled={
-                                    !form.fuelType ||
-                                    unitsQuery.isLoading ||
-                                    (Array.isArray(unitsQuery.data) && unitsQuery.data.length === 0)
-                                }
-                                isLoading={unitsQuery.isLoading}
-                            />
-                            {errors.unit && <p className="mt-2 text-xs text-error">{errors.unit}</p>}
-                        </div>
-                    </div>
-                </section>
+                {/* Fuel Details Card (Standard & Custom Fuel Workflows) */}
+                <CustomFuelSection
+                    sourceId={form.source}
+                    emissionType={form.emissionType}
+                    fuelCategory={form.fuelCategory}
+                    fuelType={form.fuelType}
+                    quantity={form.quantity}
+                    cost={form.cost}
+                    unit={form.unit}
+                    selectedCustomFuelId={form.customFuelId}
+                    onFieldChange={handleChange}
+                    onCustomFuelSelect={handleCustomFuelSelect}
+                    errors={errors}
+                />
 
                 <section className="bg-white rounded-xl border border-outline-variant relative">
                     <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center justify-between">
@@ -590,7 +568,9 @@ export default function LogFuelActivityPage() {
                                 <textarea
                                     value={form.estimationBasis}
                                     onChange={(event) => handleChange("estimationBasis", event.target.value)}
-                                    className={`${formFieldClass(Boolean(errors.estimationBasis))} min-h-[128px] border border-outline-variant bg-white px-3 py-2 text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary`}
+                                    className={`${formFieldClass(
+                                        Boolean(errors.estimationBasis)
+                                    )} min-h-[128px] border border-outline-variant bg-white px-3 py-2 text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary`}
                                     placeholder="Describe the basis, methodology, or assumptions used for this estimation..."
                                 />
                                 {errors.estimationBasis && (
@@ -646,13 +626,15 @@ export default function LogFuelActivityPage() {
                     <button
                         type="button"
                         onClick={() => router.push("/activities/fuel")}
-                        className="px-8 py-3 rounded-lg font-label-md text-label-md border border-outline-variant text-on-surface hover:bg-surface-container-low transition-colors">
+                        className="px-8 py-3 rounded-lg font-label-md text-label-md border border-outline-variant text-on-surface hover:bg-surface-container-low transition-colors"
+                    >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         className="px-10 py-3 rounded-lg font-label-md text-label-md bg-secondary text-on-secondary hover:opacity-90 shadow-md transition-all active:scale-[0.98]"
-                        disabled={isSubmitting}>
+                        disabled={isSubmitting}
+                    >
                         {isSubmitting ? "Submitting..." : "Submit Activity"}
                     </button>
                 </footer>

@@ -3,9 +3,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { getActiveEmissionSources } from "./api";
 
-export function useEmissionSources() {
+export function useEmissionSources(type?: string) {
     return useQuery({
-        queryKey: ["emissionSources"],
-        queryFn: getActiveEmissionSources,
+        queryKey: ["emissionSources", type],
+        queryFn: () => getActiveEmissionSources(type),
     });
 }

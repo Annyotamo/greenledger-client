@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { useBrsrEnergyConsumption } from "@/lib/brsr/hooks";
 import { getBrsrEnergyReport } from "@/lib/brsr/api";
 import { BrsrEnergyReportModal } from "@/components/brsr/BrsrEnergyReportModal";
+import { BrsrDocumentUploadSection } from "@/components/brsr/BrsrDocumentUploadSection";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardHeader, CardBody } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -306,6 +307,9 @@ export default function BrsrEnergyPage() {
                                 />
                             </div>
                         </div>
+
+                        {/* Document Upload & Verification Source Section */}
+                        <BrsrDocumentUploadSection />
 
                         <div className="flex justify-end gap-2 border-t border-outline-variant/60 pt-3">
                             <Button variant="secondary" size="md" onClick={handleResetFilters} disabled={isPending}>

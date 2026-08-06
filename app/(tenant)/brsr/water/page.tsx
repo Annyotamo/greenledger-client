@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useBrsrWaterDisclosure } from "@/lib/brsr/hooks";
 import { postBrsrWaterReport } from "@/lib/brsr/api";
 import { BrsrWaterReportModal } from "@/components/brsr/BrsrWaterReportModal";
+import { BrsrDocumentUploadSection } from "@/components/brsr/BrsrDocumentUploadSection";
 import { Card, CardHeader, CardBody } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -506,6 +507,9 @@ export default function BrsrWaterPage() {
                                 ))}
                             </div>
                         </div>
+
+                        {/* Document Upload & Verification Source Section */}
+                        <BrsrDocumentUploadSection />
 
                         <div className="flex justify-end gap-2 border-t border-outline-variant/60 pt-4">
                             <Button

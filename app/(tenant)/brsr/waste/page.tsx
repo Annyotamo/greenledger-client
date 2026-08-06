@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useBrsrWasteDisclosure } from "@/lib/brsr/hooks";
 import { postBrsrWasteReport } from "@/lib/brsr/api";
 import { BrsrWasteReportModal } from "@/components/brsr/BrsrWasteReportModal";
+import { BrsrDocumentUploadSection } from "@/components/brsr/BrsrDocumentUploadSection";
 import { Card, CardHeader, CardBody } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -448,6 +449,9 @@ export default function BrsrWastePage() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Document Upload & Verification Source Section */}
+                        <BrsrDocumentUploadSection />
 
                         <div className="flex justify-end gap-2 border-t border-outline-variant/60 pt-4">
                             <Button variant="secondary" size="md" onClick={handleReset} disabled={isPending}>

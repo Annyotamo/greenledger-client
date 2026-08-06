@@ -27,6 +27,7 @@ export const BRSR_NAV_CHILDREN: NavScopeChild[] = [
     { label: "Energy", href: "/brsr/energy" },
     { label: "Water", href: "/brsr/water" },
     { label: "Waste", href: "/brsr/waste" },
+    { label: "Air", href: "/brsr/air" },
 ];
 
 export const BOTTOM_NAV: NavItem[] = [

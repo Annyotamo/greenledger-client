@@ -25,6 +25,8 @@ import { ActivityDocumentsManager } from "@/components/activity/ActivityDocument
 import type { ActivityDocument } from "@/components/activity/ActivityDocumentsManager";
 import { FormErrorSummary } from "@/components/ui/FormErrorSummary";
 import { getErrorMessage } from "@/lib/utils/error";
+import { CustomFuelSection } from "@/components/activity/CustomFuelSection";
+import { useCustomFuelUnits } from "@/lib/customFuel/hooks";
 
 const activityTypeOptions = [
     { label: "Grid Import", value: "grid_import" },
@@ -94,40 +96,50 @@ export default function LogElectricityActivityPage() {
     const [fuelForm, setFuelForm] = useState({
         fuelCategory: "",
         fuelType: "",
+        customFuelId: "",
         quantity: "",
         unit: "",
         emissionType: "stationary",
         cost: "",
-        source: "ceea4ef9-1120-4c0f-9325-b5c5fca66400",
+        source: "",
     });
+
+    const fuelEmissionSourcesQuery = useEmissionSources("fuel");
+    const customFuelUnitsQuery = useCustomFuelUnits(Boolean(fuelForm.customFuelId));
+
+    useEffect(() => {
+        if (!fuelForm.source && fuelEmissionSourcesQuery.data && fuelEmissionSourcesQuery.data.length > 0) {
+            setFuelForm((current) => ({ ...current, source: String(fuelEmissionSourcesQuery.data[0].id) }));
+        }
+    }, [fuelForm.source, fuelEmissionSourcesQuery.data]);
 
     function handleFuelChange(field: string, value: string) {
         setFuelForm((current) => {
             const next = { ...current, [field]: value } as typeof fuelForm;
+            if (field === "source") {
+                next.fuelCategory = "";
+                next.fuelType = "";
+                next.customFuelId = "";
+                next.unit = "";
+            }
             if (field === "fuelCategory") {
                 next.fuelType = "";
                 next.unit = "";
             }
             if (field === "fuelType") {
+                next.customFuelId = "";
                 next.unit = "";
             }
             if (field === "emissionType") {
                 next.fuelCategory = "";
                 next.fuelType = "";
+                next.customFuelId = "";
                 next.unit = "";
             }
             return next;
         });
         setErrors((current) => ({ ...current, [field]: "" }));
     }
-
-    const fuelQueryType = useMemo<FuelQueryType>(() => {
-        return fuelForm.emissionType === "process" || fuelForm.emissionType === "fugitive" ? "REFRIGERANT" : "FUEL";
-    }, [fuelForm.emissionType]);
-
-    const fuelCategoriesQuery = useFuelCategories(fuelQueryType);
-    const fuelsQuery = useFuels(fuelQueryType, fuelForm.fuelCategory);
-    const unitsQuery = useFuelUnits(fuelForm.fuelType);
 
     const [documents, setDocuments] = useState<ActivityDocument[]>([
         {
@@ -223,9 +235,11 @@ export default function LogElectricityActivityPage() {
         if (!form.sourceType) nextErrors.sourceType = "Source type is required.";
         if (!form.dataQualityTier) nextErrors.dataQualityTier = "Data quality is required.";
 
-        if (form.electricityActivityType === "captive") {
-            if (!fuelForm.fuelCategory) nextErrors.fuelCategory = "Fuel Category is required.";
-            if (!fuelForm.fuelType) nextErrors.fuelType = "Fuel is required.";
+        if (form.electricityActivityType === "captive" && form.sourceType === "fbc") {
+            if (!fuelForm.source) nextErrors.fuelSource = "Emission standard / source is required.";
+            if (!fuelForm.customFuelId && !fuelForm.fuelType) {
+                nextErrors.fuelType = "Fuel type or Custom Fuel is required.";
+            }
             if (!fuelForm.quantity) nextErrors.quantity = "Quantity is required.";
             if (!fuelForm.unit) nextErrors.unit = "Unit is required.";
             if (!fuelForm.emissionType) nextErrors.emissionType = "Emission Type is required.";
@@ -289,21 +303,50 @@ export default function LogElectricityActivityPage() {
             if (!activityId) throw new Error("Created activity ID not returned from API.");
 
             let fuelActivityId: string | null = null;
-            if (form.electricityActivityType === "captive") {
+            if (form.electricityActivityType === "captive" && form.sourceType === "fbc") {
+                let finalQuantity = fuelForm.quantity ? Number(fuelForm.quantity) : null;
+                let finalUnitId = fuelForm.unit;
+
+                if (fuelForm.customFuelId && customFuelUnitsQuery.data && customFuelUnitsQuery.data.length > 0) {
+                    const unitsList = customFuelUnitsQuery.data;
+                    const kgUnit = unitsList.find(
+                        (u: any) => u.symbol.toLowerCase() === "kg" || u.name.toLowerCase().includes("kilograms")
+                    );
+                    const tonneUnit = unitsList.find(
+                        (u: any) =>
+                            u.symbol.toLowerCase().includes("tonne") ||
+                            u.symbol.toLowerCase() === "t" ||
+                            u.name.toLowerCase().includes("tonne")
+                    );
+
+                    if (tonneUnit) {
+                        if (kgUnit && fuelForm.unit === kgUnit.id && finalQuantity !== null) {
+                            finalQuantity = finalQuantity / 1000;
+                        }
+                        finalUnitId = tonneUnit.id;
+                    }
+                }
+
                 const fuelPayload: Record<string, unknown> = {
                     reporting_period_id: form.reportingPeriod,
                     facility_id: form.facility,
                     source_id: fuelForm.source,
                     electricity_activity_id: activityId,
                     emission_type: fuelForm.emissionType,
-                    fuel_id: fuelForm.fuelType,
-                    quantity: fuelForm.quantity ? Number(fuelForm.quantity) : null,
-                    quantity_unit_id: fuelForm.unit,
+                    quantity: finalQuantity,
+                    quantity_unit_id: finalUnitId,
                     cost: fuelForm.emissionType !== "fugitive" && fuelForm.cost ? Number(fuelForm.cost) : null,
                     data_quality_tier: form.dataQualityTier,
                     activity_start_date: form.activityStartDate,
                     activity_end_date: form.activityEndDate,
                 };
+
+                if (fuelForm.customFuelId) {
+                    fuelPayload.custom_fuel_id = fuelForm.customFuelId;
+                } else {
+                    fuelPayload.fuel_id = fuelForm.fuelType;
+                }
+
                 const createFuelResponse = await createFuelActivity(fuelPayload);
                 fuelActivityId = createFuelResponse?.data?.id ?? createFuelResponse?.id ?? createFuelResponse?.data?.data?.id ?? null;
                 if (!fuelActivityId) throw new Error("Created fuel activity ID not returned from API.");
@@ -331,7 +374,7 @@ export default function LogElectricityActivityPage() {
                     document_date: doc.documentDate || null,
                 });
 
-                if (form.electricityActivityType === "captive" && fuelActivityId) {
+                if (form.electricityActivityType === "captive" && form.sourceType === "fbc" && fuelActivityId) {
                     await uploadFuelActivityDocument(fuelActivityId, {
                         fuel_activity_id: fuelActivityId,
                         electricity_activity_id: null,
@@ -572,7 +615,7 @@ export default function LogElectricityActivityPage() {
                     </div>
                 </section>
 
-                {form.electricityActivityType === "captive" && (
+                {form.electricityActivityType === "captive" && form.sourceType === "fbc" && (
                     <section className="bg-white rounded-xl border border-outline-variant relative">
                         <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -582,118 +625,51 @@ export default function LogElectricityActivityPage() {
                                 <div>
                                     <h2 className="text-headline-sm font-semibold text-primary">Captive Generation Fuel Details</h2>
                                     <p className="text-xs text-on-surface-variant">
-                                        Specify fuel consumption and cost details for the captive power source.
+                                        Specify fuel consumption, emission standard source, and cost details for FBC captive power.
                                     </p>
                                 </div>
                             </div>
                         </div>
-                        <div className="p-card-padding grid gap-4 lg:grid-cols-2">
-                            <div id="form-field-fuelCategory">
+                        <div className="p-card-padding space-y-6">
+                            <div id="form-field-fuelSource">
                                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                    Fuel Category <span className="text-error">*</span>
+                                    Emission Standard / Source <span className="text-error">*</span>
                                 </label>
                                 <CustomSelect
-                                    options={fuelCategoriesQuery.data?.map((c: any) => ({
-                                        label: c.name,
-                                        value: String(c.id)
+                                    options={fuelEmissionSourcesQuery.data?.map((s: any) => ({
+                                        label: s.version ? `${s.standard} (${s.version})` : s.standard,
+                                        value: String(s.id)
                                     })) || []}
-                                    value={fuelForm.fuelCategory}
-                                    onChange={(val) => handleFuelChange("fuelCategory", val)}
-                                    error={Boolean(errors.fuelCategory)}
-                                    placeholder={fuelCategoriesQuery.isLoading ? "Loading categories..." : "Select category..."}
-                                    isLoading={fuelCategoriesQuery.isLoading}
-                                    isDisabled={fuelCategoriesQuery.isLoading}
+                                    value={fuelForm.source}
+                                    onChange={(val) => handleFuelChange("source", val)}
+                                    error={Boolean(errors.fuelSource)}
+                                    placeholder={fuelEmissionSourcesQuery.isLoading ? "Loading sources..." : "Select source..."}
+                                    isLoading={fuelEmissionSourcesQuery.isLoading}
                                 />
-                                {errors.fuelCategory && (
-                                    <p className="mt-2 text-xs text-error">{errors.fuelCategory}</p>
-                                )}
+                                {errors.fuelSource && <p className="mt-2 text-xs text-error">{errors.fuelSource}</p>}
                             </div>
-                            <div id="form-field-fuelType">
-                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                    Fuel <span className="text-error">*</span>
-                                </label>
-                                <CustomSelect
-                                    options={fuelsQuery.data?.map((f: any) => ({
-                                        label: f.name,
-                                        value: String(f.id)
-                                    })) || []}
-                                    value={fuelForm.fuelType}
-                                    onChange={(val) => handleFuelChange("fuelType", val)}
-                                    error={Boolean(errors.fuelType)}
-                                    placeholder={
-                                        fuelsQuery.isLoading
-                                            ? "Loading fuels..."
-                                            : !fuelForm.fuelCategory
-                                            ? "Select category first"
-                                            : "Select fuel..."
-                                    }
-                                    isDisabled={
-                                        !fuelForm.fuelCategory ||
-                                        fuelsQuery.isLoading ||
-                                        (Array.isArray(fuelsQuery.data) && fuelsQuery.data.length === 0)
-                                    }
-                                    isLoading={fuelsQuery.isLoading}
-                                />
-                                {errors.fuelType && <p className="mt-2 text-xs text-error">{errors.fuelType}</p>}
-                            </div>
-                            <div id="form-field-quantity">
-                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                    Quantity <span className="text-error">*</span>
-                                </label>
-                                <Input
-                                    type="number"
-                                    step="0.01"
-                                    value={fuelForm.quantity}
-                                    onChange={(event) => handleFuelChange("quantity", event.target.value)}
-                                    className={`${formFieldClass(Boolean(errors.quantity))} border border-outline-variant`}
-                                    placeholder="0.00"
-                                />
-                                {errors.quantity && <p className="mt-2 text-xs text-error">{errors.quantity}</p>}
-                            </div>
-                            {fuelForm.emissionType !== "fugitive" && (
-                                <div id="form-field-cost">
-                                    <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                        Price / Cost <span className="text-error">*</span>
-                                    </label>
-                                    <Input
-                                        type="number"
-                                        step="0.01"
-                                        value={fuelForm.cost}
-                                        onChange={(event) => handleFuelChange("cost", event.target.value)}
-                                        className={`${formFieldClass(Boolean(errors.cost))} border border-outline-variant`}
-                                        placeholder="12000"
-                                    />
-                                    {errors.cost && <p className="mt-2 text-xs text-error">{errors.cost}</p>}
-                                </div>
-                            )}
-                            <div id="form-field-unit">
-                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                    Unit <span className="text-error">*</span>
-                                </label>
-                                <CustomSelect
-                                    options={unitsQuery.data?.map((u: any) => ({
-                                        label: u.name,
-                                        value: String(u.id)
-                                    })) || []}
-                                    value={fuelForm.unit}
-                                    onChange={(val) => handleFuelChange("unit", val)}
-                                    error={Boolean(errors.unit)}
-                                    placeholder={
-                                        unitsQuery.isLoading
-                                            ? "Loading units..."
-                                            : !fuelForm.fuelType
-                                            ? "Select fuel first"
-                                            : "Select unit..."
-                                    }
-                                    isDisabled={
-                                        !fuelForm.fuelType ||
-                                        unitsQuery.isLoading ||
-                                        (Array.isArray(unitsQuery.data) && unitsQuery.data.length === 0)
-                                    }
-                                    isLoading={unitsQuery.isLoading}
-                                />
-                                {errors.unit && <p className="mt-2 text-xs text-error">{errors.unit}</p>}
-                            </div>
+
+                            <CustomFuelSection
+                                sourceId={fuelForm.source}
+                                emissionType={fuelForm.emissionType}
+                                fuelCategory={fuelForm.fuelCategory}
+                                fuelType={fuelForm.fuelType}
+                                quantity={fuelForm.quantity}
+                                cost={fuelForm.cost}
+                                unit={fuelForm.unit}
+                                selectedCustomFuelId={fuelForm.customFuelId}
+                                onFieldChange={handleFuelChange}
+                                onCustomFuelSelect={(customFuelId) => {
+                                    setFuelForm((prev) => ({
+                                        ...prev,
+                                        customFuelId,
+                                        fuelType: customFuelId ? "" : prev.fuelType,
+                                        unit: "",
+                                    }));
+                                    setErrors((prev) => ({ ...prev, fuelType: "", customFuelId: "" }));
+                                }}
+                                errors={errors}
+                            />
                         </div>
                     </section>
                 )}

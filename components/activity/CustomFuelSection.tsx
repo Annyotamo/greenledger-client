@@ -663,7 +663,7 @@ export function CustomFuelSection({
                             <div className="p-4 rounded-xl border border-outline-variant bg-surface-container-lowest space-y-4">
                                 <h3 className="text-xs font-semibold text-primary flex items-center gap-1.5">
                                     <MaterialIcon name="local_fire_department" size="xs" />
-                                    Calorific Value / Energy Content
+                                    Heat Content
                                 </h3>
                                 <div className="grid gap-4 lg:grid-cols-3">
                                     <div>

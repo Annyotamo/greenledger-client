@@ -57,13 +57,6 @@ export default function BrsrEnergyPage() {
     }, []);
 
     const {
-        reporting_period = {
-            name: "",
-            period_status: "",
-            period_start: "1970-01-01",
-            period_end: "1970-01-01",
-            reporting_year: ""
-        },
         totals = {
             renewable_electricity_gj: "0",
             renewable_fuel_gj: "0",
@@ -83,7 +76,6 @@ export default function BrsrEnergyPage() {
             skipped_fuel_activity_count: 0
         },
         skipped_fuel_activities = [],
-        generated_at = "1970-01-01T00:00:00.000Z",
         turnover_inr = null
     } = data || {};
 
@@ -359,31 +351,6 @@ export default function BrsrEnergyPage() {
                 </div>
             ) : (
                 <>
-            {/* Reporting Period Summary Bar */}
-            <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary-container/30 text-on-secondary-container">
-                        <MaterialIcon name="calendar_month" size="lg" />
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-sans text-body-lg font-bold text-on-surface">
-                                {reporting_period.name}
-                            </span>
-                            <Badge variant={reporting_period.period_status === "open" ? "active" : "neutral"} size="sm">
-                                {reporting_period.period_status}
-                            </Badge>
-                        </div>
-                        <p className="text-xs text-on-surface-variant font-mono mt-0.5">
-                            Period: {format(new Date(reporting_period.period_start), "MMM d, yyyy")} – {format(new Date(reporting_period.period_end), "MMM d, yyyy")}
-                        </p>
-                    </div>
-                </div>
-                <div className="text-left md:text-right font-mono text-[11px] text-on-surface-variant opacity-80">
-                    <p>Reporting Year: {reporting_period.reporting_year}</p>
-                    <p className="mt-0.5">Generated: {format(new Date(generated_at), "PPpp")}</p>
-                </div>
-            </div>
 
             {/* Overall Metrics Cards Grid */}
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">

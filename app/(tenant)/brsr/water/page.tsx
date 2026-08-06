@@ -72,7 +72,6 @@ export default function BrsrWaterPage() {
 
     const { data, isPending, isError, error } = useBrsrWaterDisclosure(activePayload);
     const {
-        financial_year_label = "",
         turnover_inr = 0,
         totals = {
             withdrawal: {
@@ -102,6 +101,7 @@ export default function BrsrWaterPage() {
     const [isFilterOpen, setIsFilterOpen] = useState(false); // Collapsed by default
 
     // Auto-update total water consumption input as components change
+    /* eslint-disable react-hooks/set-state-in-effect */
     useEffect(() => {
         const sum =
             (Number(surfaceWater) || 0) +
@@ -115,6 +115,7 @@ export default function BrsrWaterPage() {
             setTotalWater("");
         }
     }, [surfaceWater, groundwater, thirdParty, seawater, others]);
+    /* eslint-enable react-hooks/set-state-in-effect */
 
     const handleGenerate = () => {
         setActivePayload({
@@ -524,25 +525,6 @@ export default function BrsrWaterPage() {
                 </div>
             ) : (
                 <>
-                    {/* Financial Year Summary Bar */}
-                    <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary-container/30 text-on-secondary-container">
-                                <MaterialIcon name="water_drop" size="lg" />
-                            </div>
-                            <div>
-                                <span className="font-sans text-body-lg font-bold text-on-surface">
-                                    Water Disclosure Status
-                                </span>
-                                <p className="text-xs text-on-surface-variant font-mono mt-0.5">
-                                    Active Financial Year: {financial_year_label}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="text-left sm:text-right font-mono text-[11px] text-on-surface-variant opacity-80">
-                            <p>Status: Calculated successfully</p>
-                        </div>
-                    </div>
 
                     {/* Overall Metrics Cards Grid */}
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">

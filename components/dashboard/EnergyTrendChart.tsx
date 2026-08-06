@@ -7,9 +7,10 @@ type EnergyTrendChartProps = {
 };
 
 function buildPath(values: number[], maxValue: number) {
-    const step = values.length > 1 ? 1000 / (values.length - 1) : 0;
+    if (values.length === 0) return "";
+    const step = values.length > 1 ? 1000 / (values.length - 1) : 500;
     const points = values.map((value, index) => ({
-        x: Math.round(index * step),
+        x: values.length === 1 ? 500 : Math.round(index * step),
         y: Math.round(170 - (value / maxValue) * 140),
     }));
 
@@ -30,15 +31,18 @@ function buildPath(values: number[], maxValue: number) {
 }
 
 function buildPoints(values: number[], maxValue: number) {
-    const step = values.length > 1 ? 1000 / (values.length - 1) : 0;
+    if (values.length === 0) return [];
+    const step = values.length > 1 ? 1000 / (values.length - 1) : 500;
     return values.map((value, index) => ({
-        x: Math.round(index * step),
+        x: values.length === 1 ? 500 : Math.round(index * step),
         y: Math.round(170 - (value / maxValue) * 140),
     }));
 }
 
 export function EnergyTrendChart({ data }: EnergyTrendChartProps) {
-    const maxValue = Math.max(...data.map((point) => Math.max(point.captive, point.grid))) * 1.05;
+    const rawMax = Math.max(...(data.length > 0 ? data.map((point) => Math.max(point.captive, point.grid)) : [100]));
+    const maxValue = rawMax > 0 ? rawMax * 1.08 : 100;
+
     const captivePoints = buildPoints(
         data.map((point) => point.captive),
         maxValue,
@@ -58,7 +62,7 @@ export function EnergyTrendChart({ data }: EnergyTrendChartProps) {
 
     return (
         <Card className="h-full">
-            <CardHeader tone="flat" className="flex-wrap items-center gap-4 sm:flex-nowrap">
+            <CardHeader tone="flat" className="flex-wrap items-center justify-between gap-4 sm:flex-nowrap">
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="analytics" size="sm" className="text-primary" />
                     <div>
@@ -76,57 +80,65 @@ export function EnergyTrendChart({ data }: EnergyTrendChartProps) {
 
             <CardBody className="p-0">
                 <div className="chart-grid-bg relative flex h-64 w-full items-end overflow-hidden rounded-b-lg border border-t-0 border-outline-variant bg-surface-container-low px-4 py-4">
-                    <svg
-                        className="absolute inset-0 h-full w-full"
-                        preserveAspectRatio="none"
-                        viewBox="0 0 1000 180"
-                        aria-hidden>
-                        <defs>
-                            <linearGradient id="trendGradient" x1="0" x2="0" y1="0" y2="1">
-                                <stop offset="0%" stopColor="var(--gl-secondary)" stopOpacity="0.25" />
-                                <stop offset="100%" stopColor="var(--gl-secondary)" stopOpacity="0" />
-                            </linearGradient>
-                        </defs>
-                        <path
-                            d={captivePath}
-                            fill="none"
-                            stroke="var(--gl-secondary)"
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        />
-                        <path
-                            d={gridPath}
-                            fill="none"
-                            stroke="#fb923c"
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        />
-                        {captivePoints.map((point, index) => (
-                            <circle
-                                key={`captive-${index}`}
-                                cx={point.x}
-                                cy={point.y}
-                                r="3"
-                                fill="var(--gl-secondary)"
-                                stroke="var(--gl-surface-container-lowest)"
-                                strokeWidth="1.5"
+                    {data.length === 0 ? (
+                        <div className="flex h-full w-full items-center justify-center font-mono text-sm text-on-surface-variant">
+                            No monthly trend data available.
+                        </div>
+                    ) : (
+                        <svg
+                            className="absolute inset-0 h-full w-full"
+                            preserveAspectRatio="none"
+                            viewBox="0 0 1000 180"
+                            aria-hidden>
+                            <defs>
+                                <linearGradient id="trendGradient" x1="0" x2="0" y1="0" y2="1">
+                                    <stop offset="0%" stopColor="var(--gl-secondary)" stopOpacity="0.25" />
+                                    <stop offset="100%" stopColor="var(--gl-secondary)" stopOpacity="0" />
+                                </linearGradient>
+                            </defs>
+                            <path
+                                d={captivePath}
+                                fill="none"
+                                stroke="var(--gl-secondary)"
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
                             />
-                        ))}
-                        {gridPoints.map((point, index) => (
-                            <circle
-                                key={`grid-${index}`}
-                                cx={point.x}
-                                cy={point.y}
-                                r="3"
-                                fill="#fb923c"
-                                stroke="var(--gl-surface-container-lowest)"
-                                strokeWidth="1.5"
+                            <path
+                                d={gridPath}
+                                fill="none"
+                                stroke="#fb923c"
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
                             />
-                        ))}
-                        <path d={`${captivePath} L1000 180 L0 180 Z`} fill="url(#trendGradient)" opacity="0.4" />
-                    </svg>
+                            {captivePoints.map((point, index) => (
+                                <circle
+                                    key={`captive-${index}`}
+                                    cx={point.x}
+                                    cy={point.y}
+                                    r="4"
+                                    fill="var(--gl-secondary)"
+                                    stroke="var(--gl-surface-container-lowest)"
+                                    strokeWidth="1.5"
+                                />
+                            ))}
+                            {gridPoints.map((point, index) => (
+                                <circle
+                                    key={`grid-${index}`}
+                                    cx={point.x}
+                                    cy={point.y}
+                                    r="4"
+                                    fill="#fb923c"
+                                    stroke="var(--gl-surface-container-lowest)"
+                                    strokeWidth="1.5"
+                                />
+                            ))}
+                            {captivePath && (
+                                <path d={`${captivePath} L1000 180 L0 180 Z`} fill="url(#trendGradient)" opacity="0.3" />
+                            )}
+                        </svg>
+                    )}
                     <div className="pointer-events-none absolute bottom-2 left-0 right-0 flex justify-between px-4 font-mono text-[10px] text-on-surface-variant">
                         {data.map((point) => (
                             <span key={point.month}>{point.month}</span>

@@ -457,25 +457,6 @@ export default function BrsrWastePage() {
                 </div>
             ) : (
                 <>
-                    {/* Status Info Bar */}
-                    <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary-container/30 text-on-secondary-container">
-                                <MaterialIcon name="delete_sweep" size="lg" />
-                            </div>
-                            <div>
-                                <span className="font-sans text-body-lg font-bold text-on-surface">
-                                    Waste Management Disclosure Status
-                                </span>
-                                <p className="text-xs text-on-surface-variant font-mono mt-0.5">
-                                    Active Financial Year: {data.financial_year_label}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="text-left sm:text-right font-mono text-[11px] text-on-surface-variant opacity-80">
-                            <p>Status: Calculated successfully</p>
-                        </div>
-                    </div>
 
                     {/* Overall Metrics Cards Grid */}
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">

@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { format, isAfter } from "date-fns";
@@ -122,7 +122,7 @@ export default function LogFuelActivityPage() {
         }
     }, [form.source, emissionSourcesQuery.data]);
 
-    function handleChange(field: string, value: string) {
+    const handleChange = useCallback((field: string, value: string) => {
         setForm((current) => {
             const next = { ...current, [field]: value } as FuelActivityFormState;
 
@@ -157,9 +157,9 @@ export default function LogFuelActivityPage() {
             return next;
         });
         setErrors((current) => ({ ...current, [field]: "" }));
-    }
+    }, []);
 
-    function handleCustomFuelSelect(customFuelId: string) {
+    const handleCustomFuelSelect = useCallback((customFuelId: string) => {
         setForm((current) => ({
             ...current,
             customFuelId,
@@ -167,7 +167,7 @@ export default function LogFuelActivityPage() {
             unit: "",
         }));
         setErrors((current) => ({ ...current, fuelType: "", customFuelId: "" }));
-    }
+    }, []);
 
     function handleStartDateChange(date: Date) {
         const nextEndDate = selectedEndDate && isAfter(date, selectedEndDate) ? date : selectedEndDate;

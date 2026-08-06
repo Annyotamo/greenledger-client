@@ -139,10 +139,12 @@ export function CustomFuelSection({
     // If source changes to non-IPCC (e.g. DEFRA), automatically turn off custom fuel mode
     useEffect(() => {
         if (currentSource && !currentSource.standard.toUpperCase().includes("IPCC")) {
-            setUseCustomFuel(false);
-            onCustomFuelSelect("");
+            if (useCustomFuel || selectedCustomFuelId) {
+                setUseCustomFuel(false);
+                onCustomFuelSelect("");
+            }
         }
-    }, [currentSource]);
+    }, [currentSource, useCustomFuel, selectedCustomFuelId, onCustomFuelSelect]);
 
     // When custom fuels list loads or selectedCustomFuelId changes, populate form if in view_edit mode
     useEffect(() => {
@@ -714,6 +716,34 @@ export function CustomFuelSection({
                                             placeholder="Select unit..."
                                         />
                                     </div>
+                                    <div>
+                                        <label className="block font-label-md text-xs text-on-surface-variant mb-1">
+                                            Hydrogen (%)
+                                        </label>
+                                        <Input
+                                            type="number"
+                                            step="any"
+                                            value={customForm.hydrogen_percentage}
+                                            onChange={(e) => handleCustomFormChange("hydrogen_percentage", e.target.value)}
+                                            disabled={!isEditing}
+                                            className={formFieldClass(false, !isEditing)}
+                                            placeholder="3"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-label-md text-xs text-on-surface-variant mb-1">
+                                            Moisture (%)
+                                        </label>
+                                        <Input
+                                            type="number"
+                                            step="any"
+                                            value={customForm.moisture_percentage}
+                                            onChange={(e) => handleCustomFormChange("moisture_percentage", e.target.value)}
+                                            disabled={!isEditing}
+                                            className={formFieldClass(false, !isEditing)}
+                                            placeholder="6"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
@@ -723,7 +753,7 @@ export function CustomFuelSection({
                                 <div className="p-4 rounded-xl border border-outline-variant bg-surface-container-lowest space-y-3">
                                     <h3 className="text-xs font-semibold text-primary flex items-center gap-1.5">
                                         <MaterialIcon name="co2" size="xs" />
-                                        Total Carbon (Provide only ONE)
+                                        Total Carbon Content
                                     </h3>
                                     <div>
                                         <label className="block font-label-md text-xs text-on-surface-variant mb-1">
@@ -784,7 +814,7 @@ export function CustomFuelSection({
                                 <div className="p-4 rounded-xl border border-outline-variant bg-surface-container-lowest space-y-3">
                                     <h3 className="text-xs font-semibold text-primary flex items-center gap-1.5">
                                         <MaterialIcon name="science" size="xs" />
-                                        Fixed Carbon & Moisture
+                                        Total Carbon / Fixed Carbon
                                     </h3>
                                     <div className="grid grid-cols-2 gap-2">
                                         <div>
@@ -835,36 +865,6 @@ export function CustomFuelSection({
 
                             {/* Additional Properties & Lab Report */}
                             <div className="grid gap-4 lg:grid-cols-3">
-                                <div>
-                                    <label className="block font-label-md text-xs text-on-surface-variant mb-1">
-                                        Hydrogen (%)
-                                    </label>
-                                    <Input
-                                        type="number"
-                                        step="any"
-                                        value={customForm.hydrogen_percentage}
-                                        onChange={(e) => handleCustomFormChange("hydrogen_percentage", e.target.value)}
-                                        disabled={!isEditing}
-                                        className={formFieldClass(false, !isEditing)}
-                                        placeholder="3"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block font-label-md text-xs text-on-surface-variant mb-1">
-                                        Moisture (%)
-                                    </label>
-                                    <Input
-                                        type="number"
-                                        step="any"
-                                        value={customForm.moisture_percentage}
-                                        onChange={(e) => handleCustomFormChange("moisture_percentage", e.target.value)}
-                                        disabled={!isEditing}
-                                        className={formFieldClass(false, !isEditing)}
-                                        placeholder="6"
-                                    />
-                                </div>
-
                                 <div>
                                     <label className="block font-label-md text-xs text-on-surface-variant mb-1">
                                         Oxidation Factor

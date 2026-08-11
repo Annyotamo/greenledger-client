@@ -230,3 +230,101 @@ export type BrsrWasteDisclosureResponse = {
     path: string;
     timestamp: string;
 };
+
+// ==========================================
+// BRSR Air Disclosure Types & Schema
+// ==========================================
+
+export type AttachedUnitEnum =
+    | "DRI"
+    | "Captive power"
+    | "Boiler"
+    | "Furnace"
+    | "Kiln"
+    | "Sinter plant"
+    | "Pellet plant"
+    | "Coke oven"
+    | "Foundry"
+    | "Other";
+
+export type ConcentrationUnit = "mg_per_nm3";
+export type FlowRateUnit = "nm3_per_hour";
+
+export interface BrsrAirValueWithUnit<U extends string> {
+    value: number;
+    unit: U;
+}
+
+export interface BrsrAirStackInput {
+    stack_name: string;
+    attached_unit: AttachedUnitEnum;
+    sampling_date: string;
+    gas_flow_rate: BrsrAirValueWithUnit<FlowRateUnit>;
+    operating_hours_per_year: number;
+    permitted_limit_nox: BrsrAirValueWithUnit<ConcentrationUnit>;
+    permitted_limit_sox: BrsrAirValueWithUnit<ConcentrationUnit>;
+    permitted_limit_pm: BrsrAirValueWithUnit<ConcentrationUnit>;
+    permitted_limit_pop?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
+    permitted_limit_voc?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
+    permitted_limit_hap?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
+    permitted_flow_rate: BrsrAirValueWithUnit<FlowRateUnit>;
+    nox: BrsrAirValueWithUnit<ConcentrationUnit>;
+    sox: BrsrAirValueWithUnit<ConcentrationUnit>;
+    particulate_matter: BrsrAirValueWithUnit<ConcentrationUnit>;
+    pop?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
+    voc?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
+    hap?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
+}
+
+export interface BrsrAirOtherPollutantInput {
+    label: string;
+    quantity: number;
+}
+
+export interface BrsrAirDisclosurePayload {
+    financial_year_label: string;
+    sampling_date?: string | null;
+    operating_hours?: number | null;
+    stacks: BrsrAirStackInput[];
+    others?: BrsrAirOtherPollutantInput[] | null;
+}
+
+export interface BrsrAirPollutantValues {
+    nox?: number | string | null;
+    sox?: number | string | null;
+    particulate_matter?: number | string | null;
+    pop?: number | string | null;
+    voc?: number | string | null;
+    hap?: number | string | null;
+    unit?: string | null;
+}
+
+export interface BrsrAirStackResult {
+    stack_name: string;
+    attached_unit: AttachedUnitEnum | string;
+    emission_per_hour: BrsrAirPollutantValues;
+    emission_per_year: BrsrAirPollutantValues;
+}
+
+export interface BrsrAirTotals {
+    stack_results: BrsrAirStackResult[];
+    plant_total_per_pollutant: BrsrAirPollutantValues;
+    plant_average_concentration: BrsrAirPollutantValues;
+}
+
+export interface BrsrAirDisclosureData {
+    financial_year_label: string;
+    inputs: BrsrAirDisclosurePayload;
+    totals: BrsrAirTotals;
+}
+
+export interface BrsrAirDisclosureResponse {
+    success: boolean;
+    status_code: number;
+    message: string;
+    data: BrsrAirDisclosureData;
+    error: null | unknown;
+    method: string;
+    path: string;
+    timestamp: string;
+}

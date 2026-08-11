@@ -1,8 +1,16 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getBrsrEnergyConsumption, postBrsrWaterDisclosure, postBrsrWasteDisclosure } from "./api";
-import type { BrsrEnergyConsumptionData, BrsrWaterDisclosurePayload, BrsrWaterDisclosureData, BrsrWasteDisclosurePayload, BrsrWasteDisclosureData } from "./types";
+import { getBrsrEnergyConsumption, postBrsrWaterDisclosure, postBrsrWasteDisclosure, postBrsrAirDisclosure } from "./api";
+import type {
+    BrsrEnergyConsumptionData,
+    BrsrWaterDisclosurePayload,
+    BrsrWaterDisclosureData,
+    BrsrWasteDisclosurePayload,
+    BrsrWasteDisclosureData,
+    BrsrAirDisclosurePayload,
+    BrsrAirDisclosureData,
+} from "./types";
 
 export function useBrsrEnergyConsumption(payload: {
     start_date: string | null;
@@ -41,5 +49,13 @@ export function useBrsrWasteDisclosure(payload: BrsrWasteDisclosurePayload) {
         queryKey: ["brsr-waste-disclosure", payload],
         queryFn: () => postBrsrWasteDisclosure(payload),
         enabled: !!payload.financial_year_label && payload.turnover_inr > 0,
+    });
+}
+
+export function useBrsrAirDisclosure(payload: BrsrAirDisclosurePayload) {
+    return useQuery<BrsrAirDisclosureData, Error>({
+        queryKey: ["brsr-air-disclosure", payload],
+        queryFn: () => postBrsrAirDisclosure(payload),
+        enabled: !!payload.financial_year_label && payload.stacks?.length > 0,
     });
 }

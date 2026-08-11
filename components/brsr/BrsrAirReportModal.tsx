@@ -4,30 +4,18 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
-
-export type AirEmissionsData = {
-    fyLabel: string;
-    turnover: string;
-    physicalOutput: string;
-    physicalOutputUnit: string;
-    nox: string;
-    sox: string;
-    pm: string;
-    pop: string;
-    voc: string;
-    hap: string;
-    othersLabel: string;
-    othersValue: string;
-};
+import type { BrsrAirDisclosurePayload } from "@/lib/brsr/types";
 
 type BrsrAirReportModalProps = {
     isOpen: boolean;
     onClose: () => void;
-    data: AirEmissionsData;
+    payload: BrsrAirDisclosurePayload;
+    onDownload: (payload: BrsrAirDisclosurePayload) => Promise<void>;
 };
 
-export function BrsrAirReportModal({ isOpen, onClose, data }: BrsrAirReportModalProps) {
+export function BrsrAirReportModal({ isOpen, onClose, payload, onDownload }: BrsrAirReportModalProps) {
     const [isDownloading, setIsDownloading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -47,49 +35,15 @@ export function BrsrAirReportModal({ isOpen, onClose, data }: BrsrAirReportModal
 
     if (!isOpen || !mounted) return null;
 
-    const handleDownloadCSV = () => {
+    const handleDownload = async () => {
         setIsDownloading(true);
+        setError(null);
         try {
-            const totalEmissions =
-                (Number(data.nox) || 0) +
-                (Number(data.sox) || 0) +
-                (Number(data.pm) || 0) +
-                (Number(data.pop) || 0) +
-                (Number(data.voc) || 0) +
-                (Number(data.hap) || 0) +
-                (Number(data.othersValue) || 0);
-
-            const csvContent = [
-                ["SEBI BRSR Principle 6 - Air Emissions Disclosure Report"],
-                ["Financial Year", data.fyLabel || "FY 2025-26"],
-                ["Turnover (INR)", data.turnover || "1000000"],
-                ["Physical Output", `${data.physicalOutput || "100"} ${data.physicalOutputUnit || "tonnes"}`],
-                [""],
-                ["Parameter / Air Pollutant", "Emission Quantity (Metric Tonnes)", "Category"],
-                ["NOx (Oxides of Nitrogen)", data.nox || "0.00", "Criteria Air Pollutant"],
-                ["SOx (Oxides of Sulfur)", data.sox || "0.00", "Criteria Air Pollutant"],
-                ["Particulate Matter (PM)", data.pm || "0.00", "Criteria Air Pollutant"],
-                ["Persistent Organic Pollutants (POP)", data.pop || "0.00", "Persistent Organic Pollutant"],
-                ["Volatile Organic Compounds (VOC)", data.voc || "0.00", "Volatile Organic Compound"],
-                ["Hazardous Air Pollutants (HAP)", data.hap || "0.00", "Hazardous Air Pollutant"],
-                [data.othersLabel || "Others", data.othersValue || "0.00", "Other Air Emissions"],
-                ["Total Air Emissions", totalEmissions.toFixed(2), "Grand Total"],
-            ]
-                .map((row) => row.join(","))
-                .join("\n");
-
-            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `brsr-air-emissions-report-${data.fyLabel || "FY2025-26"}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
+            await onDownload(payload);
             onClose();
         } catch (err) {
             console.error("Failed to generate Air report:", err);
+            setError(err instanceof Error ? err.message : "Failed to download Air report.");
         } finally {
             setIsDownloading(false);
         }
@@ -117,22 +71,25 @@ export function BrsrAirReportModal({ isOpen, onClose, data }: BrsrAirReportModal
 
                 <div className="space-y-3 text-xs text-on-surface-variant">
                     <p>
-                        Export the SEBI BRSR Principle 6 Air Emissions disclosure metrics including NOx, SOx, PM, POP, VOC, HAP, and intensity metrics into a structured CSV report.
+                        Export official SEBI BRSR Principle 6 Air Emissions report (.xlsx) containing stack pollutant emission rates (kg/hr), annual totals (tonnes/year), and plant average concentrations (mg/Nm³).
                     </p>
-                    <div className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-3 space-y-1 font-mono text-[11px]">
+                    <div className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-3 space-y-1.5 font-mono text-[11px]">
                         <div className="flex justify-between">
                             <span className="text-on-surface-variant">FY Period:</span>
-                            <span className="font-bold text-on-surface">{data.fyLabel || "FY 2025-26"}</span>
+                            <span className="font-bold text-on-surface">{payload.financial_year_label || "FY 2024-25"}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-on-surface-variant">Turnover:</span>
-                            <span className="font-bold text-on-surface">₹{Number(data.turnover || 1000000).toLocaleString()}</span>
+                            <span className="text-on-surface-variant">Active Stacks Count:</span>
+                            <span className="font-bold text-on-surface">{payload.stacks?.length || 0} stack(s)</span>
                         </div>
-                        <div className="flex justify-between">
-                            <span className="text-on-surface-variant">Physical Output:</span>
-                            <span className="font-bold text-on-surface">{data.physicalOutput || "100"} {data.physicalOutputUnit || "tonnes"}</span>
-                        </div>
+                        {payload.sampling_date && (
+                            <div className="flex justify-between">
+                                <span className="text-on-surface-variant">Sampling Date:</span>
+                                <span className="font-bold text-on-surface">{payload.sampling_date}</span>
+                            </div>
+                        )}
                     </div>
+                    {error && <p className="text-xs text-error font-medium">{error}</p>}
                 </div>
 
                 <div className="flex justify-end gap-2 pt-2 border-t border-outline-variant/60">
@@ -142,7 +99,7 @@ export function BrsrAirReportModal({ isOpen, onClose, data }: BrsrAirReportModal
                     <Button
                         variant="primary"
                         size="md"
-                        onClick={handleDownloadCSV}
+                        onClick={handleDownload}
                         disabled={isDownloading}
                         className="flex items-center gap-2">
                         {isDownloading ? (
@@ -153,7 +110,7 @@ export function BrsrAirReportModal({ isOpen, onClose, data }: BrsrAirReportModal
                         ) : (
                             <>
                                 <MaterialIcon name="download" size="sm" />
-                                <span>Download CSV</span>
+                                <span>Download Excel</span>
                             </>
                         )}
                     </Button>

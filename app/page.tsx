@@ -12,6 +12,7 @@ import DeepDiveSection from "@/components/landing/sections/DeepDiveSection";
 import KickoffToReportingSection from "@/components/landing/sections/KickoffToReportingSection";
 import SocialProofSection from "@/components/landing/sections/SocialProofSection";
 import SolutionsSection from "@/components/landing/sections/SolutionsSection";
+import BeforeAfterSection from "@/components/landing/sections/BeforeAfterSection";
 import BenefitsSection from "@/components/landing/sections/BenefitsSection";
 import PricingSection from "@/components/landing/sections/PricingSection";
 import InsightsSection from "@/components/landing/sections/InsightsSection";
@@ -123,9 +124,9 @@ export default function Home() {
 
             <Navbar />
             <div className="mx-6">
-                {/* <MotionInView className="mb-16 scroll-mt-24 mt-24" delayMs={80}>
-                    <PillarsSection cards={sliderCards} />
-                </MotionInView> */}
+                <MotionInView className="mb-16 scroll-mt-24" delayMs={40}>
+                    <BeforeAfterSection />
+                </MotionInView>
                 <MotionInView className="mb-16" delayMs={45}>
                     <SocialProofSection />
                 </MotionInView>

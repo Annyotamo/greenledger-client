@@ -40,6 +40,36 @@ function formatNumber(value: number, digits = 0) {
     }).format(value);
 }
 
+const sourceLabels: Record<string, string> = {
+    renewable_ppa: "Renewable PPA",
+    non_renewable_ppa: "Non-Renewable PPA",
+    rec_backed_electricity: "REC Backed",
+    irec_backed_electricity: "I-REC Backed",
+    national_grid: "National Grid",
+    solar: "Solar",
+    hydro: "Hydro",
+    wind: "Wind",
+    whrb: "WHRB",
+    fbc: "FBC",
+    waste_fuel: "Waste Fuel",
+};
+
+const activityTypeLabels: Record<string, string> = {
+    grid_import: "Grid Import",
+    market_instruments: "Market Instruments",
+    renewable: "Renewable",
+    captive: "Captive",
+    other: "Other",
+};
+
+function formatSourceType(type: string) {
+    return sourceLabels[type] ?? type.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+}
+
+function formatActivityType(type: string) {
+    return activityTypeLabels[type] ?? type.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+}
+
 type DateRange = {
     start: Date | null;
     end: Date | null;
@@ -246,7 +276,7 @@ export function ElectricityActivityTable({
                 <Table className="w-full table-auto">
                     <TableHeader>
                         <TableRow className="bg-surface-container-low border-b border-outline-variant">
-                            <TableHead>Period</TableHead>
+                            <TableHead>Period & Method</TableHead>
                             <TableHead>Activity Type</TableHead>
                             <TableHead>Source</TableHead>
                             <TableHead>Electricity</TableHead>
@@ -285,6 +315,8 @@ export function ElectricityActivityTable({
                                         (activityEnd.getTime() - activityStart.getTime()) / (1000 * 60 * 60 * 24),
                                     ) + 1,
                                 );
+                                const isMarketBased = activity.accountingMethod === "market_based";
+
                                 return (
                                     <TableRow
                                         key={activity.id}
@@ -294,21 +326,32 @@ export function ElectricityActivityTable({
                                                 {format(activityStart, "MMMM d, yyyy")} to{" "}
                                                 {format(activityEnd, "MMMM d, yyyy")}
                                             </div>
-                                            <div className="mt-2 text-[11px] uppercase tracking-[0.12em] text-on-surface-variant">
-                                                {activeDays} days
+                                            <div className="mt-1 flex items-center gap-2">
+                                                <span className="text-[11px] uppercase tracking-[0.12em] text-on-surface-variant">
+                                                    {activeDays} days
+                                                </span>
+                                                <span
+                                                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+                                                        isMarketBased
+                                                            ? "bg-secondary/15 text-secondary border border-secondary/20"
+                                                            : "bg-surface-container-high text-on-surface-variant border border-outline-variant"
+                                                    }`}>
+                                                    <MaterialIcon name={isMarketBased ? "verified" : "grid_view"} size="xs" />
+                                                    {isMarketBased ? "Market-Based" : "Location-Based"}
+                                                </span>
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             <span className="inline-flex rounded-full border border-outline-variant bg-surface-container-high px-3 py-1 text-[11px] font-semibold text-on-surface-variant">
-                                                {activity.electricityActivityType}
+                                                {formatActivityType(activity.electricityActivityType)}
                                             </span>
                                         </TableCell>
                                         <TableCell>
                                             <span className="inline-flex rounded-full border border-outline-variant bg-surface-container-high px-3 py-1 text-[11px] font-semibold text-on-surface-variant">
-                                                {activity.sourceType}
+                                                {formatSourceType(activity.sourceType)}
                                             </span>
                                             {activity.supplierName ? (
-                                                <div className="mt-2 text-[11px] text-on-surface-variant">
+                                                <div className="mt-2 text-[11px] text-on-surface-variant font-medium">
                                                     {activity.supplierName}
                                                 </div>
                                             ) : null}
@@ -320,9 +363,15 @@ export function ElectricityActivityTable({
                                             <div className="mt-2 text-[11px] text-on-surface-variant uppercase tracking-[0.12em]">
                                                 {formatNumber(activity.electricityKwh, 0)} kWh
                                             </div>
-                                            <div className="mt-2 text-[11px] uppercase tracking-[0.12em] text-on-surface-variant">
-                                                {activity.isRenewableCertified ? "Certified renewable" : "Uncertified"}
-                                            </div>
+                                            {activity.marketAllocation ? (
+                                                <div className="mt-1 text-[10px] text-secondary font-medium">
+                                                    Contract: {formatNumber(activity.marketAllocation.contractedElectricityKwh, 0)} kWh @ {activity.marketAllocation.contractedEmissionFactor} {activity.marketAllocation.contractedEmissionFactorUnit}
+                                                </div>
+                                            ) : (
+                                                <div className="mt-2 text-[11px] uppercase tracking-[0.12em] text-on-surface-variant">
+                                                    {activity.isRenewableCertified ? "Certified renewable" : "Uncertified"}
+                                                </div>
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             <div className="text-body-md text-primary">

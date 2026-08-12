@@ -1,5 +1,12 @@
 import { privateApi } from "@/lib/http/client";
 import type { FuelActivity, FuelActivityApiResponse, FuelActivityItemDto } from "./types";
+import type {
+    ElectricityActivity,
+    ElectricityActivityItemDto,
+    MarketAllocation,
+    MarketCertificate,
+    PurchasedEnergy,
+} from "./electricityTypes";
 
 function mapFuelActivityItem(dto: FuelActivityItemDto): FuelActivity {
     return {
@@ -122,45 +129,97 @@ export async function uploadFuelActivityDocument(activityId: string, payload: Re
     return response.data;
 }
 
-function mapElectricityActivityItem(dto: any) {
+function mapElectricityActivityItem(dto: ElectricityActivityItemDto): ElectricityActivity {
+    const act = dto.activity ?? dto;
+    const ctx = dto.context ?? dto;
+    const wf = dto.workflow ?? dto;
+    const calc = dto.calculated ?? dto;
+
+    const marketAllocDto = act.market_allocation ?? dto.market_allocation;
+    const marketAlloc: MarketAllocation | null = marketAllocDto
+        ? {
+              contractedElectricityKwh: Number(marketAllocDto.contracted_electricity_kwh || 0),
+              contractedElectricityMwh: marketAllocDto.contracted_electricity_mwh != null ? Number(marketAllocDto.contracted_electricity_mwh) : Number(marketAllocDto.contracted_electricity_kwh || 0) / 1000,
+              contractedEmissionFactor: Number(marketAllocDto.contracted_emission_factor || 0),
+              contractedEmissionFactorUnit: marketAllocDto.contracted_emission_factor_unit || "tco2_per_mwh",
+              uncoveredElectricityKwh: marketAllocDto.uncovered_electricity_kwh != null ? Number(marketAllocDto.uncovered_electricity_kwh) : undefined,
+              uncoveredElectricityMwh: marketAllocDto.uncovered_electricity_mwh != null ? Number(marketAllocDto.uncovered_electricity_mwh) : undefined,
+          }
+        : null;
+
+    const certDto = act.market_certificate ?? dto.market_certificate;
+    const marketCert: MarketCertificate | null = certDto
+        ? {
+              serialNumber: certDto.serial_number || undefined,
+              dateAcquired: certDto.date_acquired || undefined,
+              expirationDate: certDto.expiration_date || undefined,
+              quantity: certDto.quantity != null ? Number(certDto.quantity) : undefined,
+              certificateReference: certDto.certificate_reference || undefined,
+              isRenewableCertified: certDto.is_renewable_certified ?? true,
+          }
+        : null;
+
+    const peDto = act.purchased_energy ?? dto.purchased_energy;
+    const purchasedEnergy: PurchasedEnergy | null = peDto
+        ? {
+              includePurchasedEnergy: act.include_purchased_energy ?? dto.include_purchased_energy ?? peDto.include_purchased_energy ?? true,
+              unit: peDto.unit || "gj",
+              steam: peDto.steam != null ? Number(peDto.steam) : undefined,
+              heating: peDto.heating != null ? Number(peDto.heating) : undefined,
+              cooling: peDto.cooling != null ? Number(peDto.cooling) : undefined,
+              steamEmissionFactor: peDto.steam_emission_factor != null ? Number(peDto.steam_emission_factor) : undefined,
+              heatingEmissionFactor: peDto.heating_emission_factor != null ? Number(peDto.heating_emission_factor) : undefined,
+              coolingEmissionFactor: peDto.cooling_emission_factor != null ? Number(peDto.cooling_emission_factor) : undefined,
+              emissionFactorUnit: peDto.emission_factor_unit || "kgco2_per_gj",
+          }
+        : null;
+
     return {
         id: dto.id,
-        createdAt: dto.created_at,
-        updatedAt: dto.updated_at,
-        facilityId: dto.context.facility_id,
-        reportingPeriodId: dto.context.reporting_period_id,
-        activityStartDate: dto.context.activity_start_date,
-        activityEndDate: dto.context.activity_end_date,
-        scopeType: dto.activity.scope_type,
-        electricityActivityType: dto.activity.electricity_activity_type,
-        sourceType: dto.activity.source_type,
-        electricityKwh: Number(dto.activity.electricity_kwh),
-        electricityMwh: Number(dto.activity.electricity_mwh),
-        sourceFuelActivityId: dto.activity.source_fuel_activity_id,
-        supplierName: dto.activity.supplier_name,
-        isRenewableCertified: dto.activity.is_renewable_certified,
-        dataQualityTier: dto.activity.data_quality_tier,
-        estimationBasis: dto.activity.estimation_basis,
-        notes: dto.activity.notes,
-        workflowStatus: dto.workflow.status,
-        calculatedTCo2e: dto.calculated ? Number(dto.calculated.calculated_t_co2e) : 0,
-        calculatedKgCo2e: dto.calculated ? Number(dto.calculated.calculated_kg_co2e) : 0,
-        documentsCount: dto.documents.count,
+        createdAt: dto.created_at || "",
+        updatedAt: dto.updated_at || "",
+        facilityId: (ctx as any).facility_id || (dto as any).facility_id || "",
+        reportingPeriodId: (ctx as any).reporting_period_id || (dto as any).reporting_period_id || "",
+        activityStartDate: (ctx as any).activity_start_date || (dto as any).activity_start_date || "",
+        activityEndDate: (ctx as any).activity_end_date || (dto as any).activity_end_date || "",
+        scopeType: (act as any).scope_type || "scope_2",
+        accountingMethod: (act as any).accounting_method || (dto as any).accounting_method || "location_based",
+        electricityActivityType: (act as any).electricity_activity_type || (dto as any).electricity_activity_type || "",
+        sourceType: (act as any).source_type || (dto as any).source_type || "",
+        electricityKwh: Number((act as any).electricity_kwh ?? (dto as any).electricity_kwh ?? 0),
+        electricityMwh: Number((act as any).electricity_mwh ?? (dto as any).electricity_mwh ?? 0),
+        sourceFuelActivityId: (act as any).source_fuel_activity_id ?? null,
+        supplierName: (act as any).supplier_name ?? (dto as any).supplier_name ?? null,
+        isRenewableCertified: Boolean((act as any).is_renewable_certified ?? (dto as any).is_renewable_certified ?? false),
+        dataQualityTier: (act as any).data_quality_tier || (dto as any).data_quality_tier || "measured",
+        estimationBasis: (act as any).estimation_basis ?? null,
+        notes: (act as any).notes ?? (dto as any).notes ?? null,
+        workflowStatus: (wf as any).status || dto.workflow_status || dto.status || "pending",
+        calculatedTCo2e: (calc as any).calculated_t_co2e != null ? Number((calc as any).calculated_t_co2e) : Number((dto as any).calculated_t_co2e ?? 0),
+        calculatedKgCo2e: (calc as any).calculated_kg_co2e != null ? Number((calc as any).calculated_kg_co2e) : Number((dto as any).calculated_kg_co2e ?? 0),
+        documentsCount: dto.documents?.count ?? 0,
         factorSourceStandard: dto.factor?.source?.standard ?? null,
         factorSourceVersion: dto.factor?.source?.version ?? null,
         factorSourceRegion: dto.factor?.source?.region ?? null,
+        marketAllocation: marketAlloc,
+        marketCertificate: marketCert,
+        includePurchasedEnergy: Boolean((act as any).include_purchased_energy ?? (dto as any).include_purchased_energy ?? false),
+        purchasedEnergy,
+        calculationMethod: (calc as any).calculation_method ?? null,
     };
 }
 
 export async function getElectricityActivities(filters?: {
     status?: string;
+    accounting_method?: string;
     electricity_activity_type?: string;
     data_quality_tier?: string;
     source_type?: string;
     facility_id?: string;
-}) {
+}): Promise<ElectricityActivity[]> {
     const params = new URLSearchParams();
     if (filters?.status) params.append("status", filters.status);
+    if (filters?.accounting_method) params.append("accounting_method", filters.accounting_method);
     if (filters?.electricity_activity_type) {
         params.append("electricity_activity_type", filters.electricity_activity_type);
     }
@@ -173,7 +232,7 @@ export async function getElectricityActivities(filters?: {
     const qs = params.toString();
     const url = `/tenant/activity/electricity${qs ? `?${qs}` : ""}`;
     const response = await privateApi.get(url);
-    const rawItems = response.data.data?.items ?? [];
+    const rawItems = response.data.data?.items ?? response.data.data ?? [];
     return Array.isArray(rawItems) ? rawItems.map(mapElectricityActivityItem) : [];
 }
 
@@ -186,3 +245,4 @@ export async function uploadElectricityActivityDocument(activityId: string, payl
     const response = await privateApi.post(`/tenant/activity/electricity/${activityId}/documents`, payload);
     return response.data;
 }
+

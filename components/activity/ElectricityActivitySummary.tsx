@@ -24,11 +24,20 @@ function getMostCommon(items: string[]) {
 
 export function ElectricityActivitySummary({ activities }: ElectricityActivitySummaryProps) {
     const totalEmissions = activities.reduce((sum, activity) => sum + activity.calculatedTCo2e, 0);
-    const totalKwh = activities.reduce((sum, activity) => sum + activity.electricityKwh, 0);
     const totalMwh = activities.reduce((sum, activity) => sum + activity.electricityMwh, 0);
     const activeFacilities = new Set(activities.map((activity) => activity.facilityId)).size;
     const activeSources = new Set(activities.map((activity) => activity.sourceType)).size;
-    const renewableCertified = activities.filter((activity) => activity.isRenewableCertified).length;
+
+    const marketBasedActivities = activities.filter((act) => act.accountingMethod === "market_based");
+    const marketCount = marketBasedActivities.length;
+    const contractedMwh = marketBasedActivities.reduce((sum, act) => {
+        const allocMwh = act.marketAllocation?.contractedElectricityMwh ?? (act.marketAllocation?.contractedElectricityKwh ? act.marketAllocation.contractedElectricityKwh / 1000 : 0);
+        return sum + allocMwh;
+    }, 0);
+
+    const renewableCertified = activities.filter(
+        (activity) => activity.isRenewableCertified || (activity.accountingMethod === "market_based" && ["renewable_ppa", "rec_backed_electricity", "irec_backed_electricity"].includes(activity.sourceType))
+    ).length;
     const averageEmissions = activities.length ? totalEmissions / activities.length : 0;
     const averageMwh = activities.length ? totalMwh / activities.length : 0;
     const mostCommonSource = getMostCommon(activities.map((activity) => activity.sourceType));
@@ -44,8 +53,7 @@ export function ElectricityActivitySummary({ activities }: ElectricityActivitySu
                     {formatNumber(activities.length, 0)}
                 </p>
                 <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-on-surface-variant">
-                    Across {activeFacilities} facility{activeFacilities === 1 ? "" : "ies"} across {activeSources}{" "}
-                    source{activeSources === 1 ? "" : "s"}
+                    Across {activeFacilities} facility{activeFacilities === 1 ? "" : "ies"} • {marketCount} Market-Based
                 </p>
             </Card>
 
@@ -57,8 +65,8 @@ export function ElectricityActivitySummary({ activities }: ElectricityActivitySu
                     {formatNumber(totalMwh, 2)}
                     <span className="text-body-md font-normal text-on-surface-variant"> MWh</span>
                 </p>
-                <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-on-surface-variant">
-                    Avg. {formatNumber(averageMwh, 2)} MWh/activity
+                <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-secondary font-medium">
+                    {formatNumber(contractedMwh, 2)} MWh under PPA/REC contracts
                 </p>
             </Card>
 
@@ -80,19 +88,19 @@ export function ElectricityActivitySummary({ activities }: ElectricityActivitySu
                     <p className="text-label-md font-label-md uppercase tracking-[0.12em] text-on-surface-variant">
                         Renewable Certified
                     </p>
-                    <span className="text-[10px] uppercase tracking-[0.18em] text-on-surface-variant">
+                    <span className="text-[10px] uppercase tracking-[0.18em] text-secondary font-bold">
                         {certifiedPercent}%
                     </span>
                 </div>
                 <div className="mt-4 space-y-3">
                     <div className="h-2.5 rounded-full bg-surface-container-high overflow-hidden">
-                        <div className="h-full rounded-full bg-secondary" style={{ width: `${certifiedPercent}%` }} />
+                        <div className="h-full rounded-full bg-secondary transition-all" style={{ width: `${certifiedPercent}%` }} />
                     </div>
                     <p className="text-[11px] text-on-surface-variant">
-                        {renewableCertified} of {activities.length} activities certified renewable
+                        {renewableCertified} of {activities.length} activities certified green/PPA
                     </p>
                     <div className="mt-2 text-[11px] uppercase tracking-[0.16em] text-on-surface-variant">
-                        Top source: {mostCommonSource}
+                        Top source: {mostCommonSource.replace(/_/g, " ")}
                     </div>
                 </div>
             </Card>
@@ -101,3 +109,4 @@ export function ElectricityActivitySummary({ activities }: ElectricityActivitySu
 }
 
 export default ElectricityActivitySummary;
+

@@ -10,6 +10,7 @@ import { useElectricityActivities } from "@/lib/activity/hooks";
 
 export default function ElectricityActivitiesPage() {
     const [status, setStatus] = useState("");
+    const [accountingMethod, setAccountingMethod] = useState("");
     const [electricityActivityType, setElectricityActivityType] = useState("");
     const [dataQualityTier, setDataQualityTier] = useState("");
     const [sourceType, setSourceType] = useState("");
@@ -19,12 +20,13 @@ export default function ElectricityActivitiesPage() {
     const filterParams = useMemo(
         () => ({
             status: status || undefined,
+            accounting_method: accountingMethod || undefined,
             electricity_activity_type: electricityActivityType || undefined,
             data_quality_tier: dataQualityTier || undefined,
             source_type: sourceType || undefined,
             facility_id: selectedFacility || undefined,
         }),
-        [status, electricityActivityType, dataQualityTier, sourceType, selectedFacility],
+        [status, accountingMethod, electricityActivityType, dataQualityTier, sourceType, selectedFacility],
     );
 
     const { data: activities = [], isPending, isError } = useElectricityActivities(filterParams);
@@ -36,6 +38,7 @@ export default function ElectricityActivitiesPage() {
 
     function handleRefresh() {
         setStatus("");
+        setAccountingMethod("");
         setElectricityActivityType("");
         setDataQualityTier("");
         setSourceType("");
@@ -52,7 +55,7 @@ export default function ElectricityActivitiesPage() {
                         Electricity Activity Log
                     </h2>
                     <p className="mt-1 text-body-md text-on-surface-variant">
-                        Review, filter and manage electricity activity emissions across your operational sites.
+                        Review, filter and manage location-based and market-based electricity activity emissions.
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
@@ -84,14 +87,24 @@ export default function ElectricityActivitiesPage() {
                     </select>
                     <select
                         className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        aria-label="Accounting Method"
+                        value={accountingMethod}
+                        onChange={(e) => setAccountingMethod(e.target.value)}>
+                        <option value="">All accounting methods</option>
+                        <option value="location_based">Location-Based</option>
+                        <option value="market_based">Market-Based</option>
+                    </select>
+                    <select
+                        className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                         aria-label="Activity Type"
                         value={electricityActivityType}
                         onChange={(e) => setElectricityActivityType(e.target.value)}>
                         <option value="">All activity types</option>
                         <option value="grid_import">Grid Import</option>
-                        <option value="renewable_import">Renewable Import</option>
-                        <option value="self_generated">Self Generated</option>
-                        <option value="grid_export">Grid Export</option>
+                        <option value="market_instruments">Market Instruments</option>
+                        <option value="renewable">Renewable</option>
+                        <option value="captive">Captive</option>
+                        <option value="other">Other</option>
                     </select>
                     <select
                         className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
@@ -100,14 +113,15 @@ export default function ElectricityActivitiesPage() {
                         onChange={(e) => setSourceType(e.target.value)}>
                         <option value="">All source types</option>
                         <option value="national_grid">National Grid</option>
-                        <option value="solar_pv">Solar PV</option>
+                        <option value="renewable_ppa">Renewable PPA</option>
+                        <option value="non_renewable_ppa">Non-Renewable PPA</option>
+                        <option value="rec_backed_electricity">REC Backed Electricity</option>
+                        <option value="irec_backed_electricity">I-REC Backed Electricity</option>
+                        <option value="solar">Solar</option>
                         <option value="wind">Wind</option>
                         <option value="hydro">Hydro</option>
-                        <option value="diesel_generator">Diesel Generator</option>
-                        <option value="gas_generator">Gas Generator</option>
-                        <option value="coal_generator">Coal Generator</option>
-                        <option value="other_generator">Other Generator</option>
-                        <option value="other_renewable">Other Renewable</option>
+                        <option value="whrb">WHRB</option>
+                        <option value="fbc">FBC</option>
                     </select>
                     <select
                         className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
@@ -117,18 +131,6 @@ export default function ElectricityActivitiesPage() {
                         <option value="">All quality tiers</option>
                         <option value="measured">Measured</option>
                         <option value="estimated">Estimated</option>
-                    </select>
-                    <select
-                        className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
-                        aria-label="Facility"
-                        value={selectedFacility}
-                        onChange={(e) => setSelectedFacility(e.target.value)}>
-                        <option value="">All facilities</option>
-                        {facilityOptions.map((f) => (
-                            <option key={f} value={f}>
-                                {f}
-                            </option>
-                        ))}
                     </select>
 
                     <div className="flex items-center justify-end gap-2">
@@ -165,3 +167,4 @@ export default function ElectricityActivitiesPage() {
         </div>
     );
 }
+

@@ -13,8 +13,22 @@ const SOURCE_TYPE_OPTIONS = [
     { value: "others", label: "Others" },
 ];
 
-export function BrsrDocumentUploadSection() {
-    const [sourceType, setSourceType] = useState<string>("");
+type BrsrDocumentUploadSectionProps = {
+    reportNumber?: string;
+    onReportNumberChange?: (val: string) => void;
+    sourceType?: string;
+    onSourceTypeChange?: (val: string) => void;
+    title?: string;
+};
+
+export function BrsrDocumentUploadSection({
+    reportNumber = "",
+    onReportNumberChange,
+    sourceType: initialSourceType = "",
+    onSourceTypeChange,
+    title = "Source Document & Verification",
+}: BrsrDocumentUploadSectionProps) {
+    const [sourceType, setSourceType] = useState<string>(initialSourceType);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState<boolean>(false);
     const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
@@ -85,23 +99,39 @@ export function BrsrDocumentUploadSection() {
     return (
         <div className="border-t border-outline-variant/60 pt-4 space-y-3">
             <div className="flex items-center gap-2">
-                <MaterialIcon name="attach_file" size="sm" className="text-primary" />
+                <MaterialIcon name="verified_user" size="sm" className="text-primary" />
                 <span className="text-xs font-bold text-primary uppercase tracking-wider block">
-                    Source Document & Verification
+                    {title}
                 </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 items-start">
+                {/* Report Number / Test Report ID */}
+                <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-on-surface-variant block">
+                        Test Report / Verification No.
+                    </label>
+                    <input
+                        type="text"
+                        placeholder="e.g. TR-2025-STACK-01"
+                        value={reportNumber}
+                        onChange={(e) => onReportNumberChange?.(e.target.value)}
+                        className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-[12px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs"
+                    />
+                </div>
+
                 {/* Source Type Dropdown */}
-                <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-on-surface-variant block">
-                        Source Type
+                <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-on-surface-variant block">
+                        Source Document Type
                     </label>
                     <select
                         value={sourceType}
-                        onChange={(e) => setSourceType(e.target.value)}
-                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px]"
-                    >
+                        onChange={(e) => {
+                            setSourceType(e.target.value);
+                            onSourceTypeChange?.(e.target.value);
+                        }}
+                        className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-sans text-[12px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs">
                         {SOURCE_TYPE_OPTIONS.map((opt) => (
                             <option key={opt.value} value={opt.value}>
                                 {opt.label}
@@ -111,29 +141,27 @@ export function BrsrDocumentUploadSection() {
                 </div>
 
                 {/* Document Upload Input & Dropzone */}
-                <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-on-surface-variant block">
-                        Supporting Document Upload
+                <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-on-surface-variant block">
+                        Supporting Document File
                     </label>
                     <input
                         ref={fileInputRef}
                         type="file"
                         onChange={handleFileChange}
                         className="hidden"
-                        id="brsr-document-file-input"
                     />
 
                     {isSuccess && uploadedFileName ? (
-                        <div className="flex items-center justify-between rounded-lg border border-emerald-500/40 bg-emerald-50/50 px-3 py-2 text-[12px]">
-                            <div className="flex items-center gap-2 text-emerald-800 font-medium truncate max-w-[80%]">
-                                <MaterialIcon name="check_circle" size="sm" className="text-emerald-600 shrink-0" />
+                        <div className="flex h-8.5 items-center justify-between rounded-lg border border-secondary/40 bg-secondary/10 px-2.5 text-[11px]">
+                            <div className="flex items-center gap-1.5 text-secondary font-medium truncate max-w-[80%]">
+                                <MaterialIcon name="check_circle" size="sm" className="text-secondary shrink-0 !text-[14px]" />
                                 <span className="truncate">{uploadedFileName}</span>
                             </div>
                             <button
                                 type="button"
                                 onClick={handleRemoveFile}
-                                className="text-on-surface-variant hover:text-error text-xs font-semibold underline shrink-0 cursor-pointer"
-                            >
+                                className="text-on-surface-variant hover:text-error text-[10px] font-semibold underline shrink-0 cursor-pointer">
                                 Remove
                             </button>
                         </div>
@@ -143,22 +171,21 @@ export function BrsrDocumentUploadSection() {
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
                             onClick={() => !isUploading && fileInputRef.current?.click()}
-                            className={`w-full flex items-center justify-center gap-2 rounded-lg border border-dashed px-3 py-2 text-[12px] font-medium transition duration-150 cursor-pointer ${
+                            className={`w-full flex h-8.5 items-center justify-center gap-1.5 rounded-lg border border-dashed px-2.5 text-[11px] font-medium transition duration-150 cursor-pointer ${
                                 isDragging
                                     ? "border-primary bg-primary/5 text-primary"
-                                    : "border-outline-variant bg-white hover:bg-surface-container-low text-on-surface"
-                            } ${isUploading ? "opacity-60 pointer-events-none" : ""}`}
-                        >
+                                    : "border-outline-variant bg-white hover:bg-surface-container-low text-on-surface-variant"
+                            } ${isUploading ? "opacity-60 pointer-events-none" : ""}`}>
                             {isUploading ? (
                                 <>
-                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                                    <span>Uploading document...</span>
+                                    <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                                    <span>Uploading...</span>
                                 </>
                             ) : (
                                 <>
-                                    <MaterialIcon name="cloud_upload" size="sm" className="text-primary shrink-0" />
+                                    <MaterialIcon name="cloud_upload" size="sm" className="text-primary shrink-0 !text-[15px]" />
                                     <span className="truncate">
-                                        {selectedFile ? selectedFile.name : "Choose or drag file to upload"}
+                                        {selectedFile ? selectedFile.name : "Choose or drag report file"}
                                     </span>
                                 </>
                             )}

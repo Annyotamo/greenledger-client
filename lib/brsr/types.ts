@@ -255,25 +255,34 @@ export interface BrsrAirValueWithUnit<U extends string> {
     unit: U;
 }
 
-export interface BrsrAirStackInput {
-    stack_name: string;
-    attached_unit: AttachedUnitEnum;
-    sampling_date: string;
-    gas_flow_rate: BrsrAirValueWithUnit<FlowRateUnit>;
-    operating_hours_per_year: number;
+export interface BrsrAirPermittedLimits {
     permitted_limit_nox: BrsrAirValueWithUnit<ConcentrationUnit>;
     permitted_limit_sox: BrsrAirValueWithUnit<ConcentrationUnit>;
     permitted_limit_pm: BrsrAirValueWithUnit<ConcentrationUnit>;
-    permitted_limit_pop?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
-    permitted_limit_voc?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
-    permitted_limit_hap?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
     permitted_flow_rate: BrsrAirValueWithUnit<FlowRateUnit>;
+}
+
+export interface BrsrAirReadingInput {
+    sampling_date: string;
+    gas_flow_rate: BrsrAirValueWithUnit<FlowRateUnit>;
     nox: BrsrAirValueWithUnit<ConcentrationUnit>;
     sox: BrsrAirValueWithUnit<ConcentrationUnit>;
     particulate_matter: BrsrAirValueWithUnit<ConcentrationUnit>;
     pop?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
     voc?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
     hap?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
+}
+
+export interface BrsrAirStackInput {
+    stack_name: string;
+    attached_unit: AttachedUnitEnum;
+    operating_hours_per_year: number;
+    permitted_limits: BrsrAirPermittedLimits;
+    report_number?: string | null;
+    is_pop_monitored?: boolean;
+    is_voc_monitored?: boolean;
+    is_hap_monitored?: boolean;
+    readings: BrsrAirReadingInput[];
 }
 
 export interface BrsrAirOtherPollutantInput {
@@ -283,8 +292,6 @@ export interface BrsrAirOtherPollutantInput {
 
 export interface BrsrAirDisclosurePayload {
     financial_year_label: string;
-    sampling_date?: string | null;
-    operating_hours?: number | null;
     stacks: BrsrAirStackInput[];
     others?: BrsrAirOtherPollutantInput[] | null;
 }
@@ -299,17 +306,56 @@ export interface BrsrAirPollutantValues {
     unit?: string | null;
 }
 
-export interface BrsrAirStackResult {
+export interface BrsrAirGasDetailMetric {
+    pollutant_key: string;
+    pollutant_name: string;
+    average_concentration_mg_per_nm3: number | null;
+    emission_rate_kg_per_hour: number | null;
+    annual_emission_tonnes_per_year: number | null;
+    average_gas_flow_rate_nm3_per_hour: number | null;
+    operating_hours_per_year: number | null;
+    permitted_limit_mg_per_nm3: number | null;
+    is_exceeding_permitted_limit: boolean | null;
+    is_monitored: boolean;
+}
+
+export interface BrsrAirCalculatedStack {
     stack_name: string;
     attached_unit: AttachedUnitEnum | string;
+    total_readings?: number;
+    operating_hours_per_year: number;
+    report_number?: string | null;
+    average_gas_flow_rate: BrsrAirValueWithUnit<FlowRateUnit>;
+    permitted_limits: BrsrAirPermittedLimits;
+    average_concentration: BrsrAirPollutantValues;
     emission_per_hour: BrsrAirPollutantValues;
     emission_per_year: BrsrAirPollutantValues;
+    gas_details: Record<string, BrsrAirGasDetailMetric>;
+    is_pop_monitored?: boolean;
+    is_voc_monitored?: boolean;
+    is_hap_monitored?: boolean;
+    readings?: BrsrAirReadingInput[];
+}
+
+export interface BrsrAirOptionalPollutantDisclosures {
+    pop_monitored_stacks_count: number;
+    voc_monitored_stacks_count: number;
+    hap_monitored_stacks_count: number;
+    total_pop_tonnes_per_year: number | null;
+    total_voc_tonnes_per_year: number | null;
+    total_hap_tonnes_per_year: number | null;
+    average_pop_mg_per_nm3: number | null;
+    average_voc_mg_per_nm3: number | null;
+    average_hap_mg_per_nm3: number | null;
 }
 
 export interface BrsrAirTotals {
-    stack_results: BrsrAirStackResult[];
+    stacks: BrsrAirCalculatedStack[];
+    stack_results?: BrsrAirCalculatedStack[];
+    plant_gas_details?: Record<string, BrsrAirGasDetailMetric>;
     plant_total_per_pollutant: BrsrAirPollutantValues;
     plant_average_concentration: BrsrAirPollutantValues;
+    optional_pollutant_disclosures?: BrsrAirOptionalPollutantDisclosures;
 }
 
 export interface BrsrAirDisclosureData {
@@ -328,3 +374,4 @@ export interface BrsrAirDisclosureResponse {
     path: string;
     timestamp: string;
 }
+

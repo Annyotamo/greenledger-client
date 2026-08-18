@@ -82,12 +82,12 @@ export function BrsrAirReportModal({ isOpen, onClose, payload, onDownload }: Brs
                             <span className="text-on-surface-variant">Active Stacks Count:</span>
                             <span className="font-bold text-on-surface">{payload.stacks?.length || 0} stack(s)</span>
                         </div>
-                        {payload.sampling_date && (
-                            <div className="flex justify-between">
-                                <span className="text-on-surface-variant">Sampling Date:</span>
-                                <span className="font-bold text-on-surface">{payload.sampling_date}</span>
-                            </div>
-                        )}
+                        <div className="flex justify-between">
+                            <span className="text-on-surface-variant">Total Readings Logged:</span>
+                            <span className="font-bold text-on-surface">
+                                {payload.stacks?.reduce((acc, s) => acc + (s.readings?.length || 0), 0) || 0} reading(s)
+                            </span>
+                        </div>
                     </div>
                     {error && <p className="text-xs text-error font-medium">{error}</p>}
                 </div>

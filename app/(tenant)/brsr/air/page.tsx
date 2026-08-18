@@ -194,17 +194,17 @@ export default function BrsrAirPage() {
     const handleUpdateStackField = (stackIndex: number, field: string, value: any) => {
         setStacks((prev) => {
             const next = [...prev];
-            const stack = { ...next[stackIndex] };
+            const stack = JSON.parse(JSON.stringify(next[stackIndex]));
 
-            if (field.includes(".")) {
-                const [parent, child] = field.split(".");
-                (stack as any)[parent] = {
-                    ...(stack as any)[parent],
-                    [child]: value,
-                };
-            } else {
-                (stack as any)[field] = value;
+            const keys = field.split(".");
+            let curr: any = stack;
+            for (let i = 0; i < keys.length - 1; i++) {
+                if (!curr[keys[i]]) {
+                    curr[keys[i]] = {};
+                }
+                curr = curr[keys[i]];
             }
+            curr[keys[keys.length - 1]] = value;
 
             next[stackIndex] = stack;
             return next;
@@ -369,12 +369,26 @@ export default function BrsrAirPage() {
         window.URL.revokeObjectURL(url);
     };
 
-    const formatNum = (val: string | number | null | undefined, decimals = 2) => {
-        if (val === null || val === undefined) return "0.00";
+    const formatNum = (val: string | number | null | undefined, defaultDecimals = 2) => {
+        if (val === null || val === undefined || val === "") return "0.00";
         const num = Number(val);
-        return isNaN(num)
-            ? "0.00"
-            : num.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        if (isNaN(num)) return "0.00";
+        if (num === 0) return "0.00";
+
+        const absNum = Math.abs(num);
+        let maxDecimals = defaultDecimals;
+
+        if (absNum < 1 && absNum > 0) {
+            maxDecimals = Math.max(defaultDecimals, 4);
+        }
+        if (absNum < 0.0001 && absNum > 0) {
+            maxDecimals = Math.max(defaultDecimals, 6);
+        }
+
+        return num.toLocaleString("en-US", {
+            minimumFractionDigits: Math.min(defaultDecimals, maxDecimals),
+            maximumFractionDigits: maxDecimals,
+        });
     };
 
     const totals = data?.totals;
@@ -397,7 +411,7 @@ export default function BrsrAirPage() {
                         </span>
                     </div>
                     <h1 className="text-headline-md font-bold tracking-tight text-primary">
-                        BRSR Air Emissions Disclosure & Accounting
+                        BRSR Air Emissions & EIA dust load (NIPL)
                     </h1>
                     <p className="text-sm text-on-surface-variant">
                         Stack sampling readings log, single stack permitted limits, hourly emission rates (kg/hr), annual totals (tonnes/yr), and per-gas compliance checks.
@@ -476,7 +490,7 @@ export default function BrsrAirPage() {
                                     {/* Stack Top Header */}
                                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 pb-3">
                                         <div className="flex items-center gap-3">
-                                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-white font-mono text-xs font-bold shadow-sm">
+                                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-black font-mono text-xs font-bold shadow-sm border-1 text-blue-600">
                                                 {stackIdx + 1}
                                             </span>
                                             <input
@@ -650,7 +664,7 @@ export default function BrsrAirPage() {
                                     <div className="space-y-3 border-t border-outline-variant/40 pt-3">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
-                                                <MaterialIcon name="science" size="sm" className="text-primary" />
+                                                <MaterialIcon name="science" size="sm" className="text-secondary" />
                                                 <span className="text-[11px] font-bold text-primary uppercase tracking-wider block">
                                                     Sampling Readings Log ({stack.readings.length} Reading{stack.readings.length > 1 ? "s" : ""})
                                                 </span>
@@ -672,7 +686,7 @@ export default function BrsrAirPage() {
                                                     className="rounded-xl border border-outline-variant/50 bg-white p-3.5 space-y-3 shadow-2xs">
                                                     <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2">
                                                         <span className="font-mono text-[11px] font-bold text-on-surface-variant flex items-center gap-1.5">
-                                                            <span className="h-2 w-2 rounded-full bg-primary" />
+                                                            <span className="h-2 w-2 rounded-full bg-secondary" />
                                                             Reading #{readingIdx + 1}
                                                         </span>
                                                         {stack.readings.length > 1 && (
@@ -1042,13 +1056,17 @@ export default function BrsrAirPage() {
                                     <div>
                                         <div className="flex items-baseline gap-1.5 font-mono">
                                             <span className="text-headline-md font-bold text-primary">
-                                                {formatNum(
-                                                    (Number(plantTotals?.pop) || 0) +
-                                                    (Number(plantTotals?.voc) || 0) +
-                                                    (Number(plantTotals?.hap) || 0)
-                                                )}
+                                                {((Number(plantTotals?.pop) || 0) + (Number(plantTotals?.voc) || 0) + (Number(plantTotals?.hap) || 0)) > 0
+                                                    ? formatNum(
+                                                        (Number(plantTotals?.pop) || 0) +
+                                                        (Number(plantTotals?.voc) || 0) +
+                                                        (Number(plantTotals?.hap) || 0)
+                                                      )
+                                                    : <span className="text-on-surface-variant/40">—</span>}
                                             </span>
-                                            <span className="text-xs font-sans text-on-surface-variant">tonnes/yr</span>
+                                            {((Number(plantTotals?.pop) || 0) + (Number(plantTotals?.voc) || 0) + (Number(plantTotals?.hap) || 0)) > 0 && (
+                                                <span className="text-xs font-sans text-on-surface-variant">tonnes/yr</span>
+                                            )}
                                         </div>
                                         <p className="text-[11px] text-on-surface-variant mt-1 font-mono">
                                             Monitored: POP ({totals?.optional_pollutant_disclosures?.pop_monitored_stacks_count || 0}), VOC ({totals?.optional_pollutant_disclosures?.voc_monitored_stacks_count || 0}), HAP ({totals?.optional_pollutant_disclosures?.hap_monitored_stacks_count || 0})
@@ -1076,51 +1094,70 @@ export default function BrsrAirPage() {
                                 </CardHeader>
                                 <CardBody className="p-card-padding">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                                        {Object.entries(plantGasDetails).map(([gasKey, gas]: [string, BrsrAirGasDetailMetric]) => (
-                                            <div
-                                                key={gasKey}
-                                                className={`rounded-xl border p-4 space-y-3 ${
-                                                    gas.is_exceeding_permitted_limit
-                                                        ? "border-error/40 bg-error-container/10"
-                                                        : "border-outline-variant/60 bg-white"
-                                                }`}>
-                                                <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2">
-                                                    <span className="font-sans font-bold text-sm text-primary">
-                                                        {gas.pollutant_name}
-                                                    </span>
-                                                    {gas.is_exceeding_permitted_limit ? (
-                                                        <Badge variant="negative" size="sm" className="flex items-center gap-1">
-                                                            <MaterialIcon name="warning" size="sm" className="!text-[12px]" />
-                                                            Exceeding Limit
-                                                        </Badge>
-                                                    ) : (
-                                                        <Badge variant="positive" size="sm" className="flex items-center gap-1">
-                                                            <MaterialIcon name="check_circle" size="sm" className="!text-[12px]" />
-                                                            Compliant
-                                                        </Badge>
-                                                    )}
-                                                </div>
+                                        {Object.entries(plantGasDetails).map(([gasKey, gas]: [string, BrsrAirGasDetailMetric]) => {
+                                            const isOptionalGas = ["pop", "voc", "hap"].includes(gasKey.toLowerCase());
+                                            const hasValue = (v: number | null | undefined) => v !== null && v !== undefined && Number(v) > 0;
 
-                                                <div className="space-y-1.5 font-mono text-[12px]">
-                                                    <div className="flex justify-between">
-                                                        <span className="text-on-surface-variant">Hourly Rate:</span>
-                                                        <span className="font-bold text-primary">{formatNum(gas.emission_rate_kg_per_hour)} kg/hr</span>
+                                            return (
+                                                <div
+                                                    key={gasKey}
+                                                    className={`rounded-xl border p-4 space-y-3 ${
+                                                        gas.is_exceeding_permitted_limit
+                                                            ? "border-error/40 bg-error-container/10"
+                                                            : "border-outline-variant/60 bg-white"
+                                                    }`}>
+                                                    <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2">
+                                                        <span className="font-sans font-bold text-sm text-primary">
+                                                            {gas.pollutant_name}
+                                                        </span>
+                                                        {gas.is_exceeding_permitted_limit ? (
+                                                            <Badge variant="negative" size="sm" className="flex items-center gap-1">
+                                                                <MaterialIcon name="warning" size="sm" className="!text-[12px]" />
+                                                                Exceeding Limit
+                                                            </Badge>
+                                                        ) : (
+                                                            <Badge variant="positive" size="sm" className="flex items-center gap-1">
+                                                                <MaterialIcon name="check_circle" size="sm" className="!text-[12px]" />
+                                                                Compliant
+                                                            </Badge>
+                                                        )}
                                                     </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="text-on-surface-variant">Annual Total:</span>
-                                                        <span className="font-bold text-primary">{formatNum(gas.annual_emission_tonnes_per_year)} t/yr</span>
-                                                    </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="text-on-surface-variant">Avg Concentration:</span>
-                                                        <span className="font-bold text-on-surface">{formatNum(gas.average_concentration_mg_per_nm3)} mg/Nm³</span>
-                                                    </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="text-on-surface-variant">Permitted Limit:</span>
-                                                        <span className="font-bold text-on-surface-variant">{gas.permitted_limit_mg_per_nm3 ? `${formatNum(gas.permitted_limit_mg_per_nm3)} mg/Nm³` : "N/A"}</span>
+
+                                                    <div className="space-y-1.5 font-mono text-[12px]">
+                                                        <div className="flex justify-between">
+                                                            <span className="text-on-surface-variant">Hourly Rate:</span>
+                                                            <span className="font-bold text-primary">
+                                                                {isOptionalGas && !hasValue(gas.emission_rate_kg_per_hour)
+                                                                    ? <span className="text-on-surface-variant/40">—</span>
+                                                                    : `${formatNum(gas.emission_rate_kg_per_hour)} kg/hr`}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-on-surface-variant">Annual Total:</span>
+                                                            <span className="font-bold text-primary">
+                                                                {isOptionalGas && !hasValue(gas.annual_emission_tonnes_per_year)
+                                                                    ? <span className="text-on-surface-variant/40">—</span>
+                                                                    : `${formatNum(gas.annual_emission_tonnes_per_year)} t/yr`}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-on-surface-variant">Avg Concentration:</span>
+                                                            <span className="font-bold text-on-surface">
+                                                                {isOptionalGas && !hasValue(gas.average_concentration_mg_per_nm3)
+                                                                    ? <span className="text-on-surface-variant/40">—</span>
+                                                                    : `${formatNum(gas.average_concentration_mg_per_nm3)} mg/Nm³`}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-on-surface-variant">Permitted Limit:</span>
+                                                            <span className="font-bold text-on-surface-variant">
+                                                                {gas.permitted_limit_mg_per_nm3 ? `${formatNum(gas.permitted_limit_mg_per_nm3)} mg/Nm³` : "N/A"}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </CardBody>
                             </Card>
@@ -1190,13 +1227,13 @@ export default function BrsrAirPage() {
                                                         {formatNum(res.emission_per_year?.particulate_matter)}
                                                     </TableCell>
                                                     <TableCell className="text-right font-mono text-xs">
-                                                        {res.is_pop_monitored !== false ? formatNum(res.emission_per_year?.pop) : <span className="text-on-surface-variant/40">—</span>}
+                                                        {res.is_pop_monitored && res.emission_per_year?.pop && Number(res.emission_per_year?.pop) > 0 ? formatNum(res.emission_per_year?.pop) : <span className="text-on-surface-variant/40">—</span>}
                                                     </TableCell>
                                                     <TableCell className="text-right font-mono text-xs">
-                                                        {res.is_voc_monitored ? formatNum(res.emission_per_year?.voc) : <span className="text-on-surface-variant/40">—</span>}
+                                                        {res.is_voc_monitored && res.emission_per_year?.voc && Number(res.emission_per_year?.voc) > 0 ? formatNum(res.emission_per_year?.voc) : <span className="text-on-surface-variant/40">—</span>}
                                                     </TableCell>
                                                     <TableCell className="text-right font-mono text-xs">
-                                                        {res.is_hap_monitored ? formatNum(res.emission_per_year?.hap) : <span className="text-on-surface-variant/40">—</span>}
+                                                        {res.is_hap_monitored && res.emission_per_year?.hap && Number(res.emission_per_year?.hap) > 0 ? formatNum(res.emission_per_year?.hap) : <span className="text-on-surface-variant/40">—</span>}
                                                     </TableCell>
                                                     <TableCell className="text-center font-mono text-[11px] text-on-surface-variant">
                                                         <div title="Hourly Emission Rate in kg/hr">
@@ -1264,30 +1301,54 @@ export default function BrsrAirPage() {
                                     <div className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-3 space-y-1">
                                         <span className="text-[11px] font-bold text-on-surface-variant block">POP</span>
                                         <span className="font-mono text-sm font-bold text-on-surface block">
-                                            {formatNum(totals?.optional_pollutant_disclosures?.total_pop_tonnes_per_year ?? plantTotals?.pop)} <span className="text-[10px] font-sans text-on-surface-variant">t/yr</span>
+                                            {totals?.optional_pollutant_disclosures?.total_pop_tonnes_per_year && Number(totals.optional_pollutant_disclosures.total_pop_tonnes_per_year) > 0
+                                                ? <>{formatNum(totals.optional_pollutant_disclosures.total_pop_tonnes_per_year)} <span className="text-[10px] font-sans text-on-surface-variant">t/yr</span></>
+                                                : plantTotals?.pop && Number(plantTotals.pop) > 0
+                                                ? <>{formatNum(plantTotals.pop)} <span className="text-[10px] font-sans text-on-surface-variant">t/yr</span></>
+                                                : <span className="text-on-surface-variant/40">—</span>}
                                         </span>
                                         <span className="font-mono text-[10px] text-on-surface-variant block">
-                                            {formatNum(totals?.optional_pollutant_disclosures?.average_pop_mg_per_nm3 ?? plantAvgs?.pop)} mg/Nm³
+                                            {totals?.optional_pollutant_disclosures?.average_pop_mg_per_nm3 && Number(totals.optional_pollutant_disclosures.average_pop_mg_per_nm3) > 0
+                                                ? `${formatNum(totals.optional_pollutant_disclosures.average_pop_mg_per_nm3)} mg/Nm³`
+                                                : plantAvgs?.pop && Number(plantAvgs.pop) > 0
+                                                ? `${formatNum(plantAvgs.pop)} mg/Nm³`
+                                                : <span className="text-on-surface-variant/40">—</span>}
                                         </span>
                                     </div>
 
                                     <div className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-3 space-y-1">
                                         <span className="text-[11px] font-bold text-on-surface-variant block">VOC</span>
                                         <span className="font-mono text-sm font-bold text-on-surface block">
-                                            {formatNum(totals?.optional_pollutant_disclosures?.total_voc_tonnes_per_year ?? plantTotals?.voc)} <span className="text-[10px] font-sans text-on-surface-variant">t/yr</span>
+                                            {totals?.optional_pollutant_disclosures?.total_voc_tonnes_per_year && Number(totals.optional_pollutant_disclosures.total_voc_tonnes_per_year) > 0
+                                                ? <>{formatNum(totals.optional_pollutant_disclosures.total_voc_tonnes_per_year)} <span className="text-[10px] font-sans text-on-surface-variant">t/yr</span></>
+                                                : plantTotals?.voc && Number(plantTotals.voc) > 0
+                                                ? <>{formatNum(plantTotals.voc)} <span className="text-[10px] font-sans text-on-surface-variant">t/yr</span></>
+                                                : <span className="text-on-surface-variant/40">—</span>}
                                         </span>
                                         <span className="font-mono text-[10px] text-on-surface-variant block">
-                                            {formatNum(totals?.optional_pollutant_disclosures?.average_voc_mg_per_nm3 ?? plantAvgs?.voc)} mg/Nm³
+                                            {totals?.optional_pollutant_disclosures?.average_voc_mg_per_nm3 && Number(totals.optional_pollutant_disclosures.average_voc_mg_per_nm3) > 0
+                                                ? `${formatNum(totals.optional_pollutant_disclosures.average_voc_mg_per_nm3)} mg/Nm³`
+                                                : plantAvgs?.voc && Number(plantAvgs.voc) > 0
+                                                ? `${formatNum(plantAvgs.voc)} mg/Nm³`
+                                                : <span className="text-on-surface-variant/40">—</span>}
                                         </span>
                                     </div>
 
                                     <div className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-3 space-y-1">
                                         <span className="text-[11px] font-bold text-on-surface-variant block">HAP</span>
                                         <span className="font-mono text-sm font-bold text-on-surface block">
-                                            {formatNum(totals?.optional_pollutant_disclosures?.total_hap_tonnes_per_year ?? plantTotals?.hap)} <span className="text-[10px] font-sans text-on-surface-variant">t/yr</span>
+                                            {totals?.optional_pollutant_disclosures?.total_hap_tonnes_per_year && Number(totals.optional_pollutant_disclosures.total_hap_tonnes_per_year) > 0
+                                                ? <>{formatNum(totals.optional_pollutant_disclosures.total_hap_tonnes_per_year)} <span className="text-[10px] font-sans text-on-surface-variant">t/yr</span></>
+                                                : plantTotals?.hap && Number(plantTotals.hap) > 0
+                                                ? <>{formatNum(plantTotals.hap)} <span className="text-[10px] font-sans text-on-surface-variant">t/yr</span></>
+                                                : <span className="text-on-surface-variant/40">—</span>}
                                         </span>
                                         <span className="font-mono text-[10px] text-on-surface-variant block">
-                                            {formatNum(totals?.optional_pollutant_disclosures?.average_hap_mg_per_nm3 ?? plantAvgs?.hap)} mg/Nm³
+                                            {totals?.optional_pollutant_disclosures?.average_hap_mg_per_nm3 && Number(totals.optional_pollutant_disclosures.average_hap_mg_per_nm3) > 0
+                                                ? `${formatNum(totals.optional_pollutant_disclosures.average_hap_mg_per_nm3)} mg/Nm³`
+                                                : plantAvgs?.hap && Number(plantAvgs.hap) > 0
+                                                ? `${formatNum(plantAvgs.hap)} mg/Nm³`
+                                                : <span className="text-on-surface-variant/40">—</span>}
                                         </span>
                                     </div>
                                 </div>

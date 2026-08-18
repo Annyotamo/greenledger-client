@@ -409,14 +409,14 @@ export default function BrsrAirPage() {
                         onClick={() => setIsFilterOpen((prev) => !prev)}
                         className="flex items-center gap-2 px-4 py-2.5">
                         <MaterialIcon name={isFilterOpen ? "filter_alt_off" : "tune"} size="sm" />
-                        <span>{isFilterOpen ? "Hide Form Controls" : "Configure Stacks"}</span>
+                        <span>{isFilterOpen ? "Hide Controls" : "Configure"}</span>
                     </Button>
                     <Button
                         variant="primary"
                         onClick={() => setIsDownloadOpen(true)}
                         className="flex items-center gap-2 px-5 py-2.5 shadow-md">
                         <MaterialIcon name="download" size="sm" />
-                        <span>Download Excel</span>
+                        <span>Download</span>
                     </Button>
                 </div>
             </div>
@@ -1224,7 +1224,7 @@ export default function BrsrAirPage() {
                                             Plant Average Concentrations & Total Summary
                                         </h3>
                                         <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
-                                            Weighted plant average concentrations (mg/Nm³) & annual pollutant totals (tonnes/year)
+                                            Plant average concentrations (mg/Nm³) & annual pollutant totals (tonnes/year)
                                         </p>
                                     </div>
                                 </div>

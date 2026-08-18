@@ -184,8 +184,40 @@ buildings, vehicles).
 }
 
 ===============================================================================
-4. SCOPE 3 CATEGORY 3: FUEL & ENERGY-RELATED ACTIVITIES
+4. SCOPE 3 CATEGORY 4: UPSTREAM TRANSPORTATION AND DISTRIBUTION (SPEND-BASED)
 ===============================================================================
+
+Description:
+Identical calculation model, schemas, validation rules, exchange rates, and lifecycle
+state machine as Category 1 & Category 2, but dedicated to Upstream Transportation
+and Distribution spend (freight transport, warehousing, 3PL logistics).
+
+[A] ENDPOINTS
+- GET    /api/v1/tenant/scope3/category4/spend
+- GET    /api/v1/tenant/scope3/category4/spend/{activity_id}
+- POST   /api/v1/tenant/scope3/category4/spend
+- PATCH  /api/v1/tenant/scope3/category4/spend/{activity_id}
+- DELETE /api/v1/tenant/scope3/category4/spend/{activity_id}
+- POST   /api/v1/tenant/scope3/category4/spend/{activity_id}/submit
+- POST   /api/v1/tenant/scope3/category4/spend/{activity_id}/verify
+- POST   /api/v1/tenant/scope3/category4/spend/{activity_id}/reject
+- POST   /api/v1/tenant/scope3/category4/spend/{activity_id}/amend
+
+[B] SAMPLE CREATE REQUEST BODY
+{
+  "reporting_period": "FY 2021-22",
+  "facility_id": null,
+  "scope3_spend_emission_factor_id": "ca68b110-59ba-4c62-b841-270138cc06dd",
+  "spend_date": "2021-12-09",
+  "spend_in_inr": 75000.00,
+  "spend_year": 2021,
+  "notes": "Upstream freight transportation spend for raw materials delivery"
+}
+
+===============================================================================
+5. SCOPE 3 CATEGORY 3: FUEL & ENERGY-RELATED ACTIVITIES
+===============================================================================
+
 
 Scope 3 Category 3 covers upstream emissions from fuels and energy not included in Scope 1 or 2:
   4.1 WTT Fuels & Measurement Units Lookup

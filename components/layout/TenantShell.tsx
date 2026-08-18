@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useMemo, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { DashboardTab } from "@/lib/dashboard/types";
@@ -50,22 +50,17 @@ export function TenantShell({ children }: TenantShellProps) {
             <Sidebar />
             <TopBar activeTab={activeTab} onTabChange={handleTabChange} searchPlaceholder={searchPlaceholder} />
 
-            <motion.main
-                animate={{ marginLeft: mainMargin }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                style={{ paddingTop: mainPaddingTop }}
+            <main
+                style={{ marginLeft: mainMargin, paddingTop: mainPaddingTop }}
                 className={cn("min-h-screen px-gutter pb-12 transition-[margin-left] duration-300")}>
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={pathname}
-                        initial={{ opacity: 0, x: 8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -8 }}
-                        transition={{ duration: 0.2 }}>
-                        {children}
-                    </motion.div>
-                </AnimatePresence>
-            </motion.main>
+                <motion.div
+                    key={pathname}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}>
+                    {children}
+                </motion.div>
+            </main>
         </div>
     );
 }

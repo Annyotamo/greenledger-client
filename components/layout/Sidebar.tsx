@@ -24,10 +24,11 @@ export function Sidebar() {
     const pathname = usePathname();
 
     const beforeActivities = MAIN_NAV.filter(
-        (i) => i.label === "Dashboard" || i.label === "Facilities" || i.label === "Scope 3",
+        (i) => i.label === "Dashboard" || i.label === "Facilities",
     );
+    const valueChainItem = MAIN_NAV.find((i) => i.label === "Value Chain");
     const afterActivities = MAIN_NAV.filter(
-        (i) => i.label === "Team Members" || i.label === "Tenant Profile" || i.label === "Audit Trails",
+        (i) => i.label === "Reporting Periods" || i.label === "Team Members" || i.label === "Tenant Profile",
     );
 
     useEffect(() => {
@@ -116,6 +117,10 @@ export function Sidebar() {
                             </div>
                         )}
                     </div>
+
+                    {valueChainItem && (
+                        <SidebarLink key={valueChainItem.label} item={valueChainItem} collapsed={collapsed} />
+                    )}
 
                     <div className="relative">
                         <button

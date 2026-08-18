@@ -355,7 +355,59 @@ transmission and distribution across the power grid.
 - calculated_t_co2e = calculated_kg_co2e / 1000 = 1.2172 t CO2e
 
 ===============================================================================
-5. SUMMARY OF COMMON ERROR CODES & EDGE CASES
+6. SCOPE 3 CATEGORY 5: WASTE GENERATED IN OPERATIONS
+===============================================================================
+
+Description:
+Tracks emissions from disposal and treatment of waste generated in tenant operations
+(e.g., Construction, Metal, Plastic, Refuse, Paper, Electrical items, Other).
+
+6.1 WASTE TYPES LOOKUP ENDPOINTS
+- GET /api/v1/tenant/scope3/category5/waste-types
+  Optional query param: ?category=Construction
+  Returns list of active waste types with unit_symbol ("tonnes") and a dictionary of
+  supported treatment methods with emission factors in kg CO2e & t CO2e per tonne.
+
+- GET /api/v1/tenant/scope3/category5/waste-types/{waste_type_id}
+  Returns detailed waste type information and supported treatment methods.
+
+6.2 WASTE ACTIVITY CRUD & LIFECYCLE ENDPOINTS
+- GET    /api/v1/tenant/scope3/category5/waste
+- GET    /api/v1/tenant/scope3/category5/waste/{activity_id}
+- POST   /api/v1/tenant/scope3/category5/waste
+- PATCH  /api/v1/tenant/scope3/category5/waste/{activity_id}
+- DELETE /api/v1/tenant/scope3/category5/waste/{activity_id}
+- POST   /api/v1/tenant/scope3/category5/waste/{activity_id}/submit
+- POST   /api/v1/tenant/scope3/category5/waste/{activity_id}/verify
+- POST   /api/v1/tenant/scope3/category5/waste/{activity_id}/reject
+- POST   /api/v1/tenant/scope3/category5/waste/{activity_id}/amend
+
+[A] SAMPLE CREATE REQUEST BODY
+{
+  "reporting_period": "FY 2021-22",
+  "facility_id": null,
+  "waste_type_id": "faa2ea7e-1fe8-46e4-a349-68562c882cf8",
+  "treatment_method": "landfill",
+  "activity_date": "2021-12-09",
+  "waste_generated_tonnes": 10.5,
+  "notes": "10.5 tonnes of construction wood waste sent to landfill"
+}
+
+[B] SUPPORTED TREATMENT METHOD ENUM VALUES
+- "open_loop"
+- "closed_loop"
+- "incineration_energy_recovery"
+- "composting"
+- "landfill"
+- "anaerobic_digestion"
+
+[C] CALCULATION FORMULA
+- calculated_kg_co2e = waste_generated_tonnes * applied_kg_co2e_per_tonne
+  Example (Wood -> Landfill): 10.5 tonnes * 925.34348 kg CO2e/tonne = 9,716.106540 kg CO2e
+- calculated_t_co2e = calculated_kg_co2e / 1000 = 9.716107 t CO2e
+
+===============================================================================
+7. SUMMARY OF COMMON ERROR CODES & EDGE CASES
 ===============================================================================
 
 HTTP Status | Error Code                              | Reason / Resolution
@@ -363,10 +415,16 @@ HTTP Status | Error Code                              | Reason / Resolution
 400 Bad Req | SPEND_DATE_YEAR_MISMATCH               | `spend_date.year` does not match `spend_year`.
 400 Bad Req | INVALID_SPEND_YEAR                      | `spend_year` is outside allowed range (2020-2025).
 400 Bad Req | SCOPE3_ACTIVITY_IMMUTABLE               | Entry is in state "verified". Use /amend instead.
+400 Bad Req | INVALID_WASTE_TREATMENT_METHOD          | Method not supported/active for selected waste type.
+400 Bad Req | INVALID_WASTE_QUANTITY                  | Quantity generated in tonnes is <= 0.
 404 Not Fnd | SCOPE3_CAT1_SPEND_ACTIVITY_NOT_FOUND    | Category 1 ID invalid or deleted.
 404 Not Fnd | SCOPE3_CAT2_SPEND_ACTIVITY_NOT_FOUND    | Category 2 ID invalid or deleted.
 404 Not Fnd | SCOPE3_CAT3_FUEL_ACTIVITY_NOT_FOUND     | Category 3 Fuel ID invalid or deleted.
 404 Not Fnd | SCOPE3_CAT3_ELEC_ACTIVITY_NOT_FOUND     | Category 3 Elec ID invalid or deleted.
+404 Not Fnd | SCOPE3_CAT4_SPEND_ACTIVITY_NOT_FOUND    | Category 4 ID invalid or deleted.
+404 Not Fnd | SCOPE3_CAT5_WASTE_ACTIVITY_NOT_FOUND    | Category 5 ID invalid or deleted.
+404 Not Fnd | WASTE_TYPE_NOT_FOUND                    | Selected WasteType ID invalid.
+404 Not Fnd | WASTE_TREATMENT_FACTOR_NOT_FOUND        | Waste treatment factor record missing.
 404 Not Fnd | SCOPE3_SPEND_FACTOR_NOT_FOUND           | USEEIO spend factor ID not found.
 404 Not Fnd | WTT_FUEL_FACTOR_NOT_FOUND               | WTT factor ID not found.
 422 Unproc  | INVALID_SPEND_AMOUNT                    | Spend amount in INR is <= 0.
@@ -375,3 +433,4 @@ HTTP Status | Error Code                              | Reason / Resolution
 ===============================================================================
                             END OF DOCUMENTATION
 ===============================================================================
+

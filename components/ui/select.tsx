@@ -14,7 +14,7 @@ interface CustomSelectProps extends Omit<SelectProps<CustomSelectOption, false, 
     onChange: (value: string) => void;
     error?: boolean;
     placeholder?: string;
-    variant?: "default" | "compact";
+    variant?: "default" | "compact" | "form";
     className?: string;
 }
 
@@ -24,7 +24,7 @@ export function CustomSelect({
     onChange,
     error,
     placeholder = "Select...",
-    variant = "default",
+    variant = "form",
     className,
     ...props
 }: CustomSelectProps) {
@@ -68,9 +68,9 @@ export function CustomSelect({
                 boxShadow: state.isFocused
                     ? "0 0 0 1px var(--gl-primary, #000000)"
                     : "none",
-                borderRadius: "0.25rem",
-                minHeight: "42px",
-                height: "42px",
+                borderRadius: "0.5rem",
+                minHeight: "38px",
+                height: "38px",
                 cursor: "pointer",
                 transition: "all 200ms ease",
                 "&:hover": {
@@ -82,43 +82,45 @@ export function CustomSelect({
         },
         valueContainer: (provided) => ({
             ...provided,
-            padding: variant === "compact" ? "0 2px" : "0 12px",
-            height: variant === "compact" ? "auto" : "40px",
+            padding: variant === "compact" ? "0 2px" : "0 10px",
+            height: variant === "compact" ? "auto" : "36px",
             display: "flex",
             alignItems: "center",
         }),
         input: (provided) => ({
             ...provided,
             color: "var(--gl-on-surface, #191c1d)",
-            fontFamily: "var(--font-hanken), Inter, sans-serif",
-            fontSize: variant === "compact" ? "0.875rem" : "0.95rem",
+            fontFamily: "var(--font-mono), monospace",
+            fontSize: variant === "compact" ? "0.875rem" : "0.75rem",
             margin: 0,
             padding: 0,
         }),
         placeholder: (provided) => ({
             ...provided,
             color: "var(--gl-on-surface-variant, #45464c)",
-            fontFamily: "var(--font-hanken), Inter, sans-serif",
-            fontSize: variant === "compact" ? "0.875rem" : "0.95rem",
+            fontFamily: "var(--font-mono), monospace",
+            fontSize: variant === "compact" ? "0.875rem" : "0.75rem",
             opacity: 0.6,
         }),
         singleValue: (provided) => ({
             ...provided,
             color: "var(--gl-on-surface, #191c1d)",
-            fontFamily: "var(--font-hanken), Inter, sans-serif",
-            fontSize: variant === "compact" ? "0.875rem" : "0.95rem",
-            fontWeight: variant === "compact" ? 600 : 400,
+            fontFamily: "var(--font-mono), monospace",
+            fontSize: variant === "compact" ? "0.875rem" : "0.75rem",
+            fontWeight: 500,
+            display: "flex",
+            alignItems: "center",
         }),
         dropdownIndicator: (provided, state) => ({
             ...provided,
             color: "var(--gl-outline, #76777d)",
-            padding: variant === "compact" ? "0" : "0 8px",
+            padding: variant === "compact" ? "0" : "0 6px",
             transition: "transform 150ms ease",
             transform: state.selectProps.menuIsOpen ? "rotate(180deg)" : "none",
-            "& svg": variant === "compact" ? {
-                width: "12px",
-                height: "12px",
-            } : undefined,
+            "& svg": {
+                width: "14px",
+                height: "14px",
+            },
             "&:hover": {
                 color: "var(--gl-primary, #000000)",
             },
@@ -131,7 +133,7 @@ export function CustomSelect({
             backgroundColor: "var(--gl-surface-container-lowest, #ffffff)",
             borderRadius: "0.5rem",
             border: "1px solid var(--gl-outline-variant, #c6c6cd)",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
             zIndex: 99999,
             overflow: "hidden",
             width: variant === "compact" ? "120px" : "100%",
@@ -144,7 +146,7 @@ export function CustomSelect({
         menuList: (provided) => ({
             ...provided,
             padding: "4px 0",
-            maxHeight: "250px",
+            maxHeight: "180px",
         }),
         option: (provided, state) => ({
             ...provided,
@@ -156,9 +158,9 @@ export function CustomSelect({
             color: state.isSelected
                 ? "var(--gl-on-secondary-container, #00714d)"
                 : "var(--gl-on-surface, #191c1d)",
-            padding: variant === "compact" ? "6px 10px" : "8px 12px",
-            fontSize: variant === "compact" ? "0.875rem" : "0.95rem",
-            fontFamily: "var(--font-hanken), Inter, sans-serif",
+            padding: "6px 10px",
+            fontSize: "0.75rem",
+            fontFamily: "var(--font-mono), monospace",
             cursor: "pointer",
             transition: "all 150ms ease",
             "&:active": {
@@ -176,7 +178,7 @@ export function CustomSelect({
             );
         }
         return (
-            <div className={`relative w-full rounded-lg border ${error ? "border-error" : "border-outline-variant"} bg-white min-h-[42px] px-3 py-2 text-body-md text-on-surface`}>
+            <div className={`relative w-full rounded-lg border ${error ? "border-error" : "border-outline-variant"} bg-white min-h-[38px] px-3 py-2 text-xs font-mono text-on-surface`}>
                 <span className="opacity-60">{placeholder}</span>
             </div>
         );

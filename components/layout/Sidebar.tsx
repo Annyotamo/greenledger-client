@@ -23,7 +23,9 @@ export function Sidebar() {
     const [user, setUser] = useState<UserProfile | null>(null);
     const pathname = usePathname();
 
-    const beforeActivities = MAIN_NAV.filter((i) => i.label === "Dashboard" || i.label === "Facilities");
+    const beforeActivities = MAIN_NAV.filter(
+        (i) => i.label === "Dashboard" || i.label === "Facilities" || i.label === "Scope 3",
+    );
     const afterActivities = MAIN_NAV.filter(
         (i) => i.label === "Team Members" || i.label === "Tenant Profile" || i.label === "Audit Trails",
     );

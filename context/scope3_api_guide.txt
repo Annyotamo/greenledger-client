@@ -1,0 +1,345 @@
+===============================================================================
+               GREENLEDGER ESG SERVER - SCOPE 3 API DOCUMENTATION
+===============================================================================
+Target Audience: Frontend Developers & API Integration Agents
+Date: August 2026
+Base URL: /api/v1
+
+-------------------------------------------------------------------------------
+TABLE OF CONTENTS
+-------------------------------------------------------------------------------
+1. GLOBAL RULES, CONVENTIONS & LIFECYCLE STATE MACHINE
+2. SCOPE 3 CATEGORY 1: PURCHASED GOODS & SERVICES (SPEND-BASED)
+3. SCOPE 3 CATEGORY 2: CAPITAL GOODS (SPEND-BASED)
+4. SCOPE 3 CATEGORY 3: FUEL & ENERGY-RELATED ACTIVITIES (WTT & T&D LOSSES)
+   - 4.1 WTT Fuels & Measurement Units Lookup Endpoints
+   - 4.2 Upstream WTT Fuel Activities
+   - 4.3 Electricity Transmission & Distribution (T&D) Losses Activities
+5. SUMMARY OF COMMON ERROR CODES & EDGE CASES
+
+===============================================================================
+1. GLOBAL RULES, CONVENTIONS & LIFECYCLE STATE MACHINE
+===============================================================================
+
+[A] AUTHENTICATION & HEADERS
+- All endpoints require a valid JWT Bearer token in the request header:
+  Authorization: Bearer <your_jwt_token>
+- Requests with JSON bodies must include:
+  Content-Type: application/json
+
+[B] COMMON RESPONSE WRAPPER FORMAT
+Every API response is wrapped in a standard structure:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Operation completed successfully",
+  "data": { ... },
+  "error": null,
+  "method": "POST",
+  "path": "/api/v1/tenant/scope3/...",
+  "timestamp": "2026-08-18T12:00:00.000Z"
+}
+
+[C] REPORTING PERIOD FORMAT
+- `reporting_period` is a MANUAL STRING LABEL typed by tenants (e.g., "FY 2021-22", "Q3 2021", "2024-H1").
+- No foreign key ID lookup is required for reporting_period.
+
+[D] ACTIVITY LIFECYCLE STATE MACHINE & IMMUTABILITY
+- Status Values: "draft", "submitted", "verified", "rejected".
+- Role-based default status upon creation (`POST`):
+  * Tenant Admin / Tenant Owner -> Auto-defaults to "verified"
+  * Standard User -> Defaults to "submitted" (or "draft" if explicitly sent as "draft")
+- Immutability Rule:
+  * Entries in state "verified" CANNOT be edited (`PATCH`) or deleted (`DELETE`) directly.
+  * If a verified record needs correction, use the `/amend` endpoint.
+  * Attempting to edit/delete a verified entry returns HTTP 400 with error_code: "SCOPE3_ACTIVITY_IMMUTABLE".
+
+===============================================================================
+2. SCOPE 3 CATEGORY 1: PURCHASED GOODS & SERVICES (SPEND-BASED)
+===============================================================================
+
+Description:
+Captures purchase spend in INR across years (2020 to 2025), converts spend to USD
+using annual average exchange rates, and calculates emissions using US EPA USEEIO
+factors (kg CO2e per USD) with full margin breakdowns.
+
+[A] ENDPOINTS
+
+1. List Category 1 Spend Entries
+   - Method & Path: GET /api/v1/tenant/scope3/category1/spend
+   - Query Parameters (all optional):
+     * reporting_period (string): Filter by string label (e.g. "FY 2021-22")
+     * facility_id (uuid)
+     * scope3_spend_emission_factor_id (uuid)
+     * status (string): "draft", "submitted", "verified", "rejected"
+     * spend_year (integer): 2020 to 2025
+     * spend_date (date string: YYYY-MM-DD)
+     * start_date / end_date (date strings)
+     * page (integer, default: 1)
+     * page_size (integer, default: 15)
+     * sort_by (string, default: "created_at")
+     * sort_order (string, "asc" or "desc", default: "desc")
+
+2. Get Single Category 1 Entry
+   - Method & Path: GET /api/v1/tenant/scope3/category1/spend/{activity_id}
+
+3. Create Category 1 Spend Entry
+   - Method & Path: POST /api/v1/tenant/scope3/category1/spend
+   - Request Body:
+     {
+       "reporting_period": "FY 2021-22",
+       "facility_id": "optional-uuid-or-null",
+       "scope3_spend_emission_factor_id": "ca68b110-59ba-4c62-b841-270138cc06dd",
+       "spend_date": "2021-12-09",
+       "spend_in_inr": 45000.00,
+       "spend_year": 2021,
+       "notes": "Procurement spend for Soybean Farming (NAICS 111110)"
+     }
+
+4. Update Category 1 Entry (Draft / Rejected only)
+   - Method & Path: PATCH /api/v1/tenant/scope3/category1/spend/{activity_id}
+   - Request Body (all fields optional):
+     {
+       "spend_in_inr": 50000.00,
+       "notes": "Updated invoice amount"
+     }
+
+5. Delete Category 1 Entry (Draft / Rejected only)
+   - Method & Path: DELETE /api/v1/tenant/scope3/category1/spend/{activity_id}
+
+6. Submit Entry for Review
+   - Method & Path: POST /api/v1/tenant/scope3/category1/spend/{activity_id}/submit
+
+7. Verify Entry (Reviewer / Admin only)
+   - Method & Path: POST /api/v1/tenant/scope3/category1/spend/{activity_id}/verify
+
+8. Reject Entry (Reviewer / Admin only)
+   - Method & Path: POST /api/v1/tenant/scope3/category1/spend/{activity_id}/reject
+   - Request Body:
+     {
+       "reason": "Invoice document is missing"
+     }
+
+9. Amend Verified Entry
+   - Method & Path: POST /api/v1/tenant/scope3/category1/spend/{activity_id}/amend
+   - Request Body:
+     {
+       "amended_from_id": "verified-activity-id",
+       "reporting_period": "FY 2021-22",
+       "facility_id": null,
+       "scope3_spend_emission_factor_id": "ca68b110-59ba-4c62-b841-270138cc06dd",
+       "spend_date": "2021-12-09",
+       "spend_in_inr": 48000.00,
+       "spend_year": 2021,
+       "notes": "Amended spend entry after internal audit"
+     }
+
+[B] CALCULATION FORMULA & MARGIN BREAKDOWN
+- USD/INR Conversion: spend_in_usd = spend_in_inr / annual_average_exchange_rate(spend_year)
+- Headline Emissions (With Margins):
+  * calculated_kg_co2e = spend_in_usd * kg_co2e_per_usd_with_margins
+  * calculated_t_co2e = calculated_kg_co2e / 1000
+- Producer Price Component (Without Margins):
+  * calculated_kg_co2e_without_margins = spend_in_usd * kg_co2e_per_usd_without_margins
+  * calculated_t_co2e_without_margins = calculated_kg_co2e_without_margins / 1000
+- Margin Component (Trade & Transport):
+  * margin_kg_co2e = spend_in_usd * margin_kg_co2e_per_usd
+  * margin_t_co2e = margin_kg_co2e / 1000
+
+[C] CATEGORY 1 EDGE CASES & VALIDATIONS
+- Date-Year Mismatch: `spend_date` year MUST equal `spend_year`.
+  Example: spend_date = "2024-05-10" and spend_year = 2021 -> Returns 400 SPEND_DATE_YEAR_MISMATCH.
+- Spend Amount: `spend_in_inr` must be strictly > 0 -> Returns 422 UNPROCESSABLE ENTITY if <= 0.
+- Allowed Spend Years: 2020 through 2025. Any other year -> Returns 400 INVALID_SPEND_YEAR.
+
+===============================================================================
+3. SCOPE 3 CATEGORY 2: CAPITAL GOODS (SPEND-BASED)
+===============================================================================
+
+Description:
+Identical calculation model, schemas, validation rules, exchange rates, and lifecycle
+state machine as Category 1, but dedicated to Capital Expenditure (equipment, machinery,
+buildings, vehicles).
+
+[A] ENDPOINTS
+- GET    /api/v1/tenant/scope3/category2/spend
+- GET    /api/v1/tenant/scope3/category2/spend/{activity_id}
+- POST   /api/v1/tenant/scope3/category2/spend
+- PATCH  /api/v1/tenant/scope3/category2/spend/{activity_id}
+- DELETE /api/v1/tenant/scope3/category2/spend/{activity_id}
+- POST   /api/v1/tenant/scope3/category2/spend/{activity_id}/submit
+- POST   /api/v1/tenant/scope3/category2/spend/{activity_id}/verify
+- POST   /api/v1/tenant/scope3/category2/spend/{activity_id}/reject
+- POST   /api/v1/tenant/scope3/category2/spend/{activity_id}/amend
+
+[B] SAMPLE CREATE REQUEST BODY
+{
+  "reporting_period": "FY 2021-22",
+  "facility_id": null,
+  "scope3_spend_emission_factor_id": "ca68b110-59ba-4c62-b841-270138cc06dd",
+  "spend_date": "2021-12-09",
+  "spend_in_inr": 200000.00,
+  "spend_year": 2021,
+  "notes": "Capital expenditure for agricultural machinery (NAICS 111110)"
+}
+
+===============================================================================
+4. SCOPE 3 CATEGORY 3: FUEL & ENERGY-RELATED ACTIVITIES
+===============================================================================
+
+Scope 3 Category 3 covers upstream emissions from fuels and energy not included in Scope 1 or 2:
+  4.1 WTT Fuels & Measurement Units Lookup
+  4.2 Upstream WTT Fuel Activities
+  4.3 Electricity Transmission & Distribution (T&D) Losses
+
+-------------------------------------------------------------------------------
+4.1 WTT FUELS & MEASUREMENT UNITS LOOKUP ENDPOINTS
+-------------------------------------------------------------------------------
+
+Frontend UI workflow for selecting WTT fuels:
+Step 1: Fetch list of WTT-supported fuels.
+Step 2: Fetch available units and emission factors for the selected fuel.
+
+1. List WTT Available Fuels
+   - Method & Path: GET /api/v1/tenant/scope3/category3/wtt-fuels
+   - Response Data Structure:
+     [
+       {
+         "fuel_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         "fuel_name": "Coal (industrial)",
+         "fuel_slug": "coal-industrial",
+         "category_id": "...",
+         "category_name": "Solid fuels",
+         "units": [
+           {
+             "unit_id": "...",
+             "unit_name": "Tonne",
+             "unit_symbol": "tonnes",
+             "unit_type": "mass",
+             "wtt_emission_factor_id": "a1b2c3d4-...",
+             "kg_co2e": 418.14964,
+             "t_co2e": 0.41814964
+           },
+           {
+             "unit_id": "...",
+             "unit_name": "Kilowatt Hour (Net CV)",
+             "unit_symbol": "kWh (Net CV)",
+             "unit_type": "energy",
+             "wtt_emission_factor_id": "e5f6a7b8-...",
+             "kg_co2e": 0.05925,
+             "t_co2e": 0.00005925
+           }
+
+         ]
+       }
+     ]
+
+2. Get WTT Units & Factor Details for a Specific Fuel
+   - Method & Path: GET /api/v1/tenant/scope3/category3/wtt-fuels/{fuel_id}/units
+   - Response Data Structure:
+     [
+       {
+         "wtt_emission_factor_id": "a1b2c3d4-...",
+         "fuel_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         "fuel_name": "Coal (industrial)",
+         "unit_id": "...",
+         "unit_symbol": "tonnes",
+         "kg_co2e": 418.14964,
+         "t_co2e": 0.41814964,
+         "source_reference_code": "DEFRA_2025_WTT_SOLID_COAL"
+       }
+     ]
+
+-------------------------------------------------------------------------------
+4.2 UPSTREAM WTT FUEL ACTIVITIES
+-------------------------------------------------------------------------------
+
+Description:
+Calculates upstream Well-To-Tank (WTT) emissions associated with fuel extraction,
+refining, and transport.
+
+[A] ENDPOINTS
+- GET    /api/v1/tenant/scope3/category3/fuel
+- GET    /api/v1/tenant/scope3/category3/fuel/{activity_id}
+- POST   /api/v1/tenant/scope3/category3/fuel
+- PATCH  /api/v1/tenant/scope3/category3/fuel/{activity_id}
+- DELETE /api/v1/tenant/scope3/category3/fuel/{activity_id}
+- POST   /api/v1/tenant/scope3/category3/fuel/{activity_id}/submit
+- POST   /api/v1/tenant/scope3/category3/fuel/{activity_id}/verify
+- POST   /api/v1/tenant/scope3/category3/fuel/{activity_id}/reject
+- POST   /api/v1/tenant/scope3/category3/fuel/{activity_id}/amend
+
+[B] SAMPLE CREATE REQUEST BODY
+{
+  "reporting_period": "FY 2021-22",
+  "facility_id": null,
+  "wtt_fuel_emission_factor_id": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
+  "fuel_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "unit_id": "7b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e",
+  "activity_date": "2021-12-09",
+  "fuel_quantity": 100.50,
+  "notes": "Upstream WTT coal consumption for plant boilers"
+}
+
+[C] CALCULATION FORMULA
+- calculated_kg_co2e = fuel_quantity * kg_co2e_per_unit
+- calculated_t_co2e = calculated_kg_co2e / 1000
+
+-------------------------------------------------------------------------------
+4.3 ELECTRICITY TRANSMISSION & DISTRIBUTION (T&D) LOSSES ACTIVITIES
+-------------------------------------------------------------------------------
+
+Description:
+Calculates Scope 3 Category 3 upstream emissions from electricity lost during
+transmission and distribution across the power grid.
+
+[A] ENDPOINTS
+- GET    /api/v1/tenant/scope3/category3/electricity
+- GET    /api/v1/tenant/scope3/category3/electricity/{activity_id}
+- POST   /api/v1/tenant/scope3/category3/electricity
+- PATCH  /api/v1/tenant/scope3/category3/electricity/{activity_id}
+- DELETE /api/v1/tenant/scope3/category3/electricity/{activity_id}
+- POST   /api/v1/tenant/scope3/category3/electricity/{activity_id}/submit
+- POST   /api/v1/tenant/scope3/category3/electricity/{activity_id}/verify
+- POST   /api/v1/tenant/scope3/category3/electricity/{activity_id}/reject
+- POST   /api/v1/tenant/scope3/category3/electricity/{activity_id}/amend
+
+[B] SAMPLE CREATE REQUEST BODY
+{
+  "reporting_period": "FY 2021-22",
+  "facility_id": null,
+  "electricity_emission_factor_id": null,
+  "activity_date": "2021-12-09",
+  "electricity_consumed_kwh": 10000.00,
+  "td_loss_rate": 0.1700,
+  "notes": "Facility Scope 3 Category 3 electricity grid T&D losses"
+}
+
+[C] CALCULATION FORMULA & DEFAULTS
+- Default Grid Factor: 0.7160000000 kg CO2e/kWh (CEA National Grid Average) if electricity_emission_factor_id is omitted/null.
+- Default T&D Loss Rate: 0.1700 (17.0% India National Grid Loss Rate) if td_loss_rate is omitted/null.
+- calculated_kg_co2e = electricity_consumed_kwh * grid_kg_co2e_per_kwh * td_loss_rate
+  Example: 10,000 kWh * 0.7160 * 0.1700 = 1,217.20 kg CO2e
+- calculated_t_co2e = calculated_kg_co2e / 1000 = 1.2172 t CO2e
+
+===============================================================================
+5. SUMMARY OF COMMON ERROR CODES & EDGE CASES
+===============================================================================
+
+HTTP Status | Error Code                              | Reason / Resolution
+-------------------------------------------------------------------------------
+400 Bad Req | SPEND_DATE_YEAR_MISMATCH               | `spend_date.year` does not match `spend_year`.
+400 Bad Req | INVALID_SPEND_YEAR                      | `spend_year` is outside allowed range (2020-2025).
+400 Bad Req | SCOPE3_ACTIVITY_IMMUTABLE               | Entry is in state "verified". Use /amend instead.
+404 Not Fnd | SCOPE3_CAT1_SPEND_ACTIVITY_NOT_FOUND    | Category 1 ID invalid or deleted.
+404 Not Fnd | SCOPE3_CAT2_SPEND_ACTIVITY_NOT_FOUND    | Category 2 ID invalid or deleted.
+404 Not Fnd | SCOPE3_CAT3_FUEL_ACTIVITY_NOT_FOUND     | Category 3 Fuel ID invalid or deleted.
+404 Not Fnd | SCOPE3_CAT3_ELEC_ACTIVITY_NOT_FOUND     | Category 3 Elec ID invalid or deleted.
+404 Not Fnd | SCOPE3_SPEND_FACTOR_NOT_FOUND           | USEEIO spend factor ID not found.
+404 Not Fnd | WTT_FUEL_FACTOR_NOT_FOUND               | WTT factor ID not found.
+422 Unproc  | INVALID_SPEND_AMOUNT                    | Spend amount in INR is <= 0.
+422 Unproc  | UNPROCESSABLE_ENTITY                    | Input validation failed (e.g. quantity <= 0).
+
+===============================================================================
+                            END OF DOCUMENTATION
+===============================================================================

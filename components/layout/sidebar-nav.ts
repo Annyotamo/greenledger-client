@@ -13,6 +13,7 @@ export type NavScopeChild = {
 export const MAIN_NAV: NavItem[] = [
     { label: "Dashboard", icon: "dashboard", href: "/dashboard" },
     { label: "Facilities", icon: "domain", href: "/facilities" },
+    { label: "Scope 3", icon: "hub", href: "/scope-3" },
     { label: "Reporting Periods", icon: "calendar_month", href: "/reporting-period" },
     { label: "Team Members", icon: "group", href: "/team-members" },
     { label: "Tenant Profile", icon: "business", href: "/tenant" },
@@ -32,6 +33,4 @@ export const BRSR_NAV_CHILDREN: NavScopeChild[] = [
 
 export const BOTTOM_NAV: NavItem[] = [
     { label: "Audit Logs", icon: "history", href: "/audit-logs" },
-    { label: "Settings", icon: "settings", href: "#" },
-    { label: "Help & Support", icon: "help", href: "#" },
 ];

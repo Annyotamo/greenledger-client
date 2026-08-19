@@ -10,21 +10,31 @@ type Scope2DonutProps = {
 
 /** Donut — SVG stroke rings matching designs/dashboard-light.html */
 export function Scope2Donut({ segments }: Scope2DonutProps) {
-    const [grid, solar, wind] = segments;
+    let cumulative = 0;
+    const circles = segments.map((seg) => {
+        const offset = cumulative;
+        cumulative += seg.percent;
+        return {
+            ...seg,
+            offset,
+        };
+    });
+
+    const totalPercent = Math.round(cumulative);
 
     return (
         <Card className="flex h-full flex-col">
             <CardHeader tone="flat">
                 <div className="flex items-center gap-2.5">
-                    <MaterialIcon name="bolt" size="sm" className="text-primary" />
+                    <MaterialIcon name="pie_chart" size="sm" className="text-primary" />
                     <h3 className="text-headline-sm font-semibold uppercase tracking-tight text-primary">
-                        Scope 2 Breakdown (Electricity)
+                        Gas Breakdown (% CO2e)
                     </h3>
                 </div>
                 <Badge
                     variant="active"
                     className="border-0 bg-secondary-container/20 text-on-secondary-container text-[9px]">
-                    Electricity Usage
+                    GHG Composition
                 </Badge>
             </CardHeader>
 
@@ -32,74 +42,58 @@ export function Scope2Donut({ segments }: Scope2DonutProps) {
                 <div className="flex items-center justify-between rounded-lg border border-outline-variant/30 bg-surface-container-low p-4">
                     <div className="space-y-0.5">
                         <p className="font-mono text-[10px] uppercase tracking-wider text-on-surface-variant">
-                            Carbon Intensity
+                            GHG Protocol Accounting
                         </p>
                         <p className="font-mono text-[18px] font-bold text-primary">
-                            {SCOPE2_CARBON_INTENSITY}{" "}
-                            <span className="text-[12px] font-normal opacity-70">gCO2e/kWh</span>
+                            100% <span className="text-[12px] font-normal opacity-70">Audited Factors</span>
                         </p>
                     </div>
                     <div className="flex items-center gap-1.5 rounded-full bg-secondary-container/30 px-2.5 py-1 text-secondary">
-                        <MaterialIcon name="trending_down" size="xs" className="font-bold" />
-                        <span className="font-mono text-[10px] font-bold uppercase">Trending Down</span>
+                        <MaterialIcon name="verified" size="xs" className="font-bold" />
+                        <span className="font-mono text-[10px] font-bold uppercase">IPCC / DEFRA</span>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-10 py-4">
-                    <div className="relative h-40 w-40 shrink-0">
-                        <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36" aria-hidden>
-                            <circle
-                                cx="18"
-                                cy="18"
-                                r="16"
-                                fill="none"
-                                stroke={grid?.color ?? "var(--gl-chart-esg-teal)"}
-                                strokeWidth="4"
-                                strokeDasharray={`${grid?.percent ?? 72}, 100`}
-                            />
-                            <circle
-                                cx="18"
-                                cy="18"
-                                r="16"
-                                fill="none"
-                                stroke={solar?.color ?? "var(--gl-chart-solar)"}
-                                strokeWidth="4"
-                                strokeDasharray={`${solar?.percent ?? 18}, 100`}
-                                strokeDashoffset={-(grid?.percent ?? 72)}
-                            />
-                            <circle
-                                cx="18"
-                                cy="18"
-                                r="16"
-                                fill="none"
-                                stroke={wind?.color ?? "var(--gl-chart-wind)"}
-                                strokeWidth="4"
-                                strokeDasharray={`${wind?.percent ?? 10}, 100`}
-                                strokeDashoffset={-((grid?.percent ?? 72) + (solar?.percent ?? 18))}
-                            />
+                <div className="flex flex-1 items-center justify-between gap-8 py-2">
+                    <div className="relative h-56 w-56 shrink-0">
+                        <svg className="h-full w-full -rotate-90 drop-shadow-sm" viewBox="0 0 36 36" aria-hidden>
+                            {circles.map((circle) => (
+                                <circle
+                                    key={circle.label}
+                                    cx="18"
+                                    cy="18"
+                                    r="15.5"
+                                    fill="none"
+                                    stroke={circle.color}
+                                    strokeWidth="4.5"
+                                    strokeDasharray={`${circle.percent}, 100`}
+                                    strokeDashoffset={-circle.offset}
+                                    className="transition-all duration-700 ease-out"
+                                />
+                            ))}
                         </svg>
                         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-                            <span className="font-mono text-[20px] font-bold leading-none text-primary">
-                                {(SCOPE2_TOTAL / 1000).toFixed(1)}k
+                            <span className="font-mono text-[28px] font-bold leading-none text-primary">
+                                {totalPercent}%
                             </span>
-                            <span className="mt-1 font-mono text-[9px] uppercase tracking-wider text-on-surface-variant">
-                                tCO2e
+                            <span className="mt-1.5 font-mono text-[10px] uppercase tracking-wider text-on-surface-variant font-medium">
+                                Accounted
                             </span>
                         </div>
                     </div>
 
-                    <div className="flex-1 space-y-4">
+                    <div className="flex-1 space-y-4 pr-2">
                         {segments.map((segment) => (
                             <div key={segment.label} className="flex items-center justify-between gap-4">
-                                <div className="flex min-w-0 items-center gap-2">
+                                <div className="flex min-w-0 items-center gap-2.5">
                                     <span
-                                        className="h-3 w-3 shrink-0 rounded-sm"
+                                        className="h-3.5 w-3.5 shrink-0 rounded-sm shadow-sm"
                                         style={{ backgroundColor: segment.color }}
                                     />
-                                    <span className="text-[13px] text-on-surface">{segment.label}</span>
+                                    <span className="text-[14px] font-medium text-on-surface truncate">{segment.label}</span>
                                 </div>
-                                <span className="shrink-0 font-mono text-[12px] font-bold text-primary">
-                                    {segment.percent}%
+                                <span className="shrink-0 font-mono text-[14px] font-bold text-primary">
+                                    {segment.percent.toFixed(1)}%
                                 </span>
                             </div>
                         ))}

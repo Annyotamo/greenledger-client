@@ -332,3 +332,160 @@ export interface ParsedEnergyDashboardData {
     documentsCount: number;
     raw: EnergyDashboardResponseDataDto;
 }
+
+// ==========================================
+// API DTO Types for GET /tenant/ghg/dashboard
+// ==========================================
+
+export interface GhgDashboardKpiSummaryDto {
+    total_emissions: {
+        current_tco2e: string;
+        previous_tco2e: string;
+        change_pct: string;
+        percentage_of_total: string;
+    };
+    scope_1: {
+        current_tco2e: string;
+        previous_tco2e: string;
+        change_pct: string;
+        percentage_of_total: string;
+    };
+    scope_2: {
+        current_tco2e: string;
+        previous_tco2e: string;
+        change_pct: string;
+        percentage_of_total: string;
+    };
+    scope_3: {
+        current_tco2e: string;
+        previous_tco2e: string;
+        change_pct: string;
+        percentage_of_total: string;
+    };
+    net_zero_progress?: {
+        reduction_pct: string;
+        status_label: string;
+        target_year: number;
+        baseline_year: number;
+    };
+}
+
+export interface MonthlyScopeComparisonItemDto {
+    month_key: string;
+    month_name: string;
+    year: number;
+    scope_1_tco2e: string;
+    scope_2_tco2e: string;
+    scope_3_tco2e: string;
+    total_tco2e: string;
+}
+
+export interface EmissionsTrendItemDto {
+    period_key: string;
+    actual_tco2e: string;
+    target_tco2e: string;
+    scope_1_tco2e: string;
+    scope_2_tco2e: string;
+    scope_3_tco2e: string;
+}
+
+export interface GasBreakdownItemDto {
+    gas_name: string;
+    mass_kg: string;
+    tco2e: string;
+    share_pct: string;
+}
+
+export interface SourceCategoryItemDto {
+    category_name: string;
+    scope_type: string;
+    tco2e: string;
+    share_pct: string;
+}
+
+export interface FuelBreakdownItemDto {
+    fuel_name: string;
+    quantity: string;
+    quantity_unit_symbol: string;
+    tco2e: string;
+    share_pct: string;
+}
+
+export interface SourceCategoriesDto {
+    categories?: SourceCategoryItemDto[];
+    fuel_breakdown?: FuelBreakdownItemDto[];
+}
+
+export interface TopFacilityItemDto {
+    facility_id: string;
+    facility_name: string;
+    facility_code: string;
+    country: string;
+    city: string;
+    facility_status: string;
+    is_active: boolean;
+    total_tco2e: string;
+    scope_1_tco2e: string;
+    scope_2_tco2e: string;
+    scope_3_tco2e: string;
+    yoy_change_pct: string;
+    data_quality?: {
+        measured_pct: string;
+        calculated_pct: string;
+        estimated_pct: string;
+    };
+}
+
+export interface RecentActivityItemDto {
+    activity_id: string;
+    scope: string;
+    facility_id?: string | null;
+    facility_name?: string | null;
+    activity_title: string;
+    activity_date: string;
+    tco2e: string;
+    status: string;
+    created_at: string;
+}
+
+export interface GhgDashboardResponseDataDto {
+    requested_scope?: string | null;
+    kpi_summary: GhgDashboardKpiSummaryDto;
+    monthly_scope_comparison?: MonthlyScopeComparisonItemDto[];
+    emissions_trend?: EmissionsTrendItemDto[];
+    gas_breakdown?: GasBreakdownItemDto[];
+    source_categories?: SourceCategoriesDto;
+    top_facilities?: TopFacilityItemDto[];
+    recent_activities?: RecentActivityItemDto[];
+    scope_1?: Record<string, unknown>;
+}
+
+export interface GhgDashboardApiResponse {
+    success: boolean;
+    status_code: number;
+    message: string;
+    data: GhgDashboardResponseDataDto;
+}
+
+export interface ParsedGhgDashboardData {
+    metricCards: MetricCardData[];
+    emissionsTrend: EmissionsTrendPoint[];
+    monthlyScopeComparison: ScopeComparisonMonth[];
+    gasBreakdown: Scope2Segment[];
+    fuelBreakdown: Scope1FuelItem[];
+    categories: {
+        categoryName: string;
+        scopeType: string;
+        tco2e: number;
+        sharePct: number;
+    }[];
+    facilityRows: FacilityRow[];
+    recentActivities: ActivityItem[];
+    netZeroProgress?: {
+        reductionPct: number;
+        statusLabel: string;
+        targetYear: number;
+        baselineYear: number;
+    };
+    raw: GhgDashboardResponseDataDto;
+}

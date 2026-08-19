@@ -58,13 +58,7 @@ export default function CreateFacilityPage() {
         if (!form.city.trim()) nextErrors.city = "City is required.";
         if (!form.addressLine1.trim()) nextErrors.addressLine1 = "Address Line 1 is required.";
 
-        // 2. operational_control and financial_control cannot both be True
-        if (form.operationalControl && form.financialControl) {
-            nextErrors.operationalControl = "Operational control and financial control cannot both be enabled.";
-            nextErrors.financialControl = "Operational control and financial control cannot both be enabled.";
-        }
-
-        // 3. operational_until must be after operational_since
+        // 2. operational_until must be after operational_since
         if (form.operationalSince && form.operationalUntil) {
             const since = new Date(form.operationalSince);
             const until = new Date(form.operationalUntil);
@@ -73,12 +67,12 @@ export default function CreateFacilityPage() {
             }
         }
 
-        // 4. floor_area_unit is required when floor_area is provided
+        // 3. floor_area_unit is required when floor_area is provided
         if (form.floorArea.trim() && !form.floorAreaUnit) {
             nextErrors.floorAreaUnit = "Floor area unit is required when floor area is specified.";
         }
 
-        // 5. ownershipPercent validation
+        // 4. ownershipPercent validation
         if (form.ownershipPercent) {
             const pct = Number(form.ownershipPercent);
             if (isNaN(pct) || pct < 0 || pct > 100) {
@@ -100,25 +94,23 @@ export default function CreateFacilityPage() {
 
         mutate(
             {
-                name: form.name,
-                description: form.description,
-                facilityCode: form.facilityCode,
+                name: form.name.trim(),
                 facilityType: form.facilityType,
-                operationalControl: form.operationalControl,
-                financialControl: form.financialControl,
-                ownershipPercent: Number(form.ownershipPercent),
-                country: form.country,
-                state: form.state,
-                city: form.city,
-                addressLine1: form.addressLine1,
-                addressLine2: form.addressLine2,
-                postalCode: form.postalCode,
-                timezone: form.timezone,
-                operationalSince: form.operationalSince,
-                operationalUntil: form.operationalUntil,
-                floorArea: form.floorArea,
-                floorAreaUnit: form.floorAreaUnit,
-                employeeCount: form.employeeCount,
+                country: form.country.trim(),
+                city: form.city.trim(),
+                addressLine1: form.addressLine1.trim(),
+                description: form.description.trim() || undefined,
+                facilityCode: form.facilityCode.trim() || undefined,
+                ownershipPercent: form.ownershipPercent !== "" ? Number(form.ownershipPercent) : undefined,
+                state: form.state.trim() || undefined,
+                addressLine2: form.addressLine2.trim() || undefined,
+                postalCode: form.postalCode.trim() || undefined,
+                timezone: form.timezone || undefined,
+                operationalSince: form.operationalSince || undefined,
+                operationalUntil: form.operationalUntil || undefined,
+                floorArea: form.floorArea ? Number(form.floorArea) : undefined,
+                floorAreaUnit: form.floorAreaUnit || undefined,
+                employeeCount: form.employeeCount ? Number(form.employeeCount) : undefined,
                 scope1Enabled: form.scope1Enabled,
                 scope2Enabled: form.scope2Enabled,
                 scope3Enabled: form.scope3Enabled,
@@ -230,58 +222,22 @@ export default function CreateFacilityPage() {
                             />
                             {errors.facilityType && <p className="text-xs text-error mt-1">{errors.facilityType}</p>}
                         </div>
-                        <div id="form-field-operationalControl" className="space-y-2 md:col-span-2">
+                        <div id="form-field-ownershipPercent" className="space-y-2">
                             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                Control & Ownership Settings
+                                Ownership Percentage (%)
                             </label>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                                <label className="flex items-center gap-3 cursor-pointer rounded-lg border border-outline-variant bg-white p-3 select-none">
-                                    <input
-                                        type="checkbox"
-                                        checked={form.operationalControl}
-                                        onChange={(event) => handleChange("operationalControl", event.target.checked)}
-                                        className="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
-                                    />
-                                    <div>
-                                        <span className="font-body-md text-body-md font-semibold text-primary block">Operational Control</span>
-                                        <span className="text-[10px] text-on-surface-variant">Authority to introduce policies</span>
-                                    </div>
-                                </label>
-
-                                <label className="flex items-center gap-3 cursor-pointer rounded-lg border border-outline-variant bg-white p-3 select-none">
-                                    <input
-                                        type="checkbox"
-                                        checked={form.financialControl}
-                                        onChange={(event) => handleChange("financialControl", event.target.checked)}
-                                        className="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
-                                    />
-                                    <div>
-                                        <span className="font-body-md text-body-md font-semibold text-primary block">Financial Control</span>
-                                        <span className="text-[10px] text-on-surface-variant">Direct financial benefits and risks</span>
-                                    </div>
-                                </label>
-
-                                <div id="form-field-ownershipPercent" className="space-y-1 bg-white border border-outline-variant rounded-lg p-3">
-                                    <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
-                                        Ownership Percentage (%)
-                                    </label>
-                                    <Input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        max="100"
-                                        value={form.ownershipPercent}
-                                        onChange={(event) => handleChange("ownershipPercent", event.target.value)}
-                                        placeholder="100.00"
-                                        className="w-full px-2.5 py-1.5 border border-outline-variant rounded bg-white font-body-md text-on-surface focus:ring-1 focus:ring-primary outline-none"
-                                    />
-                                    {errors.ownershipPercent && (
-                                        <p className="text-[10px] text-error mt-0.5">{errors.ownershipPercent}</p>
-                                    )}
-                                </div>
-                            </div>
-                            {(errors.operationalControl || errors.financialControl) && (
-                                <p className="text-xs text-error mt-1">{errors.operationalControl || errors.financialControl}</p>
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100"
+                                value={form.ownershipPercent}
+                                onChange={(event) => handleChange("ownershipPercent", event.target.value)}
+                                placeholder="100.00 (optional)"
+                                className="w-full px-4 py-2.5 border border-outline-variant rounded-lg font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none bg-white"
+                            />
+                            {errors.ownershipPercent && (
+                                <p className="text-xs text-error mt-1">{errors.ownershipPercent}</p>
                             )}
                         </div>
                     </div>

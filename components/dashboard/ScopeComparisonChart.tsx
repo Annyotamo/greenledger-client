@@ -12,6 +12,8 @@ type ScopeComparisonChartProps = {
  * (no Recharts; preserves symmetric 20×20 grid and exact bar proportions).
  */
 export function ScopeComparisonChart({ data }: ScopeComparisonChartProps) {
+    const maxVal = Math.max(...data.map((row) => Math.max(row.scope1, row.scope2)), 1);
+
     return (
         <Card>
             <CardHeader tone="flat" className="flex-wrap items-center gap-4 sm:flex-nowrap">
@@ -20,41 +22,44 @@ export function ScopeComparisonChart({ data }: ScopeComparisonChartProps) {
                     <div>
                         <h3 className="text-headline-sm font-semibold text-primary">Scope 1 vs. Scope 2 Comparison</h3>
                         <p className="font-mono text-[10px] uppercase text-on-surface-variant">
-                            Monthly tCO2e Distribution (Last 6 Months)
+                            Monthly tCO2e Distribution
                         </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-6">
-                    <LegendDot className="bg-primary-container" label="Scope 1 (Technical Navy)" />
-                    <LegendDot style={{ backgroundColor: "var(--gl-chart-esg-teal)" }} label="Scope 2 (ESG Green)" />
+                    <LegendDot className="bg-primary-container" label="Scope 1 (Direct)" />
+                    <LegendDot style={{ backgroundColor: "var(--gl-chart-esg-teal)" }} label="Scope 2 (Electricity)" />
                 </div>
             </CardHeader>
 
             <CardBody className="p-card-padding">
-                <div className="chart-grid-bg flex h-64 w-full items-end gap-12 border-b border-outline-variant px-6 pb-2">
-                    {data.map((row) => (
-                        <div key={row.month} className="flex h-full flex-1 items-end justify-center gap-2">
-                            <div
-                                className="w-6 rounded-t bg-primary-container shadow-sm transition-[height] duration-700 ease-out"
-                                style={{ height: `${row.scope1}%` }}
-                                role="img"
-                                aria-label={`${row.month} Scope 1 ${row.scope1}%`}
-                            />
-                            <div
-                                className="w-6 rounded-t shadow-sm transition-[height] duration-700 ease-out"
-                                style={{
-                                    backgroundColor: "var(--gl-chart-esg-teal)",
-                                    height: `${row.scope2}%`,
-                                }}
-                                role="img"
-                                aria-label={`${row.month} Scope 2 ${row.scope2}%`}
-                            />
-                        </div>
-                    ))}
+                <div className="chart-grid-bg flex h-64 w-full items-end gap-4 overflow-x-auto border-b border-outline-variant px-4 pb-2 scrollbar-thin">
+                    {data.map((row) => {
+                        const h1 = Math.min(100, Math.max(row.scope1 > 0 ? 4 : 0, Math.round((row.scope1 / maxVal) * 100)));
+                        const h2 = Math.min(100, Math.max(row.scope2 > 0 ? 4 : 0, Math.round((row.scope2 / maxVal) * 100)));
+
+                        return (
+                            <div key={row.month} className="flex h-full min-w-[40px] flex-1 items-end justify-center gap-1.5">
+                                <div
+                                    className="w-4 rounded-t bg-primary-container shadow-sm transition-[height] duration-700 ease-out"
+                                    style={{ height: `${h1}%` }}
+                                    title={`Scope 1: ${row.scope1.toFixed(2)} tCO2e`}
+                                />
+                                <div
+                                    className="w-4 rounded-t shadow-sm transition-[height] duration-700 ease-out"
+                                    style={{
+                                        backgroundColor: "var(--gl-chart-esg-teal)",
+                                        height: `${h2}%`,
+                                    }}
+                                    title={`Scope 2: ${row.scope2.toFixed(2)} tCO2e`}
+                                />
+                            </div>
+                        );
+                    })}
                 </div>
-                <div className="flex justify-between px-6 pt-3 font-mono text-[10px] uppercase tracking-widest text-on-surface-variant">
+                <div className="flex justify-between px-4 pt-3 font-mono text-[10px] uppercase tracking-widest text-on-surface-variant overflow-x-auto scrollbar-thin">
                     {data.map((d) => (
-                        <span key={d.month} className="flex-1 text-center">
+                        <span key={d.month} className="min-w-[40px] flex-1 text-center">
                             {d.month}
                         </span>
                     ))}

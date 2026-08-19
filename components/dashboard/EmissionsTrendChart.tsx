@@ -11,6 +11,29 @@ type EmissionsTrendChartProps = {
  * (symmetric chart-grid background, no Recharts grid overlay).
  */
 export function EmissionsTrendChart({ data = EMISSIONS_TREND }: EmissionsTrendChartProps) {
+    const chartPoints = data.length > 0 ? data : EMISSIONS_TREND;
+    const maxVal = Math.max(...chartPoints.map((d) => Math.max(d.actual, d.target)), 1) * 1.1;
+    const count = chartPoints.length;
+
+    const targetPath = chartPoints
+        .map((d, i) => {
+            const x = count > 1 ? (i / (count - 1)) * 1000 : 500;
+            const y = 180 - (d.target / maxVal) * 160;
+            return `${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
+        })
+        .join(" ");
+
+    const actualPath = chartPoints
+        .map((d, i) => {
+            const x = count > 1 ? (i / (count - 1)) * 1000 : 500;
+            const y = 180 - (d.actual / maxVal) * 160;
+            return `${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
+        })
+        .join(" ");
+
+    const lastActual = chartPoints[chartPoints.length - 1];
+    const lastY = lastActual ? 180 - (lastActual.actual / maxVal) * 160 : 115;
+
     return (
         <Card>
             <CardBody>
@@ -19,16 +42,12 @@ export function EmissionsTrendChart({ data = EMISSIONS_TREND }: EmissionsTrendCh
                         <MaterialIcon name="analytics" size="sm" className="text-primary" />
                         <div>
                             <h3 className="text-headline-sm font-semibold text-primary">
-                                Emissions Trends: Historical vs. Target
+                                Emissions Trends
                             </h3>
                             <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
                                 Metric: Tonnes of CO2 equivalent (tCO2e)
                             </p>
                         </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <LegendDot className="bg-primary" label="Actual" />
-                        <LegendDot className="bg-secondary" label="Target" />
                     </div>
                 </div>
 
@@ -40,7 +59,7 @@ export function EmissionsTrendChart({ data = EMISSIONS_TREND }: EmissionsTrendCh
                         aria-hidden>
                         {/* Target — dashed green */}
                         <path
-                            d="M0 150 L200 140 L400 135 L600 120 L800 110 L1000 100"
+                            d={targetPath}
                             fill="none"
                             stroke="var(--gl-data-green)"
                             strokeDasharray="4"
@@ -48,21 +67,21 @@ export function EmissionsTrendChart({ data = EMISSIONS_TREND }: EmissionsTrendCh
                         />
                         {/* Actual — solid blue */}
                         <path
-                            d="M0 180 L150 160 L300 170 L450 140 L600 130 L750 145 L1000 115"
+                            d={actualPath}
                             fill="none"
                             stroke="var(--gl-data-blue)"
                             strokeWidth="3"
                         />
                         <circle
                             cx="1000"
-                            cy="115"
+                            cy={lastY.toFixed(1)}
                             r="4"
                             fill="var(--gl-data-blue)"
                             className="drop-shadow-[0_0_4px_rgba(96,165,250,0.8)]"
                         />
                     </svg>
                     <div className="pointer-events-none absolute bottom-1 left-0 right-0 flex justify-between px-4 font-mono text-[10px] text-on-surface-variant">
-                        {data.map((point) => (
+                        {chartPoints.map((point) => (
                             <span key={point.month}>{point.month}</span>
                         ))}
                     </div>

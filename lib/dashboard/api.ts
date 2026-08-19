@@ -9,6 +9,14 @@ import type {
     EnergyTrendPoint,
     MetricCardData,
     Scope2Segment,
+    GhgDashboardApiResponse,
+    GhgDashboardResponseDataDto,
+    ParsedGhgDashboardData,
+    EmissionsTrendPoint,
+    ScopeComparisonMonth,
+    Scope1FuelItem,
+    FacilityRow,
+    ActivityItem,
 } from "./types";
 
 export function parseEnergyDashboardData(raw: EnergyDashboardResponseDataDto): ParsedEnergyDashboardData {
@@ -268,4 +276,208 @@ export async function getEnergyDashboard(): Promise<ParsedEnergyDashboardData> {
         throw new Error("Failed to load energy dashboard data");
     }
     return parseEnergyDashboardData(response.data.data);
+}
+
+// ==========================================
+// GHG Dashboard Parser & API Call
+// ==========================================
+
+export function parseGhgDashboardData(raw: GhgDashboardResponseDataDto): ParsedGhgDashboardData {
+    const kpi = raw.kpi_summary || {
+        total_emissions: { current_tco2e: "0", previous_tco2e: "0", change_pct: "0", percentage_of_total: "100" },
+        scope_1: { current_tco2e: "0", previous_tco2e: "0", change_pct: "0", percentage_of_total: "0" },
+        scope_2: { current_tco2e: "0", previous_tco2e: "0", change_pct: "0", percentage_of_total: "0" },
+        scope_3: { current_tco2e: "0", previous_tco2e: "0", change_pct: "0", percentage_of_total: "0" },
+    };
+
+    const totalEmissionsVal = Number(kpi.total_emissions?.current_tco2e || 0);
+    const scope1Val = Number(kpi.scope_1?.current_tco2e || 0);
+    const scope2Val = Number(kpi.scope_2?.current_tco2e || 0);
+    const scope3Val = Number(kpi.scope_3?.current_tco2e || 0);
+
+    const totalChangePct = Number(kpi.total_emissions?.change_pct || 0);
+    const scope1ChangePct = Number(kpi.scope_1?.change_pct || 0);
+    const scope2ChangePct = Number(kpi.scope_2?.change_pct || 0);
+    const scope3ChangePct = Number(kpi.scope_3?.change_pct || 0);
+
+    const scope1Share = Number(kpi.scope_1?.percentage_of_total || 0);
+    const scope2Share = Number(kpi.scope_2?.percentage_of_total || 0);
+    const scope3Share = Number(kpi.scope_3?.percentage_of_total || 0);
+
+    // 1. Metric Cards
+    const metricCards: MetricCardData[] = [
+        {
+            id: "total-emissions",
+            label: "Total Emissions",
+            icon: "leaderboard",
+            value: totalEmissionsVal,
+            unit: "tCO2e",
+            trend: {
+                value: `${totalChangePct >= 0 ? "+" : ""}${totalChangePct.toFixed(1)}%`,
+                direction: totalChangePct <= 0 ? "down" : "up",
+            },
+            progressPercent: 100,
+            progressClassName: "bg-primary",
+        },
+        {
+            id: "scope-1",
+            label: "Scope 1 Direct",
+            icon: "local_fire_department",
+            value: scope1Val,
+            unit: "tCO2e",
+            trend: {
+                value: `${scope1ChangePct >= 0 ? "+" : ""}${scope1ChangePct.toFixed(1)}%`,
+                direction: scope1ChangePct <= 0 ? "down" : "up",
+            },
+            statusLabel: `${scope1Share.toFixed(1)}% of total`,
+            progressPercent: Math.min(100, Math.max(0, scope1Share)),
+            progressClassName: "bg-orange-500",
+        },
+        {
+            id: "scope-2",
+            label: "Scope 2 Indirect",
+            icon: "bolt",
+            value: scope2Val,
+            unit: "tCO2e",
+            trend: {
+                value: `${scope2ChangePct >= 0 ? "+" : ""}${scope2ChangePct.toFixed(1)}%`,
+                direction: scope2ChangePct <= 0 ? "down" : "up",
+            },
+            statusLabel: `${scope2Share.toFixed(1)}% of total`,
+            progressPercent: Math.min(100, Math.max(0, scope2Share)),
+            progressClassName: "bg-blue-500",
+        },
+        {
+            id: "scope-3",
+            label: "Scope 3 Value Chain",
+            icon: "hub",
+            value: scope3Val,
+            unit: "tCO2e",
+            trend: {
+                value: `${scope3ChangePct >= 0 ? "+" : ""}${scope3ChangePct.toFixed(1)}%`,
+                direction: scope3ChangePct <= 0 ? "down" : "up",
+            },
+            statusLabel: `${scope3Share.toFixed(1)}% of total`,
+            progressPercent: Math.min(100, Math.max(0, scope3Share)),
+            progressClassName: "bg-emerald-500",
+        },
+    ];
+
+    // Net zero progress
+    const nz = kpi.net_zero_progress;
+    const netZeroProgress = nz
+        ? {
+              reductionPct: Number(nz.reduction_pct || 0),
+              statusLabel: nz.status_label || "On Track",
+              targetYear: nz.target_year || 2030,
+              baselineYear: nz.baseline_year || 2021,
+          }
+        : undefined;
+
+    // 2. Emissions Trend
+    const emissionsTrend: EmissionsTrendPoint[] = (raw.emissions_trend || []).map((item) => ({
+        month: item.period_key,
+        actual: Number(item.actual_tco2e || 0),
+        target: Number(item.target_tco2e || 0),
+    }));
+
+    // 3. Monthly Scope Comparison
+    const monthlyScopeComparison: ScopeComparisonMonth[] = (raw.monthly_scope_comparison || []).map((m) => ({
+        month: `${m.month_name.slice(0, 3)} '${m.year.toString().slice(2)}`,
+        scope1: Number(m.scope_1_tco2e || 0),
+        scope2: Number(m.scope_2_tco2e || 0),
+    }));
+
+    // 4. Gas Breakdown (or Scope Segments for Donut)
+    const GAS_COLORS: Record<string, string> = {
+        CO2: "#10b981",
+        CH4: "#60a5fa",
+        N2O: "#fb923c",
+        "Biogenic CO2": "#a855f7",
+    };
+
+    const gasBreakdown: Scope2Segment[] = (raw.gas_breakdown || []).map((g) => ({
+        label: g.gas_name,
+        percent: Number(g.share_pct || 0),
+        color: GAS_COLORS[g.gas_name] || "var(--gl-secondary)",
+    }));
+
+    // 5. Fuel Breakdown (Top 5 performing fuels)
+    const rawFuels = raw.source_categories?.fuel_breakdown || [];
+    const fuelBreakdown: Scope1FuelItem[] = [...rawFuels]
+        .sort((a, b) => Number(b.tco2e || 0) - Number(a.tco2e || 0))
+        .slice(0, 5)
+        .map((f) => ({
+            label: f.fuel_name,
+            value: Number(f.tco2e || 0),
+            unit: "tCO2e",
+            percent: Number(f.share_pct || 0),
+        }));
+
+    // 6. Categories
+    const categories = (raw.source_categories?.categories || []).map((c) => ({
+        categoryName: c.category_name,
+        scopeType: c.scope_type,
+        tco2e: Number(c.tco2e || 0),
+        sharePct: Number(c.share_pct || 0),
+    }));
+
+    // 7. Facility Rows (Top 5 performing facilities)
+    const rawFacilities = raw.top_facilities || [];
+    const facilityRows: FacilityRow[] = [...rawFacilities]
+        .sort((a, b) => Number(b.total_tco2e || 0) - Number(a.total_tco2e || 0))
+        .slice(0, 5)
+        .map((f) => {
+            const yoyVal = Number(f.yoy_change_pct || 0);
+            return {
+                id: f.facility_code || (f.facility_id ? f.facility_id.slice(0, 8) : "FAC"),
+                region: `${f.facility_name} (${f.city}, ${f.country})`,
+                status: f.is_active ? "ACTIVE" : "INACTIVE",
+                emissions: Number(f.total_tco2e || 0),
+                yoyChange: `${yoyVal >= 0 ? "+" : ""}${yoyVal.toFixed(1)}%`,
+                yoyDirection: yoyVal <= 0 ? "down" : "up",
+                dataQuality: Number(f.data_quality?.measured_pct || 100),
+            };
+        });
+
+    // 8. Recent Activities (Top 12 items)
+    const recentActivities: ActivityItem[] = (raw.recent_activities || [])
+        .slice(0, 12)
+        .map((act) => {
+            const isScope1 = act.scope === "Scope 1";
+            const isScope2 = act.scope === "Scope 2";
+            return {
+                id: act.activity_id,
+                icon: isScope1 ? "local_fire_department" : isScope2 ? "bolt" : "hub",
+                iconBgClassName: isScope1
+                    ? "bg-orange-500/10 text-orange-500"
+                    : isScope2
+                    ? "bg-blue-500/10 text-blue-500"
+                    : "bg-emerald-500/10 text-emerald-500",
+                iconColorClassName: isScope1 ? "text-orange-500" : isScope2 ? "text-blue-500" : "text-emerald-500",
+                title: act.activity_title,
+                subtitle: `${act.facility_name ? act.facility_name + " • " : ""}${act.activity_date} • ${Number(act.tco2e).toFixed(2)} tCO2e • ${act.status.toUpperCase()}`,
+            };
+        });
+
+    return {
+        metricCards,
+        emissionsTrend,
+        monthlyScopeComparison,
+        gasBreakdown,
+        fuelBreakdown,
+        categories,
+        facilityRows,
+        recentActivities,
+        netZeroProgress,
+        raw,
+    };
+}
+
+export async function getGhgDashboard(): Promise<ParsedGhgDashboardData> {
+    const response = await privateApi.get<GhgDashboardApiResponse>("/tenant/ghg/dashboard");
+    if (!response.data || !response.data.data) {
+        throw new Error("Failed to load GHG dashboard data");
+    }
+    return parseGhgDashboardData(response.data.data);
 }

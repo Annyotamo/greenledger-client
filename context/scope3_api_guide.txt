@@ -11,11 +11,22 @@ TABLE OF CONTENTS
 1. GLOBAL RULES, CONVENTIONS & LIFECYCLE STATE MACHINE
 2. SCOPE 3 CATEGORY 1: PURCHASED GOODS & SERVICES (SPEND-BASED)
 3. SCOPE 3 CATEGORY 2: CAPITAL GOODS (SPEND-BASED)
-4. SCOPE 3 CATEGORY 3: FUEL & ENERGY-RELATED ACTIVITIES (WTT & T&D LOSSES)
-   - 4.1 WTT Fuels & Measurement Units Lookup Endpoints
-   - 4.2 Upstream WTT Fuel Activities
-   - 4.3 Electricity Transmission & Distribution (T&D) Losses Activities
-5. SUMMARY OF COMMON ERROR CODES & EDGE CASES
+4. SCOPE 3 CATEGORY 4: UPSTREAM TRANSPORTATION AND DISTRIBUTION (SPEND-BASED)
+5. SCOPE 3 CATEGORY 3: FUEL & ENERGY-RELATED ACTIVITIES (WTT & T&D LOSSES)
+   - 5.1 WTT Fuels & Measurement Units Lookup Endpoints
+   - 5.2 Upstream WTT Fuel Activities
+   - 5.3 Electricity Transmission & Distribution (T&D) Losses Activities
+6. SCOPE 3 CATEGORY 5: WASTE GENERATED IN OPERATIONS
+   - 6.1 Waste Types & Treatment Methods Lookup
+   - 6.2 Waste Activity CRUD & Lifecycle Endpoints
+7. SCOPE 3 CATEGORY 6 (BUSINESS TRAVEL) & CATEGORY 7 (EMPLOYEE COMMUTING)
+   - 7.1 Multi-Modal Travel Activity Concept & Architecture
+   - 7.2 Travel Activity CRUD, Preview & Analytics Endpoints
+8. EMISSION FACTORS & MODEL LOOKUP ENDPOINTS FOR FRONTEND UIS
+   - 8.1 Car Types & Land Travel Emission Factors
+   - 8.2 Air Travel Emission Factors (Flights)
+   - 8.3 Sea Travel Emission Factors (Ferries)
+9. SUMMARY OF COMMON ERROR CODES & EDGE CASES
 
 ===============================================================================
 1. GLOBAL RULES, CONVENTIONS & LIFECYCLE STATE MACHINE
@@ -37,21 +48,18 @@ Every API response is wrapped in a standard structure:
   "error": null,
   "method": "POST",
   "path": "/api/v1/tenant/scope3/...",
-  "timestamp": "2026-08-18T12:00:00.000Z"
+  "timestamp": "2026-08-20T12:00:00.000Z"
 }
 
 [C] REPORTING PERIOD FORMAT
-- `reporting_period` is a MANUAL STRING LABEL typed by tenants (e.g., "FY 2021-22", "Q3 2021", "2024-H1").
-- No foreign key ID lookup is required for reporting_period.
+- `reporting_period_id` is a UUID foreign key pointing to the tenant's registered `reporting_periods` record.
+- In legacy spend endpoints, string labels (e.g. "FY 2021-22") are supported.
 
 [D] ACTIVITY LIFECYCLE STATE MACHINE & IMMUTABILITY
-- Status Values: "draft", "submitted", "verified", "rejected".
-- Role-based default status upon creation (`POST`):
-  * Tenant Admin / Tenant Owner -> Auto-defaults to "verified"
-  * Standard User -> Defaults to "submitted" (or "draft" if explicitly sent as "draft")
+- Status Values: "DRAFT", "SUBMITTED", "VERIFIED", "REJECTED".
+- Standard User -> Defaults to "SUBMITTED" (or "DRAFT" if explicitly sent as "DRAFT").
 - Immutability Rule:
-  * Entries in state "verified" CANNOT be edited (`PATCH`) or deleted (`DELETE`) directly.
-  * If a verified record needs correction, use the `/amend` endpoint.
+  * Entries in state "VERIFIED" CANNOT be edited (`PUT`/`PATCH`) or deleted (`DELETE`) directly.
   * Attempting to edit/delete a verified entry returns HTTP 400 with error_code: "SCOPE3_ACTIVITY_IMMUTABLE".
 
 ===============================================================================
@@ -64,113 +72,11 @@ using annual average exchange rates, and calculates emissions using US EPA USEEI
 factors (kg CO2e per USD) with full margin breakdowns.
 
 [A] ENDPOINTS
-
-1. List Category 1 Spend Entries
-   - Method & Path: GET /api/v1/tenant/scope3/category1/spend
-   - Query Parameters (all optional):
-     * reporting_period (string): Filter by string label (e.g. "FY 2021-22")
-     * facility_id (uuid)
-     * scope3_spend_emission_factor_id (uuid)
-     * status (string): "draft", "submitted", "verified", "rejected"
-     * spend_year (integer): 2020 to 2025
-     * spend_date (date string: YYYY-MM-DD)
-     * start_date / end_date (date strings)
-     * page (integer, default: 1)
-     * page_size (integer, default: 15)
-     * sort_by (string, default: "created_at")
-     * sort_order (string, "asc" or "desc", default: "desc")
-
-2. Get Single Category 1 Entry
-   - Method & Path: GET /api/v1/tenant/scope3/category1/spend/{activity_id}
-
-3. Create Category 1 Spend Entry
-   - Method & Path: POST /api/v1/tenant/scope3/category1/spend
-   - Request Body:
-     {
-       "reporting_period": "FY 2021-22",
-       "facility_id": "optional-uuid-or-null",
-       "scope3_spend_emission_factor_id": "ca68b110-59ba-4c62-b841-270138cc06dd",
-       "spend_date": "2021-12-09",
-       "spend_in_inr": 45000.00,
-       "spend_year": 2021,
-       "notes": "Procurement spend for Soybean Farming (NAICS 111110)"
-     }
-
-4. Update Category 1 Entry (Draft / Rejected only)
-   - Method & Path: PATCH /api/v1/tenant/scope3/category1/spend/{activity_id}
-   - Request Body (all fields optional):
-     {
-       "spend_in_inr": 50000.00,
-       "notes": "Updated invoice amount"
-     }
-
-5. Delete Category 1 Entry (Draft / Rejected only)
-   - Method & Path: DELETE /api/v1/tenant/scope3/category1/spend/{activity_id}
-
-6. Submit Entry for Review
-   - Method & Path: POST /api/v1/tenant/scope3/category1/spend/{activity_id}/submit
-
-7. Verify Entry (Reviewer / Admin only)
-   - Method & Path: POST /api/v1/tenant/scope3/category1/spend/{activity_id}/verify
-
-8. Reject Entry (Reviewer / Admin only)
-   - Method & Path: POST /api/v1/tenant/scope3/category1/spend/{activity_id}/reject
-   - Request Body:
-     {
-       "reason": "Invoice document is missing"
-     }
-
-9. Amend Verified Entry
-   - Method & Path: POST /api/v1/tenant/scope3/category1/spend/{activity_id}/amend
-   - Request Body:
-     {
-       "amended_from_id": "verified-activity-id",
-       "reporting_period": "FY 2021-22",
-       "facility_id": null,
-       "scope3_spend_emission_factor_id": "ca68b110-59ba-4c62-b841-270138cc06dd",
-       "spend_date": "2021-12-09",
-       "spend_in_inr": 48000.00,
-       "spend_year": 2021,
-       "notes": "Amended spend entry after internal audit"
-     }
-
-[B] CALCULATION FORMULA & MARGIN BREAKDOWN
-- USD/INR Conversion: spend_in_usd = spend_in_inr / annual_average_exchange_rate(spend_year)
-- Headline Emissions (With Margins):
-  * calculated_kg_co2e = spend_in_usd * kg_co2e_per_usd_with_margins
-  * calculated_t_co2e = calculated_kg_co2e / 1000
-- Producer Price Component (Without Margins):
-  * calculated_kg_co2e_without_margins = spend_in_usd * kg_co2e_per_usd_without_margins
-  * calculated_t_co2e_without_margins = calculated_kg_co2e_without_margins / 1000
-- Margin Component (Trade & Transport):
-  * margin_kg_co2e = spend_in_usd * margin_kg_co2e_per_usd
-  * margin_t_co2e = margin_kg_co2e / 1000
-
-[C] CATEGORY 1 EDGE CASES & VALIDATIONS
-- Date-Year Mismatch: `spend_date` year MUST equal `spend_year`.
-  Example: spend_date = "2024-05-10" and spend_year = 2021 -> Returns 400 SPEND_DATE_YEAR_MISMATCH.
-- Spend Amount: `spend_in_inr` must be strictly > 0 -> Returns 422 UNPROCESSABLE ENTITY if <= 0.
-- Allowed Spend Years: 2020 through 2025. Any other year -> Returns 400 INVALID_SPEND_YEAR.
-
-===============================================================================
-3. SCOPE 3 CATEGORY 2: CAPITAL GOODS (SPEND-BASED)
-===============================================================================
-
-Description:
-Identical calculation model, schemas, validation rules, exchange rates, and lifecycle
-state machine as Category 1, but dedicated to Capital Expenditure (equipment, machinery,
-buildings, vehicles).
-
-[A] ENDPOINTS
-- GET    /api/v1/tenant/scope3/category2/spend
-- GET    /api/v1/tenant/scope3/category2/spend/{activity_id}
-- POST   /api/v1/tenant/scope3/category2/spend
-- PATCH  /api/v1/tenant/scope3/category2/spend/{activity_id}
-- DELETE /api/v1/tenant/scope3/category2/spend/{activity_id}
-- POST   /api/v1/tenant/scope3/category2/spend/{activity_id}/submit
-- POST   /api/v1/tenant/scope3/category2/spend/{activity_id}/verify
-- POST   /api/v1/tenant/scope3/category2/spend/{activity_id}/reject
-- POST   /api/v1/tenant/scope3/category2/spend/{activity_id}/amend
+1. List Category 1 Spend Entries: GET /api/v1/tenant/scope3/category1/spend
+2. Get Single Category 1 Entry: GET /api/v1/tenant/scope3/category1/spend/{activity_id}
+3. Create Category 1 Spend Entry: POST /api/v1/tenant/scope3/category1/spend
+4. Update Category 1 Entry: PATCH /api/v1/tenant/scope3/category1/spend/{activity_id}
+5. Delete Category 1 Entry: DELETE /api/v1/tenant/scope3/category1/spend/{activity_id}
 
 [B] SAMPLE CREATE REQUEST BODY
 {
@@ -178,18 +84,32 @@ buildings, vehicles).
   "facility_id": null,
   "scope3_spend_emission_factor_id": "ca68b110-59ba-4c62-b841-270138cc06dd",
   "spend_date": "2021-12-09",
-  "spend_in_inr": 200000.00,
+  "spend_in_inr": 45000.00,
   "spend_year": 2021,
-  "notes": "Capital expenditure for agricultural machinery (NAICS 111110)"
+  "notes": "Procurement spend for Soybean Farming (NAICS 111110)"
 }
+
+===============================================================================
+3. SCOPE 3 CATEGORY 2: CAPITAL GOODS (SPEND-BASED)
+===============================================================================
+
+Description:
+Identical calculation model, schemas, validation rules, exchange rates, and lifecycle
+state machine as Category 1, but dedicated to Capital Expenditure (equipment, machinery, buildings).
+
+[A] ENDPOINTS
+- GET    /api/v1/tenant/scope3/category2/spend
+- GET    /api/v1/tenant/scope3/category2/spend/{activity_id}
+- POST   /api/v1/tenant/scope3/category2/spend
+- PATCH  /api/v1/tenant/scope3/category2/spend/{activity_id}
+- DELETE /api/v1/tenant/scope3/category2/spend/{activity_id}
 
 ===============================================================================
 4. SCOPE 3 CATEGORY 4: UPSTREAM TRANSPORTATION AND DISTRIBUTION (SPEND-BASED)
 ===============================================================================
 
 Description:
-Identical calculation model, schemas, validation rules, exchange rates, and lifecycle
-state machine as Category 1 & Category 2, but dedicated to Upstream Transportation
+Identical spend calculation model as Category 1 & 2, dedicated to Upstream Transportation
 and Distribution spend (freight transport, warehousing, 3PL logistics).
 
 [A] ENDPOINTS
@@ -198,239 +118,302 @@ and Distribution spend (freight transport, warehousing, 3PL logistics).
 - POST   /api/v1/tenant/scope3/category4/spend
 - PATCH  /api/v1/tenant/scope3/category4/spend/{activity_id}
 - DELETE /api/v1/tenant/scope3/category4/spend/{activity_id}
-- POST   /api/v1/tenant/scope3/category4/spend/{activity_id}/submit
-- POST   /api/v1/tenant/scope3/category4/spend/{activity_id}/verify
-- POST   /api/v1/tenant/scope3/category4/spend/{activity_id}/reject
-- POST   /api/v1/tenant/scope3/category4/spend/{activity_id}/amend
-
-[B] SAMPLE CREATE REQUEST BODY
-{
-  "reporting_period": "FY 2021-22",
-  "facility_id": null,
-  "scope3_spend_emission_factor_id": "ca68b110-59ba-4c62-b841-270138cc06dd",
-  "spend_date": "2021-12-09",
-  "spend_in_inr": 75000.00,
-  "spend_year": 2021,
-  "notes": "Upstream freight transportation spend for raw materials delivery"
-}
 
 ===============================================================================
 5. SCOPE 3 CATEGORY 3: FUEL & ENERGY-RELATED ACTIVITIES
 ===============================================================================
 
+5.1 WTT FUELS & MEASUREMENT UNITS LOOKUP ENDPOINTS
+- GET /api/v1/tenant/scope3/category3/wtt-fuels
+- GET /api/v1/tenant/scope3/category3/wtt-fuels/{fuel_id}/units
 
-Scope 3 Category 3 covers upstream emissions from fuels and energy not included in Scope 1 or 2:
-  4.1 WTT Fuels & Measurement Units Lookup
-  4.2 Upstream WTT Fuel Activities
-  4.3 Electricity Transmission & Distribution (T&D) Losses
-
--------------------------------------------------------------------------------
-4.1 WTT FUELS & MEASUREMENT UNITS LOOKUP ENDPOINTS
--------------------------------------------------------------------------------
-
-Frontend UI workflow for selecting WTT fuels:
-Step 1: Fetch list of WTT-supported fuels.
-Step 2: Fetch available units and emission factors for the selected fuel.
-
-1. List WTT Available Fuels
-   - Method & Path: GET /api/v1/tenant/scope3/category3/wtt-fuels
-   - Response Data Structure:
-     [
-       {
-         "fuel_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-         "fuel_name": "Coal (industrial)",
-         "fuel_slug": "coal-industrial",
-         "category_id": "...",
-         "category_name": "Solid fuels",
-         "units": [
-           {
-             "unit_id": "...",
-             "unit_name": "Tonne",
-             "unit_symbol": "tonnes",
-             "unit_type": "mass",
-             "wtt_emission_factor_id": "a1b2c3d4-...",
-             "kg_co2e": 418.14964,
-             "t_co2e": 0.41814964
-           },
-           {
-             "unit_id": "...",
-             "unit_name": "Kilowatt Hour (Net CV)",
-             "unit_symbol": "kWh (Net CV)",
-             "unit_type": "energy",
-             "wtt_emission_factor_id": "e5f6a7b8-...",
-             "kg_co2e": 0.05925,
-             "t_co2e": 0.00005925
-           }
-
-         ]
-       }
-     ]
-
-2. Get WTT Units & Factor Details for a Specific Fuel
-   - Method & Path: GET /api/v1/tenant/scope3/category3/wtt-fuels/{fuel_id}/units
-   - Response Data Structure:
-     [
-       {
-         "wtt_emission_factor_id": "a1b2c3d4-...",
-         "fuel_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-         "fuel_name": "Coal (industrial)",
-         "unit_id": "...",
-         "unit_symbol": "tonnes",
-         "kg_co2e": 418.14964,
-         "t_co2e": 0.41814964,
-         "source_reference_code": "DEFRA_2025_WTT_SOLID_COAL"
-       }
-     ]
-
--------------------------------------------------------------------------------
-4.2 UPSTREAM WTT FUEL ACTIVITIES
--------------------------------------------------------------------------------
-
-Description:
-Calculates upstream Well-To-Tank (WTT) emissions associated with fuel extraction,
-refining, and transport.
-
-[A] ENDPOINTS
+5.2 UPSTREAM WTT FUEL ACTIVITIES
 - GET    /api/v1/tenant/scope3/category3/fuel
 - GET    /api/v1/tenant/scope3/category3/fuel/{activity_id}
 - POST   /api/v1/tenant/scope3/category3/fuel
 - PATCH  /api/v1/tenant/scope3/category3/fuel/{activity_id}
 - DELETE /api/v1/tenant/scope3/category3/fuel/{activity_id}
-- POST   /api/v1/tenant/scope3/category3/fuel/{activity_id}/submit
-- POST   /api/v1/tenant/scope3/category3/fuel/{activity_id}/verify
-- POST   /api/v1/tenant/scope3/category3/fuel/{activity_id}/reject
-- POST   /api/v1/tenant/scope3/category3/fuel/{activity_id}/amend
 
-[B] SAMPLE CREATE REQUEST BODY
-{
-  "reporting_period": "FY 2021-22",
-  "facility_id": null,
-  "wtt_fuel_emission_factor_id": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
-  "fuel_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "unit_id": "7b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e",
-  "activity_date": "2021-12-09",
-  "fuel_quantity": 100.50,
-  "notes": "Upstream WTT coal consumption for plant boilers"
-}
-
-[C] CALCULATION FORMULA
-- calculated_kg_co2e = fuel_quantity * kg_co2e_per_unit
-- calculated_t_co2e = calculated_kg_co2e / 1000
-
--------------------------------------------------------------------------------
-4.3 ELECTRICITY TRANSMISSION & DISTRIBUTION (T&D) LOSSES ACTIVITIES
--------------------------------------------------------------------------------
-
-Description:
-Calculates Scope 3 Category 3 upstream emissions from electricity lost during
-transmission and distribution across the power grid.
-
-[A] ENDPOINTS
+5.3 ELECTRICITY TRANSMISSION & DISTRIBUTION (T&D) LOSSES ACTIVITIES
 - GET    /api/v1/tenant/scope3/category3/electricity
 - GET    /api/v1/tenant/scope3/category3/electricity/{activity_id}
 - POST   /api/v1/tenant/scope3/category3/electricity
 - PATCH  /api/v1/tenant/scope3/category3/electricity/{activity_id}
 - DELETE /api/v1/tenant/scope3/category3/electricity/{activity_id}
-- POST   /api/v1/tenant/scope3/category3/electricity/{activity_id}/submit
-- POST   /api/v1/tenant/scope3/category3/electricity/{activity_id}/verify
-- POST   /api/v1/tenant/scope3/category3/electricity/{activity_id}/reject
-- POST   /api/v1/tenant/scope3/category3/electricity/{activity_id}/amend
-
-[B] SAMPLE CREATE REQUEST BODY
-{
-  "reporting_period": "FY 2021-22",
-  "facility_id": null,
-  "electricity_emission_factor_id": null,
-  "activity_date": "2021-12-09",
-  "electricity_consumed_kwh": 10000.00,
-  "td_loss_rate": 0.1700,
-  "notes": "Facility Scope 3 Category 3 electricity grid T&D losses"
-}
-
-[C] CALCULATION FORMULA & DEFAULTS
-- Default Grid Factor: 0.7160000000 kg CO2e/kWh (CEA National Grid Average) if electricity_emission_factor_id is omitted/null.
-- Default T&D Loss Rate: 0.1700 (17.0% India National Grid Loss Rate) if td_loss_rate is omitted/null.
-- calculated_kg_co2e = electricity_consumed_kwh * grid_kg_co2e_per_kwh * td_loss_rate
-  Example: 10,000 kWh * 0.7160 * 0.1700 = 1,217.20 kg CO2e
-- calculated_t_co2e = calculated_kg_co2e / 1000 = 1.2172 t CO2e
 
 ===============================================================================
 6. SCOPE 3 CATEGORY 5: WASTE GENERATED IN OPERATIONS
 ===============================================================================
 
-Description:
-Tracks emissions from disposal and treatment of waste generated in tenant operations
-(e.g., Construction, Metal, Plastic, Refuse, Paper, Electrical items, Other).
-
 6.1 WASTE TYPES LOOKUP ENDPOINTS
 - GET /api/v1/tenant/scope3/category5/waste-types
-  Optional query param: ?category=Construction
-  Returns list of active waste types with unit_symbol ("tonnes") and a dictionary of
-  supported treatment methods with emission factors in kg CO2e & t CO2e per tonne.
-
 - GET /api/v1/tenant/scope3/category5/waste-types/{waste_type_id}
-  Returns detailed waste type information and supported treatment methods.
 
-6.2 WASTE ACTIVITY CRUD & LIFECYCLE ENDPOINTS
+6.2 WASTE ACTIVITY CRUD ENDPOINTS
 - GET    /api/v1/tenant/scope3/category5/waste
 - GET    /api/v1/tenant/scope3/category5/waste/{activity_id}
 - POST   /api/v1/tenant/scope3/category5/waste
 - PATCH  /api/v1/tenant/scope3/category5/waste/{activity_id}
 - DELETE /api/v1/tenant/scope3/category5/waste/{activity_id}
-- POST   /api/v1/tenant/scope3/category5/waste/{activity_id}/submit
-- POST   /api/v1/tenant/scope3/category5/waste/{activity_id}/verify
-- POST   /api/v1/tenant/scope3/category5/waste/{activity_id}/reject
-- POST   /api/v1/tenant/scope3/category5/waste/{activity_id}/amend
-
-[A] SAMPLE CREATE REQUEST BODY
-{
-  "reporting_period": "FY 2021-22",
-  "facility_id": null,
-  "waste_type_id": "faa2ea7e-1fe8-46e4-a349-68562c882cf8",
-  "treatment_method": "landfill",
-  "activity_date": "2021-12-09",
-  "waste_generated_tonnes": 10.5,
-  "notes": "10.5 tonnes of construction wood waste sent to landfill"
-}
-
-[B] SUPPORTED TREATMENT METHOD ENUM VALUES
-- "open_loop"
-- "closed_loop"
-- "incineration_energy_recovery"
-- "composting"
-- "landfill"
-- "anaerobic_digestion"
-
-[C] CALCULATION FORMULA
-- calculated_kg_co2e = waste_generated_tonnes * applied_kg_co2e_per_tonne
-  Example (Wood -> Landfill): 10.5 tonnes * 925.34348 kg CO2e/tonne = 9,716.106540 kg CO2e
-- calculated_t_co2e = calculated_kg_co2e / 1000 = 9.716107 t CO2e
 
 ===============================================================================
-7. SUMMARY OF COMMON ERROR CODES & EDGE CASES
+7. SCOPE 3 CATEGORY 6 (BUSINESS TRAVEL) & CATEGORY 7 (EMPLOYEE COMMUTING)
+===============================================================================
+
+-------------------------------------------------------------------------------
+7.1 MULTI-MODAL TRAVEL ACTIVITY CONCEPT & ARCHITECTURE
+-------------------------------------------------------------------------------
+A single Travel Activity log (e.g. "Global Sales Summit Q1" or "Employee Monthly Commute")
+can contain multiple itemized Trips / Segments across LAND, AIR, and SEA transport modes.
+
+Parent Entity: `TravelActivity`
+Child Entity:  `TravelActivityTrip` (ordered list of trips within a journey)
+
+Categories Supported:
+- `BUSINESS_TRAVEL` (Scope 3 Category 6)
+- `EMPLOYEE_COMMUTING` (Scope 3 Category 7)
+
+Transport Modes Supported per Trip:
+1. `LAND`: Requires `car_type_id`, `fuel_type` (diesel, petrol, hybrid, cng, lpg, unknown, phev, bev, general).
+2. `AIR`: Requires `haul_type` (Domestic, Short-haul, Long-haul, International), `cabin_class` (Average passenger, Economy class, Premium economy class, Business class, First class), `include_rf` (boolean).
+3. `SEA`: Requires `passenger_type` (Foot passenger, Car passenger, Average (all passenger)).
+
+Gas Factor Breakdown calculated per trip and aggregated at parent activity level:
+- total_kg_co2e, total_t_co2e
+- total_kg_co2, total_t_co2
+- total_kg_ch4, total_t_ch4
+- total_kg_n2o, total_t_n2o
+- Transport Mode Breakdowns: `land_t_co2e`, `air_t_co2e`, `sea_t_co2e`
+
+-------------------------------------------------------------------------------
+7.2 TRAVEL ACTIVITY CRUD, PREVIEW & ANALYTICS ENDPOINTS
+-------------------------------------------------------------------------------
+
+1. Preview Multi-Modal Travel Calculation (Dry-Run - No DB Save)
+   - Method & Path: POST /api/v1/tenant/scope3/travel/calculate
+   - Request Body:
+     {
+       "category": "BUSINESS_TRAVEL",
+       "trips": [
+         {
+           "trip_order": 1,
+           "transport_mode": "LAND",
+           "description": "Taxi to Heathrow Airport",
+           "car_type_id": "8d0bbc29-5c0b-45ea-8f97-24d7e6b90df7",
+           "fuel_type": "diesel",
+           "distance": 35.5,
+           "unit_id": "cc1a1096-4e41-4e6a-8fcf-f05c59a91c49",
+           "source_id": "ceea4ef9-1120-4c0f-9325-b5c5fca66400"
+         },
+         {
+           "trip_order": 2,
+           "transport_mode": "AIR",
+           "description": "Flight London (LHR) to NY (JFK)",
+           "haul_type": "Long-haul",
+           "cabin_class": "Business class",
+           "include_rf": true,
+           "distance": 5550.0,
+           "unit_id": "13d299f8-ae19-4501-b5c8-d1914103b57f",
+           "source_id": "ceea4ef9-1120-4c0f-9325-b5c5fca66400"
+         }
+       ]
+     }
+
+2. Create & Log Travel Activity
+   - Method & Path: POST /api/v1/tenant/scope3/travel
+   - Request Body:
+     {
+       "category": "BUSINESS_TRAVEL",
+       "title": "Global Sales Summit Q1",
+       "description": "London to New York client trip",
+       "facility_id": null,
+       "reporting_period_id": "29b47087-b1a3-4ccd-a86b-c4f17882bffa",
+       "start_date": "2026-03-10",
+       "end_date": "2026-03-15",
+       "status": "SUBMITTED",
+       "trips": [ ... ]
+     }
+
+3. Get Travel Activity Analytics Summary
+   - Method & Path: GET /api/v1/tenant/scope3/travel/summary
+   - Query Parameters:
+     * category (string, optional): "BUSINESS_TRAVEL" or "EMPLOYEE_COMMUTING"
+     * reporting_period_id (uuid, optional)
+   - Response Data Structure:
+     {
+       "category": "BUSINESS_TRAVEL",
+       "reporting_period_id": null,
+       "total_activities_count": 5,
+       "total_distance_km": "24850.5",
+       "total_kg_co2e": "8450.32015",
+       "total_t_co2e": "8.45032015",
+       "mode_breakdown": {
+         "LAND": "0.145205",
+         "AIR": "8.304535",
+         "SEA": "0.0005801"
+       }
+     }
+
+4. List Travel Activities
+   - Method & Path: GET /api/v1/tenant/scope3/travel
+   - Query Parameters:
+     * category (string, optional): "BUSINESS_TRAVEL" or "EMPLOYEE_COMMUTING"
+     * facility_id (uuid, optional)
+     * reporting_period_id (uuid, optional)
+     * status (string, optional): "SUBMITTED", "VERIFIED", "DRAFT"
+
+5. Get Single Travel Activity Detail
+   - Method & Path: GET /api/v1/tenant/scope3/travel/{activity_id}
+
+6. Update & Recalculate Travel Activity
+   - Method & Path: PUT /api/v1/tenant/scope3/travel/{activity_id}
+   - Request Body:
+     {
+       "title": "Updated Summit Title",
+       "status": "SUBMITTED",
+       "trips": [ ... ]
+     }
+
+7. Delete Travel Activity
+   - Method & Path: DELETE /api/v1/tenant/scope3/travel/{activity_id}
+
+===============================================================================
+8. EMISSION FACTORS & MODEL LOOKUP ENDPOINTS FOR FRONTEND UIS
+===============================================================================
+
+-------------------------------------------------------------------------------
+8.1 CAR TYPES & LAND TRAVEL EMISSION FACTORS
+-------------------------------------------------------------------------------
+
+1. List Car Type Categories
+   - Method & Path: GET /api/v1/tenant/emission-factors/car-types/categories
+   - Returns: List of distinct category strings (e.g. "Cars (by market segment)", "Cars (by size)", "Motorbike", "Taxis", "Bus", "Rail").
+
+2. List Car Types
+   - Method & Path: GET /api/v1/tenant/emission-factors/car-types
+   - Query Parameters:
+     * activity_category (string, optional): e.g. "Cars (by market segment)"
+     * source_id (uuid, optional)
+   - Response Data Structure:
+     [
+       {
+         "id": "8d0bbc29-5c0b-45ea-8f97-24d7e6b90df7",
+         "name": "Dual purpose 4X4",
+         "slug": "cars-by-market-segment-dual-purpose-4x4",
+         "activity_category": "Cars (by market segment)",
+         "source_id": "ceea4ef9-1120-4c0f-9325-b5c5fca66400",
+         "is_active": true
+       }
+     ]
+
+3. Get Single Car Type Detail
+   - Method & Path: GET /api/v1/tenant/emission-factors/car-types/{car_type_id}
+
+4. List Land Travel Emission Factors
+   - Method & Path: GET /api/v1/tenant/emission-factors/land-travel
+   - Query Parameters:
+     * car_type_id (uuid, optional)
+     * source_id (uuid, optional)
+   - Response Data Structure:
+     [
+       {
+         "id": "c44a8cd1-5dd5-4775-8187-f77b9db8b9cd",
+         "car_type": { "id": "...", "name": "Dual purpose 4X4" },
+         "unit": { "id": "...", "name": "Kilometer", "symbol": "km" },
+         "source": { "id": "...", "standard": "DEFRA", "version": "2024" },
+         "diesel": { "kg_co2e": "0.19973", "t_co2e": "0.00019973", "kg_co2": "0.19805", "kg_ch4": "0.000005", "kg_n2o": "0.00167" },
+         "petrol": { "kg_co2e": "0.20811", "t_co2e": "0.00020811", ... },
+         "hybrid": { ... },
+         "bev": { "kg_co2e": "0", ... },
+         "general": { ... }
+       }
+     ]
+
+5. Get Single Land Travel Factor Detail
+   - Method & Path: GET /api/v1/tenant/emission-factors/land-travel/{factor_id}
+
+-------------------------------------------------------------------------------
+8.2 AIR TRAVEL EMISSION FACTORS (FLIGHTS)
+-------------------------------------------------------------------------------
+
+1. List Flight Haul Types
+   - Method & Path: GET /api/v1/tenant/emission-factors/air-travel/haul-types
+   - Returns: ["Domestic", "Short-haul", "Long-haul", "International"]
+
+2. List Flight Cabin Classes
+   - Method & Path: GET /api/v1/tenant/emission-factors/air-travel/cabin-classes
+   - Returns: ["Average passenger", "Economy class", "Premium economy class", "Business class", "First class"]
+
+3. List Air Travel Emission Factors
+   - Method & Path: GET /api/v1/tenant/emission-factors/air-travel
+   - Query Parameters:
+     * haul_type (string, optional): e.g. "Long-haul"
+     * cabin_class (string, optional): e.g. "Business class"
+     * source_id (uuid, optional)
+   - Response Data Structure:
+     [
+       {
+         "id": "af82b16a-f2cf-4a02-8151-31e6af9b4733",
+         "haul_type": "Long-haul",
+         "cabin_class": "Business class",
+         "unit": { "symbol": "passenger.km" },
+         "source": { "standard": "DEFRA" },
+         "with_rf": { "kg_co2e": "0.3394", "t_co2e": "0.0003394", "kg_co2": "0.33652", "kg_ch4": "0.00002", "kg_n2o": "0.00285" },
+         "without_rf": { "kg_co2e": "0.20083", "t_co2e": "0.00020083", "kg_co2": "0.19795", "kg_ch4": "0.00002", "kg_n2o": "0.00285" }
+       }
+     ]
+
+4. Get Single Air Travel Factor Detail
+   - Method & Path: GET /api/v1/tenant/emission-factors/air-travel/{factor_id}
+
+-------------------------------------------------------------------------------
+8.3 SEA TRAVEL EMISSION FACTORS (FERRIES)
+-------------------------------------------------------------------------------
+
+1. List Ferry Passenger Types
+   - Method & Path: GET /api/v1/tenant/emission-factors/sea-travel/passenger-types
+   - Returns: ["Foot passenger", "Car passenger", "Average (all passenger)"]
+
+2. List Sea Travel Emission Factors
+   - Method & Path: GET /api/v1/tenant/emission-factors/sea-travel
+   - Query Parameters:
+     * passenger_type (string, optional): e.g. "Foot passenger"
+     * source_id (uuid, optional)
+   - Response Data Structure:
+     [
+       {
+         "id": "7656faf2-f6c1-4dee-bb19-ac1c7cdd819e",
+         "passenger_type": "Foot passenger",
+         "unit": { "symbol": "passenger.km" },
+         "source": { "standard": "DEFRA" },
+         "general": { "kg_co2e": "0.01871", "t_co2e": "0.00001871", "kg_co2": "0.01848", "kg_ch4": "0.00001", "kg_n2o": "0.00022" }
+       }
+     ]
+
+3. Get Single Sea Travel Factor Detail
+   - Method & Path: GET /api/v1/tenant/emission-factors/sea-travel/{factor_id}
+
+===============================================================================
+9. SUMMARY OF COMMON ERROR CODES & EDGE CASES
 ===============================================================================
 
 HTTP Status | Error Code                              | Reason / Resolution
 -------------------------------------------------------------------------------
 400 Bad Req | SPEND_DATE_YEAR_MISMATCH               | `spend_date.year` does not match `spend_year`.
 400 Bad Req | INVALID_SPEND_YEAR                      | `spend_year` is outside allowed range (2020-2025).
-400 Bad Req | SCOPE3_ACTIVITY_IMMUTABLE               | Entry is in state "verified". Use /amend instead.
+400 Bad Req | SCOPE3_ACTIVITY_IMMUTABLE               | Entry is in state "VERIFIED". Use /amend instead.
 400 Bad Req | INVALID_WASTE_TREATMENT_METHOD          | Method not supported/active for selected waste type.
 400 Bad Req | INVALID_WASTE_QUANTITY                  | Quantity generated in tonnes is <= 0.
-404 Not Fnd | SCOPE3_CAT1_SPEND_ACTIVITY_NOT_FOUND    | Category 1 ID invalid or deleted.
-404 Not Fnd | SCOPE3_CAT2_SPEND_ACTIVITY_NOT_FOUND    | Category 2 ID invalid or deleted.
-404 Not Fnd | SCOPE3_CAT3_FUEL_ACTIVITY_NOT_FOUND     | Category 3 Fuel ID invalid or deleted.
-404 Not Fnd | SCOPE3_CAT3_ELEC_ACTIVITY_NOT_FOUND     | Category 3 Elec ID invalid or deleted.
-404 Not Fnd | SCOPE3_CAT4_SPEND_ACTIVITY_NOT_FOUND    | Category 4 ID invalid or deleted.
-404 Not Fnd | SCOPE3_CAT5_WASTE_ACTIVITY_NOT_FOUND    | Category 5 ID invalid or deleted.
-404 Not Fnd | WASTE_TYPE_NOT_FOUND                    | Selected WasteType ID invalid.
-404 Not Fnd | WASTE_TREATMENT_FACTOR_NOT_FOUND        | Waste treatment factor record missing.
-404 Not Fnd | SCOPE3_SPEND_FACTOR_NOT_FOUND           | USEEIO spend factor ID not found.
-404 Not Fnd | WTT_FUEL_FACTOR_NOT_FOUND               | WTT factor ID not found.
+400 Bad Req | HTTP_400_BAD_REQUEST                    | Missing required mode trip parameter (e.g. car_type_id for LAND).
+404 Not Fnd | REPORTING_PERIOD_NOT_FOUND              | `reporting_period_id` invalid or doesn't belong to tenant.
+404 Not Fnd | CAR_TYPE_NOT_FOUND                      | CarType UUID invalid or not found.
+404 Not Fnd | LAND_TRAVEL_FACTOR_NOT_FOUND            | Land travel emission factor not found for selection.
+404 Not Fnd | AIR_TRAVEL_FACTOR_NOT_FOUND             | Flight factor not found for haul_type and cabin_class.
+404 Not Fnd | SEA_TRAVEL_FACTOR_NOT_FOUND             | Ferry factor not found for passenger_type.
+404 Not Fnd | TRAVEL_ACTIVITY_NOT_FOUND               | Travel activity ID invalid or not found.
 422 Unproc  | INVALID_SPEND_AMOUNT                    | Spend amount in INR is <= 0.
-422 Unproc  | UNPROCESSABLE_ENTITY                    | Input validation failed (e.g. quantity <= 0).
+422 Unproc  | UNPROCESSABLE_ENTITY                    | Input validation failed (e.g. distance <= 0).
 
 ===============================================================================
                             END OF DOCUMENTATION
 ===============================================================================
-

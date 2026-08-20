@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getBrsrEnergyConsumption, postBrsrWaterDisclosure, postBrsrWasteDisclosure, postBrsrAirDisclosure } from "./api";
+import { getBrsrEnergyConsumption, postBrsrWaterDisclosure, postBrsrWasteDisclosure, postBrsrAirDisclosure, getBrsrAirStackPresets } from "./api";
 import type {
     BrsrEnergyConsumptionData,
     BrsrWaterDisclosurePayload,
@@ -10,6 +10,7 @@ import type {
     BrsrWasteDisclosureData,
     BrsrAirDisclosurePayload,
     BrsrAirDisclosureData,
+    BrsrAirStackPresetsData,
 } from "./types";
 
 export function useBrsrEnergyConsumption(payload: {
@@ -57,5 +58,13 @@ export function useBrsrAirDisclosure(payload: BrsrAirDisclosurePayload) {
         queryKey: ["brsr-air-disclosure", payload],
         queryFn: () => postBrsrAirDisclosure(payload),
         enabled: !!payload.financial_year_label && payload.stacks?.length > 0,
+    });
+}
+
+export function useBrsrAirStackPresets() {
+    return useQuery<BrsrAirStackPresetsData, Error>({
+        queryKey: ["brsr-air-stack-presets"],
+        queryFn: getBrsrAirStackPresets,
+        staleTime: 5 * 60 * 1000,
     });
 }

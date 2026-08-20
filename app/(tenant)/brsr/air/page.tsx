@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format, parseISO, isValid } from "date-fns";
-import { useBrsrAirDisclosure } from "@/lib/brsr/hooks";
+import { useBrsrAirDisclosure, useBrsrAirStackPresets } from "@/lib/brsr/hooks";
 import { postBrsrAirReport } from "@/lib/brsr/api";
 import { BrsrAirReportModal } from "@/components/brsr/BrsrAirReportModal";
 import { BrsrDocumentUploadSection } from "@/components/brsr/BrsrDocumentUploadSection";
@@ -21,12 +21,81 @@ import {
 } from "@/components/ui/table";
 import type {
     AttachedUnitEnum,
+    StackCategoryEnum,
     BrsrAirDisclosurePayload,
     BrsrAirStackInput,
     BrsrAirReadingInput,
     BrsrAirOtherPollutantInput,
     BrsrAirGasDetailMetric,
 } from "@/lib/brsr/types";
+
+const STACK_CATEGORIES: StackCategoryEnum[] = [
+    "Sponge iron / DRI",
+    "Steel melting",
+    "Ferro alloy",
+    "Blast furnace",
+    "Sinter plant",
+    "Pellet plant",
+    "Coke oven",
+    "Captive power",
+    "Other",
+];
+
+const DEFAULT_STACK_PRESETS: Record<string, string[]> = {
+    "Sponge iron / DRI": [
+        "Rotary Kiln No. 1 & 2 (150 TPD each, common stack)",
+        "Rotary Kiln No. 3 (100 TPD)",
+        "Rotary Kiln No. 4 (100 TPD)",
+        "De-dusting System DRI Kiln 1",
+        "De-dusting System DRI Kiln 2",
+        "Cooler Building De-dusting Stack",
+        "Product Handling & Screening Stack",
+        "Raw Material Handling (Coal/Iron Ore) De-dusting",
+        "Magnetic Separator De-dusting Stack",
+        "Coal Crusher & Screening De-dusting Stack",
+        "Iron Ore Crusher De-dusting Stack",
+        "Dolomite Handling De-dusting Stack",
+        "Waste Heat Recovery Boiler (WHRB) Stack",
+        "ABC (After Burning Chamber) Emergency Chimney",
+        "Char Handling & Separation De-dusting Stack",
+    ],
+    "Steel melting": [
+        "Induction Furnace Primary Fume Extraction Stack",
+        "Induction Furnace Secondary Fume Extraction Stack",
+        "Electric Arc Furnace (EAF) Primary Stack",
+        "Ladling & Tapping De-dusting Stack",
+    ],
+    "Ferro alloy": [
+        "Submerged Arc Furnace (SAF) Stack No. 1",
+        "Submerged Arc Furnace (SAF) Stack No. 2",
+        "SAF Raw Material Handling De-dusting Stack",
+        "Metal Tapping & Casting Fume Extraction Stack",
+        "Crushing & Screening Plant De-dusting Stack",
+        "Slag Processing & Metal Recovery De-dusting",
+    ],
+    "Blast furnace": [
+        "Blast Furnace Cast House De-dusting Stack",
+        "Blast Furnace Stove Chimney",
+        "Stockhouse De-dusting Stack",
+    ],
+    "Sinter plant": [
+        "Sinter Machine Main Exhaust Chimney",
+        "Sinter Discharge & Cooling De-dusting Stack",
+    ],
+    "Pellet plant": [
+        "Induration Furnace Main Chimney",
+        "Pellet Handling & Screening De-dusting Stack",
+    ],
+    "Coke oven": [
+        "Coke Oven Battery Combustion Stack",
+    ],
+    "Captive power": [
+        "Captive Power Boiler Chimney 1",
+        "AFBC / CFBC Boiler Stack",
+        "DG Set Emergency Stack",
+    ],
+    "Other": [],
+};
 
 const ATTACHED_UNITS: AttachedUnitEnum[] = [
     "DRI",
@@ -53,8 +122,10 @@ const createCleanReading = (): BrsrAirReadingInput => ({
 });
 
 const createCleanStack = (): BrsrAirStackInput => ({
-    stack_name: "",
-    attached_unit: "Boiler",
+    stack_category: "Sponge iron / DRI",
+    stack_title: "Rotary Kiln No. 1 & 2 (150 TPD each, common stack)",
+    stack_name: "Rotary Kiln No. 1 & 2 (150 TPD each, common stack)",
+    attached_unit: "Kiln",
     operating_hours_per_year: "" as unknown as number,
     permitted_limits: {
         permitted_limit_nox: { value: "" as unknown as number, unit: "mg_per_nm3" },
@@ -71,8 +142,10 @@ const createCleanStack = (): BrsrAirStackInput => ({
 
 // Demo stack payload for default initial dashboard view
 const DEMO_STACK_1: BrsrAirStackInput = {
-    stack_name: "Main Boiler Stack 01",
-    attached_unit: "Boiler",
+    stack_category: "Sponge iron / DRI",
+    stack_title: "Rotary Kiln No. 1 & 2 (150 TPD each, common stack)",
+    stack_name: "Rotary Kiln No. 1 & 2 (150 TPD each, common stack)",
+    attached_unit: "Kiln",
     operating_hours_per_year: 7200,
     permitted_limits: {
         permitted_limit_nox: { value: 300, unit: "mg_per_nm3" },
@@ -164,6 +237,10 @@ function DatePickerInput({
 export default function BrsrAirPage() {
     // Form Input States
     const [fyLabel, setFyLabel] = useState("");
+
+    // Fetch Stack Presets from API
+    const { data: presetsData } = useBrsrAirStackPresets();
+    const categoriesList = presetsData?.categories && presetsData.categories.length > 0 ? presetsData.categories : STACK_CATEGORIES;
 
     // Dynamic Stacks Input State
     const [stacks, setStacks] = useState<BrsrAirStackInput[]>([createCleanStack()]);
@@ -284,61 +361,67 @@ export default function BrsrAirPage() {
     const handleGenerate = () => {
         setActivePayload({
             financial_year_label: fyLabel || "FY 2024-25",
-            stacks: stacks.map((s, idx) => ({
-                stack_name: s.stack_name || `Stack #${idx + 1}`,
-                attached_unit: s.attached_unit || "Boiler",
-                operating_hours_per_year: Number(s.operating_hours_per_year) || 0,
-                permitted_limits: {
-                    permitted_limit_nox: {
-                        value: Number(s.permitted_limits?.permitted_limit_nox?.value) || 0,
-                        unit: "mg_per_nm3",
+            stacks: stacks.map((s, idx) => {
+                const cat = s.stack_category || "Sponge iron / DRI";
+                const title = s.stack_title || s.stack_name || `Industrial Stack #${idx + 1}`;
+                return {
+                    stack_category: cat,
+                    stack_title: title,
+                    stack_name: title,
+                    attached_unit: s.attached_unit || "Kiln",
+                    operating_hours_per_year: Number(s.operating_hours_per_year) || 0,
+                    permitted_limits: {
+                        permitted_limit_nox: {
+                            value: Number(s.permitted_limits?.permitted_limit_nox?.value) || 0,
+                            unit: "mg_per_nm3",
+                        },
+                        permitted_limit_sox: {
+                            value: Number(s.permitted_limits?.permitted_limit_sox?.value) || 0,
+                            unit: "mg_per_nm3",
+                        },
+                        permitted_limit_pm: {
+                            value: Number(s.permitted_limits?.permitted_limit_pm?.value) || 0,
+                            unit: "mg_per_nm3",
+                        },
+                        permitted_flow_rate: {
+                            value: Number(s.permitted_limits?.permitted_flow_rate?.value) || 0,
+                            unit: "nm3_per_hour",
+                        },
                     },
-                    permitted_limit_sox: {
-                        value: Number(s.permitted_limits?.permitted_limit_sox?.value) || 0,
-                        unit: "mg_per_nm3",
-                    },
-                    permitted_limit_pm: {
-                        value: Number(s.permitted_limits?.permitted_limit_pm?.value) || 0,
-                        unit: "mg_per_nm3",
-                    },
-                    permitted_flow_rate: {
-                        value: Number(s.permitted_limits?.permitted_flow_rate?.value) || 0,
-                        unit: "nm3_per_hour",
-                    },
-                },
-                report_number: s.report_number || null,
-                is_pop_monitored: !!s.is_pop_monitored,
-                is_voc_monitored: !!s.is_voc_monitored,
-                is_hap_monitored: !!s.is_hap_monitored,
-                readings: s.readings.map((r) => ({
-                    sampling_date: r.sampling_date || format(new Date(), "yyyy-MM-dd"),
-                    gas_flow_rate: {
-                        value: Number(r.gas_flow_rate?.value) || 0,
-                        unit: "nm3_per_hour",
-                    },
-                    nox: {
-                        value: Number(r.nox?.value) || 0,
-                        unit: "mg_per_nm3",
-                    },
-                    sox: {
-                        value: Number(r.sox?.value) || 0,
-                        unit: "mg_per_nm3",
-                    },
-                    particulate_matter: {
-                        value: Number(r.particulate_matter?.value) || 0,
-                        unit: "mg_per_nm3",
-                    },
-                    pop: s.is_pop_monitored && r.pop?.value !== undefined && r.pop?.value !== null && (r.pop?.value as any) !== ""
-                        ? { value: Number(r.pop.value) || 0, unit: "mg_per_nm3" }
-                        : null,
-                    voc: s.is_voc_monitored && r.voc?.value !== undefined && r.voc?.value !== null && (r.voc?.value as any) !== ""
-                        ? { value: Number(r.voc.value) || 0, unit: "mg_per_nm3" }
-                        : null,
-                    hap: s.is_hap_monitored && r.hap?.value !== undefined && r.hap?.value !== null && (r.hap?.value as any) !== ""
-                        ? { value: Number(r.hap.value) || 0, unit: "mg_per_nm3" }
-                        : null,
-                })),
-            })),
+                    report_number: s.report_number || null,
+                    is_pop_monitored: !!s.is_pop_monitored,
+                    is_voc_monitored: !!s.is_voc_monitored,
+                    is_hap_monitored: !!s.is_hap_monitored,
+                    readings: s.readings.map((r) => ({
+                        sampling_date: r.sampling_date || format(new Date(), "yyyy-MM-dd"),
+                        gas_flow_rate: {
+                            value: Number(r.gas_flow_rate?.value) || 0,
+                            unit: "nm3_per_hour",
+                        },
+                        nox: {
+                            value: Number(r.nox?.value) || 0,
+                            unit: "mg_per_nm3",
+                        },
+                        sox: {
+                            value: Number(r.sox?.value) || 0,
+                            unit: "mg_per_nm3",
+                        },
+                        particulate_matter: {
+                            value: Number(r.particulate_matter?.value) || 0,
+                            unit: "mg_per_nm3",
+                        },
+                        pop: s.is_pop_monitored && r.pop?.value !== undefined && r.pop?.value !== null && (r.pop?.value as any) !== ""
+                            ? { value: Number(r.pop.value) || 0, unit: "mg_per_nm3" }
+                            : null,
+                        voc: s.is_voc_monitored && r.voc?.value !== undefined && r.voc?.value !== null && (r.voc?.value as any) !== ""
+                            ? { value: Number(r.voc.value) || 0, unit: "mg_per_nm3" }
+                            : null,
+                        hap: s.is_hap_monitored && r.hap?.value !== undefined && r.hap?.value !== null && (r.hap?.value as any) !== ""
+                            ? { value: Number(r.hap.value) || 0, unit: "mg_per_nm3" }
+                            : null,
+                    })),
+                };
+            }),
             others: others
                 .filter((o) => o.label.trim() !== "")
                 .map((o) => ({ label: o.label, quantity: Number(o.quantity) || 0 })),
@@ -350,11 +433,6 @@ export default function BrsrAirPage() {
         setFyLabel("");
         setStacks([createCleanStack()]);
         setOthers([]);
-        setActivePayload({
-            financial_year_label: "",
-            stacks: [],
-            others: [],
-        });
     };
 
     const handleDownloadReport = async (payload: BrsrAirDisclosurePayload) => {
@@ -395,7 +473,7 @@ export default function BrsrAirPage() {
     const plantTotals = totals?.plant_total_per_pollutant;
     const plantAvgs = totals?.plant_average_concentration;
     const plantGasDetails = totals?.plant_gas_details;
-    const calculatedStacks = totals?.stacks || totals?.stack_results || [];
+    const calculatedStacks = totals?.stack_results || totals?.stacks || [];
 
     return (
         <div className="space-y-8 max-w-7xl mx-auto animate-fade-up">
@@ -483,69 +561,150 @@ export default function BrsrAirPage() {
                                 </Button>
                             </div>
 
-                            {stacks.map((stack, stackIdx) => (
-                                <div
-                                    key={stackIdx}
-                                    className="rounded-2xl border border-outline-variant/80 bg-surface-container-lowest p-5 space-y-5 shadow-sm">
-                                    {/* Stack Top Header */}
-                                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 pb-3">
-                                        <div className="flex items-center gap-3">
-                                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-black font-mono text-xs font-bold shadow-sm border-1 text-blue-600">
-                                                {stackIdx + 1}
-                                            </span>
-                                            <input
-                                                type="text"
-                                                value={stack.stack_name}
-                                                onChange={(e) => handleUpdateStackField(stackIdx, "stack_name", e.target.value)}
-                                                placeholder={`Stack Name (e.g. Main Boiler Stack ${stackIdx + 1})`}
-                                                className="font-sans text-sm font-bold text-on-surface border-b border-outline-variant/60 hover:border-primary focus:border-primary focus:outline-none px-2 py-1 min-w-[220px]"
-                                            />
+                            {stacks.map((stack, stackIdx) => {
+                                const currentCat = stack.stack_category || "Sponge iron / DRI";
+                                const presetsForCat = presetsData?.presets?.[currentCat] || DEFAULT_STACK_PRESETS[currentCat] || [];
+
+                                return (
+                                    <div
+                                        key={stackIdx}
+                                        className="rounded-2xl border border-outline-variant/80 bg-surface-container-lowest p-5 space-y-5 shadow-sm">
+                                        {/* Stack Top Header */}
+                                        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 pb-3">
+                                            <div className="flex items-center gap-3">
+                                                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-blue-600 font-mono text-xs font-bold shadow-sm border border-outline-variant/40">
+                                                    {stackIdx + 1}
+                                                </span>
+                                                <div>
+                                                    <h4 className="font-sans text-sm font-bold text-on-surface">
+                                                        {stack.stack_title || stack.stack_name || `Industrial Stack #${stackIdx + 1}`}
+                                                    </h4>
+                                                    <span className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+                                                        Category: {currentCat}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-3">
+                                                {stacks.length > 1 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemoveStack(stackIdx)}
+                                                        className="text-error hover:text-error/80 text-xs flex items-center gap-1 font-semibold transition px-2 py-1 rounded hover:bg-error/10">
+                                                        <MaterialIcon name="delete" size="sm" />
+                                                        <span>Delete Stack</span>
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
 
-                                        <div className="flex items-center gap-3">
-                                            {stacks.length > 1 && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleRemoveStack(stackIdx)}
-                                                    className="text-error hover:text-error/80 text-xs flex items-center gap-1 font-semibold transition px-2 py-1 rounded hover:bg-error/10">
-                                                    <MaterialIcon name="delete" size="sm" />
-                                                    <span>Delete Stack</span>
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
+                                        {/* Stack Category, Title, Attached Unit & Operating Hours */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-surface-container-low/50 p-3.5 rounded-xl border border-outline-variant/40">
+                                            <div className="space-y-1">
+                                                <label className="text-[11px] font-semibold text-on-surface-variant block">
+                                                    Stack Category <span className="text-error">*</span>
+                                                </label>
+                                                <select
+                                                    value={currentCat}
+                                                    onChange={(e) => {
+                                                        const newCat = e.target.value as StackCategoryEnum;
+                                                        handleUpdateStackField(stackIdx, "stack_category", newCat);
+                                                        const pList = presetsData?.presets?.[newCat] || DEFAULT_STACK_PRESETS[newCat] || [];
+                                                        const defaultVal = pList[0] || "";
+                                                        handleUpdateStackField(stackIdx, "stack_title", defaultVal);
+                                                        handleUpdateStackField(stackIdx, "stack_name", defaultVal);
+                                                    }}
+                                                    className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-sans text-[12px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-sm">
+                                                    {categoriesList.map((cat) => (
+                                                        <option key={cat} value={cat}>
+                                                            {cat}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
 
-                                    {/* Stack Main Info & Operating Hours */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-surface-container-low/50 p-3.5 rounded-xl border border-outline-variant/40">
-                                        <div className="space-y-1">
-                                            <label className="text-[11px] font-semibold text-on-surface-variant block">
-                                                Attached Industrial Unit <span className="text-error">*</span>
-                                            </label>
-                                            <select
-                                                value={stack.attached_unit}
-                                                onChange={(e) => handleUpdateStackField(stackIdx, "attached_unit", e.target.value)}
-                                                className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-sans text-[12px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-sm">
-                                                {ATTACHED_UNITS.map((unit) => (
-                                                    <option key={unit} value={unit}>
-                                                        {unit}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[11px] font-semibold text-on-surface-variant block">
+                                                    Stack Title / Name <span className="text-error">*</span>
+                                                </label>
+                                                {presetsForCat.length > 0 ? (
+                                                    <div className="space-y-1">
+                                                        <select
+                                                            value={presetsForCat.includes(stack.stack_title) ? stack.stack_title : "__custom__"}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                if (val === "__custom__") {
+                                                                    handleUpdateStackField(stackIdx, "stack_title", "");
+                                                                    handleUpdateStackField(stackIdx, "stack_name", "");
+                                                                } else {
+                                                                    handleUpdateStackField(stackIdx, "stack_title", val);
+                                                                    handleUpdateStackField(stackIdx, "stack_name", val);
+                                                                }
+                                                            }}
+                                                            className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-sans text-[12px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-sm">
+                                                            {presetsForCat.map((preset) => (
+                                                                <option key={preset} value={preset}>
+                                                                    {preset}
+                                                                </option>
+                                                            ))}
+                                                            <option value="__custom__">+ Custom Entry...</option>
+                                                        </select>
+                                                        {!presetsForCat.includes(stack.stack_title) && (
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Enter custom stack title..."
+                                                                value={stack.stack_title || ""}
+                                                                onChange={(e) => {
+                                                                    handleUpdateStackField(stackIdx, "stack_title", e.target.value);
+                                                                    handleUpdateStackField(stackIdx, "stack_name", e.target.value);
+                                                                }}
+                                                                className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-sans text-[12px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-sm animate-fade-in"
+                                                            />
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <input
+                                                        type="text"
+                                                        placeholder="e.g. Rotary Kiln No. 1 Stack"
+                                                        value={stack.stack_title || stack.stack_name || ""}
+                                                        onChange={(e) => {
+                                                            handleUpdateStackField(stackIdx, "stack_title", e.target.value);
+                                                            handleUpdateStackField(stackIdx, "stack_name", e.target.value);
+                                                        }}
+                                                        className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-sans text-[12px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
+                                                    />
+                                                )}
+                                            </div>
 
-                                        <div className="space-y-1">
-                                            <label className="text-[11px] font-semibold text-on-surface-variant block">
-                                                Operating Hours per Year (hrs/yr) <span className="text-error">*</span>
-                                            </label>
-                                            <input
-                                                type="number"
-                                                placeholder="e.g. 7200"
-                                                value={stack.operating_hours_per_year || ""}
-                                                onChange={(e) => handleUpdateStackField(stackIdx, "operating_hours_per_year", e.target.value)}
-                                                className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-[12px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
-                                            />
+                                            <div className="space-y-1">
+                                                <label className="text-[11px] font-semibold text-on-surface-variant block">
+                                                    Attached Industrial Unit <span className="text-error">*</span>
+                                                </label>
+                                                <select
+                                                    value={stack.attached_unit}
+                                                    onChange={(e) => handleUpdateStackField(stackIdx, "attached_unit", e.target.value)}
+                                                    className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-sans text-[12px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-sm">
+                                                    {ATTACHED_UNITS.map((unit) => (
+                                                        <option key={unit} value={unit}>
+                                                            {unit}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div className="space-y-1">
+                                                <label className="text-[11px] font-semibold text-on-surface-variant block">
+                                                    Operating Hours per Year (hrs/yr) <span className="text-error">*</span>
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    placeholder="e.g. 7200"
+                                                    value={stack.operating_hours_per_year || ""}
+                                                    onChange={(e) => handleUpdateStackField(stackIdx, "operating_hours_per_year", e.target.value)}
+                                                    className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-[12px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
 
                                     {/* Permitted Limits Section (Entered ONCE Per Stack) */}
                                     <div className="space-y-3 border-t border-outline-variant/40 pt-3">
@@ -869,8 +1028,9 @@ export default function BrsrAirPage() {
                                         />
                                     </div>
                                 </div>
-                            ))}
-                        </div>
+                            );
+                        })}
+                    </div>
 
                         {/* Custom Other Air Parameters Section */}
                         <div className="border-t border-outline-variant/60 pt-4 space-y-3">
@@ -1186,7 +1346,7 @@ export default function BrsrAirPage() {
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead>Stack Name</TableHead>
+                                                <TableHead>Stack Title & Category</TableHead>
                                                 <TableHead>Attached Unit</TableHead>
                                                 <TableHead className="text-center">Readings Log</TableHead>
                                                 <TableHead className="text-right">NOx (t/yr)</TableHead>
@@ -1202,9 +1362,14 @@ export default function BrsrAirPage() {
                                             {calculatedStacks.map((res, idx) => (
                                                 <TableRow key={idx}>
                                                     <TableCell className="font-sans font-bold text-primary text-xs">
-                                                        <div>{res.stack_name}</div>
-                                                        <div className="font-mono text-[10px] text-on-surface-variant font-normal">
-                                                            {res.operating_hours_per_year} hrs/yr {res.report_number ? `• ${res.report_number}` : ""}
+                                                        <div>{res.stack_title || res.stack_name}</div>
+                                                        <div className="font-mono text-[10px] text-on-surface-variant font-normal flex flex-wrap items-center gap-1.5 mt-0.5">
+                                                            {res.stack_category && (
+                                                                <span className="inline-block rounded bg-primary/10 px-1.5 py-0.5 text-[9.5px] font-semibold text-primary font-sans">
+                                                                    {res.stack_category}
+                                                                </span>
+                                                            )}
+                                                            <span>{res.operating_hours_per_year} hrs/yr {res.report_number ? `• ${res.report_number}` : ""}</span>
                                                         </div>
                                                     </TableCell>
                                                     <TableCell className="font-sans text-xs">

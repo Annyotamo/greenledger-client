@@ -11,6 +11,8 @@ import type {
     BrsrAirDisclosurePayload,
     BrsrAirDisclosureData,
     BrsrAirDisclosureResponse,
+    BrsrAirStackPresetsData,
+    BrsrAirStackPresetsResponse,
 } from "./types";
 
 export type BrsrEnergyConsumptionPayload = {
@@ -128,4 +130,14 @@ export async function postBrsrAirReport(
         },
     );
     return response.data as Blob;
+}
+
+export async function getBrsrAirStackPresets(): Promise<BrsrAirStackPresetsData> {
+    const response = await privateApi.get<BrsrAirStackPresetsResponse>(
+        "/tenant/brsr/air/stack-presets",
+    );
+    if (!response.data?.success || !response.data?.data) {
+        throw new Error(response.data?.message ?? "Failed to fetch stack presets.");
+    }
+    return response.data.data;
 }

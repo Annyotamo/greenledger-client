@@ -273,8 +273,21 @@ export interface BrsrAirReadingInput {
     hap?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
 }
 
+export type StackCategoryEnum =
+    | "Sponge iron / DRI"
+    | "Steel melting"
+    | "Ferro alloy"
+    | "Blast furnace"
+    | "Sinter plant"
+    | "Pellet plant"
+    | "Coke oven"
+    | "Captive power"
+    | "Other";
+
 export interface BrsrAirStackInput {
-    stack_name: string;
+    stack_category: StackCategoryEnum | string;
+    stack_title: string;
+    stack_name?: string;
     attached_unit: AttachedUnitEnum;
     operating_hours_per_year: number;
     permitted_limits: BrsrAirPermittedLimits;
@@ -320,6 +333,8 @@ export interface BrsrAirGasDetailMetric {
 }
 
 export interface BrsrAirCalculatedStack {
+    stack_category?: StackCategoryEnum | string;
+    stack_title?: string;
     stack_name: string;
     attached_unit: AttachedUnitEnum | string;
     total_readings?: number;
@@ -335,6 +350,22 @@ export interface BrsrAirCalculatedStack {
     is_voc_monitored?: boolean;
     is_hap_monitored?: boolean;
     readings?: BrsrAirReadingInput[];
+}
+
+export interface BrsrAirStackPresetsData {
+    categories: StackCategoryEnum[];
+    presets: Record<string, string[]>;
+}
+
+export interface BrsrAirStackPresetsResponse {
+    success: boolean;
+    status_code: number;
+    message: string;
+    data: BrsrAirStackPresetsData;
+    error: null | unknown;
+    method: string;
+    path: string;
+    timestamp: string;
 }
 
 export interface BrsrAirOptionalPollutantDisclosures {

@@ -8,66 +8,92 @@ import type {
     PurchasedEnergy,
 } from "./electricityTypes";
 
-function mapFuelActivityItem(dto: FuelActivityItemDto): FuelActivity {
+function mapFuelActivityItem(dto: any): FuelActivity {
+    const ctx = dto.context || {};
+    const act = dto.activity || {};
+    const wf = dto.workflow || {};
+    const calc = dto.calculated || {};
+    const fac = dto.factor || {};
+    const docs = dto.documents || {};
+
+    const fuelObj = act.fuel || fac.fuel || {};
+    const unitObj = dto.quantity_unit || act.quantity_unit || fac.unit || {};
+
     return {
         id: dto.id,
-        createdAt: dto.created_at,
-        updatedAt: dto.updated_at,
-        facilityId: dto.context.facility_id,
-        reportingPeriodId: dto.context.reporting_period_id,
-        activityStartDate: dto.context.activity_start_date,
-        activityEndDate: dto.context.activity_end_date,
-        scopeType: dto.activity.scope_type,
-        fuelId: dto.activity.fuel_id || dto.activity.custom_fuel_id || "",
-        fuelName: dto.factor?.fuel?.name ?? "Custom Fuel",
-        fuelSlug: dto.factor?.fuel?.slug ?? "",
-        quantity: Number(dto.activity.quantity),
-        quantityUnitId: dto.activity.quantity_unit_id,
-        unitName: dto.quantity_unit?.name ?? dto.factor?.unit?.name ?? "",
-        unitSymbol: dto.quantity_unit?.symbol ?? dto.factor?.unit?.symbol ?? "",
-        usageType: dto.activity.usage_type || undefined,
-        emissionType: dto.activity.emission_type,
-        energyContentGJ: dto.activity.energy_content_gj ? Number(dto.activity.energy_content_gj) : 0,
-        generatorEfficiencyPercentage: dto.activity.generator_efficiency_percentage ? Number(dto.activity.generator_efficiency_percentage) : 0,
-        generatedElectricityKwh: dto.activity.generated_electricity_kwh ? Number(dto.activity.generated_electricity_kwh) : 0,
-        generatedElectricityMwh: dto.activity.generated_electricity_mwh ? Number(dto.activity.generated_electricity_mwh) : 0,
-        generatedSteamGJ: dto.activity.generated_steam_gj ? Number(dto.activity.generated_steam_gj) : null,
-        dataQualityTier: dto.activity.data_quality_tier,
-        estimationBasis: dto.activity.estimation_basis,
-        notes: dto.activity.notes,
-        workflowStatus: dto.workflow.status,
-        calculatedTCo2e: Number(dto.calculated.calculated_t_co2e),
-        calculatedKgCo2e: Number(dto.calculated.calculated_kg_co2e),
-        documentsCount: dto.documents.count,
-        fuelFactorStandard: dto.factor?.source?.standard ?? "",
-        fuelFactorVersion: dto.factor?.source?.version ?? "",
-        fuelFactorRegion: dto.factor?.source?.region ?? "",
-        // Additional calculated data
-        calculatedKgCo2: Number(dto.calculated.calculated_kg_co2),
-        calculatedTCo2: Number(dto.calculated.calculated_t_co2),
-        calculatedKgCh4: Number(dto.calculated.calculated_kg_ch4),
-        calculatedTCh4: Number(dto.calculated.calculated_t_ch4),
-        calculatedKgN2o: Number(dto.calculated.calculated_kg_n2o),
-        calculatedTN2o: Number(dto.calculated.calculated_t_n2o),
-        biogenicKgCo2: dto.calculated.biogenic_kg_co2 ? Number(dto.calculated.biogenic_kg_co2) : null,
-        biogenicTCo2: dto.calculated.biogenic_t_co2 ? Number(dto.calculated.biogenic_t_co2) : null,
-        calculationMethod: dto.calculated.calculation_method,
-        calculationDetails: dto.calculated.calculation_details,
-        // Factor data
-        factorKgCo2e: dto.factor?.factors?.kg ? Number(dto.factor.factors.kg.kg_co2e) : 0,
-        factorKgCo2eOfCo2: dto.factor?.factors?.kg ? Number(dto.factor.factors.kg.kg_co2e_of_co2) : 0,
-        factorKgCo2eOfCh4: dto.factor?.factors?.kg ? Number(dto.factor.factors.kg.kg_co2e_of_ch4) : 0,
-        factorKgCo2eOfN2o: dto.factor?.factors?.kg ? Number(dto.factor.factors.kg.kg_co2e_of_n2o) : 0,
-        factorOtherGhgKgCo2e: dto.factor?.factors?.kg?.other_ghg_kg_co2e
-            ? Number(dto.factor.factors.kg.other_ghg_kg_co2e)
-            : null,
-        factorTCo2e: dto.factor?.factors?.tonnes ? Number(dto.factor.factors.tonnes.t_co2e) : 0,
-        factorTCo2eOfCo2: dto.factor?.factors?.tonnes ? Number(dto.factor.factors.tonnes.t_co2e_of_co2) : 0,
-        factorTCo2eOfCh4: dto.factor?.factors?.tonnes ? Number(dto.factor.factors.tonnes.t_co2e_of_ch4) : 0,
-        factorTCo2eOfN2o: dto.factor?.factors?.tonnes ? Number(dto.factor.factors.tonnes.t_co2e_of_n2o) : 0,
-        factorOtherGhgTCo2e: dto.factor?.factors?.tonnes?.other_ghg_t_co2e
-            ? Number(dto.factor.factors.tonnes.other_ghg_t_co2e)
-            : null,
+        createdAt: dto.created_at || "",
+        updatedAt: dto.updated_at || "",
+        facilityId: ctx.facility_id || ctx.facility?.id || "",
+        facilityName: ctx.facility?.name,
+        facilityCode: ctx.facility?.facility_code,
+        facilityCity: ctx.facility?.city,
+        facilityCountry: ctx.facility?.country,
+        reportingPeriodId: ctx.reporting_period_id || ctx.reporting_period?.id || "",
+        reportingPeriodName: ctx.reporting_period?.name,
+        periodStatus: ctx.reporting_period?.period_status,
+        periodStartDate: ctx.reporting_period?.period_start || ctx.reporting_period?.start_date,
+        periodEndDate: ctx.reporting_period?.period_end || ctx.reporting_period?.end_date,
+        meterId: ctx.meter_id || null,
+        activityStartDate: ctx.activity_start_date || "",
+        activityEndDate: ctx.activity_end_date || "",
+        scopeType: act.scope_type || "SCOPE_1",
+        fuelId: act.fuel_id || act.custom_fuel_id || fuelObj.id || "",
+        fuelName: fuelObj.name || fac.fuel?.name || "Custom Fuel",
+        fuelSlug: fuelObj.slug || fac.fuel?.slug || "",
+        fuelIsRenewable: fuelObj.renewable ?? fac.fuel?.renewable ?? false,
+        fuelFactorType: fuelObj.factor_type ?? fac.fuel?.factor_type ?? "COMBUSTION",
+        quantity: Number(act.quantity || 0),
+        quantityUnitId: act.quantity_unit_id || unitObj.id || "",
+        unitName: unitObj.name || "",
+        unitSymbol: unitObj.symbol || "",
+        unitType: unitObj.unit_type || "energy",
+        usageType: act.usage_type || undefined,
+        emissionType: act.emission_type || "stationary",
+        cost: act.cost ? Number(act.cost) : null,
+        energyContentGJ: act.energy_content_gj ? Number(act.energy_content_gj) : 0,
+        generatorEfficiencyPercentage: act.generator_efficiency_percentage ? Number(act.generator_efficiency_percentage) : 0,
+        generatedElectricityKwh: act.generated_electricity_kwh ? Number(act.generated_electricity_kwh) : 0,
+        generatedElectricityMwh: act.generated_electricity_mwh ? Number(act.generated_electricity_mwh) : 0,
+        generatedSteamGJ: act.generated_steam_gj ? Number(act.generated_steam_gj) : null,
+        dataQualityTier: act.data_quality_tier || "measured",
+        estimationBasis: act.estimation_basis || null,
+        notes: act.notes || null,
+        workflowStatus: wf.status || "draft",
+        rejectedReason: wf.rejected_reason || null,
+        verifiedBy: wf.verified_by || null,
+        verifiedAt: wf.verified_at || null,
+        enteredBy: wf.entered_by || null,
+        isAmendment: wf.is_amendment || false,
+        sourceReferenceCode: fac.source_reference_code || fac.source?.reference_code || null,
+        calculatedTCo2e: Number(calc.calculated_t_co2e || 0),
+        calculatedKgCo2e: Number(calc.calculated_kg_co2e || 0),
+        documentsCount: docs.count || (Array.isArray(docs.items) ? docs.items.length : 0),
+        attachedDocuments: Array.isArray(docs.items) ? docs.items : undefined,
+        fuelFactorStandard: fac.source?.standard || fac.source_reference_code || "",
+        fuelFactorVersion: fac.source?.version || "",
+        fuelFactorRegion: fac.source?.region || "",
+        factorDataYear: fac.source?.data_year || null,
+        factorEmissionUnit: fac.source?.emission_unit || "kg",
+        calculatedKgCo2: Number(calc.calculated_kg_co2 || 0),
+        calculatedTCo2: Number(calc.calculated_t_co2 || 0),
+        calculatedKgCh4: Number(calc.calculated_kg_ch4 || 0),
+        calculatedTCh4: Number(calc.calculated_t_ch4 || 0),
+        calculatedKgN2o: Number(calc.calculated_kg_n2o || 0),
+        calculatedTN2o: Number(calc.calculated_t_n2o || 0),
+        biogenicKgCo2: calc.biogenic_kg_co2 ? Number(calc.biogenic_kg_co2) : null,
+        biogenicTCo2: calc.biogenic_t_co2 ? Number(calc.biogenic_t_co2) : null,
+        calculationMethod: calc.calculation_method || null,
+        calculationDetails: calc.calculation_details || null,
+        factorKgCo2e: fac.factors?.kg ? Number(fac.factors.kg.kg_co2e) : 0,
+        factorKgCo2eOfCo2: fac.factors?.kg ? Number(fac.factors.kg.kg_co2e_of_co2) : 0,
+        factorKgCo2eOfCh4: fac.factors?.kg ? Number(fac.factors.kg.kg_co2e_of_ch4) : 0,
+        factorKgCo2eOfN2o: fac.factors?.kg ? Number(fac.factors.kg.kg_co2e_of_n2o) : 0,
+        factorOtherGhgKgCo2e: fac.factors?.kg?.other_ghg_kg_co2e ? Number(fac.factors.kg.other_ghg_kg_co2e) : null,
+        factorTCo2e: fac.factors?.tonnes ? Number(fac.factors.tonnes.t_co2e) : 0,
+        factorTCo2eOfCo2: fac.factors?.tonnes ? Number(fac.factors.tonnes.t_co2e_of_co2) : 0,
+        factorTCo2eOfCh4: fac.factors?.tonnes ? Number(fac.factors.tonnes.t_co2e_of_ch4) : 0,
+        factorTCo2eOfN2o: fac.factors?.tonnes ? Number(fac.factors.tonnes.t_co2e_of_n2o) : 0,
+        factorOtherGhgTCo2e: fac.factors?.tonnes?.other_ghg_t_co2e ? Number(fac.factors.tonnes.other_ghg_t_co2e) : null,
     };
 }
 
@@ -75,23 +101,62 @@ export async function getFuelActivities(filters?: {
     status?: string;
     emission_type?: string;
     facility_id?: string;
+    reporting_period_id?: string;
+    meter_id?: string;
+    fuel_id?: string;
+    data_quality_tier?: string;
+    activity_start_date?: string;
+    activity_end_date?: string;
     page?: number;
+    page_size?: number;
+    sort_by?: string;
+    sort_order?: string;
 }): Promise<FuelActivity[]> {
     const params = new URLSearchParams();
-    if (filters?.status) params.append("status", filters.status);
-    if (filters?.emission_type) params.append("emission_type", filters.emission_type);
+    if (filters?.status) params.append("status", filters.status.toUpperCase());
+    if (filters?.emission_type) params.append("emission_type", filters.emission_type.toUpperCase());
     if (filters?.facility_id) params.append("facility_id", filters.facility_id);
+    if (filters?.reporting_period_id) params.append("reporting_period_id", filters.reporting_period_id);
+    if (filters?.meter_id) params.append("meter_id", filters.meter_id);
+    if (filters?.fuel_id) params.append("fuel_id", filters.fuel_id);
+    if (filters?.data_quality_tier) params.append("data_quality_tier", filters.data_quality_tier);
+    if (filters?.activity_start_date) params.append("activity_start_date", filters.activity_start_date);
+    if (filters?.activity_end_date) params.append("activity_end_date", filters.activity_end_date);
     if (filters?.page) params.append("page", String(filters.page));
+    if (filters?.page_size) params.append("page_size", String(filters.page_size));
+    if (filters?.sort_by) params.append("sort_by", filters.sort_by);
+    if (filters?.sort_order) params.append("sort_order", filters.sort_order);
 
     const qs = params.toString();
-    const url = `/tenant/activity/fuel${qs ? `?${qs}` : "?status=verified"}`;
+    const url = `/tenant/activity/fuel${qs ? `?${qs}` : ""}`;
     const response = await privateApi.get<FuelActivityApiResponse>(url);
-    const rawItems = response.data.data?.items ?? [];
+    const rawItems = response.data.data?.items ?? response.data.data ?? [];
     return Array.isArray(rawItems) ? rawItems.map(mapFuelActivityItem) : [];
+}
+
+export async function getFuelActivityById(activityId: string): Promise<FuelActivity> {
+    const response = await privateApi.get(`/tenant/activity/fuel/${activityId}`);
+    const data = response.data?.data ?? response.data;
+    return mapFuelActivityItem(data);
 }
 
 export async function createFuelActivity(payload: Record<string, unknown>) {
     const response = await privateApi.post("/tenant/activity/fuel", payload);
+    return response.data;
+}
+
+export async function updateFuelActivity(activityId: string, payload: Record<string, unknown>) {
+    const response = await privateApi.patch(`/tenant/activity/fuel/${activityId}`, payload);
+    return response.data;
+}
+
+export async function deleteFuelActivity(activityId: string) {
+    const response = await privateApi.delete(`/tenant/activity/fuel/${activityId}`);
+    return response.data;
+}
+
+export async function submitFuelActivity(activityId: string) {
+    const response = await privateApi.post(`/tenant/activity/fuel/${activityId}/submit`);
     return response.data;
 }
 
@@ -104,6 +169,26 @@ export async function rejectFuelActivity(activityId: string, rejected_reason: st
     const response = await privateApi.post(`/tenant/activity/fuel/${activityId}/reject`, {
         rejected_reason,
     });
+    return response.data;
+}
+
+export async function amendFuelActivity(activityId: string, payload: Record<string, unknown>) {
+    const response = await privateApi.post(`/tenant/activity/fuel/${activityId}/amend`, payload);
+    return response.data;
+}
+
+export async function getFuelActivityDocuments(activityId: string) {
+    const response = await privateApi.get(`/tenant/activity/fuel/${activityId}/documents`);
+    return response.data?.data ?? response.data;
+}
+
+export async function presignFuelActivityDocumentUrl(activityId: string, payload: { document_name: string; document_type: string }) {
+    const response = await privateApi.post(`/tenant/activity/fuel/${activityId}/documents/presign`, payload);
+    return response.data?.data ?? response.data;
+}
+
+export async function deleteFuelActivityDocument(activityId: string, documentId: string) {
+    const response = await privateApi.delete(`/tenant/activity/fuel/${activityId}/documents/${documentId}`);
     return response.data;
 }
 

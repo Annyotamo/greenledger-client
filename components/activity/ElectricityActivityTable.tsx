@@ -13,16 +13,29 @@ import type { ElectricityActivity } from "@/lib/activity/electricityTypes";
 import { DATE_RANGE_LABEL } from "@/lib/dashboard/data";
 
 const statusStyles: Record<string, string> = {
-    verified: "bg-secondary text-white",
-    pending: "bg-surface-container-high text-on-surface-variant",
-    rejected: "bg-error text-white",
-    default: "bg-surface-container-high text-on-surface-variant",
+    verified: "bg-emerald-500/10 text-emerald-800 border border-emerald-500/20 font-bold",
+    pending: "bg-amber-500/10 text-amber-800 border border-amber-500/20 font-semibold",
+    submitted: "bg-blue-500/10 text-blue-800 border border-blue-500/20 font-semibold",
+    draft: "bg-slate-100 text-slate-700 border border-slate-200 font-medium",
+    rejected: "bg-rose-500/10 text-rose-800 border border-rose-500/20 font-semibold",
+    default: "bg-slate-100 text-slate-700 border border-slate-200",
 };
 
 const StatusLabel: Record<string, string> = {
     verified: "Verified",
     pending: "Pending",
+    submitted: "Submitted",
+    draft: "Draft",
     rejected: "Rejected",
+};
+
+const activityTypeStyles: Record<string, string> = {
+    grid_import: "bg-sky-500/10 text-sky-800 border border-sky-500/20",
+    market_instruments: "bg-emerald-500/10 text-emerald-800 border border-emerald-500/20",
+    renewable: "bg-teal-500/10 text-teal-800 border border-teal-500/20",
+    captive: "bg-amber-500/10 text-amber-800 border border-amber-500/20",
+    other: "bg-purple-500/10 text-purple-800 border border-purple-500/20",
+    default: "bg-slate-100 text-slate-700 border border-slate-200",
 };
 
 function getStatusClass(status: string) {
@@ -33,11 +46,33 @@ function getStatusLabel(status: string) {
     return StatusLabel[status.toLowerCase()] ?? status;
 }
 
+function getActivityTypeClass(type: string) {
+    return activityTypeStyles[type.toLowerCase()] ?? activityTypeStyles.default;
+}
+
 function formatNumber(value: number, digits = 0) {
     return new Intl.NumberFormat("en-US", {
         minimumFractionDigits: digits,
         maximumFractionDigits: digits,
     }).format(value);
+}
+
+function formatShortPeriod(startDateStr: string, endDateStr: string) {
+    if (!startDateStr || !endDateStr) return "N/A";
+    const start = new Date(startDateStr);
+    const end = new Date(endDateStr);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return `${startDateStr} - ${endDateStr}`;
+
+    const sameYear = start.getFullYear() === end.getFullYear();
+    const sameMonth = sameYear && start.getMonth() === end.getMonth();
+
+    if (sameMonth) {
+        return `${format(start, "MMM d")}–${format(end, "d, yyyy")}`;
+    } if (sameYear) {
+        return `${format(start, "MMM d")} – ${format(end, "MMM d, yyyy")}`;
+    } 
+        return `${format(start, "MMM d, yyyy")} – ${format(end, "MMM d, yyyy")}`;
+    
 }
 
 const sourceLabels: Record<string, string> = {
@@ -275,31 +310,31 @@ export function ElectricityActivityTable({
             <div className="overflow-x-auto bg-white">
                 <Table className="w-full table-auto">
                     <TableHeader>
-                        <TableRow className="bg-surface-container-low border-b border-outline-variant">
-                            <TableHead>Period & Method</TableHead>
-                            <TableHead>Activity Type</TableHead>
-                            <TableHead>Source</TableHead>
-                            <TableHead>Electricity</TableHead>
-                            <TableHead>Emissions</TableHead>
-                            <TableHead>Status</TableHead>
+                        <TableRow className="bg-slate-50/80 border-b border-outline-variant/60">
+                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Period & Method</TableHead>
+                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Activity Type</TableHead>
+                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Source</TableHead>
+                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Electricity</TableHead>
+                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Emissions</TableHead>
+                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Status</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {isLoading ? (
                             <TableRow className="border-none">
-                                <TableCell className="py-12 text-center text-on-surface-variant" colSpan={6}>
+                                <TableCell className="py-12 text-center text-xs text-on-surface-variant" colSpan={6}>
                                     Loading activities...
                                 </TableCell>
                             </TableRow>
                         ) : isError ? (
                             <TableRow className="border-none">
-                                <TableCell className="py-12 text-center text-error" colSpan={6}>
+                                <TableCell className="py-12 text-center text-xs text-error font-medium" colSpan={6}>
                                     Unable to load activities. Refresh to try again.
                                 </TableCell>
                             </TableRow>
                         ) : activities.length === 0 ? (
                             <TableRow className="border-none">
-                                <TableCell className="py-12 text-center text-on-surface-variant" colSpan={6}>
+                                <TableCell className="py-12 text-center text-xs text-on-surface-variant" colSpan={6}>
                                     No activity records available.
                                 </TableCell>
                             </TableRow>
@@ -320,70 +355,65 @@ export function ElectricityActivityTable({
                                 return (
                                     <TableRow
                                         key={activity.id}
-                                        className="hover:bg-surface-container-high cursor-pointer">
-                                        <TableCell>
-                                            <div className="font-semibold text-body-md text-primary">
-                                                {format(activityStart, "MMMM d, yyyy")} to{" "}
-                                                {format(activityEnd, "MMMM d, yyyy")}
-                                            </div>
-                                            <div className="mt-1 flex items-center gap-2">
-                                                <span className="text-[11px] uppercase tracking-[0.12em] text-on-surface-variant">
-                                                    {activeDays} days
+                                        className="hover:bg-slate-50/90 transition-colors cursor-pointer border-b border-slate-100 last:border-none">
+                                        <TableCell className="py-2.5 px-4 text-nowrap">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-semibold text-xs text-slate-900">
+                                                    {formatShortPeriod(activity.activityStartDate, activity.activityEndDate)}
                                                 </span>
+                                                <span className="px-1.5 py-0.5 rounded bg-slate-100 font-mono text-[10px] font-bold text-slate-600">
+                                                    {activeDays}d
+                                                </span>
+                                            </div>
+                                            <div className="mt-1">
                                                 <span
-                                                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+                                                    className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-bold tracking-tight uppercase ${
                                                         isMarketBased
-                                                            ? "bg-secondary/15 text-secondary border border-secondary/20"
-                                                            : "bg-surface-container-high text-on-surface-variant border border-outline-variant"
+                                                            ? "bg-purple-500/10 text-purple-800 border border-purple-500/20"
+                                                            : "bg-slate-100 text-slate-700 border border-slate-200"
                                                     }`}>
                                                     <MaterialIcon name={isMarketBased ? "verified" : "grid_view"} size="xs" />
                                                     {isMarketBased ? "Market-Based" : "Location-Based"}
                                                 </span>
                                             </div>
                                         </TableCell>
-                                        <TableCell>
-                                            <span className="inline-flex rounded-full border border-outline-variant bg-surface-container-high px-3 py-1 text-[11px] font-semibold text-on-surface-variant">
+                                        <TableCell className="py-2.5 px-4">
+                                            <span
+                                                className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold tracking-tight uppercase ${getActivityTypeClass(
+                                                    activity.electricityActivityType,
+                                                )}`}>
                                                 {formatActivityType(activity.electricityActivityType)}
                                             </span>
                                         </TableCell>
-                                        <TableCell>
-                                            <span className="inline-flex rounded-full border border-outline-variant bg-surface-container-high px-3 py-1 text-[11px] font-semibold text-on-surface-variant">
+                                        <TableCell className="py-2.5 px-4">
+                                            <div className="font-bold text-xs text-slate-900">
                                                 {formatSourceType(activity.sourceType)}
-                                            </span>
+                                            </div>
                                             {activity.supplierName ? (
-                                                <div className="mt-2 text-[11px] text-on-surface-variant font-medium">
+                                                <div className="text-[10px] text-slate-500 font-medium truncate max-w-[140px]">
                                                     {activity.supplierName}
                                                 </div>
                                             ) : null}
                                         </TableCell>
-                                        <TableCell>
-                                            <div className="text-body-md text-primary">
+                                        <TableCell className="py-2.5 px-4 font-mono text-xs">
+                                            <div className="font-bold text-slate-900">
                                                 {formatNumber(activity.electricityMwh, 2)} MWh
                                             </div>
-                                            <div className="mt-2 text-[11px] text-on-surface-variant uppercase tracking-[0.12em]">
+                                            <div className="text-[10px] text-slate-500 font-medium">
                                                 {formatNumber(activity.electricityKwh, 0)} kWh
                                             </div>
-                                            {activity.marketAllocation ? (
-                                                <div className="mt-1 text-[10px] text-secondary font-medium">
-                                                    Contract: {formatNumber(activity.marketAllocation.contractedElectricityKwh, 0)} kWh @ {activity.marketAllocation.contractedEmissionFactor} {activity.marketAllocation.contractedEmissionFactorUnit}
-                                                </div>
-                                            ) : (
-                                                <div className="mt-2 text-[11px] uppercase tracking-[0.12em] text-on-surface-variant">
-                                                    {activity.isRenewableCertified ? "Certified renewable" : "Uncertified"}
-                                                </div>
-                                            )}
                                         </TableCell>
-                                        <TableCell>
-                                            <div className="text-body-md text-primary">
+                                        <TableCell className="py-2.5 px-4 font-mono text-xs">
+                                            <div className="font-bold text-slate-900">
                                                 {formatNumber(activity.calculatedTCo2e, 2)} tCO₂e
                                             </div>
-                                            <div className="mt-2 text-[11px] text-on-surface-variant uppercase tracking-[0.12em]">
+                                            <div className="text-[10px] text-slate-500 uppercase font-semibold">
                                                 {activity.dataQualityTier}
                                             </div>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="py-2.5 px-4">
                                             <span
-                                                className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${statusClass}`}>
+                                                className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] uppercase tracking-wide ${statusClass}`}>
                                                 {status}
                                             </span>
                                         </TableCell>

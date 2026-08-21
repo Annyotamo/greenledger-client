@@ -5,7 +5,7 @@ import Link from "next/link";
 import { format, isAfter } from "date-fns";
 import { getScope1Report } from "@/lib/ghg/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { verifyFuelActivity, rejectFuelActivity } from "@/lib/activity/api";
+import { verifyFuelActivity, rejectFuelActivity, submitFuelActivity, deleteFuelActivity } from "@/lib/activity/api";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -16,24 +16,28 @@ import { DATE_RANGE_LABEL } from "@/lib/dashboard/data";
 import { FuelActivityDetailModal } from "./FuelActivityDetailModal";
 
 const statusStyles: Record<string, string> = {
-    verified: "bg-secondary text-white",
-    pending: "bg-surface-container-high text-on-surface-variant",
-    rejected: "bg-error text-white",
-    default: "bg-surface-container-high text-on-surface-variant",
+    verified: "bg-emerald-500/10 text-emerald-800 border border-emerald-500/20 font-bold",
+    pending: "bg-amber-500/10 text-amber-800 border border-amber-500/20 font-semibold",
+    submitted: "bg-blue-500/10 text-blue-800 border border-blue-500/20 font-semibold",
+    draft: "bg-slate-100 text-slate-700 border border-slate-200 font-medium",
+    rejected: "bg-rose-500/10 text-rose-800 border border-rose-500/20 font-semibold",
+    default: "bg-slate-100 text-slate-700 border border-slate-200",
 };
 
 const StatusLabel: Record<string, string> = {
     verified: "Verified",
     pending: "Pending",
+    submitted: "Submitted",
+    draft: "Draft",
     rejected: "Rejected",
 };
 
 const emissionTypeStyles: Record<string, string> = {
-    stationary: "bg-surface-container-high text-on-surface-variant",
-    mobile: "bg-surface-container-high text-on-surface-variant",
-    process: "bg-secondary/10 text-secondary",
-    fugitive: "bg-error/10 text-error",
-    default: "bg-surface-container-high text-on-surface-variant",
+    stationary: "bg-amber-500/10 text-amber-800 border border-amber-500/20",
+    mobile: "bg-sky-500/10 text-sky-800 border border-sky-500/20",
+    process: "bg-purple-500/10 text-purple-800 border border-purple-500/20",
+    fugitive: "bg-rose-500/10 text-rose-800 border border-rose-500/20",
+    default: "bg-slate-100 text-slate-700 border border-slate-200",
 };
 
 const emissionTypeLabels: Record<string, string> = {
@@ -57,6 +61,24 @@ function getEmissionTypeClass(emissionType: string) {
 
 function getEmissionTypeLabel(emissionType: string) {
     return emissionTypeLabels[emissionType.toLowerCase()] ?? emissionType;
+}
+
+function formatShortPeriod(startDateStr: string, endDateStr: string) {
+    if (!startDateStr || !endDateStr) return "N/A";
+    const start = new Date(startDateStr);
+    const end = new Date(endDateStr);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return `${startDateStr} - ${endDateStr}`;
+
+    const sameYear = start.getFullYear() === end.getFullYear();
+    const sameMonth = sameYear && start.getMonth() === end.getMonth();
+
+    if (sameMonth) {
+        return `${format(start, "MMM d")}–${format(end, "d, yyyy")}`;
+    } if (sameYear) {
+        return `${format(start, "MMM d")} – ${format(end, "MMM d, yyyy")}`;
+    } 
+        return `${format(start, "MMM d, yyyy")} – ${format(end, "MMM d, yyyy")}`;
+    
 }
 
 type DateRange = {
@@ -110,7 +132,7 @@ export function FuelActivityTable({
 
     const [confirmState, setConfirmState] = useState<{
         open: boolean;
-        action: "verify" | "reject" | null;
+        action: "verify" | "reject" | "submit" | "delete" | null;
         activityId?: string | null;
     }>({ open: false, action: null, activityId: null });
     const [rejectReason, setRejectReason] = useState("");
@@ -186,7 +208,33 @@ export function FuelActivityTable({
         },
     });
 
-    const isSubmitting = verifyMutation.status === "pending" || rejectMutation.status === "pending";
+    const submitMutation = useMutation<unknown, Error, string>({
+        mutationFn: submitFuelActivity,
+        onSuccess: () => {
+            setConfirmState({ open: false, action: null, activityId: null });
+            queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
+        },
+        onError: (error: Error) => {
+            console.error("Submit failed", error);
+        },
+    });
+
+    const deleteMutation = useMutation<unknown, Error, string>({
+        mutationFn: deleteFuelActivity,
+        onSuccess: () => {
+            setConfirmState({ open: false, action: null, activityId: null });
+            queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
+        },
+        onError: (error: Error) => {
+            console.error("Delete failed", error);
+        },
+    });
+
+    const isSubmitting =
+        verifyMutation.status === "pending" ||
+        rejectMutation.status === "pending" ||
+        submitMutation.status === "pending" ||
+        deleteMutation.status === "pending";
 
     async function performVerify(activityId?: string | null) {
         if (!activityId) return;
@@ -197,6 +245,16 @@ export function FuelActivityTable({
         if (!activityId) return;
         if (!reason || reason.length < 1 || reason.length > 2000) return;
         await rejectMutation.mutateAsync({ activityId, rejected_reason: reason });
+    }
+
+    async function performSubmit(activityId?: string | null) {
+        if (!activityId) return;
+        await submitMutation.mutateAsync(activityId);
+    }
+
+    async function performDelete(activityId?: string | null) {
+        if (!activityId) return;
+        await deleteMutation.mutateAsync(activityId);
     }
 
     useEffect(() => {
@@ -356,33 +414,33 @@ export function FuelActivityTable({
             <div className="overflow-x-auto bg-white">
                 <Table className="w-full table-auto">
                     <TableHeader>
-                        <TableRow className="bg-surface-container-low border-b border-outline-variant">
-                            <TableHead>Period</TableHead>
-                            <TableHead>Emission type</TableHead>
-                            <TableHead>Fuel / Usage</TableHead>
-                            <TableHead>Quantity</TableHead>
-                            <TableHead>Energy / Emissions</TableHead>
-                            <TableHead>Docs</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead />
+                        <TableRow className="bg-slate-50/80 border-b border-outline-variant/60">
+                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Period</TableHead>
+                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Type</TableHead>
+                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Fuel Source</TableHead>
+                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Quantity</TableHead>
+                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Emissions</TableHead>
+                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Docs</TableHead>
+                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Status</TableHead>
+                            <TableHead className="py-2.5 px-4" />
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {isLoading ? (
                             <TableRow className="border-none">
-                                <TableCell className="py-12 text-center text-on-surface-variant" colSpan={8}>
+                                <TableCell className="py-12 text-center text-xs text-on-surface-variant" colSpan={8}>
                                     Loading fuel activities...
                                 </TableCell>
                             </TableRow>
                         ) : isError ? (
                             <TableRow className="border-none">
-                                <TableCell className="py-12 text-center text-error" colSpan={8}>
+                                <TableCell className="py-12 text-center text-xs text-error font-medium" colSpan={8}>
                                     Unable to load fuel activities. Refresh to try again.
                                 </TableCell>
                             </TableRow>
                         ) : activities.length === 0 ? (
                             <TableRow className="border-none">
-                                <TableCell className="py-12 text-center text-on-surface-variant" colSpan={8}>
+                                <TableCell className="py-12 text-center text-xs text-on-surface-variant" colSpan={8}>
                                     No fuel activity records available.
                                 </TableCell>
                             </TableRow>
@@ -402,60 +460,59 @@ export function FuelActivityTable({
                                 return (
                                     <TableRow
                                         key={activity.id}
-                                        onClick={() => setOpenMenuId(activity.id)}
-                                        className="hover:bg-surface-container-high cursor-pointer">
-                                        <TableCell>
-                                            <div className="font-semibold text-body-md text-primary">
-                                                {format(activityStart, "MMMM d, yyyy")} to{" "}
-                                                {format(activityEnd, "MMMM d, yyyy")}
-                                            </div>
-                                            <div className="mt-2 text-[11px] uppercase tracking-[0.12em] text-on-surface-variant">
-                                                {activeDays} days
+                                        onClick={() => setSelectedActivityId(activity.id)}
+                                        className="hover:bg-slate-50/90 transition-colors cursor-pointer border-b border-slate-100 last:border-none">
+                                        <TableCell className="py-2.5 px-4 text-nowrap">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-semibold text-xs text-slate-900">
+                                                    {formatShortPeriod(activity.activityStartDate, activity.activityEndDate)}
+                                                </span>
+                                                <span className="px-1.5 py-0.5 rounded bg-slate-100 font-mono text-[10px] font-bold text-slate-600">
+                                                    {activeDays}d
+                                                </span>
                                             </div>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="py-2.5 px-4">
                                             <span
-                                                className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${getEmissionTypeClass(
+                                                className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold tracking-tight uppercase ${getEmissionTypeClass(
                                                     activity.emissionType,
                                                 )}`}>
                                                 {getEmissionTypeLabel(activity.emissionType)}
                                             </span>
                                         </TableCell>
-                                        <TableCell>
-                                            <div className="inline-flex rounded-full border border-outline-variant bg-surface-container-high px-3 py-1 text-[11px] font-semibold text-on-surface-variant">
-                                                {activity.fuelName}
-                                            </div>
-                                            <div className="mt-1 text-[11px] text-on-surface-variant">
+                                        <TableCell className="py-2.5 px-4">
+                                            <div className="font-bold text-xs text-slate-900">{activity.fuelName}</div>
+                                            <div className="text-[10px] text-slate-500 font-medium truncate max-w-[150px]">
                                                 {activity.fuelFactorStandard} • {activity.fuelFactorVersion}
                                             </div>
                                         </TableCell>
-                                        <TableCell>
-                                            <div className="text-body-md text-primary">
-                                                {activity.quantity.toFixed(2)}
-                                            </div>
-                                            <div className="mt-2 text-[11px] text-on-surface-variant uppercase tracking-[0.12em]">
+                                        <TableCell className="py-2.5 px-4 font-mono text-xs">
+                                            <span className="font-bold text-slate-900">
+                                                {activity.quantity.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                            </span>
+                                            <span className="ml-1 text-[10px] text-slate-500 uppercase font-semibold">
                                                 {activity.unitSymbol}
-                                            </div>
+                                            </span>
                                         </TableCell>
-                                        <TableCell>
-                                            <div className="text-body-md text-primary">
-                                                {activity.calculatedTCo2e.toFixed(2)} tCO₂e
+                                        <TableCell className="py-2.5 px-4 font-mono text-xs">
+                                            <div className="font-bold text-slate-900">
+                                                {activity.calculatedTCo2e.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} tCO₂e
                                             </div>
                                             {activity.energyContentGJ > 0 ? (
-                                                <div className="mt-2 text-[11px] text-on-surface-variant">
+                                                <div className="text-[10px] text-slate-500 font-medium">
                                                     {activity.energyContentGJ.toFixed(1)} GJ
                                                 </div>
                                             ) : null}
                                         </TableCell>
-                                        <TableCell>
-                                            <div className="inline-flex items-center gap-2 rounded-full bg-surface-container-high px-2 py-1 text-[11px] text-on-surface-variant">
-                                                <MaterialIcon name="insert_drive_file" size="xs" />
+                                        <TableCell className="py-2.5 px-4 text-xs">
+                                            <div className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+                                                <MaterialIcon name="insert_drive_file" size="xs" className="text-slate-500" />
                                                 {activity.documentsCount} docs
                                             </div>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="py-2.5 px-4">
                                             <span
-                                                className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${statusClass}`}>
+                                                className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] uppercase tracking-wide ${statusClass}`}>
                                                 {status}
                                             </span>
                                         </TableCell>
@@ -495,9 +552,25 @@ export function FuelActivityTable({
                                                             <MaterialIcon name="edit" size="sm" />
                                                             <span>Edit</span>
                                                         </div>
-                                                    </Link>
+                                                    </Link>                                                    {activity.workflowStatus.toLowerCase() === "draft" ? (
+                                                        <button
+                                                            onClick={() => {
+                                                                setConfirmState({
+                                                                    open: true,
+                                                                    action: "submit",
+                                                                    activityId: activity.id,
+                                                                });
+                                                                setOpenMenuId(null);
+                                                            }}
+                                                            className="w-full text-left px-3 py-2 hover:bg-surface-container-high">
+                                                            <div className="flex items-center gap-2 text-primary font-medium">
+                                                                <MaterialIcon name="send" size="sm" />
+                                                                <span>Submit</span>
+                                                            </div>
+                                                        </button>
+                                                    ) : null}
 
-                                                    {["draft", "submitted"].includes(
+                                                    {["draft", "submitted", "pending"].includes(
                                                         activity.workflowStatus.toLowerCase(),
                                                     ) ? (
                                                         <>
@@ -511,9 +584,9 @@ export function FuelActivityTable({
                                                                     setOpenMenuId(null);
                                                                 }}
                                                                 className="w-full text-left px-3 py-2 hover:bg-surface-container-high">
-                                                                <div className="flex items-center gap-2 text-emerald-600">
+                                                                <div className="flex items-center gap-2 text-emerald-600 font-medium">
                                                                     <MaterialIcon name="check_circle" size="sm" />
-                                                                    <span className="text-emerald-600">Verify</span>
+                                                                    <span>Verify</span>
                                                                 </div>
                                                             </button>
                                                             <button
@@ -526,13 +599,29 @@ export function FuelActivityTable({
                                                                     setOpenMenuId(null);
                                                                 }}
                                                                 className="w-full text-left px-3 py-2 hover:bg-surface-container-high">
-                                                                <div className="flex items-center gap-2 text-red-600">
+                                                                <div className="flex items-center gap-2 text-amber-600 font-medium">
                                                                     <MaterialIcon name="block" size="sm" />
-                                                                    <span className="text-red-600">Reject</span>
+                                                                    <span>Reject</span>
                                                                 </div>
                                                             </button>
                                                         </>
                                                     ) : null}
+
+                                                    <button
+                                                        onClick={() => {
+                                                            setConfirmState({
+                                                                open: true,
+                                                                action: "delete",
+                                                                activityId: activity.id,
+                                                            });
+                                                            setOpenMenuId(null);
+                                                        }}
+                                                        className="w-full text-left px-3 py-2 hover:bg-surface-container-high border-t border-slate-100">
+                                                        <div className="flex items-center gap-2 text-rose-600 font-medium">
+                                                            <MaterialIcon name="delete" size="sm" />
+                                                            <span>Delete</span>
+                                                        </div>
+                                                    </button>
                                                 </div>
                                             ) : null}
                                         </TableCell>
@@ -546,7 +635,7 @@ export function FuelActivityTable({
 
             <div className="flex flex-col gap-4 border-t border-outline-variant bg-surface p-4 md:flex-row md:items-center md:justify-between">
                 <span className="text-label-md text-on-surface-variant">
-                    Showing 1-{Math.min(10, activities.length)} of {activities.length} activities
+                    Showing 1-{Math.min(activities.length, 15)} of {activities.length} activities
                 </span>
                 <div className="flex items-center gap-2">
                     <button
@@ -556,18 +645,10 @@ export function FuelActivityTable({
                     </button>
                     <div className="flex items-center gap-1 rounded border border-outline-variant bg-white px-2 py-1">
                         <span className="px-3 py-1 rounded bg-primary text-on-primary text-xs font-semibold">1</span>
-                        <button className="px-3 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high rounded">
-                            2
-                        </button>
-                        <button className="px-3 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high rounded">
-                            3
-                        </button>
-                        <span className="px-3 py-1 text-xs font-medium text-on-surface-variant">...</span>
-                        <button className="px-3 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high rounded">
-                            5
-                        </button>
                     </div>
-                    <button className="rounded border border-outline-variant bg-white p-2 text-on-surface-variant hover:bg-surface-container-high">
+                    <button
+                        className="rounded border border-outline-variant bg-white p-2 text-on-surface-variant hover:bg-surface-container-high disabled:opacity-50"
+                        disabled>
                         <MaterialIcon name="chevron_right" size="sm" />
                     </button>
                 </div>
@@ -577,9 +658,9 @@ export function FuelActivityTable({
                 <FuelActivityDetailModal
                     activity={selectedActivity}
                     onClose={() => setSelectedActivityId(null)}
-                    onVerify={(id) => {
-                        console.log("Verify activity:", id);
-                    }}
+                    onVerify={(id) => performVerify(id)}
+                    onReject={(id) => setConfirmState({ open: true, action: "reject", activityId: id })}
+                    onSubmit={(id) => performSubmit(id)}
                 />
             )}
 
@@ -595,12 +676,16 @@ export function FuelActivityTable({
                         <div className="flex items-start justify-between gap-4 px-6 py-5">
                             <div>
                                 <h3 className="text-headline-sm font-semibold text-primary">
-                                    {confirmState.action === "verify" ? "Verify activity" : "Reject activity"}
+                                    {confirmState.action === "verify" && "Verify activity"}
+                                    {confirmState.action === "reject" && "Reject activity"}
+                                    {confirmState.action === "submit" && "Submit activity"}
+                                    {confirmState.action === "delete" && "Delete activity"}
                                 </h3>
                                 <p className="text-body-sm text-on-surface-variant mt-1">
-                                    {confirmState.action === "verify"
-                                        ? "This will mark the activity as verified. This action cannot be undone."
-                                        : "Please provide a reason for rejecting this activity (1-2000 characters)."}
+                                    {confirmState.action === "verify" && "This will mark the activity as verified."}
+                                    {confirmState.action === "reject" && "Please provide a reason for rejecting this activity (1-2000 characters)."}
+                                    {confirmState.action === "submit" && "This will submit the activity for reviewer verification."}
+                                    {confirmState.action === "delete" && "Are you sure you want to delete this fuel activity? This action cannot be undone."}
                                 </p>
                             </div>
                             <button
@@ -611,18 +696,18 @@ export function FuelActivityTable({
                             </button>
                         </div>
 
-                        <div className="p-6">
-                            {confirmState.action === "reject" ? (
+                        {confirmState.action === "reject" ? (
+                            <div className="p-6 pt-0">
                                 <textarea
                                     value={rejectReason}
                                     onChange={(e) => setRejectReason(e.target.value)}
-                                    placeholder="Enter rejection reason"
+                                    placeholder="Enter rejection reason..."
                                     className="w-full rounded border border-outline-variant p-3 text-sm"
-                                    rows={6}
+                                    rows={5}
                                     maxLength={2000}
                                 />
-                            ) : null}
-                        </div>
+                            </div>
+                        ) : null}
 
                         <div className="flex items-center gap-3 border-t border-outline-variant bg-surface p-4 justify-end">
                             <Button
@@ -630,22 +715,38 @@ export function FuelActivityTable({
                                 onClick={() => setConfirmState({ open: false, action: null, activityId: null })}>
                                 Cancel
                             </Button>
-                            {confirmState.action === "verify" ? (
+                            {confirmState.action === "verify" && (
                                 <button
-                                    className="bg-primary text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm disabled:opacity-70"
+                                    className="bg-emerald-600 text-white px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm disabled:opacity-70 font-mono text-xs font-bold uppercase"
                                     onClick={() => performVerify(confirmState.activityId)}
                                     disabled={isSubmitting}>
                                     <MaterialIcon name="check_circle" size="sm" />
-                                    <span className="font-label-md text-label-md uppercase">
-                                        {verifyMutation.status === "pending" ? "Verifying..." : "Confirm verify"}
-                                    </span>
+                                    <span>{verifyMutation.status === "pending" ? "Verifying..." : "Confirm verify"}</span>
                                 </button>
-                            ) : (
+                            )}
+                            {confirmState.action === "submit" && (
+                                <button
+                                    className="bg-primary text-white px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm disabled:opacity-70 font-mono text-xs font-bold uppercase"
+                                    onClick={() => performSubmit(confirmState.activityId)}
+                                    disabled={isSubmitting}>
+                                    <MaterialIcon name="send" size="sm" />
+                                    <span>{submitMutation.status === "pending" ? "Submitting..." : "Confirm submit"}</span>
+                                </button>
+                            )}
+                            {confirmState.action === "reject" && (
                                 <Button
                                     variant="danger"
                                     onClick={() => performReject(confirmState.activityId, rejectReason)}
                                     disabled={isSubmitting || rejectReason.length < 1 || rejectReason.length > 2000}>
                                     {rejectMutation.status === "pending" ? "Rejecting..." : "Confirm reject"}
+                                </Button>
+                            )}
+                            {confirmState.action === "delete" && (
+                                <Button
+                                    variant="danger"
+                                    onClick={() => performDelete(confirmState.activityId)}
+                                    disabled={isSubmitting}>
+                                    {deleteMutation.status === "pending" ? "Deleting..." : "Confirm delete"}
                                 </Button>
                             )}
                         </div>

@@ -142,6 +142,32 @@ export type FuelActivity = {
     fuelFactorStandard: string;
     fuelFactorVersion: string;
     fuelFactorRegion: string;
+    // Facility & Period Context
+    facilityName?: string;
+    facilityCode?: string;
+    facilityCity?: string;
+    facilityCountry?: string;
+    reportingPeriodName?: string;
+    periodStatus?: string;
+    periodStartDate?: string;
+    periodEndDate?: string;
+    meterId?: string | null;
+    cost?: number | null;
+    // Workflow metadata
+    rejectedReason?: string | null;
+    verifiedBy?: string | null;
+    verifiedAt?: string | null;
+    enteredBy?: string | null;
+    isAmendment?: boolean;
+    sourceReferenceCode?: string | null;
+    // Factor & Fuel Details
+    fuelIsRenewable?: boolean;
+    fuelFactorType?: string;
+    unitType?: string;
+    factorDataYear?: number | null;
+    factorEmissionUnit?: string | null;
+    // Attached documents
+    attachedDocuments?: FuelActivityDocumentItem[];
     // Full calculated data
     calculatedKgCo2: number;
     calculatedTCo2: number;
@@ -164,6 +190,17 @@ export type FuelActivity = {
     factorTCo2eOfCh4: number;
     factorTCo2eOfN2o: number;
     factorOtherGhgTCo2e: number | null;
+};
+
+export type FuelActivityDocumentItem = {
+    id: string;
+    document_name: string;
+    document_type: string;
+    source_url: string;
+    document_date?: string | null;
+    notes?: string | null;
+    issued_by?: string | null;
+    uploaded_by?: string | null;
 };
 
 export type FuelActivityPagination = {

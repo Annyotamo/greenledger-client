@@ -3,362 +3,496 @@
 import Link from "next/link";
 import { format } from "date-fns";
 import {
-    LineChart,
-    Line,
     PieChart,
     Pie,
     Cell,
-    XAxis,
-    YAxis,
-    CartesianGrid,
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
+import { useFuelActivity } from "@/lib/activity/hooks";
 import type { FuelActivity } from "@/lib/activity/types";
 
 const GHG_COLORS = {
     co2: "#2563eb",
-    ch4: "#f97316",
     n2o: "#14b8a6",
+    ch4: "#f97316",
 };
 
 const formatValue = (value: string | number | null | undefined) =>
     value == null || value === "" || Number.isNaN(Number(value)) ? "N/A" : String(value);
 
+const emissionTypeStyles: Record<string, string> = {
+    stationary: "bg-amber-500/10 text-amber-800 border-amber-500/20",
+    mobile: "bg-sky-500/10 text-sky-800 border-sky-500/20",
+    process: "bg-purple-500/10 text-purple-800 border-purple-500/20",
+    fugitive: "bg-rose-500/10 text-rose-800 border-rose-500/20",
+    default: "bg-slate-100 text-slate-700 border-slate-200",
+};
+
+const statusStyles: Record<string, string> = {
+    verified: "bg-emerald-500/10 text-emerald-800 border-emerald-500/20 font-bold",
+    pending: "bg-amber-500/10 text-amber-800 border-amber-500/20 font-semibold",
+    submitted: "bg-blue-500/10 text-blue-800 border-blue-500/20 font-semibold",
+    draft: "bg-slate-100 text-slate-700 border-slate-200 font-medium",
+    rejected: "bg-rose-500/10 text-rose-800 border-rose-500/20 font-semibold",
+    default: "bg-slate-100 text-slate-700 border-slate-200",
+};
+
 export function FuelActivityDetailModal({
-    activity,
+    activity: initialActivity,
     onClose,
     onVerify,
+    onReject,
+    onSubmit,
 }: {
     activity: FuelActivity;
     onClose: () => void;
-    onVerify: (id: string) => void;
+    onVerify?: (id: string) => void;
+    onReject?: (id: string) => void;
+    onSubmit?: (id: string) => void;
 }) {
-    const activityStart = new Date(activity.activityStartDate);
-    const activityEnd = new Date(activity.activityEndDate);
+    // Fetch full single fuel activity details from API
+    const { data: fetchedActivity, isLoading } = useFuelActivity(initialActivity.id);
+    const activity = fetchedActivity || initialActivity;
 
-    // Prepare calculated emissions breakdown for pie chart
+    const activityStart = activity.activityStartDate ? new Date(activity.activityStartDate) : new Date();
+    const activityEnd = activity.activityEndDate ? new Date(activity.activityEndDate) : new Date();
+    const activeDays = Math.max(
+        1,
+        Math.ceil((activityEnd.getTime() - activityStart.getTime()) / (1000 * 60 * 60 * 24)) + 1,
+    );
+
     const calculatedEmissionsData = [
         {
             name: "CO₂",
-            value: activity.calculatedTCo2,
+            fullName: "Carbon Dioxide (CO₂)",
+            value: activity.calculatedTCo2 || 0,
+            kgValue: activity.calculatedKgCo2 || 0,
             color: GHG_COLORS.co2,
         },
         {
-            name: "CH₄",
-            value: activity.calculatedTCh4,
-            color: GHG_COLORS.ch4,
+            name: "N₂O",
+            fullName: "Nitrous Oxide (N₂O)",
+            value: activity.calculatedTN2o || 0,
+            kgValue: activity.calculatedKgN2o || 0,
+            color: GHG_COLORS.n2o,
         },
         {
-            name: "N₂O",
-            value: activity.calculatedTN2o,
-            color: GHG_COLORS.n2o,
+            name: "CH₄",
+            fullName: "Methane (CH₄)",
+            value: activity.calculatedTCh4 || 0,
+            kgValue: activity.calculatedKgCh4 || 0,
+            color: GHG_COLORS.ch4,
         },
     ].filter((item) => item.value > 0);
 
-    const comparisonData = [
-        {
-            name: "Total CO₂e",
-            Calculated: Number(activity.calculatedTCo2e.toFixed(2)),
-            Factor: Number(activity.factorTCo2e.toFixed(4)),
-        },
-        {
-            name: "CO₂",
-            Calculated: Number(activity.calculatedTCo2.toFixed(2)),
-            Factor: Number(activity.factorTCo2eOfCo2.toFixed(4)),
-        },
-        {
-            name: "CH₄",
-            Calculated: Number(activity.calculatedTCh4.toFixed(2)),
-            Factor: Number(activity.factorTCo2eOfCh4.toFixed(4)),
-        },
-        {
-            name: "N₂O",
-            Calculated: Number(activity.calculatedTN2o.toFixed(2)),
-            Factor: Number(activity.factorTCo2eOfN2o.toFixed(4)),
-        },
-    ];
+    const statusLower = (activity.workflowStatus || "draft").toLowerCase();
+    const isVerified = statusLower === "verified";
+    const isDraft = statusLower === "draft";
+    const isSubmitted = statusLower === "submitted" || statusLower === "pending";
+    const isRejected = statusLower === "rejected";
 
-    const isVerified = activity.workflowStatus.toLowerCase() === "verified";
+    const attachedDocs = activity.attachedDocuments || [];
+    const facilityLocation = [activity.facilityCity, activity.facilityCountry].filter(Boolean).join(", ");
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-5xl max-h-[calc(100vh-2rem)] overflow-hidden rounded-md bg-white shadow-2xl ring-1 ring-slate-200/40">
-                <div className="flex flex-col gap-3 border-b border-slate-200/70 bg-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="w-full max-w-5xl max-h-[calc(100vh-2rem)] overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-slate-200/60 flex flex-col">
+                {/* Header Bar */}
+                <div className="flex flex-col gap-3 border-b border-slate-200/80 bg-slate-50/70 px-6 py-4 sm:flex-row sm:items-center sm:justify-between shrink-0">
                     <div>
-                        <p className="text-xs uppercase tracking-[0.32em] text-slate-500">Activity Details</p>
-                        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-                            {format(activityStart, "MMMM d, yyyy")} to {format(activityEnd, "MMMM d, yyyy")}
-                        </h2>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                Scope 1 Fuel Combustion Activity
+                            </span>
+                            {isLoading && (
+                                <span className="text-[10px] text-primary italic font-mono animate-pulse">
+                                    • Syncing live details...
+                                </span>
+                            )}
+                        </div>
+                        <div className="mt-1 flex flex-wrap items-center gap-3">
+                            <h2 className="text-xl font-bold tracking-tight text-slate-950">
+                                {activity.fuelName}
+                            </h2>
+                            <span className="text-xs font-semibold text-slate-600">
+                                ({format(activityStart, "MMM d, yyyy")} – {format(activityEnd, "MMM d, yyyy")})
+                            </span>
+                            <span className="px-2 py-0.5 rounded bg-slate-200/80 text-slate-700 font-mono text-[11px] font-bold">
+                                {activeDays} Days
+                            </span>
+                            <span className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs uppercase tracking-wide border ${statusStyles[statusLower] || statusStyles.default}`}>
+                                {activity.workflowStatus}
+                            </span>
+                        </div>
                     </div>
                     <button
                         type="button"
                         onClick={onClose}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:bg-slate-50">
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:bg-slate-100 shrink-0">
                         <MaterialIcon name="close" size="sm" />
                     </button>
                 </div>
 
-                <div className="flex flex-1 min-h-0 max-h-[calc(100vh-12rem)] flex-col overflow-y-auto px-6 py-5">
-                    <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        {(
-                            [
-                                { label: "Fuel", value: activity.fuelName },
-                                { label: "Quantity", value: `${activity.quantity.toFixed(2)} ${activity.unitSymbol}` },
-                                { label: "Scope", value: activity.scopeType },
-                            ] as const
-                        ).map((item) => (
-                            <div
-                                key={item.label}
-                                className="rounded-md border border-slate-200/80 bg-slate-50 px-4 py-4">
-                                <p className="text-[11px] uppercase tracking-[0.32em] text-slate-500">{item.label}</p>
-                                <p className="mt-3 text-sm font-semibold text-slate-950">{item.value}</p>
+                {/* Modal Body */}
+                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+                    {/* Rejection Alert Banner */}
+                    {isRejected && activity.rejectedReason && (
+                        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 flex items-start gap-3">
+                            <MaterialIcon name="error" size="sm" className="text-rose-600 shrink-0 mt-0.5" />
+                            <div>
+                                <h4 className="text-xs font-bold text-rose-900 uppercase tracking-wider">Rejection Reason</h4>
+                                <p className="text-xs text-rose-700 mt-1 leading-relaxed">{activity.rejectedReason}</p>
                             </div>
-                        ))}
+                        </div>
+                    )}
+
+                    {/* Top KPI Cards (4 Grid) */}
+                    <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-1">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Fuel & Emission Type</p>
+                            <p className="text-sm font-bold text-slate-950 truncate">{activity.fuelName}</p>
+                            <div className="flex items-center gap-1.5 pt-0.5">
+                                <span className={`inline-flex rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-tight border ${emissionTypeStyles[activity.emissionType?.toLowerCase()] || emissionTypeStyles.default}`}>
+                                    {activity.emissionType}
+                                </span>
+                                {activity.fuelFactorType && (
+                                    <span className="text-[10px] font-mono text-slate-500 uppercase">
+                                        • {activity.fuelFactorType}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-1">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Quantity Consumed</p>
+                            <p className="text-base font-bold font-mono text-slate-950">
+                                {activity.quantity.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                            </p>
+                            <p className="text-xs text-slate-500 font-semibold uppercase">
+                                {activity.unitName || activity.unitSymbol} ({activity.unitSymbol})
+                            </p>
+                        </div>
+
+                        <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-1">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Total Calculated Emissions</p>
+                            <p className="text-base font-bold font-mono text-primary">
+                                {(activity.calculatedTCo2e || 0).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 6 })} tCO₂e
+                            </p>
+                            <p className="text-[11px] text-slate-500 font-mono">
+                                {(activity.calculatedKgCo2e || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kgCO₂e
+                            </p>
+                        </div>
+
+                        <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-1">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Cost & Quality Tier</p>
+                            <p className="text-base font-bold font-mono text-slate-950">
+                                {activity.cost != null ? `₹${activity.cost.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "N/A"}
+                            </p>
+                            <p className="text-xs text-slate-500 font-medium capitalize">Tier: {activity.dataQualityTier}</p>
+                        </div>
                     </section>
 
-                    <section className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] mt-4">
-                        <div className="rounded-md border border-gray-300 p-5">
-                            <div className="flex items-center justify-between ">
-                                <p className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">
-                                    Calculated emissions
-                                </p>
-                                <span className="rounded-md bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
-                                    tCO₂e
+                    {/* Main Content Grid: Gas Breakdown on Left, Facility & Factor Context on Right */}
+                    <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+                        {/* Greenhouse Gas Breakdown Card */}
+                        <div className="rounded-xl border border-slate-200 p-5 space-y-4 bg-white">
+                            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                                <div>
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Greenhouse Gas Breakdown</h3>
+                                    <p className="text-[11px] text-slate-400 mt-0.5">Specific gas emissions calculated for this event</p>
+                                </div>
+                                <span className="rounded bg-slate-100 px-2.5 py-1 text-[10px] font-mono font-bold text-slate-700">
+                                    {(activity.calculatedTCo2e || 0).toFixed(4)} tCO₂e
                                 </span>
                             </div>
-                            <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
-                                <div className="h-60 w-full sm:w-1/2">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <PieChart>
-                                            <Pie
-                                                data={calculatedEmissionsData}
-                                                cx="50%"
-                                                cy="50%"
-                                                labelLine={false}
-                                                outerRadius={80}
-                                                dataKey="value">
-                                                {calculatedEmissionsData.map((entry, index) => (
-                                                    <Cell key={`slice-${index}`} fill={entry.color} />
-                                                ))}
-                                            </Pie>
-                                            <Tooltip
-                                                formatter={(value) =>
-                                                    typeof value === "number" ? value.toFixed(2) : value
-                                                }
-                                            />
-                                        </PieChart>
-                                    </ResponsiveContainer>
+
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                                <div className="h-48 w-full sm:w-1/2">
+                                    {calculatedEmissionsData.length > 0 ? (
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <PieChart>
+                                                <Pie
+                                                    data={calculatedEmissionsData}
+                                                    cx="50%"
+                                                    cy="50%"
+                                                    innerRadius={42}
+                                                    outerRadius={68}
+                                                    paddingAngle={3}
+                                                    dataKey="value">
+                                                    {calculatedEmissionsData.map((entry, index) => (
+                                                        <Cell key={`slice-${index}`} fill={entry.color} />
+                                                    ))}
+                                                </Pie>
+                                                <Tooltip
+                                                    formatter={(val) =>
+                                                        typeof val === "number" ? `${val.toFixed(4)} tCO₂e` : val
+                                                    }
+                                                />
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                    ) : (
+                                        <div className="flex h-full items-center justify-center text-xs text-slate-400 italic">
+                                            No breakdown data
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="grid gap-3 sm:w-1/2">
+
+                                <div className="grid gap-2 sm:w-1/2">
                                     {calculatedEmissionsData.map((item) => (
                                         <div
                                             key={item.name}
-                                            className="flex items-center justify-between rounded-md border border-slate-200/80 bg-slate-50 px-4 py-3">
-                                            <div className="flex items-center gap-3">
+                                            className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/70 p-2.5">
+                                            <div className="flex items-center gap-2">
                                                 <span
-                                                    className="inline-flex h-3.5 w-3.5 rounded-md"
+                                                    className="inline-flex h-3 w-3 rounded-sm shrink-0"
                                                     style={{ backgroundColor: item.color }}
                                                 />
-                                                <span className="text-sm font-medium text-slate-900">{item.name}</span>
+                                                <div>
+                                                    <div className="text-xs font-bold text-slate-900">{item.name}</div>
+                                                    <div className="text-[10px] text-slate-500">{item.fullName}</div>
+                                                </div>
                                             </div>
-                                            <span className="text-sm font-semibold text-slate-950">
-                                                {item.value.toFixed(2)} t
-                                            </span>
+                                            <div className="text-right font-mono">
+                                                <div className="text-xs font-bold text-slate-950">{item.value.toFixed(4)} t</div>
+                                                <div className="text-[10px] text-slate-500">{item.kgValue.toFixed(2)} kg</div>
+                                            </div>
                                         </div>
                                     ))}
+                                    {activity.biogenicTCo2 != null && activity.biogenicTCo2 > 0 && (
+                                        <div className="flex items-center justify-between rounded-lg border border-emerald-100 bg-emerald-50/50 p-2.5">
+                                            <span className="text-xs font-semibold text-emerald-900">Biogenic CO₂</span>
+                                            <span className="text-xs font-bold font-mono text-emerald-700">{activity.biogenicTCo2.toFixed(4)} t</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
-                        <div className="rounded-md border border-gray-300 p-5">
-                            <div className="flex items-center justify-between">
-                                <p className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">
-                                    Totals
-                                </p>
-                                <span className="rounded-md bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                                    {activity.workflowStatus}
-                                </span>
-                            </div>
-                            <div className="mt-5 grid gap-4">
-                                <div className="flex items-center justify-between gap-4 text-sm text-slate-500">
-                                    <span>Total CO₂e (tonnes)</span>
-                                    <span className="text-base font-semibold text-slate-950">
-                                        {activity.calculatedTCo2e.toFixed(2)}
-                                    </span>
-                                </div>
-                                <div className="flex items-center justify-between gap-4 border-t border-slate-200/80 pt-4 text-sm text-slate-500">
-                                    <span>Total CO₂e (kg)</span>
-                                    <span className="text-base font-semibold text-slate-950">
-                                        {activity.calculatedKgCo2e.toFixed(0)}
-                                    </span>
-                                </div>
-                                <div className="border-t border-slate-200/80 pt-4">
-                                    <p className="text-[11px] uppercase tracking-[0.32em] text-slate-500">
-                                        Gas breakdown
-                                    </p>
-                                    <div className="mt-3 space-y-2 text-sm text-slate-700">
-                                        <div className="flex justify-between">
-                                            <span>CO₂</span>
-                                            <span>{activity.calculatedTCo2.toFixed(2)} t</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span>CH₄</span>
-                                            <span>{activity.calculatedTCh4.toFixed(2)} t</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span>N₂O</span>
-                                            <span>{activity.calculatedTN2o.toFixed(2)} t</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
 
-                    <section className="rounded-md border border-gray-300 p-6 mt-4">
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        {/* Operational Context & Facility Details */}
+                        <div className="rounded-xl border border-slate-200 p-5 bg-white space-y-4">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2">
+                                Facility & Reporting Context
+                            </h3>
+                            <div className="grid gap-2.5 text-xs font-mono">
+                                <div className="flex items-center justify-between py-1 border-b border-slate-100/70">
+                                    <span className="text-slate-500 font-sans font-medium">Facility</span>
+                                    <span className="font-bold text-slate-900 text-right">
+                                        {activity.facilityName} {activity.facilityCode && <span className="text-slate-500">({activity.facilityCode})</span>}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between py-1 border-b border-slate-100/70">
+                                    <span className="text-slate-500 font-sans font-medium">Location</span>
+                                    <span className="font-bold text-slate-900">{facilityLocation || "N/A"}</span>
+                                </div>
+                                <div className="flex items-center justify-between py-1 border-b border-slate-100/70">
+                                    <span className="text-slate-500 font-sans font-medium">Reporting Period</span>
+                                    <span className="font-bold text-slate-900">
+                                        {activity.reportingPeriodName} {activity.periodStatus && <span className="text-emerald-700 uppercase text-[10px]">({activity.periodStatus})</span>}
+                                    </span>
+                                </div>
+                                {activity.periodStartDate && activity.periodEndDate && (
+                                    <div className="flex items-center justify-between py-1 border-b border-slate-100/70">
+                                        <span className="text-slate-500 font-sans font-medium">Period Range</span>
+                                        <span className="font-medium text-slate-700 text-[11px]">
+                                            {activity.periodStartDate} to {activity.periodEndDate}
+                                        </span>
+                                    </div>
+                                )}
+                                <div className="flex items-center justify-between py-1 border-b border-slate-100/70">
+                                    <span className="text-slate-500 font-sans font-medium">Data Quality Tier</span>
+                                    <span className="font-bold text-slate-900 capitalize">{activity.dataQualityTier}</span>
+                                </div>
+                                {activity.meterId && (
+                                    <div className="flex items-center justify-between py-1 border-b border-slate-100/70">
+                                        <span className="text-slate-500 font-sans font-medium">Meter Reference</span>
+                                        <span className="font-bold text-slate-900">{activity.meterId}</span>
+                                    </div>
+                                )}
+                                {activity.enteredBy && (
+                                    <div className="flex items-center justify-between py-1">
+                                        <span className="text-slate-500 font-sans font-medium">Entered By</span>
+                                        <span className="font-medium text-slate-600 text-[11px] truncate max-w-[200px]">{activity.enteredBy}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Emission Factor Reference Information */}
+                    <section className="rounded-xl border border-slate-200 p-5 bg-white space-y-3">
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                             <div>
-                                <p className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">
-                                    Trend Comparison
-                                </p>
-                                <p className="text-sm text-slate-500">
-                                    A visual comparison of calculated and factor emissions.
-                                </p>
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                    Emission Factor Reference Information
+                                </h3>
+                                <p className="text-[11px] text-slate-400 mt-0.5">Factor dataset used for combustion GHG calculation</p>
                             </div>
-                            <div className="flex items-center gap-2 rounded-md border border-slate-200/80 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700">
-                                <span className="inline-flex h-2.5 w-2.5 rounded-md bg-[#2563eb]" /> Calculated
-                                <span className="inline-flex h-2.5 w-2.5 rounded-md bg-[#14b8a6]" /> Factor
+                            <span className="px-2.5 py-0.5 rounded bg-primary/10 text-primary font-mono text-xs font-bold">
+                                {activity.fuelFactorStandard || "IPCC"} {activity.fuelFactorVersion && `(${activity.fuelFactorVersion})`}
+                            </span>
+                        </div>
+
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 pt-1 font-mono text-xs">
+                            <div className="rounded-lg bg-slate-50 p-3">
+                                <span className="text-[10px] uppercase font-bold text-slate-500 block font-sans">Database Standard</span>
+                                <span className="text-xs font-bold text-slate-900 mt-1 block">
+                                    {activity.fuelFactorStandard} {activity.fuelFactorVersion}
+                                </span>
+                                <span className="text-[10px] text-slate-500 block">Region: {activity.fuelFactorRegion || "GLOBAL"}</span>
+                            </div>
+
+                            <div className="rounded-lg bg-slate-50 p-3">
+                                <span className="text-[10px] uppercase font-bold text-slate-500 block font-sans">Factor Data Year</span>
+                                <span className="text-xs font-bold text-slate-900 mt-1 block">
+                                    {activity.factorDataYear || "2023"}
+                                </span>
+                                <span className="text-[10px] text-slate-500 block">Unit: {activity.factorEmissionUnit || "kg"}</span>
+                            </div>
+
+                            <div className="rounded-lg bg-slate-50 p-3">
+                                <span className="text-[10px] uppercase font-bold text-slate-500 block font-sans">Total Factor Rate (tCO₂e)</span>
+                                <span className="text-xs font-bold text-slate-900 mt-1 block">
+                                    {(activity.factorTCo2e || 0).toFixed(7)}
+                                </span>
+                                <span className="text-[10px] text-slate-500 block">per {activity.unitSymbol}</span>
+                            </div>
+
+                            <div className="rounded-lg bg-slate-50 p-3">
+                                <span className="text-[10px] uppercase font-bold text-slate-500 block font-sans">Total Factor Rate (kgCO₂e)</span>
+                                <span className="text-xs font-bold text-slate-900 mt-1 block">
+                                    {(activity.factorKgCo2e || 0).toFixed(4)}
+                                </span>
+                                <span className="text-[10px] text-slate-500 block">per {activity.unitSymbol}</span>
                             </div>
                         </div>
-                        <div className="mt-5 h-75 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={comparisonData} margin={{ top: 10, right: 12, left: -6, bottom: 12 }}>
-                                    <CartesianGrid strokeDasharray="4 4" stroke="#e2e8f0" vertical={false} />
-                                    <XAxis
-                                        dataKey="name"
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tick={{ fill: "#64748b", fontSize: 12 }}
-                                    />
-                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 12 }} />
-                                    <Tooltip
-                                        formatter={(value) => (typeof value === "number" ? value.toFixed(4) : value)}
-                                        contentStyle={{
-                                            borderRadius: 18,
-                                            borderColor: "rgba(148,163,184,0.3)",
-                                            backgroundColor: "#ffffff",
-                                            boxShadow: "0 18px 54px rgba(15,23,42,0.08)",
-                                        }}
-                                    />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="Calculated"
-                                        stroke="#2563eb"
-                                        strokeWidth={3}
-                                        dot={{ r: 4, fill: "#2563eb", stroke: "#ffffff", strokeWidth: 2 }}
-                                        activeDot={{ r: 6 }}
-                                    />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="Factor"
-                                        stroke="#14b8a6"
-                                        strokeWidth={3}
-                                        dot={{ r: 4, fill: "#14b8a6", stroke: "#ffffff", strokeWidth: 2 }}
-                                        activeDot={{ r: 6 }}
-                                    />
-                                </LineChart>
-                            </ResponsiveContainer>
+
+                        {/* Granular Gas Factor Rates */}
+                        <div className="grid gap-2 sm:grid-cols-3 pt-2 text-xs font-mono">
+                            <div className="flex items-center justify-between px-3 py-2 rounded bg-slate-50/60 border border-slate-100">
+                                <span className="text-slate-500 font-sans">CO₂ Factor:</span>
+                                <span className="font-bold text-slate-900">{activity.factorKgCo2eOfCo2.toFixed(4)} kg/unit</span>
+                            </div>
+                            <div className="flex items-center justify-between px-3 py-2 rounded bg-slate-50/60 border border-slate-100">
+                                <span className="text-slate-500 font-sans">N₂O Factor:</span>
+                                <span className="font-bold text-slate-900">{activity.factorKgCo2eOfN2o.toFixed(4)} kg/unit</span>
+                            </div>
+                            <div className="flex items-center justify-between px-3 py-2 rounded bg-slate-50/60 border border-slate-100">
+                                <span className="text-slate-500 font-sans">CH₄ Factor:</span>
+                                <span className="font-bold text-slate-900">{activity.factorKgCo2eOfCh4.toFixed(4)} kg/unit</span>
+                            </div>
                         </div>
                     </section>
 
-                    <section className="grid gap-4 lg:grid-cols-2 mt-4">
-                        <div className="rounded-md border border-gray-300 p-6">
-                            <p className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">
-                                Factor Data
-                            </p>
-                            <div className="mt-4 grid gap-3 text-sm text-slate-700">
-                                {[
-                                    { label: "Source", value: activity.fuelFactorStandard },
-                                    { label: "Version", value: activity.fuelFactorVersion },
-                                    { label: "Region", value: activity.fuelFactorRegion },
-                                    { label: "Total CO₂e (t)", value: activity.factorTCo2e.toFixed(6) },
-                                    { label: "CO₂ CO₂e (t)", value: activity.factorTCo2eOfCo2.toFixed(6) },
-                                    { label: "CH₄ CO₂e (t)", value: activity.factorTCo2eOfCh4.toFixed(6) },
-                                    { label: "N₂O CO₂e (t)", value: activity.factorTCo2eOfN2o.toFixed(6) },
-                                ].map((item) => (
-                                    <div key={item.label} className="flex items-center justify-between text-sm">
-                                        <span className="text-slate-500">{item.label}</span>
-                                        <span className="font-medium text-slate-950">{formatValue(item.value)}</span>
+                    {/* Attached Supporting Evidence Documents Section */}
+                    <section className="rounded-xl border border-slate-200 p-5 bg-white space-y-4">
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <div>
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                    Attached Evidence Documents ({attachedDocs.length})
+                                </h3>
+                                <p className="text-[11px] text-slate-400 mt-0.5">Verification documents and invoices attached to this activity</p>
+                            </div>
+                        </div>
+
+                        {attachedDocs.length > 0 ? (
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                {attachedDocs.map((doc) => (
+                                    <div
+                                        key={doc.id}
+                                        className="rounded-lg border border-slate-200 bg-slate-50/60 p-3.5 flex items-center justify-between gap-3">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+                                                <MaterialIcon name="description" size="sm" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-bold text-slate-900 truncate">{doc.document_name}</p>
+                                                <div className="flex items-center gap-2 mt-0.5">
+                                                    <span className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 font-mono text-[9px] font-bold uppercase">
+                                                        {doc.document_type}
+                                                    </span>
+                                                    {doc.document_date && (
+                                                        <span className="text-[10px] text-slate-500 font-mono">{doc.document_date}</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {doc.source_url ? (
+                                            <a
+                                                href={doc.source_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="shrink-0 flex items-center gap-1 bg-white border border-slate-200 hover:bg-slate-100 text-primary px-3 py-1.5 rounded-md text-xs font-semibold shadow-xs transition-colors">
+                                                <span>Download</span>
+                                                <MaterialIcon name="open_in_new" size="xs" />
+                                            </a>
+                                        ) : (
+                                            <span className="text-[10px] text-slate-400 italic">No link</span>
+                                        )}
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                        <div className="rounded-md border border-gray-300 p-6">
-                            <p className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">
-                                Activity Metadata
-                            </p>
-                            <div className="mt-4 grid gap-3 text-sm text-slate-700">
-                                {[
-                                    { label: "Emission type", value: activity.emissionType },
-                                    {
-                                        label: "Energy content (GJ)",
-                                        value:
-                                            activity.energyContentGJ > 0 ? activity.energyContentGJ.toFixed(2) : "N/A",
-                                    },
-                                    {
-                                        label: "Generator efficiency",
-                                        value: activity.generatorEfficiencyPercentage
-                                            ? `${activity.generatorEfficiencyPercentage.toFixed(2)}%`
-                                            : "N/A",
-                                    },
-                                    {
-                                        label: "Generated electricity (kWh)",
-                                        value: activity.generatedElectricityKwh
-                                            ? activity.generatedElectricityKwh.toFixed(2)
-                                            : "N/A",
-                                    },
-                                    {
-                                        label: "Generated steam (GJ)",
-                                        value: activity.generatedSteamGJ ? activity.generatedSteamGJ.toFixed(2) : "N/A",
-                                    },
-                                    { label: "Estimation basis", value: activity.estimationBasis ?? "N/A" },
-                                    { label: "Notes", value: activity.notes ?? "None" },
-                                    { label: "Calculation method", value: activity.calculationMethod ?? "N/A" },
-                                ].map((item) => (
-                                    <div key={item.label} className="flex items-center justify-between text-sm">
-                                        <span className="text-slate-500">{item.label}</span>
-                                        <span className="font-medium text-slate-950">{formatValue(item.value)}</span>
-                                    </div>
-                                ))}
+                        ) : (
+                            <div className="py-6 text-center text-xs text-slate-400 italic bg-slate-50/50 rounded-lg border border-dashed border-slate-200">
+                                No evidence documents attached to this activity record.
                             </div>
-                        </div>
+                        )}
                     </section>
                 </div>
 
-                <div className="sticky bottom-0 border-t border-slate-200/70 bg-white/95 px-6 py-4 backdrop-blur-xl">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-                        <Button variant="secondary" size="md" onClick={onClose} className="w-full sm:w-auto">
-                            Close
-                        </Button>
-                        <Link href={`/activities/fuel/${activity.id}/edit`} className="w-full sm:w-auto">
-                            <button className="bg-primary text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm">
-                                <MaterialIcon name="edit" size="sm" />
-                                <span className="font-label-md text-label-md uppercase">Edit</span>
+                {/* Footer Action Bar */}
+                <div className="sticky bottom-0 border-t border-slate-200/70 bg-white/95 px-6 py-4 backdrop-blur-xl shrink-0">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <Link href={`/activities/fuel/${activity.id}/edit`}>
+                            <button className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-900 font-semibold px-3 py-2 rounded-md hover:bg-slate-100 transition-colors">
+                                <MaterialIcon name="edit" size="xs" />
+                                <span>Edit Activity</span>
                             </button>
                         </Link>
-                        {!isVerified && (
-                            <button
-                                className="bg-green-500 text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm"
-                                onClick={() => {
-                                    onVerify(activity.id);
-                                    onClose();
-                                }}>
-                                <MaterialIcon name="check_circle" size="sm" />
-                                <span className="font-label-md text-label-md uppercase">Verify</span>
-                            </button>
-                        )}
+
+                        <div className="flex items-center gap-3 justify-end">
+                            <Button variant="secondary" size="md" onClick={onClose}>
+                                Close
+                            </Button>
+
+                            {isDraft && onSubmit && (
+                                <button
+                                    className="bg-primary text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded-md shadow-sm font-mono text-xs font-bold uppercase"
+                                    onClick={() => {
+                                        onSubmit(activity.id);
+                                        onClose();
+                                    }}>
+                                    <MaterialIcon name="send" size="sm" />
+                                    <span>Submit Activity</span>
+                                </button>
+                            )}
+
+                            {isSubmitted && onVerify && (
+                                <button
+                                    className="bg-emerald-600 text-white px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded-md shadow-sm font-mono text-xs font-bold uppercase"
+                                    onClick={() => {
+                                        onVerify(activity.id);
+                                        onClose();
+                                    }}>
+                                    <MaterialIcon name="check_circle" size="sm" />
+                                    <span>Verify Activity</span>
+                                </button>
+                            )}
+
+                            {isSubmitted && onReject && (
+                                <button
+                                    className="bg-rose-600 text-white px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded-md shadow-sm font-mono text-xs font-bold uppercase"
+                                    onClick={() => {
+                                        onReject(activity.id);
+                                        onClose();
+                                    }}>
+                                    <MaterialIcon name="cancel" size="sm" />
+                                    <span>Reject Activity</span>
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

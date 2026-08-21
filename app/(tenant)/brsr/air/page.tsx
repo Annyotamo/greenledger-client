@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/table";
 import type {
     AttachedUnitEnum,
-    StackCategoryEnum,
     BrsrAirDisclosurePayload,
     BrsrAirStackInput,
     BrsrAirReadingInput,
@@ -29,7 +28,7 @@ import type {
     BrsrAirGasDetailMetric,
 } from "@/lib/brsr/types";
 
-const STACK_CATEGORIES: StackCategoryEnum[] = [
+const ATTACHED_UNITS: AttachedUnitEnum[] = [
     "Sponge iron / DRI",
     "Steel melting",
     "Ferro alloy",
@@ -44,71 +43,60 @@ const STACK_CATEGORIES: StackCategoryEnum[] = [
 const DEFAULT_STACK_PRESETS: Record<string, string[]> = {
     "Sponge iron / DRI": [
         "Rotary Kiln No. 1 & 2 (150 TPD each, common stack)",
-        "Rotary Kiln No. 3 (100 TPD)",
-        "Rotary Kiln No. 4 (100 TPD)",
-        "De-dusting System DRI Kiln 1",
-        "De-dusting System DRI Kiln 2",
-        "Cooler Building De-dusting Stack",
-        "Product Handling & Screening Stack",
-        "Raw Material Handling (Coal/Iron Ore) De-dusting",
-        "Magnetic Separator De-dusting Stack",
-        "Coal Crusher & Screening De-dusting Stack",
-        "Iron Ore Crusher De-dusting Stack",
-        "Dolomite Handling De-dusting Stack",
-        "Waste Heat Recovery Boiler (WHRB) Stack",
-        "ABC (After Burning Chamber) Emergency Chimney",
-        "Char Handling & Separation De-dusting Stack",
+        "Rotary Kiln No. 3 & 4 (350 TPD each, common stack)",
+        "De-dusting System (ABC & Cooler Discharge)",
+        "Coal Handling Plant De-dusting",
+        "Product Separation & Handling Stack",
+        "WHRB Boiler Stack (Attached to DRI Kiln 1 & 2)",
+        "WHRB Boiler Stack (Attached to DRI Kiln 3 & 4)",
+        "AFBC Power Boiler Stack (Fines Fired)",
+        "Kiln Bag Filter Vent / Stack",
+        "Cooler Discharge De-dusting Bag Filter Stack",
+        "Raw Material Handling Bag Filter Vent",
+        "Intermediate Bin De-dusting Vent",
+        "Screening & Crusher House Bag Filter Stack",
+        "Magnetic Separator & Transfer Point De-dusting",
+        "Iron Ore Fines Injection System Vent",
     ],
     "Steel melting": [
-        "Induction Furnace Primary Fume Extraction Stack",
-        "Induction Furnace Secondary Fume Extraction Stack",
-        "Electric Arc Furnace (EAF) Primary Stack",
-        "Ladling & Tapping De-dusting Stack",
+        "Induction Furnace Stack No. 1 & 2 (Primary Fume Extraction)",
+        "Induction Furnace Secondary Fume Extraction System Stack",
+        "Electric Arc Furnace (EAF) Primary Bag Filter Stack",
+        "Ladelfurnace (LF) & LRF De-dusting Stack",
     ],
     "Ferro alloy": [
-        "Submerged Arc Furnace (SAF) Stack No. 1",
-        "Submerged Arc Furnace (SAF) Stack No. 2",
-        "SAF Raw Material Handling De-dusting Stack",
-        "Metal Tapping & Casting Fume Extraction Stack",
-        "Crushing & Screening Plant De-dusting Stack",
-        "Slag Processing & Metal Recovery De-dusting",
+        "Submerged Arc Furnace No. 1 (SAF) Bag Filter Stack",
+        "Submerged Arc Furnace No. 2 (SAF) Bag Filter Stack",
+        "Raw Material Handling & Dosing Plant De-dusting Stack",
+        "Crushing & Screening Plant Bag Filter Vent",
+        "Metal Casting & Tapping Area Fume Vent",
+        "Slag Processing & Metal Recovery Bag Filter Vent",
     ],
     "Blast furnace": [
-        "Blast Furnace Cast House De-dusting Stack",
-        "Blast Furnace Stove Chimney",
-        "Stockhouse De-dusting Stack",
+        "Blast Furnace Stove Stack",
+        "Cast House De-dusting Stack",
+        "Stockhouse Bag Filter Stack",
     ],
     "Sinter plant": [
-        "Sinter Machine Main Exhaust Chimney",
-        "Sinter Discharge & Cooling De-dusting Stack",
+        "Sinter Strand Main Exhaust Stack (De-SOx / De-NOx ESP Stack)",
+        "Sinter Cooler ESP & De-dusting Stack",
     ],
     "Pellet plant": [
-        "Induration Furnace Main Chimney",
-        "Pellet Handling & Screening De-dusting Stack",
+        "Induration Furnace Main Exhaust Stack",
+        "Grinding & Drying Plant De-dusting Stack",
     ],
     "Coke oven": [
-        "Coke Oven Battery Combustion Stack",
+        "Coke Oven Battery Chimney Stack",
     ],
     "Captive power": [
-        "Captive Power Boiler Chimney 1",
-        "AFBC / CFBC Boiler Stack",
-        "DG Set Emergency Stack",
+        "AFBC / CFBC Power Plant Main Boiler Stack",
+        "Coal Crusher & Handling Plant Bag Filter Stack",
+        "Ash Handling & Silo Vent Bag Filter Stack",
     ],
-    "Other": [],
+    "Other": [
+        "Custom Auxiliary Industrial Stack",
+    ],
 };
-
-const ATTACHED_UNITS: AttachedUnitEnum[] = [
-    "DRI",
-    "Captive power",
-    "Boiler",
-    "Furnace",
-    "Kiln",
-    "Sinter plant",
-    "Pellet plant",
-    "Coke oven",
-    "Foundry",
-    "Other",
-];
 
 const createCleanReading = (): BrsrAirReadingInput => ({
     sampling_date: "",
@@ -122,10 +110,8 @@ const createCleanReading = (): BrsrAirReadingInput => ({
 });
 
 const createCleanStack = (): BrsrAirStackInput => ({
-    stack_category: "Sponge iron / DRI",
+    attached_unit: "Sponge iron / DRI",
     stack_title: "Rotary Kiln No. 1 & 2 (150 TPD each, common stack)",
-    stack_name: "Rotary Kiln No. 1 & 2 (150 TPD each, common stack)",
-    attached_unit: "Kiln",
     operating_hours_per_year: "" as unknown as number,
     permitted_limits: {
         permitted_limit_nox: { value: "" as unknown as number, unit: "mg_per_nm3" },
@@ -142,10 +128,8 @@ const createCleanStack = (): BrsrAirStackInput => ({
 
 // Demo stack payload for default initial dashboard view
 const DEMO_STACK_1: BrsrAirStackInput = {
-    stack_category: "Sponge iron / DRI",
+    attached_unit: "Sponge iron / DRI",
     stack_title: "Rotary Kiln No. 1 & 2 (150 TPD each, common stack)",
-    stack_name: "Rotary Kiln No. 1 & 2 (150 TPD each, common stack)",
-    attached_unit: "Kiln",
     operating_hours_per_year: 7200,
     permitted_limits: {
         permitted_limit_nox: { value: 300, unit: "mg_per_nm3" },
@@ -238,10 +222,6 @@ export default function BrsrAirPage() {
     // Form Input States
     const [fyLabel, setFyLabel] = useState("");
 
-    // Fetch Stack Presets from API
-    const { data: presetsData } = useBrsrAirStackPresets();
-    const categoriesList = presetsData?.categories && presetsData.categories.length > 0 ? presetsData.categories : STACK_CATEGORIES;
-
     // Dynamic Stacks Input State
     const [stacks, setStacks] = useState<BrsrAirStackInput[]>([createCleanStack()]);
 
@@ -256,8 +236,12 @@ export default function BrsrAirPage() {
     });
 
     const { data, isPending, isError, error } = useBrsrAirDisclosure(activePayload);
+    const { data: presetsData } = useBrsrAirStackPresets();
+
     const [isDownloadOpen, setIsDownloadOpen] = useState(false);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+    const unitOptions = presetsData?.attached_units || ATTACHED_UNITS;
 
     // Stack Handlers
     const handleAddStack = () => {
@@ -361,67 +345,61 @@ export default function BrsrAirPage() {
     const handleGenerate = () => {
         setActivePayload({
             financial_year_label: fyLabel || "FY 2024-25",
-            stacks: stacks.map((s, idx) => {
-                const cat = s.stack_category || "Sponge iron / DRI";
-                const title = s.stack_title || s.stack_name || `Industrial Stack #${idx + 1}`;
-                return {
-                    stack_category: cat,
-                    stack_title: title,
-                    stack_name: title,
-                    attached_unit: s.attached_unit || "Kiln",
-                    operating_hours_per_year: Number(s.operating_hours_per_year) || 0,
-                    permitted_limits: {
-                        permitted_limit_nox: {
-                            value: Number(s.permitted_limits?.permitted_limit_nox?.value) || 0,
-                            unit: "mg_per_nm3",
-                        },
-                        permitted_limit_sox: {
-                            value: Number(s.permitted_limits?.permitted_limit_sox?.value) || 0,
-                            unit: "mg_per_nm3",
-                        },
-                        permitted_limit_pm: {
-                            value: Number(s.permitted_limits?.permitted_limit_pm?.value) || 0,
-                            unit: "mg_per_nm3",
-                        },
-                        permitted_flow_rate: {
-                            value: Number(s.permitted_limits?.permitted_flow_rate?.value) || 0,
-                            unit: "nm3_per_hour",
-                        },
+            stacks: stacks.map((s, idx) => ({
+                attached_unit: s.attached_unit || "Sponge iron / DRI",
+                stack_title: s.stack_title || `Industrial Stack #${idx + 1}`,
+                operating_hours_per_year: Number(s.operating_hours_per_year) || 0,
+                permitted_limits: {
+                    permitted_limit_nox: {
+                        value: Number(s.permitted_limits?.permitted_limit_nox?.value) || 0,
+                        unit: "mg_per_nm3",
                     },
-                    report_number: s.report_number || null,
-                    is_pop_monitored: !!s.is_pop_monitored,
-                    is_voc_monitored: !!s.is_voc_monitored,
-                    is_hap_monitored: !!s.is_hap_monitored,
-                    readings: s.readings.map((r) => ({
-                        sampling_date: r.sampling_date || format(new Date(), "yyyy-MM-dd"),
-                        gas_flow_rate: {
-                            value: Number(r.gas_flow_rate?.value) || 0,
-                            unit: "nm3_per_hour",
-                        },
-                        nox: {
-                            value: Number(r.nox?.value) || 0,
-                            unit: "mg_per_nm3",
-                        },
-                        sox: {
-                            value: Number(r.sox?.value) || 0,
-                            unit: "mg_per_nm3",
-                        },
-                        particulate_matter: {
-                            value: Number(r.particulate_matter?.value) || 0,
-                            unit: "mg_per_nm3",
-                        },
-                        pop: s.is_pop_monitored && r.pop?.value !== undefined && r.pop?.value !== null && (r.pop?.value as any) !== ""
-                            ? { value: Number(r.pop.value) || 0, unit: "mg_per_nm3" }
-                            : null,
-                        voc: s.is_voc_monitored && r.voc?.value !== undefined && r.voc?.value !== null && (r.voc?.value as any) !== ""
-                            ? { value: Number(r.voc.value) || 0, unit: "mg_per_nm3" }
-                            : null,
-                        hap: s.is_hap_monitored && r.hap?.value !== undefined && r.hap?.value !== null && (r.hap?.value as any) !== ""
-                            ? { value: Number(r.hap.value) || 0, unit: "mg_per_nm3" }
-                            : null,
-                    })),
-                };
-            }),
+                    permitted_limit_sox: {
+                        value: Number(s.permitted_limits?.permitted_limit_sox?.value) || 0,
+                        unit: "mg_per_nm3",
+                    },
+                    permitted_limit_pm: {
+                        value: Number(s.permitted_limits?.permitted_limit_pm?.value) || 0,
+                        unit: "mg_per_nm3",
+                    },
+                    permitted_flow_rate: {
+                        value: Number(s.permitted_limits?.permitted_flow_rate?.value) || 0,
+                        unit: "nm3_per_hour",
+                    },
+                },
+                report_number: s.report_number || null,
+                is_pop_monitored: !!s.is_pop_monitored,
+                is_voc_monitored: !!s.is_voc_monitored,
+                is_hap_monitored: !!s.is_hap_monitored,
+                readings: s.readings.map((r) => ({
+                    sampling_date: r.sampling_date || format(new Date(), "yyyy-MM-dd"),
+                    gas_flow_rate: {
+                        value: Number(r.gas_flow_rate?.value) || 0,
+                        unit: "nm3_per_hour",
+                    },
+                    nox: {
+                        value: Number(r.nox?.value) || 0,
+                        unit: "mg_per_nm3",
+                    },
+                    sox: {
+                        value: Number(r.sox?.value) || 0,
+                        unit: "mg_per_nm3",
+                    },
+                    particulate_matter: {
+                        value: Number(r.particulate_matter?.value) || 0,
+                        unit: "mg_per_nm3",
+                    },
+                    pop: s.is_pop_monitored && r.pop?.value !== undefined && r.pop?.value !== null && (r.pop?.value as any) !== ""
+                        ? { value: Number(r.pop.value) || 0, unit: "mg_per_nm3" }
+                        : null,
+                    voc: s.is_voc_monitored && r.voc?.value !== undefined && r.voc?.value !== null && (r.voc?.value as any) !== ""
+                        ? { value: Number(r.voc.value) || 0, unit: "mg_per_nm3" }
+                        : null,
+                    hap: s.is_hap_monitored && r.hap?.value !== undefined && r.hap?.value !== null && (r.hap?.value as any) !== ""
+                        ? { value: Number(r.hap.value) || 0, unit: "mg_per_nm3" }
+                        : null,
+                })),
+            })),
             others: others
                 .filter((o) => o.label.trim() !== "")
                 .map((o) => ({ label: o.label, quantity: Number(o.quantity) || 0 })),
@@ -433,6 +411,11 @@ export default function BrsrAirPage() {
         setFyLabel("");
         setStacks([createCleanStack()]);
         setOthers([]);
+        setActivePayload({
+            financial_year_label: "",
+            stacks: [],
+            others: [],
+        });
     };
 
     const handleDownloadReport = async (payload: BrsrAirDisclosurePayload) => {
@@ -473,7 +456,7 @@ export default function BrsrAirPage() {
     const plantTotals = totals?.plant_total_per_pollutant;
     const plantAvgs = totals?.plant_average_concentration;
     const plantGasDetails = totals?.plant_gas_details;
-    const calculatedStacks = totals?.stack_results || totals?.stacks || [];
+    const calculatedStacks = totals?.stacks || totals?.stack_results || [];
 
     return (
         <div className="space-y-8 max-w-7xl mx-auto animate-fade-up">
@@ -562,8 +545,8 @@ export default function BrsrAirPage() {
                             </div>
 
                             {stacks.map((stack, stackIdx) => {
-                                const currentCat = stack.stack_category || "Sponge iron / DRI";
-                                const presetsForCat = presetsData?.presets?.[currentCat] || DEFAULT_STACK_PRESETS[currentCat] || [];
+                                const currentUnit = stack.attached_unit || "Sponge iron / DRI";
+                                const presetsForUnit = presetsData?.presets?.[currentUnit] || DEFAULT_STACK_PRESETS[currentUnit] || [];
 
                                 return (
                                     <div
@@ -577,10 +560,10 @@ export default function BrsrAirPage() {
                                                 </span>
                                                 <div>
                                                     <h4 className="font-sans text-sm font-bold text-on-surface">
-                                                        {stack.stack_title || stack.stack_name || `Industrial Stack #${stackIdx + 1}`}
+                                                        {stack.stack_title || `Industrial Stack #${stackIdx + 1}`}
                                                     </h4>
                                                     <span className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
-                                                        Category: {currentCat}
+                                                        Unit: {currentUnit}
                                                     </span>
                                                 </div>
                                             </div>
@@ -598,26 +581,25 @@ export default function BrsrAirPage() {
                                             </div>
                                         </div>
 
-                                        {/* Stack Category, Title, Attached Unit & Operating Hours */}
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-surface-container-low/50 p-3.5 rounded-xl border border-outline-variant/40">
+                                        {/* Attached Industrial Unit, Stack Title & Operating Hours */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-surface-container-low/50 p-3.5 rounded-xl border border-outline-variant/40">
                                             <div className="space-y-1">
                                                 <label className="text-[11px] font-semibold text-on-surface-variant block">
-                                                    Stack Category <span className="text-error">*</span>
+                                                    Attached Industrial Unit <span className="text-error">*</span>
                                                 </label>
                                                 <select
-                                                    value={currentCat}
+                                                    value={currentUnit}
                                                     onChange={(e) => {
-                                                        const newCat = e.target.value as StackCategoryEnum;
-                                                        handleUpdateStackField(stackIdx, "stack_category", newCat);
-                                                        const pList = presetsData?.presets?.[newCat] || DEFAULT_STACK_PRESETS[newCat] || [];
+                                                        const newUnit = e.target.value as AttachedUnitEnum;
+                                                        handleUpdateStackField(stackIdx, "attached_unit", newUnit);
+                                                        const pList = presetsData?.presets?.[newUnit] || DEFAULT_STACK_PRESETS[newUnit] || [];
                                                         const defaultVal = pList[0] || "";
                                                         handleUpdateStackField(stackIdx, "stack_title", defaultVal);
-                                                        handleUpdateStackField(stackIdx, "stack_name", defaultVal);
                                                     }}
                                                     className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-sans text-[12px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-sm">
-                                                    {categoriesList.map((cat) => (
-                                                        <option key={cat} value={cat}>
-                                                            {cat}
+                                                    {unitOptions.map((unit) => (
+                                                        <option key={unit} value={unit}>
+                                                            {unit}
                                                         </option>
                                                     ))}
                                                 </select>
@@ -627,37 +609,32 @@ export default function BrsrAirPage() {
                                                 <label className="text-[11px] font-semibold text-on-surface-variant block">
                                                     Stack Title / Name <span className="text-error">*</span>
                                                 </label>
-                                                {presetsForCat.length > 0 ? (
+                                                {presetsForUnit.length > 0 ? (
                                                     <div className="space-y-1">
                                                         <select
-                                                            value={presetsForCat.includes(stack.stack_title) ? stack.stack_title : "__custom__"}
+                                                            value={presetsForUnit.includes(stack.stack_title) ? stack.stack_title : "__custom__"}
                                                             onChange={(e) => {
                                                                 const val = e.target.value;
                                                                 if (val === "__custom__") {
                                                                     handleUpdateStackField(stackIdx, "stack_title", "");
-                                                                    handleUpdateStackField(stackIdx, "stack_name", "");
                                                                 } else {
                                                                     handleUpdateStackField(stackIdx, "stack_title", val);
-                                                                    handleUpdateStackField(stackIdx, "stack_name", val);
                                                                 }
                                                             }}
                                                             className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-sans text-[12px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-sm">
-                                                            {presetsForCat.map((preset) => (
+                                                            {presetsForUnit.map((preset) => (
                                                                 <option key={preset} value={preset}>
                                                                     {preset}
                                                                 </option>
                                                             ))}
                                                             <option value="__custom__">+ Custom Entry...</option>
                                                         </select>
-                                                        {!presetsForCat.includes(stack.stack_title) && (
+                                                        {(!presetsForUnit.includes(stack.stack_title) || stack.attached_unit === "Other") && (
                                                             <input
                                                                 type="text"
                                                                 placeholder="Enter custom stack title..."
                                                                 value={stack.stack_title || ""}
-                                                                onChange={(e) => {
-                                                                    handleUpdateStackField(stackIdx, "stack_title", e.target.value);
-                                                                    handleUpdateStackField(stackIdx, "stack_name", e.target.value);
-                                                                }}
+                                                                onChange={(e) => handleUpdateStackField(stackIdx, "stack_title", e.target.value)}
                                                                 className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-sans text-[12px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-sm animate-fade-in"
                                                             />
                                                         )}
@@ -666,30 +643,11 @@ export default function BrsrAirPage() {
                                                     <input
                                                         type="text"
                                                         placeholder="e.g. Rotary Kiln No. 1 Stack"
-                                                        value={stack.stack_title || stack.stack_name || ""}
-                                                        onChange={(e) => {
-                                                            handleUpdateStackField(stackIdx, "stack_title", e.target.value);
-                                                            handleUpdateStackField(stackIdx, "stack_name", e.target.value);
-                                                        }}
+                                                        value={stack.stack_title || ""}
+                                                        onChange={(e) => handleUpdateStackField(stackIdx, "stack_title", e.target.value)}
                                                         className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-sans text-[12px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
                                                     />
                                                 )}
-                                            </div>
-
-                                            <div className="space-y-1">
-                                                <label className="text-[11px] font-semibold text-on-surface-variant block">
-                                                    Attached Industrial Unit <span className="text-error">*</span>
-                                                </label>
-                                                <select
-                                                    value={stack.attached_unit}
-                                                    onChange={(e) => handleUpdateStackField(stackIdx, "attached_unit", e.target.value)}
-                                                    className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-sans text-[12px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-sm">
-                                                    {ATTACHED_UNITS.map((unit) => (
-                                                        <option key={unit} value={unit}>
-                                                            {unit}
-                                                        </option>
-                                                    ))}
-                                                </select>
                                             </div>
 
                                             <div className="space-y-1">
@@ -706,331 +664,328 @@ export default function BrsrAirPage() {
                                             </div>
                                         </div>
 
-                                    {/* Permitted Limits Section (Entered ONCE Per Stack) */}
-                                    <div className="space-y-3 border-t border-outline-variant/40 pt-3">
-                                        <div className="flex items-center gap-2">
-                                            <MaterialIcon name="verified" size="sm" className="text-secondary" />
-                                            <span className="text-[11px] font-bold text-primary uppercase tracking-wider block">
-                                                Stack Permitted Emission Limits (Specified Once Per Stack)
-                                            </span>
-                                        </div>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                                            <div className="space-y-1 bg-white p-2.5 rounded-lg border border-outline-variant/40">
-                                                <label className="text-[10px] font-bold text-on-surface-variant block uppercase">
-                                                    NOx Limit (mg/Nm³)
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    step="any"
-                                                    placeholder="e.g. 300"
-                                                    value={stack.permitted_limits?.permitted_limit_nox?.value || ""}
-                                                    onChange={(e) =>
-                                                        handleUpdateStackField(stackIdx, "permitted_limits.permitted_limit_nox.value", e.target.value)
-                                                    }
-                                                    className="w-full h-8 rounded border border-outline-variant bg-white px-2 py-0.5 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            <div className="space-y-1 bg-white p-2.5 rounded-lg border border-outline-variant/40">
-                                                <label className="text-[10px] font-bold text-on-surface-variant block uppercase">
-                                                    SOx Limit (mg/Nm³)
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    step="any"
-                                                    placeholder="e.g. 200"
-                                                    value={stack.permitted_limits?.permitted_limit_sox?.value || ""}
-                                                    onChange={(e) =>
-                                                        handleUpdateStackField(stackIdx, "permitted_limits.permitted_limit_sox.value", e.target.value)
-                                                    }
-                                                    className="w-full h-8 rounded border border-outline-variant bg-white px-2 py-0.5 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            <div className="space-y-1 bg-white p-2.5 rounded-lg border border-outline-variant/40">
-                                                <label className="text-[10px] font-bold text-on-surface-variant block uppercase">
-                                                    PM Limit (mg/Nm³)
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    step="any"
-                                                    placeholder="e.g. 50"
-                                                    value={stack.permitted_limits?.permitted_limit_pm?.value || ""}
-                                                    onChange={(e) =>
-                                                        handleUpdateStackField(stackIdx, "permitted_limits.permitted_limit_pm.value", e.target.value)
-                                                    }
-                                                    className="w-full h-8 rounded border border-outline-variant bg-white px-2 py-0.5 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            <div className="space-y-1 bg-white p-2.5 rounded-lg border border-outline-variant/40">
-                                                <label className="text-[10px] font-bold text-on-surface-variant block uppercase">
-                                                    Permitted Flow (Nm³/hr)
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    step="any"
-                                                    placeholder="e.g. 50000"
-                                                    value={stack.permitted_limits?.permitted_flow_rate?.value || ""}
-                                                    onChange={(e) =>
-                                                        handleUpdateStackField(stackIdx, "permitted_limits.permitted_flow_rate.value", e.target.value)
-                                                    }
-                                                    className="w-full h-8 rounded border border-outline-variant bg-white px-2 py-0.5 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Optional Pollutant Monitoring Toggles */}
-                                    <div className="space-y-2 border-t border-outline-variant/40 pt-3">
-                                        <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block">
-                                            Optional Pollutant Monitoring Flags
-                                        </span>
-                                        <div className="flex flex-wrap items-center gap-6 bg-surface-container-low/40 p-3 rounded-lg border border-outline-variant/30">
-                                            <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-on-surface">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={!!stack.is_pop_monitored}
-                                                    onChange={(e) => handleUpdateStackField(stackIdx, "is_pop_monitored", e.target.checked)}
-                                                    className="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
-                                                />
-                                                <span>Monitor POP (Persistent Organic Pollutants)</span>
-                                            </label>
-
-                                            <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-on-surface">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={!!stack.is_voc_monitored}
-                                                    onChange={(e) => handleUpdateStackField(stackIdx, "is_voc_monitored", e.target.checked)}
-                                                    className="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
-                                                />
-                                                <span>Monitor VOC (Volatile Organic Compounds)</span>
-                                            </label>
-
-                                            <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-on-surface">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={!!stack.is_hap_monitored}
-                                                    onChange={(e) => handleUpdateStackField(stackIdx, "is_hap_monitored", e.target.checked)}
-                                                    className="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
-                                                />
-                                                <span>Monitor HAP (Hazardous Air Pollutants)</span>
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    {/* Multiple Sampling Readings Section per Stack */}
-                                    <div className="space-y-3 border-t border-outline-variant/40 pt-3">
-                                        <div className="flex items-center justify-between">
+                                        {/* Permitted Limits Section (Entered ONCE Per Stack) */}
+                                        <div className="space-y-3 border-t border-outline-variant/40 pt-3">
                                             <div className="flex items-center gap-2">
-                                                <MaterialIcon name="science" size="sm" className="text-secondary" />
+                                                <MaterialIcon name="verified" size="sm" className="text-secondary" />
                                                 <span className="text-[11px] font-bold text-primary uppercase tracking-wider block">
-                                                    Sampling Readings Log ({stack.readings.length} Reading{stack.readings.length > 1 ? "s" : ""})
+                                                    Stack Permitted Emission Limits (Specified Once Per Stack)
                                                 </span>
                                             </div>
-                                            <Button
-                                                variant="secondary"
-                                                size="sm"
-                                                onClick={() => handleAddReading(stackIdx)}
-                                                className="flex items-center gap-1 text-[11px] px-2.5 py-1 font-semibold">
-                                                <MaterialIcon name="add" size="sm" />
-                                                <span>Add Sampling Reading</span>
-                                            </Button>
-                                        </div>
-
-                                        <div className="space-y-3">
-                                            {stack.readings.map((reading, readingIdx) => (
-                                                <div
-                                                    key={readingIdx}
-                                                    className="rounded-xl border border-outline-variant/50 bg-white p-3.5 space-y-3 shadow-2xs">
-                                                    <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2">
-                                                        <span className="font-mono text-[11px] font-bold text-on-surface-variant flex items-center gap-1.5">
-                                                            <span className="h-2 w-2 rounded-full bg-secondary" />
-                                                            Reading #{readingIdx + 1}
-                                                        </span>
-                                                        {stack.readings.length > 1 && (
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => handleRemoveReading(stackIdx, readingIdx)}
-                                                                className="text-error hover:text-error/80 text-[11px] flex items-center gap-1 font-medium transition">
-                                                                <MaterialIcon name="close" size="sm" />
-                                                                <span>Remove Reading</span>
-                                                            </button>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                                                        <div className="space-y-1">
-                                                            <label className="text-[10px] font-semibold text-on-surface-variant block">
-                                                                Sampling Date <span className="text-error">*</span>
-                                                            </label>
-                                                            <DatePickerInput
-                                                                value={reading.sampling_date}
-                                                                onChange={(val) =>
-                                                                    handleUpdateReadingField(stackIdx, readingIdx, "sampling_date", val)
-                                                                }
-                                                                placeholder="YYYY-MM-DD"
-                                                            />
-                                                        </div>
-
-                                                        <div className="space-y-1">
-                                                            <label className="text-[10px] font-semibold text-on-surface-variant block">
-                                                                Gas Flow Rate (Nm³/hr) <span className="text-error">*</span>
-                                                            </label>
-                                                            <input
-                                                                type="number"
-                                                                step="any"
-                                                                placeholder="e.g. 45000"
-                                                                value={reading.gas_flow_rate?.value || ""}
-                                                                onChange={(e) =>
-                                                                    handleUpdateReadingField(stackIdx, readingIdx, "gas_flow_rate.value", e.target.value)
-                                                                }
-                                                                className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary shadow-2xs"
-                                                            />
-                                                        </div>
-
-                                                        <div className="space-y-1">
-                                                            <label className="text-[10px] font-semibold text-on-surface-variant block">
-                                                                NOx Concentration (mg/Nm³) <span className="text-error">*</span>
-                                                            </label>
-                                                            <input
-                                                                type="number"
-                                                                step="any"
-                                                                placeholder="e.g. 180"
-                                                                value={reading.nox?.value || ""}
-                                                                onChange={(e) =>
-                                                                    handleUpdateReadingField(stackIdx, readingIdx, "nox.value", e.target.value)
-                                                                }
-                                                                className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary shadow-2xs"
-                                                            />
-                                                        </div>
-
-                                                        <div className="space-y-1">
-                                                            <label className="text-[10px] font-semibold text-on-surface-variant block">
-                                                                SOx Concentration (mg/Nm³) <span className="text-error">*</span>
-                                                            </label>
-                                                            <input
-                                                                type="number"
-                                                                step="any"
-                                                                placeholder="e.g. 110"
-                                                                value={reading.sox?.value || ""}
-                                                                onChange={(e) =>
-                                                                    handleUpdateReadingField(stackIdx, readingIdx, "sox.value", e.target.value)
-                                                                }
-                                                                className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary shadow-2xs"
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-1">
-                                                        <div className="space-y-1">
-                                                            <label className="text-[10px] font-semibold text-on-surface-variant block">
-                                                                PM Concentration (mg/Nm³) <span className="text-error">*</span>
-                                                            </label>
-                                                            <input
-                                                                type="number"
-                                                                step="any"
-                                                                placeholder="e.g. 30"
-                                                                value={reading.particulate_matter?.value || ""}
-                                                                onChange={(e) =>
-                                                                    handleUpdateReadingField(stackIdx, readingIdx, "particulate_matter.value", e.target.value)
-                                                                }
-                                                                className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary shadow-2xs"
-                                                            />
-                                                        </div>
-
-                                                        {stack.is_pop_monitored && (
-                                                            <div className="space-y-1">
-                                                                <label className="text-[10px] font-semibold text-on-surface-variant block">
-                                                                    POP (mg/Nm³)
-                                                                </label>
-                                                                <input
-                                                                    type="number"
-                                                                    step="any"
-                                                                    placeholder="e.g. 0.012"
-                                                                    value={reading.pop?.value ?? ""}
-                                                                    onChange={(e) =>
-                                                                        handleUpdateReadingField(
-                                                                            stackIdx,
-                                                                            readingIdx,
-                                                                            "pop",
-                                                                            e.target.value !== ""
-                                                                                ? { value: e.target.value, unit: "mg_per_nm3" }
-                                                                                : null
-                                                                        )
-                                                                    }
-                                                                    className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary shadow-2xs"
-                                                                />
-                                                            </div>
-                                                        )}
-
-                                                        {stack.is_voc_monitored && (
-                                                            <div className="space-y-1">
-                                                                <label className="text-[10px] font-semibold text-on-surface-variant block">
-                                                                    VOC (mg/Nm³)
-                                                                </label>
-                                                                <input
-                                                                    type="number"
-                                                                    step="any"
-                                                                    placeholder="e.g. 0.05"
-                                                                    value={reading.voc?.value ?? ""}
-                                                                    onChange={(e) =>
-                                                                        handleUpdateReadingField(
-                                                                            stackIdx,
-                                                                            readingIdx,
-                                                                            "voc",
-                                                                            e.target.value !== ""
-                                                                                ? { value: e.target.value, unit: "mg_per_nm3" }
-                                                                                : null
-                                                                        )
-                                                                    }
-                                                                    className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary shadow-2xs"
-                                                                />
-                                                            </div>
-                                                        )}
-
-                                                        {stack.is_hap_monitored && (
-                                                            <div className="space-y-1">
-                                                                <label className="text-[10px] font-semibold text-on-surface-variant block">
-                                                                    HAP (mg/Nm³)
-                                                                </label>
-                                                                <input
-                                                                    type="number"
-                                                                    step="any"
-                                                                    placeholder="e.g. 0.02"
-                                                                    value={reading.hap?.value ?? ""}
-                                                                    onChange={(e) =>
-                                                                        handleUpdateReadingField(
-                                                                            stackIdx,
-                                                                            readingIdx,
-                                                                            "hap",
-                                                                            e.target.value !== ""
-                                                                                ? { value: e.target.value, unit: "mg_per_nm3" }
-                                                                                : null
-                                                                        )
-                                                                    }
-                                                                    className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary shadow-2xs"
-                                                                />
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                                                <div className="space-y-1 bg-white p-2.5 rounded-lg border border-outline-variant/40">
+                                                    <label className="text-[10px] font-bold text-on-surface-variant block uppercase">
+                                                        NOx Limit (mg/Nm³)
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        step="any"
+                                                        placeholder="e.g. 300"
+                                                        value={stack.permitted_limits?.permitted_limit_nox?.value || ""}
+                                                        onChange={(e) =>
+                                                            handleUpdateStackField(stackIdx, "permitted_limits.permitted_limit_nox.value", e.target.value)
+                                                        }
+                                                        className="w-full h-8 rounded border border-outline-variant bg-white px-2 py-0.5 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary"
+                                                    />
                                                 </div>
-                                            ))}
+
+                                                <div className="space-y-1 bg-white p-2.5 rounded-lg border border-outline-variant/40">
+                                                    <label className="text-[10px] font-bold text-on-surface-variant block uppercase">
+                                                        SOx Limit (mg/Nm³)
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        step="any"
+                                                        placeholder="e.g. 200"
+                                                        value={stack.permitted_limits?.permitted_limit_sox?.value || ""}
+                                                        onChange={(e) =>
+                                                            handleUpdateStackField(stackIdx, "permitted_limits.permitted_limit_sox.value", e.target.value)
+                                                        }
+                                                        className="w-full h-8 rounded border border-outline-variant bg-white px-2 py-0.5 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary"
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-1 bg-white p-2.5 rounded-lg border border-outline-variant/40">
+                                                    <label className="text-[10px] font-bold text-on-surface-variant block uppercase">
+                                                        PM Limit (mg/Nm³)
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        step="any"
+                                                        placeholder="e.g. 50"
+                                                        value={stack.permitted_limits?.permitted_limit_pm?.value || ""}
+                                                        onChange={(e) =>
+                                                            handleUpdateStackField(stackIdx, "permitted_limits.permitted_limit_pm.value", e.target.value)
+                                                        }
+                                                        className="w-full h-8 rounded border border-outline-variant bg-white px-2 py-0.5 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary"
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-1 bg-white p-2.5 rounded-lg border border-outline-variant/40">
+                                                    <label className="text-[10px] font-bold text-on-surface-variant block uppercase">
+                                                        Permitted Flow (Nm³/hr)
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        step="any"
+                                                        placeholder="e.g. 50000"
+                                                        value={stack.permitted_limits?.permitted_flow_rate?.value || ""}
+                                                        onChange={(e) =>
+                                                            handleUpdateStackField(stackIdx, "permitted_limits.permitted_flow_rate.value", e.target.value)
+                                                        }
+                                                        className="w-full h-8 rounded border border-outline-variant bg-white px-2 py-0.5 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Optional Pollutant Monitoring Toggles */}
+                                        <div className="space-y-2 border-t border-outline-variant/40 pt-3">
+                                            <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block">
+                                                Optional Pollutant Monitoring Flags
+                                            </span>
+                                            <div className="flex flex-wrap items-center gap-6 bg-surface-container-low/40 p-3 rounded-lg border border-outline-variant/30">
+                                                <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-on-surface">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={!!stack.is_pop_monitored}
+                                                        onChange={(e) => handleUpdateStackField(stackIdx, "is_pop_monitored", e.target.checked)}
+                                                        className="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
+                                                    />
+                                                    <span>Monitor POP (Persistent Organic Pollutants)</span>
+                                                </label>
+
+                                                <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-on-surface">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={!!stack.is_voc_monitored}
+                                                        onChange={(e) => handleUpdateStackField(stackIdx, "is_voc_monitored", e.target.checked)}
+                                                        className="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
+                                                    />
+                                                    <span>Monitor VOC (Volatile Organic Compounds)</span>
+                                                </label>
+
+                                                <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-on-surface">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={!!stack.is_hap_monitored}
+                                                        onChange={(e) => handleUpdateStackField(stackIdx, "is_hap_monitored", e.target.checked)}
+                                                        className="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
+                                                    />
+                                                    <span>Monitor HAP (Hazardous Air Pollutants)</span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        {/* Multiple Sampling Readings Section per Stack */}
+                                        <div className="space-y-3 border-t border-outline-variant/40 pt-3">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <MaterialIcon name="science" size="sm" className="text-secondary" />
+                                                    <span className="text-[11px] font-bold text-primary uppercase tracking-wider block">
+                                                        Sampling Readings Log ({stack.readings.length} Reading{stack.readings.length > 1 ? "s" : ""})
+                                                    </span>
+                                                </div>
+                                                <Button
+                                                    variant="secondary"
+                                                    size="sm"
+                                                    onClick={() => handleAddReading(stackIdx)}
+                                                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 font-semibold">
+                                                    <MaterialIcon name="add" size="sm" />
+                                                    <span>Add Sampling Reading</span>
+                                                </Button>
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                {stack.readings.map((reading, readingIdx) => (
+                                                    <div
+                                                        key={readingIdx}
+                                                        className="rounded-xl border border-outline-variant/50 bg-white p-3.5 space-y-3 shadow-2xs">
+                                                        <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2">
+                                                            <span className="font-mono text-[11px] font-bold text-on-surface-variant flex items-center gap-1.5">
+                                                                <span className="h-2 w-2 rounded-full bg-secondary" />
+                                                                Reading #{readingIdx + 1}
+                                                            </span>
+                                                            {stack.readings.length > 1 && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleRemoveReading(stackIdx, readingIdx)}
+                                                                    className="text-error hover:text-error/80 text-[11px] flex items-center gap-1 font-medium transition">
+                                                                    <MaterialIcon name="close" size="sm" />
+                                                                    <span>Remove Reading</span>
+                                                                </button>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                                                            <div className="space-y-1">
+                                                                <label className="text-[10px] font-semibold text-on-surface-variant block">
+                                                                    Sampling Date <span className="text-error">*</span>
+                                                                </label>
+                                                                <DatePickerInput
+                                                                    value={reading.sampling_date}
+                                                                    onChange={(val) =>
+                                                                        handleUpdateReadingField(stackIdx, readingIdx, "sampling_date", val)
+                                                                    }
+                                                                    placeholder="YYYY-MM-DD"
+                                                                />
+                                                            </div>
+
+                                                            <div className="space-y-1">
+                                                                <label className="text-[10px] font-semibold text-on-surface-variant block">
+                                                                    Gas Flow Rate (Nm³/hr) <span className="text-error">*</span>
+                                                                </label>
+                                                                <input
+                                                                    type="number"
+                                                                    step="any"
+                                                                    placeholder="e.g. 45000"
+                                                                    value={reading.gas_flow_rate?.value || ""}
+                                                                    onChange={(e) =>
+                                                                        handleUpdateReadingField(stackIdx, readingIdx, "gas_flow_rate.value", e.target.value)
+                                                                    }
+                                                                    className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary shadow-2xs"
+                                                                />
+                                                            </div>
+
+                                                            <div className="space-y-1">
+                                                                <label className="text-[10px] font-semibold text-on-surface-variant block">
+                                                                    NOx Concentration (mg/Nm³) <span className="text-error">*</span>
+                                                                </label>
+                                                                <input
+                                                                    type="number"
+                                                                    step="any"
+                                                                    placeholder="e.g. 180"
+                                                                    value={reading.nox?.value || ""}
+                                                                    onChange={(e) =>
+                                                                        handleUpdateReadingField(stackIdx, readingIdx, "nox.value", e.target.value)
+                                                                    }
+                                                                    className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary shadow-2xs"
+                                                                />
+                                                            </div>
+
+                                                            <div className="space-y-1">
+                                                                <label className="text-[10px] font-semibold text-on-surface-variant block">
+                                                                    SOx Concentration (mg/Nm³) <span className="text-error">*</span>
+                                                                </label>
+                                                                <input
+                                                                    type="number"
+                                                                    step="any"
+                                                                    placeholder="e.g. 110"
+                                                                    value={reading.sox?.value || ""}
+                                                                    onChange={(e) =>
+                                                                        handleUpdateReadingField(stackIdx, readingIdx, "sox.value", e.target.value)
+                                                                    }
+                                                                    className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary shadow-2xs"
+                                                                />
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-1">
+                                                            <div className="space-y-1">
+                                                                <label className="text-[10px] font-semibold text-on-surface-variant block">
+                                                                    PM Concentration (mg/Nm³) <span className="text-error">*</span>
+                                                                </label>
+                                                                <input
+                                                                    type="number"
+                                                                    step="any"
+                                                                    placeholder="e.g. 30"
+                                                                    value={reading.particulate_matter?.value || ""}
+                                                                    onChange={(e) =>
+                                                                        handleUpdateReadingField(stackIdx, readingIdx, "particulate_matter.value", e.target.value)
+                                                                    }
+                                                                    className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary shadow-2xs"
+                                                                />
+                                                            </div>
+
+                                                            {stack.is_pop_monitored && (
+                                                                <div className="space-y-1">
+                                                                    <label className="text-[10px] font-semibold text-on-surface-variant block">
+                                                                        POP (mg/Nm³)
+                                                                    </label>
+                                                                    <input
+                                                                        type="number"
+                                                                        step="any"
+                                                                        value={reading.pop?.value ?? ""}
+                                                                        onChange={(e) =>
+                                                                            handleUpdateReadingField(
+                                                                                stackIdx,
+                                                                                readingIdx,
+                                                                                "pop",
+                                                                                e.target.value !== ""
+                                                                                    ? { value: e.target.value, unit: "mg_per_nm3" }
+                                                                                    : null
+                                                                            )
+                                                                        }
+                                                                        className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary shadow-2xs"
+                                                                    />
+                                                                </div>
+                                                            )}
+
+                                                            {stack.is_voc_monitored && (
+                                                                <div className="space-y-1">
+                                                                    <label className="text-[10px] font-semibold text-on-surface-variant block">
+                                                                        VOC (mg/Nm³)
+                                                                    </label>
+                                                                    <input
+                                                                        type="number"
+                                                                        step="any"
+                                                                        value={reading.voc?.value ?? ""}
+                                                                        onChange={(e) =>
+                                                                            handleUpdateReadingField(
+                                                                                stackIdx,
+                                                                                readingIdx,
+                                                                                "voc",
+                                                                                e.target.value !== ""
+                                                                                    ? { value: e.target.value, unit: "mg_per_nm3" }
+                                                                                    : null
+                                                                            )
+                                                                        }
+                                                                        className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary shadow-2xs"
+                                                                    />
+                                                                </div>
+                                                            )}
+
+                                                            {stack.is_hap_monitored && (
+                                                                <div className="space-y-1">
+                                                                    <label className="text-[10px] font-semibold text-on-surface-variant block">
+                                                                        HAP (mg/Nm³)
+                                                                    </label>
+                                                                    <input
+                                                                        type="number"
+                                                                        step="any"
+                                                                        value={reading.hap?.value ?? ""}
+                                                                        onChange={(e) =>
+                                                                            handleUpdateReadingField(
+                                                                                stackIdx,
+                                                                                readingIdx,
+                                                                                "hap",
+                                                                                e.target.value !== ""
+                                                                                    ? { value: e.target.value, unit: "mg_per_nm3" }
+                                                                                    : null
+                                                                            )
+                                                                        }
+                                                                        className="w-full h-8.5 rounded-lg border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary shadow-2xs"
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Per-Stack Source Document & Verification Section */}
+                                        <div className="pt-2">
+                                            <BrsrDocumentUploadSection
+                                                title={`Stack #${stackIdx + 1} Source Document & Verification`}
+                                                reportNumber={stack.report_number || ""}
+                                                onReportNumberChange={(val) => handleUpdateStackField(stackIdx, "report_number", val)}
+                                            />
                                         </div>
                                     </div>
-
-                                    {/* Per-Stack Source Document & Verification Section */}
-                                    <div className="pt-2">
-                                        <BrsrDocumentUploadSection
-                                            title={`Stack #${stackIdx + 1} Source Document & Verification`}
-                                            reportNumber={stack.report_number || ""}
-                                            onReportNumberChange={(val) => handleUpdateStackField(stackIdx, "report_number", val)}
-                                        />
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                );
+                            })}
+                        </div>
 
                         {/* Custom Other Air Parameters Section */}
                         <div className="border-t border-outline-variant/60 pt-4 space-y-3">
@@ -1229,7 +1184,7 @@ export default function BrsrAirPage() {
                                             )}
                                         </div>
                                         <p className="text-[11px] text-on-surface-variant mt-1 font-mono">
-                                            Monitored: POP ({totals?.optional_pollutant_disclosures?.pop_monitored_stacks_count || 0}), VOC ({totals?.optional_pollutant_disclosures?.voc_monitored_stacks_count || 0}), HAP ({totals?.optional_pollutant_disclosures?.hap_monitored_stacks_count || 0})
+                                            Monitored: POP ({(totals?.optional_pollutant_disclosures?.pop_monitored_stacks_count || 0) > 0 ? totals?.optional_pollutant_disclosures?.pop_monitored_stacks_count : "-"}), VOC ({(totals?.optional_pollutant_disclosures?.voc_monitored_stacks_count || 0) > 0 ? totals?.optional_pollutant_disclosures?.voc_monitored_stacks_count : "-"}), HAP ({(totals?.optional_pollutant_disclosures?.hap_monitored_stacks_count || 0) > 0 ? totals?.optional_pollutant_disclosures?.hap_monitored_stacks_count : "-"})
                                         </p>
                                     </div>
                                 </CardBody>
@@ -1257,6 +1212,7 @@ export default function BrsrAirPage() {
                                         {Object.entries(plantGasDetails).map(([gasKey, gas]: [string, BrsrAirGasDetailMetric]) => {
                                             const isOptionalGas = ["pop", "voc", "hap"].includes(gasKey.toLowerCase());
                                             const hasValue = (v: number | null | undefined) => v !== null && v !== undefined && Number(v) > 0;
+                                            const isGasMeasured = gas.is_monitored && (!isOptionalGas || hasValue(gas.annual_emission_tonnes_per_year) || hasValue(gas.average_concentration_mg_per_nm3));
 
                                             return (
                                                 <div
@@ -1275,12 +1231,12 @@ export default function BrsrAirPage() {
                                                                 <MaterialIcon name="warning" size="sm" className="!text-[12px]" />
                                                                 Exceeding Limit
                                                             </Badge>
-                                                        ) : (
+                                                        ) : isGasMeasured ? (
                                                             <Badge variant="positive" size="sm" className="flex items-center gap-1">
                                                                 <MaterialIcon name="check_circle" size="sm" className="!text-[12px]" />
                                                                 Compliant
                                                             </Badge>
-                                                        )}
+                                                        ) : null}
                                                     </div>
 
                                                     <div className="space-y-1.5 font-mono text-[12px]">
@@ -1346,7 +1302,7 @@ export default function BrsrAirPage() {
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead>Stack Title & Category</TableHead>
+                                                <TableHead>Stack Title / Name</TableHead>
                                                 <TableHead>Attached Unit</TableHead>
                                                 <TableHead className="text-center">Readings Log</TableHead>
                                                 <TableHead className="text-right">NOx (t/yr)</TableHead>
@@ -1362,14 +1318,9 @@ export default function BrsrAirPage() {
                                             {calculatedStacks.map((res, idx) => (
                                                 <TableRow key={idx}>
                                                     <TableCell className="font-sans font-bold text-primary text-xs">
-                                                        <div>{res.stack_title || res.stack_name}</div>
-                                                        <div className="font-mono text-[10px] text-on-surface-variant font-normal flex flex-wrap items-center gap-1.5 mt-0.5">
-                                                            {res.stack_category && (
-                                                                <span className="inline-block rounded bg-primary/10 px-1.5 py-0.5 text-[9.5px] font-semibold text-primary font-sans">
-                                                                    {res.stack_category}
-                                                                </span>
-                                                            )}
-                                                            <span>{res.operating_hours_per_year} hrs/yr {res.report_number ? `• ${res.report_number}` : ""}</span>
+                                                        <div>{res.stack_title}</div>
+                                                        <div className="font-mono text-[10px] text-on-surface-variant font-normal">
+                                                            {res.operating_hours_per_year} hrs/yr {res.report_number ? `• ${res.report_number}` : ""}
                                                         </div>
                                                     </TableCell>
                                                     <TableCell className="font-sans text-xs">
@@ -1401,12 +1352,30 @@ export default function BrsrAirPage() {
                                                         {res.is_hap_monitored && res.emission_per_year?.hap && Number(res.emission_per_year?.hap) > 0 ? formatNum(res.emission_per_year?.hap) : <span className="text-on-surface-variant/40">—</span>}
                                                     </TableCell>
                                                     <TableCell className="text-center font-mono text-[11px] text-on-surface-variant">
-                                                        <div title="Hourly Emission Rate in kg/hr">
+                                                        <div title="NOx Hourly Emission Rate in kg/hr">
                                                             NOx: {formatNum(res.emission_per_hour?.nox)} kg/h
                                                         </div>
-                                                        <div title="Hourly Emission Rate in kg/hr" className="text-[10px]">
+                                                        <div title="SOx Hourly Emission Rate in kg/hr" className="text-[10px]">
                                                             SOx: {formatNum(res.emission_per_hour?.sox)} kg/h
                                                         </div>
+                                                        <div title="PM Hourly Emission Rate in kg/hr" className="text-[10px]">
+                                                            PM: {formatNum(res.emission_per_hour?.particulate_matter)} kg/h
+                                                        </div>
+                                                        {res.is_pop_monitored && res.emission_per_hour?.pop && Number(res.emission_per_hour?.pop) > 0 && (
+                                                            <div title="POP Hourly Emission Rate in kg/hr" className="text-[10px]">
+                                                                POP: {formatNum(res.emission_per_hour?.pop)} kg/h
+                                                            </div>
+                                                        )}
+                                                        {res.is_voc_monitored && res.emission_per_hour?.voc && Number(res.emission_per_hour?.voc) > 0 && (
+                                                            <div title="VOC Hourly Emission Rate in kg/hr" className="text-[10px]">
+                                                                VOC: {formatNum(res.emission_per_hour?.voc)} kg/h
+                                                            </div>
+                                                        )}
+                                                        {res.is_hap_monitored && res.emission_per_hour?.hap && Number(res.emission_per_hour?.hap) > 0 && (
+                                                            <div title="HAP Hourly Emission Rate in kg/hr" className="text-[10px]">
+                                                                HAP: {formatNum(res.emission_per_hour?.hap)} kg/h
+                                                            </div>
+                                                        )}
                                                     </TableCell>
                                                 </TableRow>
                                             ))}

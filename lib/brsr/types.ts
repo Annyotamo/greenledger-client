@@ -236,15 +236,14 @@ export type BrsrWasteDisclosureResponse = {
 // ==========================================
 
 export type AttachedUnitEnum =
-    | "DRI"
-    | "Captive power"
-    | "Boiler"
-    | "Furnace"
-    | "Kiln"
+    | "Sponge iron / DRI"
+    | "Steel melting"
+    | "Ferro alloy"
+    | "Blast furnace"
     | "Sinter plant"
     | "Pellet plant"
     | "Coke oven"
-    | "Foundry"
+    | "Captive power"
     | "Other";
 
 export type ConcentrationUnit = "mg_per_nm3";
@@ -273,22 +272,9 @@ export interface BrsrAirReadingInput {
     hap?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
 }
 
-export type StackCategoryEnum =
-    | "Sponge iron / DRI"
-    | "Steel melting"
-    | "Ferro alloy"
-    | "Blast furnace"
-    | "Sinter plant"
-    | "Pellet plant"
-    | "Coke oven"
-    | "Captive power"
-    | "Other";
-
 export interface BrsrAirStackInput {
-    stack_category: StackCategoryEnum | string;
+    attached_unit: AttachedUnitEnum | string;
     stack_title: string;
-    stack_name?: string;
-    attached_unit: AttachedUnitEnum;
     operating_hours_per_year: number;
     permitted_limits: BrsrAirPermittedLimits;
     report_number?: string | null;
@@ -333,10 +319,8 @@ export interface BrsrAirGasDetailMetric {
 }
 
 export interface BrsrAirCalculatedStack {
-    stack_category?: StackCategoryEnum | string;
-    stack_title?: string;
-    stack_name: string;
     attached_unit: AttachedUnitEnum | string;
+    stack_title: string;
     total_readings?: number;
     operating_hours_per_year: number;
     report_number?: string | null;
@@ -353,7 +337,7 @@ export interface BrsrAirCalculatedStack {
 }
 
 export interface BrsrAirStackPresetsData {
-    categories: StackCategoryEnum[];
+    attached_units: AttachedUnitEnum[];
     presets: Record<string, string[]>;
 }
 

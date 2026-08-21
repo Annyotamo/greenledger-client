@@ -337,37 +337,90 @@ export interface ParsedEnergyDashboardData {
 // API DTO Types for GET /tenant/ghg/dashboard
 // ==========================================
 
+export interface GhgDashboardKpiItemDto {
+    current_tco2e?: number | string;
+    previous_tco2e?: number | string;
+    change_pct?: number | string;
+    percentage_of_total?: number | string;
+}
+
+export interface GhgDashboardEmissionsIntensityDto {
+    per_tonne_product?: number | string;
+    per_revenue_million?: number | string;
+}
+
 export interface GhgDashboardKpiSummaryDto {
-    total_emissions: {
-        current_tco2e: string;
-        previous_tco2e: string;
-        change_pct: string;
-        percentage_of_total: string;
-    };
-    scope_1: {
-        current_tco2e: string;
-        previous_tco2e: string;
-        change_pct: string;
-        percentage_of_total: string;
-    };
-    scope_2: {
-        current_tco2e: string;
-        previous_tco2e: string;
-        change_pct: string;
-        percentage_of_total: string;
-    };
-    scope_3: {
-        current_tco2e: string;
-        previous_tco2e: string;
-        change_pct: string;
-        percentage_of_total: string;
-    };
+    total_emissions?: GhgDashboardKpiItemDto;
+    scope_1?: GhgDashboardKpiItemDto;
+    scope_2?: GhgDashboardKpiItemDto;
+    scope_3?: GhgDashboardKpiItemDto;
+    biogenic_emissions?: GhgDashboardKpiItemDto;
+    emissions_intensity?: GhgDashboardEmissionsIntensityDto;
     net_zero_progress?: {
-        reduction_pct: string;
-        status_label: string;
-        target_year: number;
-        baseline_year: number;
+        reduction_pct?: number | string;
+        status_label?: string;
+        target_year?: number;
+        baseline_year?: number;
     };
+}
+
+export interface ScopeDistributionItemDto {
+    scope_name: string;
+    tco2e: number | string;
+    share_pct: number | string;
+}
+
+export interface YearlyEmissionsTrendItemDto {
+    year: number;
+    year_label: string;
+    total_tco2e: number | string;
+    scope_1_tco2e: number | string;
+    scope_2_tco2e: number | string;
+    scope_3_tco2e: number | string;
+    yoy_change_pct: number | string;
+}
+
+export interface Scope1DetailedBreakdownDto {
+    stationary_combustion_tco2e?: number | string;
+    mobile_combustion_tco2e?: number | string;
+    process_emissions_tco2e?: number | string;
+    fugitive_emissions_tco2e?: number | string;
+    total_tco2e?: number | string;
+}
+
+export interface Scope2DetailedBreakdownDto {
+    purchased_electricity_tco2e?: number | string;
+    purchased_steam_tco2e?: number | string;
+    purchased_heat_cooling_tco2e?: number | string;
+    location_based_tco2e?: number | string;
+    market_based_tco2e?: number | string;
+    total_tco2e?: number | string;
+}
+
+export interface Scope3CategoryBreakdownItemDto {
+    category_code: string;
+    category_name: string;
+    tco2e: number | string;
+    share_pct: number | string;
+}
+
+export interface Scope3DetailedBreakdownDto {
+    categories?: Scope3CategoryBreakdownItemDto[];
+    total_tco2e?: number | string;
+}
+
+export interface DetailedSourceBreakdownsDto {
+    scope_1?: Scope1DetailedBreakdownDto;
+    scope_2?: Scope2DetailedBreakdownDto;
+    scope_3?: Scope3DetailedBreakdownDto;
+}
+
+export interface TopEmissionSourceItemDto {
+    rank: number;
+    source_name: string;
+    scope_name: string;
+    tco2e: number | string;
+    share_pct: number | string;
 }
 
 export interface MonthlyScopeComparisonItemDto {
@@ -451,6 +504,10 @@ export interface RecentActivityItemDto {
 export interface GhgDashboardResponseDataDto {
     requested_scope?: string | null;
     kpi_summary: GhgDashboardKpiSummaryDto;
+    scope_distribution?: ScopeDistributionItemDto[];
+    yearly_emissions_trend?: YearlyEmissionsTrendItemDto[];
+    detailed_source_breakdowns?: DetailedSourceBreakdownsDto;
+    top_5_emission_sources?: TopEmissionSourceItemDto[];
     monthly_scope_comparison?: MonthlyScopeComparisonItemDto[];
     emissions_trend?: EmissionsTrendItemDto[];
     gas_breakdown?: GasBreakdownItemDto[];
@@ -467,7 +524,77 @@ export interface GhgDashboardApiResponse {
     data: GhgDashboardResponseDataDto;
 }
 
+export interface TopKpiCardData {
+    id: string;
+    label: string;
+    value: string;
+    numericValue: number;
+    unit: string;
+    changePct?: number;
+    changeLabel?: string;
+    changeDirection?: "up" | "down" | "neutral";
+    icon: string;
+    colorClassName: string;
+    iconBgClassName: string;
+    subtitle?: string;
+    intensityTonne?: number;
+    intensityRevenue?: number;
+    secondaryValue?: string;
+    secondaryLabel?: string;
+}
+
+export interface ScopeDistributionItem {
+    scopeName: string;
+    tco2e: number;
+    sharePct: number;
+    color: string;
+}
+
+export interface YearlyEmissionsTrendPoint {
+    year: number;
+    yearLabel: string;
+    totalTco2e: number;
+    scope1Tco2e: number;
+    scope2Tco2e: number;
+    scope3Tco2e: number;
+    yoyChangePct: number;
+}
+
+export interface TopEmissionSourceItem {
+    rank: number;
+    sourceName: string;
+    scopeName: string;
+    tco2e: number;
+    sharePct: number;
+}
+
 export interface ParsedGhgDashboardData {
+    topKpiCards: TopKpiCardData[];
+    scopeDistribution: ScopeDistributionItem[];
+    yearlyTrend: YearlyEmissionsTrendPoint[];
+    detailedSourceBreakdowns: {
+        scope1: {
+            stationaryCombustion: number;
+            mobileCombustion: number;
+            processEmissions: number;
+            fugitiveEmissions: number;
+            total: number;
+        };
+        scope2: {
+            purchasedElectricity: number;
+            purchasedSteam: number;
+            purchasedHeatCooling: number;
+            locationBased: number;
+            marketBased: number;
+            total: number;
+        };
+        scope3: {
+            categories: { categoryCode: string; categoryName: string; tco2e: number; sharePct: number }[];
+            total: number;
+        };
+    };
+    top5EmissionSources: TopEmissionSourceItem[];
+    // Legacy fields kept for backward compatibility with existing components
     metricCards: MetricCardData[];
     emissionsTrend: EmissionsTrendPoint[];
     monthlyScopeComparison: ScopeComparisonMonth[];

@@ -101,6 +101,7 @@ export type FuelActivityItemDto = {
         };
         source_reference_code: string | null;
         calculation_method: string | null;
+        biogenic_factor_id?: string | null;
         is_active: boolean;
         is_deprecated: boolean;
     };
@@ -142,6 +143,7 @@ export type FuelActivity = {
     fuelFactorStandard: string;
     fuelFactorVersion: string;
     fuelFactorRegion: string;
+    biogenicFactorId?: string | null;
     // Facility & Period Context
     facilityName?: string;
     facilityCode?: string;

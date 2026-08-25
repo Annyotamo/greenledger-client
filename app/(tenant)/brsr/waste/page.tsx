@@ -162,16 +162,18 @@ export default function BrsrWastePage() {
             {/* Header Section */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-outline-variant pb-6">
                 <div className="space-y-2">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2.5">
                         <Badge variant="active" size="md">
                             SEBI BRSR • Principle 6
                         </Badge>
-                        <span className="font-mono text-xs text-on-surface-variant">
-                            {data?.financial_year_label || "FY 2025-26"}
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/60 bg-surface-container-low px-2.5 py-0.5 text-[11px] font-medium text-on-surface-variant">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
+                            <span className="font-semibold text-slate-700">GRI:</span>
+                            <span>Corresponds to GRI 306-3 (generated), 306-4 (recovered), 306-5 (disposed) — Waste 2020</span>
                         </span>
                     </div>
                     <h1 className="text-headline-md font-bold tracking-tight text-primary">
-                        BRSR Waste Disclosure & Management
+                        BRSR Waste Disclosure &amp; Management
                     </h1>
                     <p className="text-sm text-on-surface-variant">
                         Principle 6 (Environmental Performance) waste generation, circular economy recovery, disposal & intensity metrics.

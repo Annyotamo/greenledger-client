@@ -79,7 +79,7 @@ export type ElectricityActivityItemDto = {
     };
     activity?: {
         scope_type?: string;
-        accounting_method?: AccountingMethod;
+        accounting_method?: AccountingMethod | null;
         electricity_activity_type: string;
         source_type: string;
         electricity_kwh: number | string;
@@ -114,7 +114,7 @@ export type ElectricityActivityItemDto = {
     reporting_period_id?: string;
     activity_start_date?: string;
     activity_end_date?: string;
-    accounting_method?: AccountingMethod;
+    accounting_method?: AccountingMethod | null;
     electricity_activity_type?: string;
     source_type?: string;
     electricity_kwh?: number | string;
@@ -142,7 +142,7 @@ export type ElectricityActivity = {
     activityStartDate: string;
     activityEndDate: string;
     scopeType: string;
-    accountingMethod: AccountingMethod;
+    accountingMethod: AccountingMethod | null;
     electricityActivityType: string;
     sourceType: string;
     electricityKwh: number;

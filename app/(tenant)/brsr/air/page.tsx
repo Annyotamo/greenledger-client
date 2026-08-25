@@ -463,16 +463,18 @@ export default function BrsrAirPage() {
             {/* Header Section */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-outline-variant pb-6">
                 <div className="space-y-2">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2.5">
                         <Badge variant="active" size="md">
                             SEBI BRSR • Principle 6
                         </Badge>
-                        <span className="font-mono text-xs text-on-surface-variant">
-                            {data?.financial_year_label || "FY 2024-25"}
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/60 bg-surface-container-low px-2.5 py-0.5 text-[11px] font-medium text-on-surface-variant">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
+                            <span className="font-semibold text-slate-700">GRI:</span>
+                            <span>Corresponds to GRI 305-7 (Emissions 2016)</span>
                         </span>
                     </div>
                     <h1 className="text-headline-md font-bold tracking-tight text-primary">
-                        BRSR Air Emissions & EIA dust load (NIPL)
+                        BRSR Air Emissions &amp; EIA dust load (NIPL)
                     </h1>
                     <p className="text-sm text-on-surface-variant">
                         Stack sampling readings log, single stack permitted limits, hourly emission rates (kg/hr), annual totals (tonnes/yr), and per-gas compliance checks.

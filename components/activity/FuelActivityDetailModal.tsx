@@ -262,9 +262,18 @@ export function FuelActivityDetailModal({
                                         </div>
                                     ))}
                                     {activity.biogenicTCo2 != null && activity.biogenicTCo2 > 0 && (
-                                        <div className="flex items-center justify-between rounded-lg border border-emerald-100 bg-emerald-50/50 p-2.5">
-                                            <span className="text-xs font-semibold text-emerald-900">Biogenic CO₂</span>
-                                            <span className="text-xs font-bold font-mono text-emerald-700">{activity.biogenicTCo2.toFixed(4)} t</span>
+                                        <div className="flex items-center justify-between rounded-lg border border-purple-200/80 bg-purple-50/60 p-2.5">
+                                            <div className="flex items-center gap-2">
+                                                <span className="inline-flex h-3 w-3 rounded-sm shrink-0 bg-purple-600" />
+                                                <div>
+                                                    <div className="text-xs font-bold text-purple-950">Biogenic CO₂</div>
+                                                    <div className="text-[10px] text-purple-700 font-medium">Outside of Scopes</div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right font-mono">
+                                                <div className="text-xs font-bold text-purple-950">{activity.biogenicTCo2.toFixed(4)} t</div>
+                                                <div className="text-[10px] text-purple-700">{(activity.biogenicKgCo2 ?? (activity.biogenicTCo2 * 1000)).toFixed(2)} kg</div>
+                                            </div>
                                         </div>
                                     )}
                                 </div>

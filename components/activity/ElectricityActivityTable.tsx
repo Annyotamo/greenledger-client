@@ -365,17 +365,19 @@ export function ElectricityActivityTable({
                                                     {activeDays}d
                                                 </span>
                                             </div>
-                                            <div className="mt-1">
-                                                <span
-                                                    className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-bold tracking-tight uppercase ${
-                                                        isMarketBased
-                                                            ? "bg-purple-500/10 text-purple-800 border border-purple-500/20"
-                                                            : "bg-slate-100 text-slate-700 border border-slate-200"
-                                                    }`}>
-                                                    <MaterialIcon name={isMarketBased ? "verified" : "grid_view"} size="xs" />
-                                                    {isMarketBased ? "Market-Based" : "Location-Based"}
-                                                </span>
-                                            </div>
+                                            {activity.accountingMethod && (
+                                                <div className="mt-1">
+                                                    <span
+                                                        className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-bold tracking-tight uppercase ${
+                                                            isMarketBased
+                                                                ? "bg-purple-500/10 text-purple-800 border border-purple-500/20"
+                                                                : "bg-slate-100 text-slate-700 border border-slate-200"
+                                                        }`}>
+                                                        <MaterialIcon name={isMarketBased ? "verified" : "grid_view"} size="xs" />
+                                                        {isMarketBased ? "Market-Based" : "Location-Based"}
+                                                    </span>
+                                                </div>
+                                            )}
                                         </TableCell>
                                         <TableCell className="py-2.5 px-4">
                                             <span

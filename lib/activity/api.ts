@@ -94,6 +94,7 @@ function mapFuelActivityItem(dto: any): FuelActivity {
         factorTCo2eOfCh4: fac.factors?.tonnes ? Number(fac.factors.tonnes.t_co2e_of_ch4) : 0,
         factorTCo2eOfN2o: fac.factors?.tonnes ? Number(fac.factors.tonnes.t_co2e_of_n2o) : 0,
         factorOtherGhgTCo2e: fac.factors?.tonnes?.other_ghg_t_co2e ? Number(fac.factors.tonnes.other_ghg_t_co2e) : null,
+        biogenicFactorId: fac.biogenic_factor_id || null,
     };
 }
 
@@ -268,7 +269,7 @@ function mapElectricityActivityItem(dto: ElectricityActivityItemDto): Electricit
         activityStartDate: (ctx as any).activity_start_date || (dto as any).activity_start_date || "",
         activityEndDate: (ctx as any).activity_end_date || (dto as any).activity_end_date || "",
         scopeType: (act as any).scope_type || "scope_2",
-        accountingMethod: (act as any).accounting_method || (dto as any).accounting_method || "location_based",
+        accountingMethod: (act as any).accounting_method || (dto as any).accounting_method || null,
         electricityActivityType: (act as any).electricity_activity_type || (dto as any).electricity_activity_type || "",
         sourceType: (act as any).source_type || (dto as any).source_type || "",
         electricityKwh: Number((act as any).electricity_kwh ?? (dto as any).electricity_kwh ?? 0),

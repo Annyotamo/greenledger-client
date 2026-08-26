@@ -1,16 +1,14 @@
-import { AuditLogsTimeline } from "@/components/audit-logs/AuditLogsTimeline";
+import { AuditLogsMainView } from "@/components/audit-logs/AuditLogsMainView";
 
 /**
- * Audit Logs Page
- *
- * Displays system activity and user action history with timeline view.
- * Clean, sleek aesthetic with proper filtering and pagination.
+ * Tenant Audit Logs & Forensic System
+ * Displays lightweight activity trails, deep forensic diffs, and compliance logs.
  */
 export const metadata = {
-    title: "Audit Logs | GreenLedger ESG Reporting",
-    description: "View system activity and user action history",
+    title: "Audit Logs & Activity Trails | GreenLedger ESG Reporting",
+    description: "Immutable activity trails, forensic state diffs, and compliance history.",
 };
 
 export default function AuditLogsPage() {
-    return <AuditLogsTimeline />;
+    return <AuditLogsMainView />;
 }

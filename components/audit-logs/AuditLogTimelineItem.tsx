@@ -1,136 +1,73 @@
 "use client";
 
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
-import { Badge } from "@/components/ui/badge";
-import type { AuditLog } from "@/lib/audit-logs/types";
+import type { AuditTrailItem } from "@/lib/audit-logs/types";
 import {
-    EVENT_TYPE_ICON_MAP,
-    EVENT_TYPE_LABEL_MAP,
-    SEVERITY_COLOR_MAP,
     formatDateTime,
-    getStatusIcon,
-    getSeverityLabel,
-    getCategoryLabel,
+    formatEventType,
+    getModuleInfo,
+    SEVERITY_CONFIG,
+    STATUS_CONFIG,
 } from "@/lib/audit-logs/formatters";
 import { cn } from "@/lib/utils/cn";
 
 type AuditLogTimelineItemProps = {
-    log: AuditLog;
+    log: AuditTrailItem;
     isLast?: boolean;
+    onInspect?: (log: AuditTrailItem) => void;
 };
 
-export function AuditLogTimelineItem({ log, isLast = false }: AuditLogTimelineItemProps) {
-    const severityColors = SEVERITY_COLOR_MAP[log.severity];
-    const eventLabel = EVENT_TYPE_LABEL_MAP[log.eventType];
-    const eventIcon = EVENT_TYPE_ICON_MAP[log.eventType];
-    const statusIcon = getStatusIcon(log.status);
-
-    const isSuccess = log.status === "success";
-    const iconBg = isSuccess
-        ? "bg-secondary-container/30 border-secondary-container/50"
-        : "bg-error-container/30 border-error-container/50";
-
-    const iconColor = isSuccess ? "text-secondary" : "text-error";
+export function AuditLogTimelineItem({ log, isLast = false, onInspect }: AuditLogTimelineItemProps) {
+    const moduleInfo = getModuleInfo(log.module);
+    const severityConfig = SEVERITY_CONFIG[log.severity] || SEVERITY_CONFIG.info;
+    const statusConfig = STATUS_CONFIG[log.status] || STATUS_CONFIG.success;
 
     return (
-        <div className="flex gap-6 pb-8 relative group last:pb-0">
+        <div className="flex gap-6 pb-8 relative group last:pb-0 font-sans">
             {/* Timeline line */}
             {!isLast && (
-                <div className="absolute left-6 top-10 bottom-0 w-px bg-outline-variant transition-colors group-hover:bg-primary/50" />
+                <div className="absolute left-6 top-10 bottom-0 w-px bg-slate-200 transition-colors group-hover:bg-emerald-500/50" />
             )}
 
             {/* Timeline circle icon */}
             <div
                 className={cn(
-                    "relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 bg-surface-container-lowest transition-all duration-200 group-hover:scale-110 group-hover:shadow-md",
-                    iconBg,
+                    "relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 bg-white transition-all duration-200 group-hover:scale-110 group-hover:shadow-md",
+                    severityConfig.badge,
                 )}>
-                <MaterialIcon name={eventIcon} size="sm" className={cn("font-bold", iconColor)} />
+                <MaterialIcon name={moduleInfo.icon} size="sm" className="font-bold text-slate-700" />
             </div>
 
             {/* Content card */}
             <div className="flex-1 pt-1 min-w-0">
                 <div
-                    className={cn(
-                        "rounded-lg border transition-all duration-200 group-hover:shadow-md",
-                        isSuccess
-                            ? "bg-surface-container-lowest border-outline-variant/50 hover:border-outline-variant"
-                            : "bg-error-container/10 border-error-container/30 hover:border-error-container/50",
-                    )}>
-                    {/* Header with event name and status */}
-                    <div className="px-card-padding pt-card-padding pb-2 border-b border-outline-variant/30">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-                            <h4 className="font-semibold text-on-surface text-sm">{eventLabel}</h4>
-
-                            {/* Status badge */}
-                            <Badge
-                                variant={isSuccess ? "positive" : "negative"}
-                                size="sm"
-                                className="flex items-center gap-1 w-fit">
-                                <MaterialIcon name={statusIcon} size="sm" />
-                                <span className="text-[10px]">{log.status === "success" ? "Success" : "Failed"}</span>
-                            </Badge>
-
-                            {/* Severity badge */}
-                            <div
-                                className={cn(
-                                    "inline-flex items-center gap-1 rounded border px-2 py-0.5 font-mono text-[10px] font-bold uppercase w-fit",
-                                    severityColors.badge,
-                                )}>
-                                <MaterialIcon
-                                    name={log.severity === "error" || log.severity === "critical" ? "warning" : "info"}
-                                    size="sm"
-                                />
-                                <span>{getSeverityLabel(log.severity)}</span>
-                            </div>
+                    onClick={() => onInspect?.(log)}
+                    className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold border ${moduleInfo.color}`}>
+                                <MaterialIcon name={moduleInfo.icon} size="xs" />
+                                {moduleInfo.label}
+                            </span>
+                            <h4 className="font-semibold text-slate-900 text-xs">{formatEventType(log.event_type)}</h4>
+                            <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold border ${statusConfig.badge}`}>
+                                <MaterialIcon name={statusConfig.icon} size="xs" />
+                                <span>{statusConfig.label}</span>
+                            </span>
                         </div>
 
-                        {/* Description */}
-                        <p className="text-[13px] text-on-surface leading-relaxed">{log.description}</p>
+                        <div className="text-slate-400 text-xs font-mono">
+                            {formatDateTime(log.created_at)}
+                        </div>
                     </div>
 
-                    {/* Details section */}
-                    <div className="px-card-padding py-card-padding flex flex-col gap-3">
-                        {/* Actor and Timestamp */}
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-[12px]">
-                            <div className="flex items-center gap-1 font-mono text-on-surface-variant">
-                                <MaterialIcon name="person" size="sm" />
-                                <span className="font-semibold text-on-surface">{log.actorEmail}</span>
-                            </div>
-                            <div className="hidden sm:block text-on-surface-variant/50">·</div>
-                            <div className="flex items-center gap-1 font-mono text-on-surface-variant">
-                                <MaterialIcon name="schedule" size="sm" />
-                                <span>{formatDateTime(log.createdAt)}</span>
-                            </div>
-                        </div>
+                    <p className="text-xs text-slate-700 leading-relaxed pt-2.5">{log.description}</p>
 
-                        {/* Resource information */}
-                        {log.resourceIdentifier && (
-                            <div className="flex flex-col gap-1 text-[12px] bg-surface-container-lowest/50 p-2 rounded border border-outline-variant/30">
-                                <div className="flex items-center gap-2">
-                                    <MaterialIcon name="inventory_2" size="sm" className="text-on-surface-variant/60" />
-                                    <span className="font-mono font-medium text-on-surface">
-                                        {log.resourceIdentifier}
-                                    </span>
-                                </div>
-                                {log.resourceType && (
-                                    <span className="text-[11px] text-on-surface-variant ml-6">
-                                        Type: {log.resourceType}
-                                    </span>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Category and ID */}
-                        <div className="flex flex-wrap items-center gap-2 text-[11px]">
-                            <Badge variant="tag">{getCategoryLabel(log.category)}</Badge>
-                            <span className="text-on-surface-variant/60 font-mono">ID: {log.id.slice(0, 8)}</span>
-                        </div>
-
-                        {/* Error message if failure */}
-                        {log.status === "failure" && log.errorMessage && (
-                            <div className="mt-2 p-2 rounded bg-error-container/20 border border-error-container/40">
-                                <p className="text-[11px] text-error font-mono">{log.errorMessage}</p>
+                    <div className="flex items-center justify-between pt-3 text-xs text-slate-500 font-mono">
+                        <div>Actor: <span className="font-semibold text-slate-800">{log.actor_email}</span></div>
+                        {log.resource_type && (
+                            <div className="text-[11px]">
+                                {log.resource_type}: <span className="font-semibold">{log.resource_identifier || log.resource_id}</span>
                             </div>
                         )}
                     </div>

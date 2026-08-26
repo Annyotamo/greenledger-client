@@ -93,7 +93,7 @@ export default function InitializingPage() {
         }
     }, [tenant]);
 
-    // Speed up progress to take exactly 10 seconds (only starts after images are fully cached)
+    // Fast snappy progress (~1.8 seconds total duration)
     useEffect(() => {
         if (isLoading || !tenant || !imagesLoaded) return;
 
@@ -103,7 +103,7 @@ export default function InitializingPage() {
                     clearInterval(progressInterval);
                     return 100;
                 }
-                const increment = Math.random() > 0.45 ? 1 : 2;
+                const increment = Math.random() > 0.4 ? 2 : 1;
                 const next = Math.min(prev + increment, 100);
 
                 if (next < 25) setActiveStepIndex(0);
@@ -114,12 +114,12 @@ export default function InitializingPage() {
 
                 return next;
             });
-        }, 90); // Speed up loader to take ~6 seconds total instead of ~10 seconds
+        }, 25); // Fast smooth tick (~1.8s total duration)
 
         return () => clearInterval(progressInterval);
     }, [isLoading, tenant, imagesLoaded]);
 
-    // Handle terminal lines logs (only starts after images are fully cached)
+    // Handle terminal lines logs with fast high-tech feed
     useEffect(() => {
         if (isLoading || !tenant || !imagesLoaded) return;
 
@@ -144,7 +144,7 @@ export default function InitializingPage() {
             } else {
                 logIndex = 0;
             }
-        }, 270); // Speed up log feed ticks from 400ms to 270ms to match progress loader
+        }, 85); // Fast streaming log feed
 
         return () => clearInterval(terminalInterval);
     }, [isLoading, tenant, imagesLoaded]);
@@ -154,7 +154,7 @@ export default function InitializingPage() {
         if (progress === 100) {
             const timeout = setTimeout(() => {
                 router.push("/dashboard");
-            }, 300); // Shave redirect delay to 300ms
+            }, 150); // Crisp 150ms handover
             return () => clearTimeout(timeout);
         }
     }, [progress, router]);

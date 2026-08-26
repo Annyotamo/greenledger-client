@@ -1,34 +1,28 @@
 /**
- * Audit Log Types
- * Mapped from API response and domain models
+ * GreenLedger Tenant Audit System Types
+ * Aligned with backend endpoints:
+ * - GET /api/v1/tenant/audit/trails (Timeline View)
+ * - GET /api/v1/tenant/audit/logs (Forensic Diff & Ingestion View)
  */
 
-export type AuditCategory = "user_action" | "data_action" | "system_action" | "security_action";
-export type AuditEventType =
-    | "user_login_success"
-    | "user_login_failed_invalid_credentials"
-    | "user_logout"
-    | "activity_created"
-    | "activity_updated"
-    | "activity_rejected"
-    | "activity_verified"
-    | "document_uploaded"
-    | "facility_created"
-    | "facility_updated"
-    | "facility_deleted";
+export type AuditCategory =
+    | "auth"
+    | "data_action"
+    | "system_event"
+    | "compliance"
+    | "security"
+    | string;
 
-export type AuditStatus = "success" | "failure";
-export type AuditSeverity = "info" | "warning" | "error" | "critical";
-export type AuditActorType = "user" | "system" | "api";
+export type AuditStatus = "success" | "failure" | "partial" | "pending";
+export type AuditSeverity = "info" | "warning" | "critical";
+export type AuditActorType = "user" | "system" | "admin" | string;
 
-/**
- * API Response DTO (snake_case from backend)
- */
-export interface AuditLogDTO {
+export interface AuditTrailItem {
     id: string;
     tenant_id: string;
     category: AuditCategory;
-    event_type: AuditEventType;
+    event_type: string;
+    module: string;
     actor_type: AuditActorType;
     actor_email: string;
     actor_user_id: string;
@@ -38,96 +32,90 @@ export interface AuditLogDTO {
     status: AuditStatus;
     severity: AuditSeverity;
     description: string;
-    error_code: string | null;
-    error_message: string | null;
     reason: string | null;
     created_at: string;
     updated_at: string;
 }
 
-/**
- * Domain Model (camelCase)
- */
-export interface AuditLog {
-    id: string;
-    tenantId: string;
-    category: AuditCategory;
-    eventType: AuditEventType;
-    actorType: AuditActorType;
-    actorEmail: string;
-    actorUserId: string;
-    resourceType: string | null;
-    resourceId: string | null;
-    resourceIdentifier: string | null;
-    status: AuditStatus;
-    severity: AuditSeverity;
-    description: string;
-    errorCode: string | null;
-    errorMessage: string | null;
-    reason: string | null;
-    createdAt: string;
-    updatedAt: string;
+export interface FieldChange {
+    old: any;
+    new: any;
 }
 
-/**
- * Pagination metadata DTO (snake_case from backend)
- */
-export interface PaginationMetaDTO {
+export interface AuditLogItem extends AuditTrailItem {
+    old_values?: Record<string, any> | null;
+    new_values?: Record<string, any> | null;
+    changes?: Record<string, FieldChange> | null;
+    metadata_json?: Record<string, any> | null;
+    error_code?: string | null;
+    error_message?: string | null;
+}
+
+export interface AuditPaginationMeta {
     total: number;
     page: number;
     page_size: number;
     total_pages: number;
 }
 
-/**
- * Pagination metadata (camelCase for frontend/domain model)
- */
-export interface PaginationMeta {
-    total: number;
-    page: number;
-    pageSize: number;
-    totalPages: number;
-}
-
-/**
- * API Response wrapper
- */
-export interface AuditLogsResponse {
+export interface AuditTrailsResponse {
     success: boolean;
-    status_code: number;
     message: string;
     data: {
-        items: AuditLogDTO[];
-    } & PaginationMetaDTO;
-    error: string | null;
-    method: string;
-    path: string;
-    timestamp: string;
+        items: AuditTrailItem[];
+        total: number;
+        page: number;
+        page_size: number;
+        total_pages: number;
+    };
 }
 
-/**
- * Filter parameters for API request
- */
-export interface AuditLogFilters {
-    category?: AuditCategory;
-    eventType?: AuditEventType;
-    status?: AuditStatus;
-    severity?: AuditSeverity;
-    startDate?: string; // ISO date string
-    endDate?: string; // ISO date string
-    actorEmail?: string;
-    resourceType?: string;
+export interface AuditLogsResponse {
+    success: boolean;
+    message: string;
+    data: {
+        items: AuditLogItem[];
+        total: number;
+        page: number;
+        page_size: number;
+        total_pages: number;
+    };
+}
+
+export interface AuditSingleTrailResponse {
+    success: boolean;
+    message: string;
+    data: AuditTrailItem;
+}
+
+export interface AuditSingleLogResponse {
+    success: boolean;
+    message: string;
+    data: AuditLogItem;
+}
+
+export interface AuditQueryParams {
+    module?: string;
+    category?: string;
+    event_type?: string;
+    has_changes?: boolean;
+    error_code?: string;
+    actor_email?: string;
+    actor_user_id?: string;
+    actor_type?: string;
+    resource_type?: string;
+    resource_id?: string;
+    status?: string;
+    severity?: string;
+    search?: string;
+    start_date?: string;
+    end_date?: string;
     page?: number;
-    pageSize?: number;
+    page_size?: number;
+    sort_by?: string;
+    sort_order?: "desc" | "asc";
 }
 
-/**
- * Extended type for UI display with formatted values
- */
-export interface AuditLogDisplay extends AuditLog {
-    formattedDate: string;
-    formattedTime: string;
-    icon: string;
-    iconColor: string;
-    statusLabel: string;
-}
+// Backward-compatibility aliases for legacy imports
+export type AuditLog = AuditLogItem;
+export type AuditLogFilters = AuditQueryParams;

@@ -1,106 +1,94 @@
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Badge } from "@/components/ui/badge";
 import { TableCell, TableRow } from "@/components/ui/table";
-import type { AuditLog } from "@/lib/audit-logs/types";
+import type { AuditLogItem as AuditLogItemType } from "@/lib/audit-logs/types";
 import {
-    EVENT_TYPE_LABEL_MAP,
-    SEVERITY_COLOR_MAP,
     formatDateTime,
-    getStatusIcon,
-    getSeverityBadgeVariant,
-    getSeverityLabel,
-    getCategoryLabel,
+    formatEventType,
+    getModuleInfo,
+    SEVERITY_CONFIG,
+    STATUS_CONFIG,
 } from "@/lib/audit-logs/formatters";
 import { cn } from "@/lib/utils/cn";
 
 type AuditLogItemProps = {
-    log: AuditLog;
+    log: AuditLogItemType;
+    onInspect?: (log: AuditLogItemType) => void;
 };
 
-export function AuditLogItem({ log }: AuditLogItemProps) {
-    const severityColors = SEVERITY_COLOR_MAP[log.severity];
-    const severityVariant = getSeverityBadgeVariant(log.severity);
-    const statusIcon = getStatusIcon(log.status);
-    const eventLabel = EVENT_TYPE_LABEL_MAP[log.eventType];
+export function AuditLogItem({ log, onInspect }: AuditLogItemProps) {
+    const moduleInfo = getModuleInfo(log.module);
+    const severityConfig = SEVERITY_CONFIG[log.severity] || SEVERITY_CONFIG.info;
+    const statusConfig = STATUS_CONFIG[log.status] || STATUS_CONFIG.success;
 
     return (
-        <TableRow className={cn("hover:bg-surface-container transition-colors")}>
+        <TableRow
+            className={cn("hover:bg-slate-50 transition-colors cursor-pointer")}
+            onClick={() => onInspect?.(log)}>
             {/* Timestamp */}
             <TableCell className="font-mono text-[11px] whitespace-nowrap">
                 <div className="flex flex-col gap-0.5">
-                    <span className="font-medium text-on-surface">{formatDateTime(log.createdAt)}</span>
-                    <span className="text-[10px] text-on-surface-variant">{log.id.slice(0, 8)}</span>
+                    <span className="font-medium text-slate-800">{formatDateTime(log.created_at)}</span>
+                    <span className="text-[10px] text-slate-400">{log.id.slice(0, 8)}</span>
                 </div>
             </TableCell>
 
             {/* Event Type & Description */}
             <TableCell>
                 <div className="flex flex-col gap-1 max-w-sm">
-                    <span className="font-semibold text-on-surface">{eventLabel}</span>
-                    <span className="text-[11px] text-on-surface-variant line-clamp-2">{log.description}</span>
+                    <span className="font-semibold text-slate-900 text-xs">{formatEventType(log.event_type)}</span>
+                    <span className="text-[11px] text-slate-600 line-clamp-2">{log.description}</span>
                 </div>
             </TableCell>
 
-            {/* Category */}
+            {/* Module */}
             <TableCell className="text-[11px]">
-                <Badge variant="tag">{getCategoryLabel(log.category)}</Badge>
+                <Badge variant="tag">{moduleInfo.label}</Badge>
             </TableCell>
 
             {/* Actor */}
             <TableCell className="font-mono text-[11px]">
                 <div className="flex flex-col gap-0.5">
-                    <span className="font-medium text-on-surface">{log.actorEmail}</span>
-                    <span className="text-[10px] text-on-surface-variant capitalize">{log.actorType}</span>
+                    <span className="font-medium text-slate-800">{log.actor_email}</span>
+                    <span className="text-[10px] text-slate-400 capitalize">{log.actor_type}</span>
                 </div>
             </TableCell>
 
             {/* Resource */}
-            <TableCell className="text-[11px] text-on-surface-variant font-mono">
-                {log.resourceIdentifier ? (
+            <TableCell className="text-[11px] text-slate-600 font-mono">
+                {log.resource_identifier || log.resource_id ? (
                     <div className="flex flex-col gap-0.5">
-                        <span className="text-on-surface">{log.resourceIdentifier}</span>
-                        {log.resourceType && (
-                            <span className="text-[10px] text-on-surface-variant">{log.resourceType}</span>
+                        <span className="text-slate-800">{log.resource_identifier || log.resource_id}</span>
+                        {log.resource_type && (
+                            <span className="text-[10px] text-slate-400">{log.resource_type}</span>
                         )}
                     </div>
                 ) : (
-                    <span className="text-on-surface-variant/60">—</span>
+                    <span className="text-slate-400">—</span>
                 )}
             </TableCell>
 
             {/* Status & Severity */}
             <TableCell>
                 <div className="flex items-center gap-2">
-                    {/* Status badge */}
-                    <Badge
-                        variant={log.status === "success" ? "positive" : "negative"}
-                        size="md"
-                        className="flex items-center gap-1">
-                        <MaterialIcon name={statusIcon} size="sm" />
-                        <span className="capitalize">{log.status}</span>
-                    </Badge>
+                    <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold border ${statusConfig.badge}`}>
+                        <MaterialIcon name={statusConfig.icon} size="xs" />
+                        <span>{statusConfig.label}</span>
+                    </span>
 
-                    {/* Severity badge */}
-                    <div
-                        className={cn(
-                            "inline-flex items-center gap-1 rounded border px-2 py-0.5 font-mono text-[10px] font-bold uppercase",
-                            severityColors.badge,
-                        )}>
-                        <MaterialIcon
-                            name={log.severity === "error" || log.severity === "critical" ? "warning" : "info"}
-                            size="sm"
-                        />
-                        <span>{getSeverityLabel(log.severity)}</span>
-                    </div>
+                    <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase border ${severityConfig.badge}`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${severityConfig.dot}`} />
+                        <span>{log.severity}</span>
+                    </span>
                 </div>
             </TableCell>
 
             {/* Error Message (if failure) */}
-            <TableCell className="text-[10px] text-on-surface-variant">
-                {log.status === "failure" && log.errorMessage ? (
-                    <span className="line-clamp-2 text-error">{log.errorMessage}</span>
+            <TableCell className="text-[10px] text-slate-500 font-mono">
+                {log.status === "failure" && (log.error_message || log.reason) ? (
+                    <span className="text-rose-600 line-clamp-1">{log.error_message || log.reason}</span>
                 ) : (
-                    <span className="text-on-surface-variant/60">—</span>
+                    "—"
                 )}
             </TableCell>
         </TableRow>

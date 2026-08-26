@@ -1,87 +1,81 @@
 import { privateApi } from "@/lib/http/client";
-import type { AuditLog, AuditLogDTO, AuditLogFilters, AuditLogsResponse, PaginationMeta } from "./types";
+import type {
+    AuditQueryParams,
+    AuditTrailsResponse,
+    AuditLogsResponse,
+    AuditSingleTrailResponse,
+    AuditSingleLogResponse,
+    AuditTrailItem,
+    AuditLogItem,
+} from "./types";
 
 /**
- * Convert snake_case DTO to camelCase domain model
+ * Filter out undefined / empty string params
  */
-function mapAuditLogDTO(dto: AuditLogDTO): AuditLog {
-    return {
-        id: dto.id,
-        tenantId: dto.tenant_id,
-        category: dto.category,
-        eventType: dto.event_type,
-        actorType: dto.actor_type,
-        actorEmail: dto.actor_email,
-        actorUserId: dto.actor_user_id,
-        resourceType: dto.resource_type,
-        resourceId: dto.resource_id,
-        resourceIdentifier: dto.resource_identifier,
-        status: dto.status,
-        severity: dto.severity,
-        description: dto.description,
-        errorCode: dto.error_code,
-        errorMessage: dto.error_message,
-        reason: dto.reason,
-        createdAt: dto.created_at,
-        updatedAt: dto.updated_at,
-    };
-}
-
-/**
- * Build query parameters object from filters
- */
-function buildQueryParams(filters: AuditLogFilters): Record<string, any> {
-    const params: Record<string, any> = {};
-
-    if (filters.category) params.category = filters.category;
-    if (filters.eventType) params.event_type = filters.eventType;
-    if (filters.status) params.status = filters.status;
-    if (filters.severity) params.severity = filters.severity;
-    if (filters.startDate) params.start_date = filters.startDate;
-    if (filters.endDate) params.end_date = filters.endDate;
-    if (filters.actorEmail) params.actor_email = filters.actorEmail;
-    if (filters.resourceType) params.resource_type = filters.resourceType;
-    if (filters.page) params.page = filters.page;
-    if (filters.pageSize) params.page_size = filters.pageSize;
-
-    return params;
-}
-
-/**
- * Fetch audit logs from API using configured axios instance
- */
-export async function fetchAuditLogs(filters: AuditLogFilters = {}) {
-    try {
-        const queryParams = buildQueryParams(filters);
-
-        const response = await privateApi.get<AuditLogsResponse>("/tenant/audit-logs", {
-            params: queryParams,
-        });
-
-        const data = response.data;
-
-        if (!data.success) {
-            throw new Error(data.message || "Failed to fetch audit logs");
+function cleanParams(params: AuditQueryParams): Record<string, any> {
+    const cleaned: Record<string, any> = {};
+    Object.entries(params).forEach(([key, val]) => {
+        if (val !== undefined && val !== null && val !== "") {
+            cleaned[key] = val;
         }
-
-        return {
-            items: data.data.items.map(mapAuditLogDTO),
-            pagination: {
-                total: data.data.total,
-                page: data.data.page,
-                pageSize: data.data.page_size,
-                totalPages: data.data.total_pages,
-            },
-        };
-    } catch (error) {
-        console.error("Error fetching audit logs:", error);
-        throw error;
-    }
+    });
+    return cleaned;
 }
 
 /**
- * Type-safe wrapper for useQuery hook
+ * GET /api/v1/tenant/audit/trails
+ * Lightweight timeline & activity feeds (who did what, when, and where).
  */
-export async function getAuditLogsQuery(filters?: AuditLogFilters) {
-    return fetchAuditLogs(filters);
+export async function fetchAuditTrails(params: AuditQueryParams = {}) {
+    const cleaned = cleanParams(params);
+    const response = await privateApi.get<AuditTrailsResponse>("/tenant/audit/trails", {
+        params: cleaned,
+    });
+
+    if (!response.data.success) {
+        throw new Error(response.data.message || "Failed to fetch audit trails");
+    }
+
+    return response.data.data;
+}
+
+/**
+ * GET /api/v1/tenant/audit/logs
+ * Deep forensic logs with before/after state diffs, ingested values & metadata.
+ */
+export async function fetchAuditLogs(params: AuditQueryParams = {}) {
+    const cleaned = cleanParams(params);
+    const response = await privateApi.get<AuditLogsResponse>("/tenant/audit/logs", {
+        params: cleaned,
+    });
+
+    if (!response.data.success) {
+        throw new Error(response.data.message || "Failed to fetch forensic audit logs");
+    }
+
+    return response.data.data;
+}
+
+/**
+ * GET /api/v1/tenant/audit/trails/{audit_id}
+ * Single lightweight audit event timeline item.
+ */
+export async function fetchSingleAuditTrail(auditId: string): Promise<AuditTrailItem> {
+    const response = await privateApi.get<AuditSingleTrailResponse>(`/tenant/audit/trails/${auditId}`);
+    if (!response.data.success) {
+        throw new Error(response.data.message || "Failed to fetch audit trail detail");
+    }
+    return response.data.data;
+}
+
+/**
+ * GET /api/v1/tenant/audit/logs/{audit_id}
+ * Single forensic diff log entry with full metadata.
+ */
+export async function fetchSingleAuditLog(auditId: string): Promise<AuditLogItem> {
+    const response = await privateApi.get<AuditSingleLogResponse>(`/tenant/audit/logs/${auditId}`);
+    if (!response.data.success) {
+        throw new Error(response.data.message || "Failed to fetch forensic audit log detail");
+    }
+    return response.data.data;
 }

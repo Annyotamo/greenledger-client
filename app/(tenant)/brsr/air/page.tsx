@@ -126,10 +126,10 @@ const createCleanStack = (): BrsrAirStackInput => ({
     readings: [createCleanReading()],
 });
 
-// Demo stack payloads for default initial dashboard view based on verification excel
+// Demo stack payloads for default initial dashboard view matching the backend validation schema
 const DEMO_STACK_1: BrsrAirStackInput = {
     attached_unit: "Sponge iron / DRI",
-    stack_title: "Rotary Kiln No. 1 & 2 (150 TPD each, common stack)",
+    stack_title: "S-01",
     operating_hours_per_year: 7920,
     permitted_limits: {
         permitted_limit_nox: { value: 300, unit: "mg_per_nm3" },
@@ -137,37 +137,30 @@ const DEMO_STACK_1: BrsrAirStackInput = {
         permitted_limit_pm: { value: 100, unit: "mg_per_nm3" },
         permitted_flow_rate: { value: 120000, unit: "nm3_per_hour" },
     },
-    report_number: "TR-2025-STACK-01",
     is_pop_monitored: false,
     is_voc_monitored: false,
     is_hap_monitored: false,
     readings: [
         {
-            sampling_date: "2024-10-15",
+            sampling_date: "2024-04-15",
             gas_flow_rate: { value: 100000, unit: "nm3_per_hour" },
             nox: { value: 200, unit: "mg_per_nm3" },
             sox: { value: 100, unit: "mg_per_nm3" },
             particulate_matter: { value: 50, unit: "mg_per_nm3" },
-            pop: null,
-            voc: null,
-            hap: null,
         },
         {
-            sampling_date: "2024-12-20",
+            sampling_date: "2024-07-15",
             gas_flow_rate: { value: 100000, unit: "nm3_per_hour" },
             nox: { value: 200, unit: "mg_per_nm3" },
             sox: { value: 120, unit: "mg_per_nm3" },
             particulate_matter: { value: 70, unit: "mg_per_nm3" },
-            pop: null,
-            voc: null,
-            hap: null,
         },
     ],
 };
 
 const DEMO_STACK_2: BrsrAirStackInput = {
-    attached_unit: "Captive Power Plant (CPP)",
-    stack_title: "AFBC Boiler (1 x 15 MW)",
+    attached_unit: "Captive power",
+    stack_title: "S-02",
     operating_hours_per_year: 6000,
     permitted_limits: {
         permitted_limit_nox: { value: 300, unit: "mg_per_nm3" },
@@ -175,37 +168,30 @@ const DEMO_STACK_2: BrsrAirStackInput = {
         permitted_limit_pm: { value: 50, unit: "mg_per_nm3" },
         permitted_flow_rate: { value: 60000, unit: "nm3_per_hour" },
     },
-    report_number: "TR-2025-STACK-02",
     is_pop_monitored: false,
     is_voc_monitored: false,
     is_hap_monitored: false,
     readings: [
         {
-            sampling_date: "2024-10-16",
+            sampling_date: "2024-05-20",
             gas_flow_rate: { value: 50000, unit: "nm3_per_hour" },
-            nox: null,
+            nox: { value: 0, unit: "mg_per_nm3" },
             sox: { value: 80, unit: "mg_per_nm3" },
             particulate_matter: { value: 40, unit: "mg_per_nm3" },
-            pop: null,
-            voc: null,
-            hap: null,
         },
         {
-            sampling_date: "2024-12-21",
+            sampling_date: "2024-08-20",
             gas_flow_rate: { value: 50000, unit: "nm3_per_hour" },
             nox: { value: 150, unit: "mg_per_nm3" },
             sox: { value: 100, unit: "mg_per_nm3" },
             particulate_matter: { value: 60, unit: "mg_per_nm3" },
-            pop: null,
-            voc: null,
-            hap: null,
         },
     ],
 };
 
 const DEMO_STACK_3: BrsrAirStackInput = {
-    attached_unit: "Steel Melting Shop (SMS)",
-    stack_title: "Induction Furnace (2 x 15 T with common bag filter)",
+    attached_unit: "Steel melting",
+    stack_title: "S-03",
     operating_hours_per_year: 7920,
     permitted_limits: {
         permitted_limit_nox: { value: 350, unit: "mg_per_nm3" },
@@ -213,30 +199,23 @@ const DEMO_STACK_3: BrsrAirStackInput = {
         permitted_limit_pm: { value: 100, unit: "mg_per_nm3" },
         permitted_flow_rate: { value: 150000, unit: "nm3_per_hour" },
     },
-    report_number: "TR-2025-STACK-03",
     is_pop_monitored: false,
     is_voc_monitored: false,
     is_hap_monitored: false,
     readings: [
         {
-            sampling_date: "2024-10-18",
+            sampling_date: "2024-06-10",
             gas_flow_rate: { value: 80000, unit: "nm3_per_hour" },
             nox: { value: 250, unit: "mg_per_nm3" },
             sox: { value: 200, unit: "mg_per_nm3" },
             particulate_matter: { value: 100, unit: "mg_per_nm3" },
-            pop: null,
-            voc: null,
-            hap: null,
         },
         {
-            sampling_date: "2024-12-22",
+            sampling_date: "2024-09-10",
             gas_flow_rate: { value: 120000, unit: "nm3_per_hour" },
             nox: { value: 250, unit: "mg_per_nm3" },
             sox: { value: 100, unit: "mg_per_nm3" },
             particulate_matter: { value: 50, unit: "mg_per_nm3" },
-            pop: null,
-            voc: null,
-            hap: null,
         },
     ],
 };
@@ -304,15 +283,13 @@ export default function BrsrAirPage() {
     const [stacks, setStacks] = useState<BrsrAirStackInput[]>(INITIAL_DEMO_STACKS);
 
     // Dynamic Custom Pollutants State
-    const [others, setOthers] = useState<BrsrAirOtherPollutantInput[]>([
-        { label: "Carbon Monoxide (CO)", quantity: 14.2 },
-    ]);
+    const [others, setOthers] = useState<BrsrAirOtherPollutantInput[]>([]);
 
     // Active payload for React Query backend calls initialized with demonstration data
     const [activePayload, setActivePayload] = useState<BrsrAirDisclosurePayload>({
         financial_year_label: "FY 2024-25",
         stacks: INITIAL_DEMO_STACKS,
-        others: [{ label: "Carbon Monoxide (CO)", quantity: 14.2 }],
+        others: [],
     });
 
     const { data, isPending, isError, error } = useBrsrAirDisclosure(activePayload);
@@ -457,15 +434,24 @@ export default function BrsrAirPage() {
                         value: Number(r.gas_flow_rate?.value) || 0,
                         unit: "nm3_per_hour",
                     },
-                    nox: r.nox?.value !== undefined && r.nox?.value !== null && (r.nox?.value as any) !== ""
-                        ? { value: Number(r.nox.value), unit: "mg_per_nm3" }
-                        : null,
-                    sox: r.sox?.value !== undefined && r.sox?.value !== null && (r.sox?.value as any) !== ""
-                        ? { value: Number(r.sox.value), unit: "mg_per_nm3" }
-                        : null,
-                    particulate_matter: r.particulate_matter?.value !== undefined && r.particulate_matter?.value !== null && (r.particulate_matter?.value as any) !== ""
-                        ? { value: Number(r.particulate_matter.value), unit: "mg_per_nm3" }
-                        : null,
+                    nox: {
+                        value: r.nox?.value !== undefined && r.nox?.value !== null && (r.nox?.value as any) !== ""
+                            ? Number(r.nox.value)
+                            : 0,
+                        unit: "mg_per_nm3",
+                    },
+                    sox: {
+                        value: r.sox?.value !== undefined && r.sox?.value !== null && (r.sox?.value as any) !== ""
+                            ? Number(r.sox.value)
+                            : 0,
+                        unit: "mg_per_nm3",
+                    },
+                    particulate_matter: {
+                        value: r.particulate_matter?.value !== undefined && r.particulate_matter?.value !== null && (r.particulate_matter?.value as any) !== ""
+                            ? Number(r.particulate_matter.value)
+                            : 0,
+                        unit: "mg_per_nm3",
+                    },
                     pop: s.is_pop_monitored && r.pop?.value !== undefined && r.pop?.value !== null && (r.pop?.value as any) !== ""
                         ? { value: Number(r.pop.value) || 0, unit: "mg_per_nm3" }
                         : null,
@@ -554,7 +540,7 @@ export default function BrsrAirPage() {
                         BRSR Air Emissions &amp; EIA dust load (NIPL)
                     </h1>
                     <p className="text-sm text-on-surface-variant">
-                        Stack sampling readings log, single stack permitted limits, hourly emission rates (kg/hr), annual totals (tonnes/yr), and per-gas compliance checks.
+                        Stack sampling readings log, single stack permitted limits, hourly emission rates (kg/hr), and annual totals (tonnes/yr).
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -1281,7 +1267,7 @@ export default function BrsrAirPage() {
                                                 Plant-Wide Dedicated Per-Gas Metrics
                                             </h3>
                                             <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
-                                                Detailed breakdown exposing hourly emission rates (kg/hr), gas flow rates, permitted limits, and compliance status
+                                                Detailed breakdown exposing hourly emission rates (kg/hr), gas flow rates, and permitted limits
                                             </p>
                                         </div>
                                     </div>
@@ -1291,7 +1277,6 @@ export default function BrsrAirPage() {
                                         {Object.entries(plantGasDetails).map(([gasKey, gas]: [string, BrsrAirGasDetailMetric]) => {
                                             const isOptionalGas = ["pop", "voc", "hap"].includes(gasKey.toLowerCase());
                                             const hasValue = (v: number | null | undefined) => v !== null && v !== undefined && Number(v) > 0;
-                                            const isGasMeasured = gas.is_monitored && (!isOptionalGas || hasValue(gas.annual_emission_tonnes_per_year) || hasValue(gas.average_concentration_mg_per_nm3));
 
                                             return (
                                                 <div
@@ -1309,11 +1294,6 @@ export default function BrsrAirPage() {
                                                             <Badge variant="negative" size="sm" className="flex items-center gap-1">
                                                                 <MaterialIcon name="warning" size="sm" className="!text-[12px]" />
                                                                 Exceeding Limit
-                                                            </Badge>
-                                                        ) : isGasMeasured ? (
-                                                            <Badge variant="positive" size="sm" className="flex items-center gap-1">
-                                                                <MaterialIcon name="check_circle" size="sm" className="!text-[12px]" />
-                                                                Compliant
                                                             </Badge>
                                                         ) : null}
                                                     </div>

@@ -264,9 +264,9 @@ export interface BrsrAirPermittedLimits {
 export interface BrsrAirReadingInput {
     sampling_date: string;
     gas_flow_rate: BrsrAirValueWithUnit<FlowRateUnit>;
-    nox?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
-    sox?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
-    particulate_matter?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
+    nox?: BrsrAirValueWithUnit<ConcentrationUnit>;
+    sox?: BrsrAirValueWithUnit<ConcentrationUnit>;
+    particulate_matter?: BrsrAirValueWithUnit<ConcentrationUnit>;
     pop?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
     voc?: BrsrAirValueWithUnit<ConcentrationUnit> | null;
     hap?: BrsrAirValueWithUnit<ConcentrationUnit> | null;

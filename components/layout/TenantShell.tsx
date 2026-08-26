@@ -22,6 +22,11 @@ export function TenantShell({ children }: TenantShellProps) {
     const collapsed = useSidebarStore((s) => s.collapsed);
     const pathname = usePathname();
     const router = useRouter();
+
+    const activeTab = useMemo<DashboardTab>(() => {
+        return pathname === "/energy-dashboard" ? "energy" : "emissions";
+    }, [pathname]);
+
     const mainMargin = collapsed ? "5rem" : "16rem";
     const mainPaddingTop = "6rem";
 
@@ -32,10 +37,6 @@ export function TenantShell({ children }: TenantShellProps) {
             </div>
         );
     }
-
-    const activeTab = useMemo<DashboardTab>(() => {
-        return pathname === "/energy-dashboard" ? "energy" : "emissions";
-    }, [pathname]);
 
     const searchPlaceholder = pathname === "/energy-dashboard" ? "Search energy data..." : "Search emissions data...";
 

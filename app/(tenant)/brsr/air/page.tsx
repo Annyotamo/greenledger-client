@@ -126,44 +126,122 @@ const createCleanStack = (): BrsrAirStackInput => ({
     readings: [createCleanReading()],
 });
 
-// Demo stack payload for default initial dashboard view
+// Demo stack payloads for default initial dashboard view based on verification excel
 const DEMO_STACK_1: BrsrAirStackInput = {
     attached_unit: "Sponge iron / DRI",
     stack_title: "Rotary Kiln No. 1 & 2 (150 TPD each, common stack)",
-    operating_hours_per_year: 7200,
+    operating_hours_per_year: 7920,
     permitted_limits: {
         permitted_limit_nox: { value: 300, unit: "mg_per_nm3" },
         permitted_limit_sox: { value: 200, unit: "mg_per_nm3" },
-        permitted_limit_pm: { value: 50, unit: "mg_per_nm3" },
-        permitted_flow_rate: { value: 50000, unit: "nm3_per_hour" },
+        permitted_limit_pm: { value: 100, unit: "mg_per_nm3" },
+        permitted_flow_rate: { value: 120000, unit: "nm3_per_hour" },
     },
     report_number: "TR-2025-STACK-01",
-    is_pop_monitored: true,
+    is_pop_monitored: false,
     is_voc_monitored: false,
     is_hap_monitored: false,
     readings: [
         {
             sampling_date: "2024-10-15",
-            gas_flow_rate: { value: 45000, unit: "nm3_per_hour" },
-            nox: { value: 180, unit: "mg_per_nm3" },
-            sox: { value: 110, unit: "mg_per_nm3" },
-            particulate_matter: { value: 30, unit: "mg_per_nm3" },
-            pop: { value: 0.012, unit: "mg_per_nm3" },
+            gas_flow_rate: { value: 100000, unit: "nm3_per_hour" },
+            nox: { value: 200, unit: "mg_per_nm3" },
+            sox: { value: 100, unit: "mg_per_nm3" },
+            particulate_matter: { value: 50, unit: "mg_per_nm3" },
+            pop: null,
             voc: null,
             hap: null,
         },
         {
             sampling_date: "2024-12-20",
-            gas_flow_rate: { value: 47000, unit: "nm3_per_hour" },
-            nox: { value: 190, unit: "mg_per_nm3" },
-            sox: { value: 130, unit: "mg_per_nm3" },
-            particulate_matter: { value: 34, unit: "mg_per_nm3" },
-            pop: { value: 0.014, unit: "mg_per_nm3" },
+            gas_flow_rate: { value: 100000, unit: "nm3_per_hour" },
+            nox: { value: 200, unit: "mg_per_nm3" },
+            sox: { value: 120, unit: "mg_per_nm3" },
+            particulate_matter: { value: 70, unit: "mg_per_nm3" },
+            pop: null,
             voc: null,
             hap: null,
         },
     ],
 };
+
+const DEMO_STACK_2: BrsrAirStackInput = {
+    attached_unit: "Captive Power Plant (CPP)",
+    stack_title: "AFBC Boiler (1 x 15 MW)",
+    operating_hours_per_year: 6000,
+    permitted_limits: {
+        permitted_limit_nox: { value: 300, unit: "mg_per_nm3" },
+        permitted_limit_sox: { value: 200, unit: "mg_per_nm3" },
+        permitted_limit_pm: { value: 50, unit: "mg_per_nm3" },
+        permitted_flow_rate: { value: 60000, unit: "nm3_per_hour" },
+    },
+    report_number: "TR-2025-STACK-02",
+    is_pop_monitored: false,
+    is_voc_monitored: false,
+    is_hap_monitored: false,
+    readings: [
+        {
+            sampling_date: "2024-10-16",
+            gas_flow_rate: { value: 50000, unit: "nm3_per_hour" },
+            nox: null,
+            sox: { value: 80, unit: "mg_per_nm3" },
+            particulate_matter: { value: 40, unit: "mg_per_nm3" },
+            pop: null,
+            voc: null,
+            hap: null,
+        },
+        {
+            sampling_date: "2024-12-21",
+            gas_flow_rate: { value: 50000, unit: "nm3_per_hour" },
+            nox: { value: 150, unit: "mg_per_nm3" },
+            sox: { value: 100, unit: "mg_per_nm3" },
+            particulate_matter: { value: 60, unit: "mg_per_nm3" },
+            pop: null,
+            voc: null,
+            hap: null,
+        },
+    ],
+};
+
+const DEMO_STACK_3: BrsrAirStackInput = {
+    attached_unit: "Steel Melting Shop (SMS)",
+    stack_title: "Induction Furnace (2 x 15 T with common bag filter)",
+    operating_hours_per_year: 7920,
+    permitted_limits: {
+        permitted_limit_nox: { value: 350, unit: "mg_per_nm3" },
+        permitted_limit_sox: { value: 250, unit: "mg_per_nm3" },
+        permitted_limit_pm: { value: 100, unit: "mg_per_nm3" },
+        permitted_flow_rate: { value: 150000, unit: "nm3_per_hour" },
+    },
+    report_number: "TR-2025-STACK-03",
+    is_pop_monitored: false,
+    is_voc_monitored: false,
+    is_hap_monitored: false,
+    readings: [
+        {
+            sampling_date: "2024-10-18",
+            gas_flow_rate: { value: 80000, unit: "nm3_per_hour" },
+            nox: { value: 250, unit: "mg_per_nm3" },
+            sox: { value: 200, unit: "mg_per_nm3" },
+            particulate_matter: { value: 100, unit: "mg_per_nm3" },
+            pop: null,
+            voc: null,
+            hap: null,
+        },
+        {
+            sampling_date: "2024-12-22",
+            gas_flow_rate: { value: 120000, unit: "nm3_per_hour" },
+            nox: { value: 250, unit: "mg_per_nm3" },
+            sox: { value: 100, unit: "mg_per_nm3" },
+            particulate_matter: { value: 50, unit: "mg_per_nm3" },
+            pop: null,
+            voc: null,
+            hap: null,
+        },
+    ],
+};
+
+const INITIAL_DEMO_STACKS: BrsrAirStackInput[] = [DEMO_STACK_1, DEMO_STACK_2, DEMO_STACK_3];
 
 function DatePickerInput({
     value,
@@ -220,18 +298,20 @@ function DatePickerInput({
 
 export default function BrsrAirPage() {
     // Form Input States
-    const [fyLabel, setFyLabel] = useState("");
+    const [fyLabel, setFyLabel] = useState("FY 2024-25");
 
     // Dynamic Stacks Input State
-    const [stacks, setStacks] = useState<BrsrAirStackInput[]>([createCleanStack()]);
+    const [stacks, setStacks] = useState<BrsrAirStackInput[]>(INITIAL_DEMO_STACKS);
 
     // Dynamic Custom Pollutants State
-    const [others, setOthers] = useState<BrsrAirOtherPollutantInput[]>([]);
+    const [others, setOthers] = useState<BrsrAirOtherPollutantInput[]>([
+        { label: "Carbon Monoxide (CO)", quantity: 14.2 },
+    ]);
 
     // Active payload for React Query backend calls initialized with demonstration data
     const [activePayload, setActivePayload] = useState<BrsrAirDisclosurePayload>({
         financial_year_label: "FY 2024-25",
-        stacks: [DEMO_STACK_1],
+        stacks: INITIAL_DEMO_STACKS,
         others: [{ label: "Carbon Monoxide (CO)", quantity: 14.2 }],
     });
 
@@ -377,18 +457,15 @@ export default function BrsrAirPage() {
                         value: Number(r.gas_flow_rate?.value) || 0,
                         unit: "nm3_per_hour",
                     },
-                    nox: {
-                        value: Number(r.nox?.value) || 0,
-                        unit: "mg_per_nm3",
-                    },
-                    sox: {
-                        value: Number(r.sox?.value) || 0,
-                        unit: "mg_per_nm3",
-                    },
-                    particulate_matter: {
-                        value: Number(r.particulate_matter?.value) || 0,
-                        unit: "mg_per_nm3",
-                    },
+                    nox: r.nox?.value !== undefined && r.nox?.value !== null && (r.nox?.value as any) !== ""
+                        ? { value: Number(r.nox.value), unit: "mg_per_nm3" }
+                        : null,
+                    sox: r.sox?.value !== undefined && r.sox?.value !== null && (r.sox?.value as any) !== ""
+                        ? { value: Number(r.sox.value), unit: "mg_per_nm3" }
+                        : null,
+                    particulate_matter: r.particulate_matter?.value !== undefined && r.particulate_matter?.value !== null && (r.particulate_matter?.value as any) !== ""
+                        ? { value: Number(r.particulate_matter.value), unit: "mg_per_nm3" }
+                        : null,
                     pop: s.is_pop_monitored && r.pop?.value !== undefined && r.pop?.value !== null && (r.pop?.value as any) !== ""
                         ? { value: Number(r.pop.value) || 0, unit: "mg_per_nm3" }
                         : null,

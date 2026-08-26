@@ -10,14 +10,12 @@ const hanken = Hanken_Grotesk({
     subsets: ["latin"],
     variable: "--font-hanken",
     display: "swap",
-    weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 const jetbrains = JetBrains_Mono({
     subsets: ["latin"],
     variable: "--font-jetbrains",
     display: "swap",
-    weight: ["100", "200", "300", "400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {

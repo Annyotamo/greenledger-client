@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
+const isProd = process.env.NODE_ENV === "production";
+
 const nextConfig: NextConfig = {
-    reactCompiler: true,
+    // Enable React Compiler only in production to avoid severe dev-mode Babel compilation overhead
+    reactCompiler: isProd,
     typescript: {
         ignoreBuildErrors: true,
     },

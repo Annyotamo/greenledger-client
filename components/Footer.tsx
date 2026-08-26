@@ -134,6 +134,35 @@ export default function Footer() {
                         </div>
                     </div>
                 </div>
+                <hr className="my-2 border-gray-300 w-full" />
+                <div className="w-full rounded-xl bg-emerald-950/[0.03] border border-emerald-950/5 px-4 py-3 sm:px-5 sm:py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
+                    <div className="space-y-0.5">
+                        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-emerald-900/65">
+                            Connect &amp; Inquiries
+                        </p>
+                        <p className="text-xs text-slate-600">
+                            Have questions or need enterprise onboarding? Reach out to our advisory team directly.
+                        </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium text-slate-700">
+                        <a
+                            href="mailto:sayan@redswitchglobal.com"
+                            className="inline-flex items-center gap-1.5 hover:text-emerald-700 transition-colors">
+                            <svg className="w-3.5 h-3.5 text-emerald-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <span>sayan@redswitchglobal.com</span>
+                        </a>
+                        <a
+                            href="tel:+919831076943"
+                            className="inline-flex items-center gap-1.5 hover:text-emerald-700 transition-colors">
+                            <svg className="w-3.5 h-3.5 text-emerald-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                            <span>+91 98310 76943</span>
+                        </a>
+                    </div>
+                </div>
                 <p className="text-xs text-slate-500 sm:w-full sm:text-center">
                     © {new Date().getFullYear()} GreenLedger. All rights reserved.
                 </p>

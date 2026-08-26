@@ -9,84 +9,175 @@ import { Card, CardHeader, CardBody } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
-import type { BrsrWasteDisclosurePayload } from "@/lib/brsr/types";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import type {
+    BRSRWasteDisclosurePayload,
+    BRSRWasteCategoryBreakdown,
+    BRSRWasteRecoveryInput,
+    BRSRWasteDisposalInput,
+} from "@/lib/brsr/types";
+
+// Standard category descriptors aligned with BRSR Principle 6 (A through H)
+const WASTE_CATEGORIES = [
+    { key: "plastic_waste_tonne", code: "A", label: "Plastic Waste", isHazardous: true },
+    { key: "ewaste_tonne", code: "B", label: "E-Waste", isHazardous: true },
+    { key: "bio_medical_waste_tonne", code: "C", label: "Bio-Medical Waste", isHazardous: true },
+    { key: "construction_and_demolition_waste_tonne", code: "D", label: "Construction & Demolition", isHazardous: true },
+    { key: "battery_waste_tonne", code: "E", label: "Battery Waste", isHazardous: true },
+    { key: "radioactive_waste_tonne", code: "F", label: "Radioactive Waste", isHazardous: true },
+    { key: "other_hazardous_waste_tonne", code: "G", label: "Other Hazardous Waste", isHazardous: true },
+    { key: "fly_ash_tonne", code: "H.i", label: "Fly Ash Waste", isHazardous: false },
+    { key: "non_hazardous_solid_waste_tonne", code: "H.ii", label: "Non-Hazardous Solid Waste", isHazardous: false },
+] as const;
+
+// Initial demonstration payload matching backend schema
+const INITIAL_PAYLOAD: BRSRWasteDisclosurePayload = {
+    financial_year_label: "FY 2024-25",
+    turnover_inr: 50000000.0,
+    physical_output_tonnes: 1000.0,
+    physical_output_unit: "tonnes",
+
+    // Root-level fields (required for backend validation)
+    plastic_waste_tonne: 10.5,
+    ewaste_tonne: 2.0,
+    bio_medical_waste_tonne: 1.5,
+    construction_and_demolition_waste_tonne: 50.0,
+    battery_waste_tonne: 0.8,
+    radioactive_waste_tonne: 0.0,
+    other_hazardous_waste_tonne: 5.2,
+    fly_ash_tonne: 100.0,
+    non_hazardous_solid_waste_tonne: 30.0,
+    recycled_tonne: 100.0,
+    reused_tonne: 50.0,
+    other_recovery_tonne: 17.1,
+    incineration_tonne: 10.0,
+    landfilling_tonne: 20.0,
+    other_disposal_tonne: 2.9,
+
+    // Nested objects (for 9-category breakdown)
+    generation: {
+        plastic_waste_tonne: 10.5,
+        ewaste_tonne: 2.0,
+        bio_medical_waste_tonne: 1.5,
+        construction_and_demolition_waste_tonne: 50.0,
+        battery_waste_tonne: 0.8,
+        radioactive_waste_tonne: 0.0,
+        other_hazardous_waste_tonne: 5.2,
+        fly_ash_tonne: 100.0,
+        non_hazardous_solid_waste_tonne: 30.0,
+    },
+    recovery: {
+        plastic_waste_tonne: 8.0,
+        ewaste_tonne: 1.5,
+        bio_medical_waste_tonne: 0.0,
+        construction_and_demolition_waste_tonne: 40.0,
+        battery_waste_tonne: 0.6,
+        radioactive_waste_tonne: 0.0,
+        other_hazardous_waste_tonne: 2.0,
+        fly_ash_tonne: 90.0,
+        non_hazardous_solid_waste_tonne: 25.0,
+        recycled_tonne: 100.0,
+        reused_tonne: 50.0,
+        other_recovery_tonne: 17.1,
+    },
+    disposal: {
+        plastic_waste_tonne: 2.5,
+        ewaste_tonne: 0.5,
+        bio_medical_waste_tonne: 1.5,
+        construction_and_demolition_waste_tonne: 10.0,
+        battery_waste_tonne: 0.2,
+        radioactive_waste_tonne: 0.0,
+        other_hazardous_waste_tonne: 3.2,
+        fly_ash_tonne: 10.0,
+        non_hazardous_solid_waste_tonne: 5.0,
+        incineration_tonne: 10.0,
+        landfilling_tonne: 20.0,
+        other_disposal_tonne: 2.9,
+    },
+};
+
+const createEmptyBreakdown = (): BRSRWasteCategoryBreakdown => ({
+    plastic_waste_tonne: 0,
+    ewaste_tonne: 0,
+    bio_medical_waste_tonne: 0,
+    construction_and_demolition_waste_tonne: 0,
+    battery_waste_tonne: 0,
+    radioactive_waste_tonne: 0,
+    other_hazardous_waste_tonne: 0,
+    fly_ash_tonne: 0,
+    non_hazardous_solid_waste_tonne: 0,
+});
 
 export default function BrsrWastePage() {
-    // General parameters
-    const [fyLabel, setFyLabel] = useState("");
-    const [turnover, setTurnover] = useState("");
-    const [physicalOutput, setPhysicalOutput] = useState("");
-    const [physicalOutputUnit, setPhysicalOutputUnit] = useState("");
+    // Form Input States
+    const [fyLabel, setFyLabel] = useState("FY 2024-25");
+    const [turnover, setTurnover] = useState("50000000");
+    const [physicalOutput, setPhysicalOutput] = useState("1000");
+    const [physicalOutputUnit, setPhysicalOutputUnit] = useState("tonnes");
 
-    // Waste generation
-    const [plastic, setPlastic] = useState("");
-    const [ewaste, setEwaste] = useState("");
-    const [bioMedical, setBioMedical] = useState("");
-    const [construction, setConstruction] = useState("");
-    const [battery, setBattery] = useState("");
-    const [radioactive, setRadioactive] = useState("");
-    const [otherHazardous, setOtherHazardous] = useState("");
-    const [flyAsh, setFlyAsh] = useState("");
-    const [nonHazardousSolid, setNonHazardousSolid] = useState("");
+    // Symmetric 9-category stream states
+    const [genInputs, setGenInputs] = useState<BRSRWasteCategoryBreakdown>(INITIAL_PAYLOAD.generation);
+    const [recInputs, setRecInputs] = useState<BRSRWasteRecoveryInput>(INITIAL_PAYLOAD.recovery);
+    const [dispInputs, setDispInputs] = useState<BRSRWasteDisposalInput>(INITIAL_PAYLOAD.disposal);
 
-    // Waste recovery
-    const [recycled, setRecycled] = useState("");
-    const [reused, setReused] = useState("");
-    const [otherRecovery, setOtherRecovery] = useState("");
+    // Active payload for API calculation
+    const [activePayload, setActivePayload] = useState<BRSRWasteDisclosurePayload>(INITIAL_PAYLOAD);
 
-    // Waste disposal
-    const [incineration, setIncineration] = useState("");
-    const [landfilling, setLandfilling] = useState("");
-    const [otherDisposal, setOtherDisposal] = useState("");
-
-    // Active payload initialized with demonstration data
-    const [activePayload, setActivePayload] = useState<BrsrWasteDisclosurePayload>({
-        financial_year_label: "FY 2025-26",
-        turnover_inr: 1000000.0,
-        physical_output_tonnes: 100.0,
-        physical_output_unit: "tcs",
-        plastic_waste_tonne: 10.0,
-        ewaste_tonne: 5.0,
-        bio_medical_waste_tonne: 2.0,
-        construction_and_demolition_waste_tonne: 1.0,
-        battery_waste_tonne: 0.5,
-        radioactive_waste_tonne: 0.0,
-        other_hazardous_waste_tonne: 1.5,
-        fly_ash_tonne: 15.0,
-        non_hazardous_solid_waste_tonne: 5.0,
-        recycled_tonne: 8.0,
-        reused_tonne: 4.0,
-        other_recovery_tonne: 2.0,
-        incineration_tonne: 3.0,
-        landfilling_tonne: 2.0,
-        other_disposal_tonne: 1.0,
-    });
+    // Drawer / Tab Controls
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+    const [activeInputTab, setActiveInputTab] = useState<"general" | "generation" | "recovery" | "disposal">("generation");
 
     const { data, isPending, isError, error } = useBrsrWasteDisclosure(activePayload);
-    const [isDownloadOpen, setIsDownloadOpen] = useState(false);
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+    // Handlers
+    const handleGenFieldChange = (key: keyof BRSRWasteCategoryBreakdown, value: string) => {
+        setGenInputs((prev) => ({ ...prev, [key]: Number(value) || 0 }));
+    };
+
+    const handleRecFieldChange = (key: keyof BRSRWasteRecoveryInput, value: string) => {
+        setRecInputs((prev) => ({ ...prev, [key]: Number(value) || 0 }));
+    };
+
+    const handleDispFieldChange = (key: keyof BRSRWasteDisposalInput, value: string) => {
+        setDispInputs((prev) => ({ ...prev, [key]: Number(value) || 0 }));
+    };
 
     const handleGenerate = () => {
         setActivePayload({
-            financial_year_label: fyLabel || "FY 2025-26",
+            financial_year_label: fyLabel.trim() || "FY 2024-25",
             turnover_inr: Number(turnover) || 0,
             physical_output_tonnes: Number(physicalOutput) || 0,
-            physical_output_unit: physicalOutputUnit || undefined,
-            plastic_waste_tonne: Number(plastic) || 0,
-            ewaste_tonne: Number(ewaste) || 0,
-            bio_medical_waste_tonne: Number(bioMedical) || 0,
-            construction_and_demolition_waste_tonne: Number(construction) || 0,
-            battery_waste_tonne: Number(battery) || 0,
-            radioactive_waste_tonne: Number(radioactive) || 0,
-            other_hazardous_waste_tonne: Number(otherHazardous) || 0,
-            fly_ash_tonne: Number(flyAsh) || 0,
-            non_hazardous_solid_waste_tonne: Number(nonHazardousSolid) || 0,
-            recycled_tonne: Number(recycled) || 0,
-            reused_tonne: Number(reused) || 0,
-            other_recovery_tonne: Number(otherRecovery) || 0,
-            incineration_tonne: Number(incineration) || 0,
-            landfilling_tonne: Number(landfilling) || 0,
-            other_disposal_tonne: Number(otherDisposal) || 0,
+            physical_output_unit: physicalOutputUnit.trim() || "tonnes",
+
+            // Root-level fields (required for backend validation)
+            plastic_waste_tonne: genInputs.plastic_waste_tonne ?? 0,
+            ewaste_tonne: genInputs.ewaste_tonne ?? 0,
+            bio_medical_waste_tonne: genInputs.bio_medical_waste_tonne ?? 0,
+            construction_and_demolition_waste_tonne: genInputs.construction_and_demolition_waste_tonne ?? 0,
+            battery_waste_tonne: genInputs.battery_waste_tonne ?? 0,
+            radioactive_waste_tonne: genInputs.radioactive_waste_tonne ?? 0,
+            other_hazardous_waste_tonne: genInputs.other_hazardous_waste_tonne ?? 0,
+            fly_ash_tonne: genInputs.fly_ash_tonne ?? 0,
+            non_hazardous_solid_waste_tonne: genInputs.non_hazardous_solid_waste_tonne ?? 0,
+            recycled_tonne: recInputs.recycled_tonne ?? 0,
+            reused_tonne: recInputs.reused_tonne ?? 0,
+            other_recovery_tonne: recInputs.other_recovery_tonne ?? 0,
+            incineration_tonne: dispInputs.incineration_tonne ?? 0,
+            landfilling_tonne: dispInputs.landfilling_tonne ?? 0,
+            other_disposal_tonne: dispInputs.other_disposal_tonne ?? 0,
+
+            // Nested objects
+            generation: genInputs,
+            recovery: recInputs,
+            disposal: dispInputs,
         });
     };
 
@@ -95,26 +186,17 @@ export default function BrsrWastePage() {
         setTurnover("");
         setPhysicalOutput("");
         setPhysicalOutputUnit("");
-        setPlastic("");
-        setEwaste("");
-        setBioMedical("");
-        setConstruction("");
-        setBattery("");
-        setRadioactive("");
-        setOtherHazardous("");
-        setFlyAsh("");
-        setNonHazardousSolid("");
-        setRecycled("");
-        setReused("");
-        setOtherRecovery("");
-        setIncineration("");
-        setLandfilling("");
-        setOtherDisposal("");
+
+        const empty = createEmptyBreakdown();
+        setGenInputs(empty);
+        setRecInputs({ ...empty, recycled_tonne: 0, reused_tonne: 0, other_recovery_tonne: 0 });
+        setDispInputs({ ...empty, incineration_tonne: 0, landfilling_tonne: 0, other_disposal_tonne: 0 });
 
         setActivePayload({
             financial_year_label: "",
             turnover_inr: 0,
             physical_output_tonnes: 0,
+
             plastic_waste_tonne: 0,
             ewaste_tonne: 0,
             bio_medical_waste_tonne: 0,
@@ -122,21 +204,27 @@ export default function BrsrWastePage() {
             battery_waste_tonne: 0,
             radioactive_waste_tonne: 0,
             other_hazardous_waste_tonne: 0,
+            fly_ash_tonne: 0,
+            non_hazardous_solid_waste_tonne: 0,
             recycled_tonne: 0,
             reused_tonne: 0,
             other_recovery_tonne: 0,
             incineration_tonne: 0,
             landfilling_tonne: 0,
             other_disposal_tonne: 0,
+
+            generation: empty,
+            recovery: { ...empty, recycled_tonne: 0, reused_tonne: 0, other_recovery_tonne: 0 },
+            disposal: { ...empty, incineration_tonne: 0, landfilling_tonne: 0, other_disposal_tonne: 0 },
         });
     };
 
-    const handleDownloadReport = async (payload: BrsrWasteDisclosurePayload) => {
+    const handleDownloadReport = async (payload: BRSRWasteDisclosurePayload) => {
         const blob = await postBrsrWasteReport(payload);
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `brsr-waste-report-${(payload.financial_year_label || "2025").replace(/\s+/g, "_")}.xlsx`;
+        a.download = `brsr-waste-disclosure-report-${(payload.financial_year_label || "2024").replace(/\s+/g, "_")}.xlsx`;
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -146,7 +234,9 @@ export default function BrsrWastePage() {
     const formatTonne = (val: string | number | null | undefined) => {
         if (val === null || val === undefined) return "0.00";
         const num = Number(val);
-        return isNaN(num) ? "0.00" : num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        return isNaN(num)
+            ? "0.00"
+            : num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
     const { totals } = data || {};
@@ -157,8 +247,27 @@ export default function BrsrWastePage() {
     const recoveryRate = totalGen > 0 ? (totalRec / totalGen) * 100 : 0;
     const disposalRate = totalGen > 0 ? (totalDisp / totalGen) * 100 : 0;
 
+    // Subtotal for other non-hazardous waste (Fly ash + Solid waste)
+    const genFlyAsh = Number(totals?.generation?.fly_ash_tonne ?? totals?.fly_ash_tonne) || 0;
+    const genSolid = Number(totals?.generation?.non_hazardous_solid_waste_tonne ?? totals?.non_hazardous_solid_waste_tonne) || 0;
+    const genOtherNonHaz = totals?.generation?.other_non_hazardous_waste_tonne
+        ? Number(totals.generation.other_non_hazardous_waste_tonne)
+        : genFlyAsh + genSolid;
+
+    const recFlyAsh = Number(totals?.recovery?.fly_ash_tonne) || 0;
+    const recSolid = Number(totals?.recovery?.non_hazardous_solid_waste_tonne) || 0;
+    const recOtherNonHaz = totals?.recovery?.other_non_hazardous_waste_tonne
+        ? Number(totals.recovery.other_non_hazardous_waste_tonne)
+        : recFlyAsh + recSolid;
+
+    const dispFlyAsh = Number(totals?.disposal?.fly_ash_tonne) || 0;
+    const dispSolid = Number(totals?.disposal?.non_hazardous_solid_waste_tonne) || 0;
+    const dispOtherNonHaz = totals?.disposal?.other_non_hazardous_waste_tonne
+        ? Number(totals.disposal.other_non_hazardous_waste_tonne)
+        : dispFlyAsh + dispSolid;
+
     return (
-        <div className="space-y-8 max-w-7xl mx-auto animate-fade-up">
+        <div className="space-y-8 max-w-7xl mx-auto animate-fade-up font-sans">
             {/* Header Section */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-outline-variant pb-6">
                 <div className="space-y-2">
@@ -176,7 +285,7 @@ export default function BrsrWastePage() {
                         BRSR Waste Disclosure &amp; Management
                     </h1>
                     <p className="text-sm text-on-surface-variant">
-                        Principle 6 (Environmental Performance) waste generation, circular economy recovery, disposal & intensity metrics.
+                        Symmetric 9-category breakdown for waste generation, circular economy recovery, and final disposal in accordance with BRSR Principle 6.
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -192,272 +301,316 @@ export default function BrsrWastePage() {
                         onClick={() => setIsDownloadOpen(true)}
                         className="flex items-center gap-2 px-5 py-2.5 shadow-md">
                         <MaterialIcon name="download" size="sm" />
-                        <span>Download</span>
+                        <span>Download Report</span>
                     </Button>
                 </div>
             </div>
 
-            {/* Inputs & Parameters settings */}
+            {/* Inputs & Parameters Settings Drawer */}
             {isFilterOpen && (
-                <Card>
-                    <CardHeader tone="strip" className="py-2.5 bg-white">
+                <Card className="border border-outline-variant shadow-md">
+                    <CardHeader tone="strip" className="py-3 bg-slate-50 flex items-center justify-between border-b border-outline-variant/60">
                         <div className="flex items-center gap-2">
                             <MaterialIcon name="tune" size="sm" className="text-primary" />
                             <span className="font-sans text-body-sm font-bold text-on-surface">
-                                Waste Parameter Entry & Settings
+                                9-Category Waste Parameter Entry &amp; Configuration
                             </span>
+                        </div>
+                        {/* Tab Switcher for Controls */}
+                        <div className="flex items-center rounded-lg bg-slate-200/80 p-0.5 text-xs font-semibold">
+                            <button
+                                type="button"
+                                onClick={() => setActiveInputTab("general")}
+                                className={`px-2.5 py-1 rounded-md transition-all ${
+                                    activeInputTab === "general" ? "bg-white text-primary shadow-xs font-bold" : "text-slate-600 hover:text-slate-900"
+                                }`}>
+                                General
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setActiveInputTab("generation")}
+                                className={`px-2.5 py-1 rounded-md transition-all ${
+                                    activeInputTab === "generation" ? "bg-white text-blue-700 shadow-xs font-bold" : "text-slate-600 hover:text-slate-900"
+                                }`}>
+                                1. Generation
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setActiveInputTab("recovery")}
+                                className={`px-2.5 py-1 rounded-md transition-all ${
+                                    activeInputTab === "recovery" ? "bg-white text-emerald-700 shadow-xs font-bold" : "text-slate-600 hover:text-slate-900"
+                                }`}>
+                                2. Recovery
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setActiveInputTab("disposal")}
+                                className={`px-2.5 py-1 rounded-md transition-all ${
+                                    activeInputTab === "disposal" ? "bg-white text-amber-700 shadow-xs font-bold" : "text-slate-600 hover:text-slate-900"
+                                }`}>
+                                3. Disposal
+                            </button>
                         </div>
                     </CardHeader>
-                    <CardBody className="space-y-6">
-                        {/* General Parameters */}
-                        <div className="space-y-2">
-                            <span className="text-xs font-bold text-primary uppercase tracking-wider block">
-                                General Info
-                            </span>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                                <div className="space-y-1">
-                                    <label htmlFor="fy-lbl" className="text-xs font-semibold text-on-surface-variant block">
-                                        FY Label <span className="text-error">*</span>
-                                    </label>
-                                    <input
-                                        id="fy-lbl"
-                                        type="text"
-                                        placeholder="e.g. FY 2025-26"
-                                        value={fyLabel}
-                                        onChange={(e) => setFyLabel(e.target.value)}
-                                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-sans text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px]"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label htmlFor="turnover-in" className="text-xs font-semibold text-on-surface-variant block">
-                                        Turnover (INR) <span className="text-error">*</span>
-                                    </label>
-                                    <input
-                                        id="turnover-in"
-                                        type="number"
-                                        placeholder="e.g. 1000000"
-                                        value={turnover}
-                                        onChange={(e) => setTurnover(e.target.value)}
-                                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-sans text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px]"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label htmlFor="output-in" className="text-xs font-semibold text-on-surface-variant block">
-                                        Physical Output <span className="text-error">*</span>
-                                    </label>
-                                    <input
-                                        id="output-in"
-                                        type="number"
-                                        placeholder="e.g. 200"
-                                        value={physicalOutput}
-                                        onChange={(e) => setPhysicalOutput(e.target.value)}
-                                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-sans text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px]"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label htmlFor="physical-unit-in" className="text-xs font-semibold text-on-surface-variant block">
-                                        Output Unit
-                                    </label>
-                                    <input
-                                        id="physical-unit-in"
-                                        type="text"
-                                        placeholder="e.g. tonnes, pcs"
-                                        value={physicalOutputUnit}
-                                        onChange={(e) => setPhysicalOutputUnit(e.target.value)}
-                                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-sans text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px]"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Waste Generation */}
-                        <div className="border-t border-outline-variant/60 pt-4 space-y-2">
-                            <span className="text-xs font-bold text-primary uppercase tracking-wider block">
-                                Waste Generation (Tonnes)
-                            </span>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 gap-4">
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-on-surface-variant block">Plastic Waste</label>
-                                    <input
-                                        type="number"
-                                        placeholder="0.00"
-                                        value={plastic}
-                                        onChange={(e) => setPlastic(e.target.value)}
-                                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-sans text-body-md text-on-surface text-[12px]"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-on-surface-variant block">E-Waste</label>
-                                    <input
-                                        type="number"
-                                        placeholder="0.00"
-                                        value={ewaste}
-                                        onChange={(e) => setEwaste(e.target.value)}
-                                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-sans text-body-md text-on-surface text-[12px]"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-on-surface-variant block">Bio-Medical Waste</label>
-                                    <input
-                                        type="number"
-                                        placeholder="0.00"
-                                        value={bioMedical}
-                                        onChange={(e) => setBioMedical(e.target.value)}
-                                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-sans text-body-md text-on-surface text-[12px]"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-on-surface-variant block">Construction & Demolition</label>
-                                    <input
-                                        type="number"
-                                        placeholder="0.00"
-                                        value={construction}
-                                        onChange={(e) => setConstruction(e.target.value)}
-                                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-sans text-body-md text-on-surface text-[12px]"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-on-surface-variant block">Battery Waste</label>
-                                    <input
-                                        type="number"
-                                        placeholder="0.00"
-                                        value={battery}
-                                        onChange={(e) => setBattery(e.target.value)}
-                                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-sans text-body-md text-on-surface text-[12px]"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-on-surface-variant block">Radioactive Waste</label>
-                                    <input
-                                        type="number"
-                                        placeholder="0.00"
-                                        value={radioactive}
-                                        onChange={(e) => setRadioactive(e.target.value)}
-                                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-sans text-body-md text-on-surface text-[12px]"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-on-surface-variant block">Other Hazardous Waste</label>
-                                    <input
-                                        type="number"
-                                        placeholder="0.00"
-                                        value={otherHazardous}
-                                        onChange={(e) => setOtherHazardous(e.target.value)}
-                                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-sans text-body-md text-on-surface text-[12px]"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-on-surface-variant block">Fly Ash</label>
-                                    <input
-                                        type="number"
-                                        placeholder="0.00"
-                                        value={flyAsh}
-                                        onChange={(e) => setFlyAsh(e.target.value)}
-                                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-sans text-body-md text-on-surface text-[12px]"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-on-surface-variant block">Non-Hazardous Solid Waste</label>
-                                    <input
-                                        type="number"
-                                        placeholder="0.00"
-                                        value={nonHazardousSolid}
-                                        onChange={(e) => setNonHazardousSolid(e.target.value)}
-                                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-sans text-body-md text-on-surface text-[12px]"
-                                    />
+                    <CardBody className="space-y-6 p-6">
+                        {/* Tab 1: General Info */}
+                        {activeInputTab === "general" && (
+                            <div className="space-y-3">
+                                <span className="text-xs font-bold text-primary uppercase tracking-wider block">
+                                    General Parameters &amp; Intensities Context
+                                </span>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div className="space-y-1">
+                                        <label htmlFor="fy-lbl" className="text-xs font-semibold text-on-surface-variant block">
+                                            FY Label <span className="text-error">*</span>
+                                        </label>
+                                        <input
+                                            id="fy-lbl"
+                                            type="text"
+                                            placeholder="e.g. FY 2024-25"
+                                            value={fyLabel}
+                                            onChange={(e) => setFyLabel(e.target.value)}
+                                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-sans text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label htmlFor="turnover-in" className="text-xs font-semibold text-on-surface-variant block">
+                                            Turnover (INR) <span className="text-error">*</span>
+                                        </label>
+                                        <input
+                                            id="turnover-in"
+                                            type="number"
+                                            placeholder="e.g. 50000000"
+                                            value={turnover}
+                                            onChange={(e) => setTurnover(e.target.value)}
+                                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-mono text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label htmlFor="output-in" className="text-xs font-semibold text-on-surface-variant block">
+                                            Physical Output <span className="text-error">*</span>
+                                        </label>
+                                        <input
+                                            id="output-in"
+                                            type="number"
+                                            placeholder="e.g. 1000"
+                                            value={physicalOutput}
+                                            onChange={(e) => setPhysicalOutput(e.target.value)}
+                                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-mono text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label htmlFor="physical-unit-in" className="text-xs font-semibold text-on-surface-variant block">
+                                            Output Unit
+                                        </label>
+                                        <input
+                                            id="physical-unit-in"
+                                            type="text"
+                                            placeholder="e.g. tonnes"
+                                            value={physicalOutputUnit}
+                                            onChange={(e) => setPhysicalOutputUnit(e.target.value)}
+                                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-sans text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
-                        {/* Recovery & Disposal Inputs */}
-                        <div className="border-t border-outline-variant/60 pt-4 space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Recovery */}
-                                <div className="space-y-2">
-                                    <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider block">
-                                        Waste Recovery (Tonnes)
+                        {/* Tab 2: Waste Generation (9 Categories) */}
+                        {activeInputTab === "generation" && (
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs font-bold text-blue-700 uppercase tracking-wider block">
+                                        1. Waste Generation — 9 Categories (Tonnes)
                                     </span>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <div className="space-y-1">
-                                            <label className="text-[11px] font-semibold text-on-surface-variant block">Recycled</label>
+                                    <span className="text-[11px] text-slate-500 font-mono">
+                                        Total: {Object.values(genInputs).reduce((a, b) => a + (Number(b) || 0), 0).toFixed(2)} t
+                                    </span>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
+                                    {WASTE_CATEGORIES.map((cat) => (
+                                        <div key={cat.key} className="space-y-1 bg-slate-50/70 p-2.5 rounded-lg border border-slate-200/80">
+                                            <label className="text-xs font-semibold text-slate-800 flex items-center justify-between">
+                                                <span>{cat.label}</span>
+                                                <span className="font-mono text-[10px] text-slate-400 font-bold">({cat.code})</span>
+                                            </label>
                                             <input
                                                 type="number"
+                                                step="0.01"
                                                 placeholder="0.00"
-                                                value={recycled}
-                                                onChange={(e) => setRecycled(e.target.value)}
-                                                className="w-full rounded-lg border border-outline-variant bg-white px-2 py-1 font-sans text-body-md text-on-surface text-[12px]"
+                                                value={genInputs[cat.key] || ""}
+                                                onChange={(e) => handleGenFieldChange(cat.key, e.target.value)}
+                                                className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface focus:outline-none focus:border-primary"
                                             />
                                         </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[11px] font-semibold text-on-surface-variant block">Reused</label>
-                                            <input
-                                                type="number"
-                                                placeholder="0.00"
-                                                value={reused}
-                                                onChange={(e) => setReused(e.target.value)}
-                                                className="w-full rounded-lg border border-outline-variant bg-white px-2 py-1 font-sans text-body-md text-on-surface text-[12px]"
-                                            />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[11px] font-semibold text-on-surface-variant block">Other Recovery</label>
-                                            <input
-                                                type="number"
-                                                placeholder="0.00"
-                                                value={otherRecovery}
-                                                onChange={(e) => setOtherRecovery(e.target.value)}
-                                                className="w-full rounded-lg border border-outline-variant bg-white px-2 py-1 font-sans text-body-md text-on-surface text-[12px]"
-                                            />
-                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Tab 3: Waste Recovery (9 Categories + Methods) */}
+                        {activeInputTab === "recovery" && (
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider block">
+                                        2. Waste Recovery — 9 Categories &amp; Methods (Tonnes)
+                                    </span>
+                                </div>
+
+                                {/* Category Streams in Recovery */}
+                                <div className="space-y-2">
+                                    <span className="text-[11px] font-bold text-slate-600 uppercase">
+                                        Recovery by Category Stream
+                                    </span>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
+                                        {WASTE_CATEGORIES.map((cat) => (
+                                            <div key={cat.key} className="space-y-1 bg-emerald-50/30 p-2.5 rounded-lg border border-emerald-200/60">
+                                                <label className="text-xs font-semibold text-slate-800 flex items-center justify-between">
+                                                    <span>{cat.label}</span>
+                                                    <span className="font-mono text-[10px] text-emerald-700 font-bold">({cat.code})</span>
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    placeholder="0.00"
+                                                    value={recInputs[cat.key] || ""}
+                                                    onChange={(e) => handleRecFieldChange(cat.key, e.target.value)}
+                                                    className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface focus:outline-none focus:border-emerald-600"
+                                                />
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
 
-                                {/* Disposal */}
-                                <div className="space-y-2">
-                                    <span className="text-xs font-bold text-amber-600 uppercase tracking-wider block">
-                                        Waste Disposal (Tonnes)
+                                {/* Recovery by Method */}
+                                <div className="border-t border-slate-200 pt-3 space-y-2">
+                                    <span className="text-[11px] font-bold text-slate-600 uppercase">
+                                        Recovery by Destination Method
                                     </span>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <div className="space-y-1">
-                                            <label className="text-[11px] font-semibold text-on-surface-variant block">Incineration</label>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <div className="space-y-1 bg-white p-2.5 rounded-lg border border-slate-200">
+                                            <label className="text-xs font-semibold text-slate-800 block">Recycled (t)</label>
                                             <input
                                                 type="number"
+                                                step="0.01"
                                                 placeholder="0.00"
-                                                value={incineration}
-                                                onChange={(e) => setIncineration(e.target.value)}
-                                                className="w-full rounded-lg border border-outline-variant bg-white px-2 py-1 font-sans text-body-md text-on-surface text-[12px]"
+                                                value={recInputs.recycled_tonne || ""}
+                                                onChange={(e) => handleRecFieldChange("recycled_tonne", e.target.value)}
+                                                className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface"
                                             />
                                         </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[11px] font-semibold text-on-surface-variant block">Landfilling</label>
+                                        <div className="space-y-1 bg-white p-2.5 rounded-lg border border-slate-200">
+                                            <label className="text-xs font-semibold text-slate-800 block">Reused (t)</label>
                                             <input
                                                 type="number"
+                                                step="0.01"
                                                 placeholder="0.00"
-                                                value={landfilling}
-                                                onChange={(e) => setLandfilling(e.target.value)}
-                                                className="w-full rounded-lg border border-outline-variant bg-white px-2 py-1 font-sans text-body-md text-on-surface text-[12px]"
+                                                value={recInputs.reused_tonne || ""}
+                                                onChange={(e) => handleRecFieldChange("reused_tonne", e.target.value)}
+                                                className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface"
                                             />
                                         </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[11px] font-semibold text-on-surface-variant block">Other Disposal</label>
+                                        <div className="space-y-1 bg-white p-2.5 rounded-lg border border-slate-200">
+                                            <label className="text-xs font-semibold text-slate-800 block">Other Recovery Operations (t)</label>
                                             <input
                                                 type="number"
+                                                step="0.01"
                                                 placeholder="0.00"
-                                                value={otherDisposal}
-                                                onChange={(e) => setOtherDisposal(e.target.value)}
-                                                className="w-full rounded-lg border border-outline-variant bg-white px-2 py-1 font-sans text-body-md text-on-surface text-[12px]"
+                                                value={recInputs.other_recovery_tonne || ""}
+                                                onChange={(e) => handleRecFieldChange("other_recovery_tonne", e.target.value)}
+                                                className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface"
                                             />
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
-                        {/* Document Upload & Verification Source Section */}
+                        {/* Tab 4: Waste Disposal (9 Categories + Methods) */}
+                        {activeInputTab === "disposal" && (
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs font-bold text-amber-700 uppercase tracking-wider block">
+                                        3. Waste Disposal — 9 Categories &amp; Methods (Tonnes)
+                                    </span>
+                                </div>
+
+                                {/* Category Streams in Disposal */}
+                                <div className="space-y-2">
+                                    <span className="text-[11px] font-bold text-slate-600 uppercase">
+                                        Disposal by Category Stream
+                                    </span>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
+                                        {WASTE_CATEGORIES.map((cat) => (
+                                            <div key={cat.key} className="space-y-1 bg-amber-50/30 p-2.5 rounded-lg border border-amber-200/60">
+                                                <label className="text-xs font-semibold text-slate-800 flex items-center justify-between">
+                                                    <span>{cat.label}</span>
+                                                    <span className="font-mono text-[10px] text-amber-700 font-bold">({cat.code})</span>
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    placeholder="0.00"
+                                                    value={dispInputs[cat.key] || ""}
+                                                    onChange={(e) => handleDispFieldChange(cat.key, e.target.value)}
+                                                    className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface focus:outline-none focus:border-amber-600"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Disposal by Method */}
+                                <div className="border-t border-slate-200 pt-3 space-y-2">
+                                    <span className="text-[11px] font-bold text-slate-600 uppercase">
+                                        Disposal by Treatment Method
+                                    </span>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <div className="space-y-1 bg-white p-2.5 rounded-lg border border-slate-200">
+                                            <label className="text-xs font-semibold text-slate-800 block">Incineration (t)</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                placeholder="0.00"
+                                                value={dispInputs.incineration_tonne || ""}
+                                                onChange={(e) => handleDispFieldChange("incineration_tonne", e.target.value)}
+                                                className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface"
+                                            />
+                                        </div>
+                                        <div className="space-y-1 bg-white p-2.5 rounded-lg border border-slate-200">
+                                            <label className="text-xs font-semibold text-slate-800 block">Landfilling (t)</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                placeholder="0.00"
+                                                value={dispInputs.landfilling_tonne || ""}
+                                                onChange={(e) => handleDispFieldChange("landfilling_tonne", e.target.value)}
+                                                className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface"
+                                            />
+                                        </div>
+                                        <div className="space-y-1 bg-white p-2.5 rounded-lg border border-slate-200">
+                                            <label className="text-xs font-semibold text-slate-800 block">Other Disposal Operations (t)</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                placeholder="0.00"
+                                                value={dispInputs.other_disposal_tonne || ""}
+                                                onChange={(e) => handleDispFieldChange("other_disposal_tonne", e.target.value)}
+                                                className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Document Upload Section */}
                         <BrsrDocumentUploadSection />
 
+                        {/* Action Buttons */}
                         <div className="flex justify-end gap-2 border-t border-outline-variant/60 pt-4">
                             <Button variant="secondary" size="md" onClick={handleReset} disabled={isPending}>
-                                Reset
+                                Reset Form
                             </Button>
                             <Button
                                 variant="primary"
@@ -466,14 +619,14 @@ export default function BrsrWastePage() {
                                 disabled={isPending}
                                 className="flex items-center gap-2">
                                 <MaterialIcon name="refresh" size="sm" />
-                                Generate Waste Metrics
+                                Generate 9-Category Metrics
                             </Button>
                         </div>
                     </CardBody>
                 </Card>
             )}
 
-            {/* Content Loading State */}
+            {/* Computation Loading & Error States */}
             {!data && !isPending && !isError ? (
                 <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-8 text-center text-on-surface-variant shadow-lg backdrop-blur-md max-w-4xl mx-auto mt-6">
                     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -483,13 +636,15 @@ export default function BrsrWastePage() {
                         Configure Waste Disclosure Parameters
                     </h3>
                     <p className="mt-2 text-body-md text-on-surface-variant max-w-md mx-auto">
-                        Please enter the Financial Year, Turnover, and waste quantities in the controls panel above, then click Generate Waste Metrics to view full audit data.
+                        Enter the Financial Year, Turnover, and 9-category waste streams in the controls panel above, then click Generate 9-Category Metrics.
                     </p>
                 </div>
             ) : isPending ? (
                 <div className="flex h-48 flex-col items-center justify-center gap-2">
                     <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                    <p className="font-mono text-label-md text-on-surface-variant animate-pulse">Calculating waste metrics...</p>
+                    <p className="font-mono text-label-md text-on-surface-variant animate-pulse">
+                        Calculating 9-category waste metrics...
+                    </p>
                 </div>
             ) : isError ? (
                 <div className="rounded-2xl border border-error/20 bg-error-container/10 p-6 text-center text-error">
@@ -521,7 +676,7 @@ export default function BrsrWastePage() {
                                             <span className="text-xs font-sans text-on-surface-variant">tonnes</span>
                                         </div>
                                         <p className="text-[11px] text-on-surface-variant mt-1">
-                                            Hazardous & non-hazardous streams
+                                            Section Total (A through H)
                                         </p>
                                     </div>
                                 </CardBody>
@@ -545,7 +700,7 @@ export default function BrsrWastePage() {
                                             </span>
                                             <span className="text-xs font-sans text-on-surface-variant">tonnes</span>
                                         </div>
-                                        <p className="text-[11px] text-on-surface-variant mt-1">
+                                        <p className="text-[11px] text-on-surface-variant mt-1 font-semibold text-emerald-700">
                                             {recoveryRate.toFixed(1)}% Circular Recovery Rate
                                         </p>
                                     </div>
@@ -570,8 +725,8 @@ export default function BrsrWastePage() {
                                             </span>
                                             <span className="text-xs font-sans text-on-surface-variant">tonnes</span>
                                         </div>
-                                        <p className="text-[11px] text-on-surface-variant mt-1">
-                                            {disposalRate.toFixed(1)}% Landfilled / Incinerated
+                                        <p className="text-[11px] text-on-surface-variant mt-1 font-semibold text-amber-700">
+                                            {disposalRate.toFixed(1)}% Final Treatment Rate
                                         </p>
                                     </div>
                                 </CardBody>
@@ -582,7 +737,7 @@ export default function BrsrWastePage() {
                                 <CardBody className="flex flex-col justify-between h-full p-card-padding">
                                     <div className="flex items-start justify-between gap-2 mb-2">
                                         <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
-                                            Waste Intensity / INR
+                                            Waste Intensity / Turnover
                                         </span>
                                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
                                             <MaterialIcon name="trending_up" size="sm" />
@@ -593,130 +748,197 @@ export default function BrsrWastePage() {
                                             {Number(totals.waste_intensity_per_inr).toFixed(8)}
                                         </div>
                                         <p className="text-[11px] text-on-surface-variant mt-1">
-                                            tonnes per ₹{Number(data.turnover_inr).toLocaleString()} turnover
+                                            tonnes / ₹ turnover ({formatTonne(totals.waste_intensity_per_physical_output)} t/output)
                                         </p>
                                     </div>
                                 </CardBody>
                             </Card>
                         </div>
 
-                        {/* Generation Breakdown Grid (Hazardous vs Non-Hazardous) */}
+                        {/* Symmetric 9-Category Master Comparison Table */}
                         <Card>
                             <CardHeader tone="flat" className="flex-wrap items-center justify-between gap-2">
                                 <div className="flex items-center gap-2.5">
-                                    <MaterialIcon name="delete_sweep" size="sm" className="text-red-500" />
+                                    <MaterialIcon name="table_chart" size="sm" className="text-primary" />
                                     <div>
                                         <h3 className="text-headline-sm font-semibold text-primary">
-                                            Waste Generation Streams Breakdown
+                                            Symmetric 9-Category Waste Balance Table
                                         </h3>
                                         <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
-                                            Hazardous & Non-Hazardous waste generation volumes (tonnes)
+                                            BRSR Standard Categories (A through H): Generation, Recovery, and Disposal streams (tonnes)
                                         </p>
                                     </div>
                                 </div>
-                                <Badge variant="active" size="md">
-                                    {formatTonne(totals.total_waste_tonne)} tonnes Total
-                                </Badge>
-                            </CardHeader>
-                            <CardBody className="p-card-padding space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* Hazardous Waste Stream */}
-                                    <div className="space-y-4">
-                                        <span className="text-xs font-bold text-red-600 uppercase tracking-wider block">
-                                            Hazardous Waste Streams
-                                        </span>
-                                        <WasteStreamRow label="Plastic Waste" val={totals.plastic_waste_tonne} total={totalGen} color="#ef4444" />
-                                        <WasteStreamRow label="E-Waste" val={totals.ewaste_tonne} total={totalGen} color="#f97316" />
-                                        <WasteStreamRow label="Bio-Medical Waste" val={totals.bio_medical_waste_tonne} total={totalGen} color="#eab308" />
-                                        <WasteStreamRow label="Construction & Demolition" val={totals.construction_and_demolition_waste_tonne} total={totalGen} color="#84cc16" />
-                                        <WasteStreamRow label="Battery Waste" val={totals.battery_waste_tonne} total={totalGen} color="#06b6d4" />
-                                        <WasteStreamRow label="Radioactive Waste" val={totals.radioactive_waste_tonne} total={totalGen} color="#8b5cf6" />
-                                        <WasteStreamRow label="Other Hazardous Waste" val={totals.other_hazardous_waste_tonne} total={totalGen} color="#ec4899" />
-                                    </div>
-
-                                    {/* Non-Hazardous Waste Stream */}
-                                    <div className="space-y-4">
-                                        <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider block">
-                                            Non-Hazardous Waste Streams
-                                        </span>
-                                        <WasteStreamRow label="Fly Ash Waste" val={totals.fly_ash_tonne} total={totalGen} color="#10b981" />
-                                        <WasteStreamRow label="Non-Hazardous Solid Waste" val={totals.non_hazardous_solid_waste_tonne} total={totalGen} color="#14b8a6" />
-                                        <WasteStreamRow label="Other Non-Hazardous Waste" val={totals.other_non_hazardous_waste_tonne} total={totalGen} color="#64748b" />
-
-                                        <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 mt-6">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-sm font-bold text-primary">Total Waste Generation</span>
-                                                <span className="font-mono text-base font-bold text-primary">
-                                                    {formatTonne(totals.total_waste_tonne)} <span className="text-xs font-sans font-normal text-on-surface-variant">t</span>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div className="flex items-center gap-2">
+                                    <Badge variant="active" size="md">
+                                        {formatTonne(totals.total_waste_tonne)} t Generated
+                                    </Badge>
                                 </div>
+                            </CardHeader>
+                            <CardBody className="p-0 overflow-x-auto">
+                                <Table className="min-w-[760px]">
+                                    <TableHeader className="bg-slate-50 border-b border-slate-200">
+                                        <TableRow className="hover:bg-transparent">
+                                            <TableHead className="py-3 pl-6 font-semibold text-xs text-slate-700">Code</TableHead>
+                                            <TableHead className="py-3 font-semibold text-xs text-slate-700">Category Parameter</TableHead>
+                                            <TableHead className="py-3 font-semibold text-xs text-slate-700">Stream Type</TableHead>
+                                            <TableHead className="py-3 font-semibold text-xs text-right text-blue-700">Generated (t)</TableHead>
+                                            <TableHead className="py-3 font-semibold text-xs text-right text-emerald-700">Recovered (t)</TableHead>
+                                            <TableHead className="py-3 font-semibold text-xs text-right text-amber-700">Disposed (t)</TableHead>
+                                            <TableHead className="py-3 pr-6 font-semibold text-xs text-right text-slate-700">Recovery Rate</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody className="divide-y divide-slate-100">
+                                        {WASTE_CATEGORIES.map((cat) => {
+                                            const genVal = Number(totals.generation?.[cat.key] ?? totals[cat.key]) || 0;
+                                            const recVal = Number(totals.recovery?.[cat.key]) || 0;
+                                            const dispVal = Number(totals.disposal?.[cat.key]) || 0;
+                                            const catRecRate = genVal > 0 ? (recVal / genVal) * 100 : 0;
+
+                                            return (
+                                                <TableRow key={cat.key} className="hover:bg-slate-50/80 transition-colors">
+                                                    <TableCell className="pl-6 py-3 font-mono text-xs font-bold text-slate-500">
+                                                        {cat.code}
+                                                    </TableCell>
+                                                    <TableCell className="py-3 font-medium text-xs text-slate-900">
+                                                        {cat.label}
+                                                    </TableCell>
+                                                    <TableCell className="py-3">
+                                                        {cat.isHazardous ? (
+                                                            <span className="inline-flex items-center gap-1 rounded bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-700 border border-rose-200">
+                                                                Hazardous
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
+                                                                Non-Hazardous
+                                                            </span>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="py-3 font-mono text-xs text-right font-semibold text-slate-800">
+                                                        {formatTonne(genVal)}
+                                                    </TableCell>
+                                                    <TableCell className="py-3 font-mono text-xs text-right font-semibold text-emerald-700">
+                                                        {formatTonne(recVal)}
+                                                    </TableCell>
+                                                    <TableCell className="py-3 font-mono text-xs text-right font-semibold text-amber-700">
+                                                        {formatTonne(dispVal)}
+                                                    </TableCell>
+                                                    <TableCell className="pr-6 py-3 font-mono text-xs text-right text-slate-600">
+                                                        {genVal > 0 ? `${catRecRate.toFixed(1)}%` : "—"}
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+
+                                        {/* Subtotal Category H (Other Non-Hazardous Waste = Fly ash + Solid waste) */}
+                                        <TableRow className="bg-slate-50/60 font-semibold border-t-2 border-slate-200">
+                                            <TableCell className="pl-6 py-3 font-mono text-xs font-bold text-slate-700">
+                                                H
+                                            </TableCell>
+                                            <TableCell className="py-3 text-xs text-slate-900" colSpan={2}>
+                                                Total Other Non-Hazardous Waste (H.i + H.ii)
+                                            </TableCell>
+                                            <TableCell className="py-3 font-mono text-xs text-right font-bold text-slate-900">
+                                                {formatTonne(genOtherNonHaz)}
+                                            </TableCell>
+                                            <TableCell className="py-3 font-mono text-xs text-right font-bold text-emerald-800">
+                                                {formatTonne(recOtherNonHaz)}
+                                            </TableCell>
+                                            <TableCell className="py-3 font-mono text-xs text-right font-bold text-amber-800">
+                                                {formatTonne(dispOtherNonHaz)}
+                                            </TableCell>
+                                            <TableCell className="pr-6 py-3 font-mono text-xs text-right font-bold text-slate-700">
+                                                {genOtherNonHaz > 0 ? `${((recOtherNonHaz / genOtherNonHaz) * 100).toFixed(1)}%` : "—"}
+                                            </TableCell>
+                                        </TableRow>
+
+                                        {/* Section Grand Totals (A through H) */}
+                                        <TableRow className="bg-primary/5 font-bold border-t-2 border-primary/20">
+                                            <TableCell className="pl-6 py-3.5 font-mono text-xs text-primary">
+                                                TOTAL
+                                            </TableCell>
+                                            <TableCell className="py-3.5 text-xs text-primary font-bold" colSpan={2}>
+                                                Section Grand Total (A + B + C + D + E + F + G + H)
+                                            </TableCell>
+                                            <TableCell className="py-3.5 font-mono text-sm text-right text-primary font-bold">
+                                                {formatTonne(totals.total_waste_tonne)} t
+                                            </TableCell>
+                                            <TableCell className="py-3.5 font-mono text-sm text-right text-emerald-800 font-bold">
+                                                {formatTonne(totals.total_recovered_tonne)} t
+                                            </TableCell>
+                                            <TableCell className="py-3.5 font-mono text-sm text-right text-amber-800 font-bold">
+                                                {formatTonne(totals.total_disposed_tonne)} t
+                                            </TableCell>
+                                            <TableCell className="pr-6 py-3.5 font-mono text-sm text-right text-emerald-700 font-bold">
+                                                {recoveryRate.toFixed(1)}%
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
                             </CardBody>
                         </Card>
 
-                        {/* Recovery & Disposal Mass Balance Grid */}
+                        {/* Recovery & Disposal Method Breakdown Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Circular Recovery Card */}
+                            {/* Circular Recovery by Method Card */}
                             <Card>
                                 <CardHeader tone="flat" className="flex-wrap items-center justify-between gap-2">
                                     <div className="flex items-center gap-2">
                                         <MaterialIcon name="recycling" size="sm" className="text-emerald-500" />
                                         <div>
                                             <h3 className="text-headline-sm font-semibold text-primary">
-                                                Circular Economy Recovery
+                                                Circular Economy Recovery by Method
                                             </h3>
                                             <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
-                                                Recycled, Reused & Recovered waste (tonnes)
+                                                Destination breakdown for recycled, reused, and recovered waste (tonnes)
                                             </p>
                                         </div>
                                     </div>
                                     <Badge variant="positive" size="sm">
-                                        {recoveryRate.toFixed(1)}% Recovered
+                                        {formatTonne(totals.total_recovered_by_method_tonne ?? totals.total_recovered_tonne)} t
                                     </Badge>
                                 </CardHeader>
                                 <CardBody className="p-card-padding space-y-4">
                                     <WasteStreamRow label="Recycled Waste" val={totals.recycled_tonne} total={totalGen} color="#10b981" />
                                     <WasteStreamRow label="Reused Waste" val={totals.reused_tonne} total={totalGen} color="#059669" />
-                                    <WasteStreamRow label="Other Recovery Methods" val={totals.other_recovery_tonne} total={totalGen} color="#047857" />
+                                    <WasteStreamRow label="Other Recovery Operations" val={totals.other_recovery_tonne} total={totalGen} color="#047857" />
 
                                     <div className="flex items-center justify-between rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3.5 mt-2">
-                                        <span className="text-sm font-bold text-emerald-900">Total Waste Recovered</span>
+                                        <span className="text-sm font-bold text-emerald-900">Total Recovered by Method</span>
                                         <span className="font-mono text-base font-bold text-emerald-900">
-                                            {formatTonne(totals.total_recovered_tonne)} <span className="text-xs font-sans font-normal">t</span>
+                                            {formatTonne(totals.total_recovered_by_method_tonne ?? totals.total_recovered_tonne)} <span className="text-xs font-sans font-normal">t</span>
                                         </span>
                                     </div>
                                 </CardBody>
                             </Card>
 
-                            {/* Final Disposal Card */}
+                            {/* Final Disposal by Method Card */}
                             <Card>
                                 <CardHeader tone="flat" className="flex-wrap items-center justify-between gap-2">
                                     <div className="flex items-center gap-2">
                                         <MaterialIcon name="delete_outline" size="sm" className="text-amber-500" />
                                         <div>
                                             <h3 className="text-headline-sm font-semibold text-primary">
-                                                Final Waste Disposal
+                                                Final Waste Disposal by Method
                                             </h3>
                                             <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
-                                                Incinerated, Landfilled & Disposed waste (tonnes)
+                                                Treatment breakdown for incinerated, landfilled, and disposed waste (tonnes)
                                             </p>
                                         </div>
                                     </div>
                                     <Badge variant="neutral" size="sm">
-                                        {disposalRate.toFixed(1)}% Disposed
+                                        {formatTonne(totals.total_disposed_by_method_tonne ?? totals.total_disposed_tonne)} t
                                     </Badge>
                                 </CardHeader>
                                 <CardBody className="p-card-padding space-y-4">
                                     <WasteStreamRow label="Incineration" val={totals.incineration_tonne} total={totalGen} color="#f59e0b" />
                                     <WasteStreamRow label="Landfilling" val={totals.landfilling_tonne} total={totalGen} color="#d97706" />
-                                    <WasteStreamRow label="Other Disposal Methods" val={totals.other_disposal_tonne} total={totalGen} color="#b45309" />
+                                    <WasteStreamRow label="Other Disposal Operations" val={totals.other_disposal_tonne} total={totalGen} color="#b45309" />
 
                                     <div className="flex items-center justify-between rounded-lg border border-amber-500/20 bg-amber-500/5 p-3.5 mt-2">
-                                        <span className="text-sm font-bold text-amber-900">Total Waste Disposed</span>
+                                        <span className="text-sm font-bold text-amber-900">Total Disposed by Method</span>
                                         <span className="font-mono text-base font-bold text-amber-900">
-                                            {formatTonne(totals.total_disposed_tonne)} <span className="text-xs font-sans font-normal">t</span>
+                                            {formatTonne(totals.total_disposed_by_method_tonne ?? totals.total_disposed_tonne)} <span className="text-xs font-sans font-normal">t</span>
                                         </span>
                                     </div>
                                 </CardBody>
@@ -726,7 +948,7 @@ export default function BrsrWastePage() {
                 )
             )}
 
-            {/* Waste report modal picker */}
+            {/* Waste Report Download Modal */}
             <BrsrWasteReportModal
                 isOpen={isDownloadOpen}
                 onClose={() => setIsDownloadOpen(false)}
@@ -743,7 +965,7 @@ function WasteStreamRow({
     color,
 }: {
     label: string;
-    val: string | number;
+    val: string | number | undefined;
     total: number;
     color: string;
 }) {

@@ -66,11 +66,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
         setIsDownloading(true);
 
         try {
-            await onDownload({
-                financial_year_label: fyLabel,
-                turnover_inr: Number(turnover) || 0,
-                physical_output_tonnes: Number(physicalOutputTonnes) || 0,
-                physical_output_unit: physicalOutputUnit || undefined,
+            const genBreakdown = {
                 plastic_waste_tonne: Number(plastic) || 0,
                 ewaste_tonne: Number(ewaste) || 0,
                 bio_medical_waste_tonne: Number(bioMedical) || 0,
@@ -80,6 +76,28 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                 other_hazardous_waste_tonne: Number(otherHazardous) || 0,
                 fly_ash_tonne: Number(flyAsh) || 0,
                 non_hazardous_solid_waste_tonne: Number(nonHazardousSolid) || 0,
+            };
+
+            await onDownload({
+                financial_year_label: fyLabel,
+                turnover_inr: Number(turnover) || 0,
+                physical_output_tonnes: Number(physicalOutputTonnes) || 0,
+                physical_output_unit: physicalOutputUnit || undefined,
+                generation: genBreakdown,
+                recovery: {
+                    ...genBreakdown,
+                    recycled_tonne: Number(recycled) || 0,
+                    reused_tonne: Number(reused) || 0,
+                    other_recovery_tonne: Number(otherRecovery) || 0,
+                },
+                disposal: {
+                    ...genBreakdown,
+                    incineration_tonne: Number(incineration) || 0,
+                    landfilling_tonne: Number(landfilling) || 0,
+                    other_disposal_tonne: Number(otherDisposal) || 0,
+                },
+                // Fallback flat fields
+                ...genBreakdown,
                 recycled_tonne: Number(recycled) || 0,
                 reused_tonne: Number(reused) || 0,
                 other_recovery_tonne: Number(otherRecovery) || 0,

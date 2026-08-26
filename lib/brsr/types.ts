@@ -144,12 +144,7 @@ export type BrsrWaterDisclosureResponse = {
     timestamp: string;
 };
 
-export type BrsrWasteDisclosurePayload = {
-    financial_year_label: string;
-    turnover_inr: number;
-    physical_output_tonnes?: number | null;
-    ppp_conversion_factor?: number;
-    physical_output_unit?: string | null;
+export interface BRSRWasteCategoryBreakdown {
     plastic_waste_tonne: number;
     ewaste_tonne: number;
     bio_medical_waste_tonne: number;
@@ -157,79 +152,120 @@ export type BrsrWasteDisclosurePayload = {
     battery_waste_tonne: number;
     radioactive_waste_tonne: number;
     other_hazardous_waste_tonne: number;
+    fly_ash_tonne: number;
+    non_hazardous_solid_waste_tonne: number;
+}
+
+export interface BRSRWasteRecoveryInput extends BRSRWasteCategoryBreakdown {
+    recycled_tonne?: number;
+    reused_tonne?: number;
+    other_recovery_tonne?: number;
+}
+
+export interface BRSRWasteDisposalInput extends BRSRWasteCategoryBreakdown {
+    incineration_tonne?: number;
+    landfilling_tonne?: number;
+    other_disposal_tonne?: number;
+}
+
+export interface BRSRWasteDisclosurePayload {
+    financial_year_label: string;
+    turnover_inr: number;
+    physical_output_tonnes: number;
+    ppp_conversion_factor?: number;
+    physical_output_unit?: string;
+    generation: BRSRWasteCategoryBreakdown;
+    recovery: BRSRWasteRecoveryInput;
+    disposal: BRSRWasteDisposalInput;
+    // Optional flat legacy fields
+    plastic_waste_tonne?: number;
+    ewaste_tonne?: number;
+    bio_medical_waste_tonne?: number;
+    construction_and_demolition_waste_tonne?: number;
+    battery_waste_tonne?: number;
+    radioactive_waste_tonne?: number;
+    other_hazardous_waste_tonne?: number;
     fly_ash_tonne?: number;
     non_hazardous_solid_waste_tonne?: number;
-    recycled_tonne: number;
-    reused_tonne: number;
-    other_recovery_tonne: number;
-    incineration_tonne: number;
-    landfilling_tonne: number;
-    other_disposal_tonne: number;
-};
+    recycled_tonne?: number;
+    reused_tonne?: number;
+    other_recovery_tonne?: number;
+    incineration_tonne?: number;
+    landfilling_tonne?: number;
+    other_disposal_tonne?: number;
+}
 
-export type BrsrWasteTotals = {
-    plastic_waste_tonne: string;
-    ewaste_tonne: string;
-    bio_medical_waste_tonne: string;
-    construction_and_demolition_waste_tonne: string;
-    battery_waste_tonne: string;
-    radioactive_waste_tonne: string;
-    other_hazardous_waste_tonne: string;
-    fly_ash_tonne: string;
-    non_hazardous_solid_waste_tonne: string;
-    other_non_hazardous_waste_tonne: string;
+export interface BRSRWasteCategoryTotals {
+    plastic_waste_tonne?: string;
+    ewaste_tonne?: string;
+    bio_medical_waste_tonne?: string;
+    construction_and_demolition_waste_tonne?: string;
+    battery_waste_tonne?: string;
+    radioactive_waste_tonne?: string;
+    other_hazardous_waste_tonne?: string;
+    fly_ash_tonne?: string;
+    non_hazardous_solid_waste_tonne?: string;
+    other_non_hazardous_waste_tonne: string; // Fly ash + Solid waste
+    total_tonne: string;                    // Section total (A through H)
+}
+
+export interface BRSRWasteTotalsResponse {
+    generation?: BRSRWasteCategoryTotals;
     total_waste_tonne: string;
-    recycled_tonne: string;
-    reused_tonne: string;
-    other_recovery_tonne: string;
+    recovery?: BRSRWasteCategoryTotals;
     total_recovered_tonne: string;
-    incineration_tonne: string;
-    landfilling_tonne: string;
-    other_disposal_tonne: string;
+    recycled_tonne?: string;
+    reused_tonne?: string;
+    other_recovery_tonne?: string;
+    total_recovered_by_method_tonne?: string;
+    disposal?: BRSRWasteCategoryTotals;
     total_disposed_tonne: string;
+    incineration_tonne?: string;
+    landfilling_tonne?: string;
+    other_disposal_tonne?: string;
+    total_disposed_by_method_tonne?: string;
     waste_intensity_per_inr: string;
     waste_intensity_per_physical_output: string;
-    waste_intensity_ppp: string | null;
-    waste_intensity_physical_unit: string | null;
-};
+    waste_intensity_ppp?: string | null;
+    waste_intensity_physical_unit?: string | null;
+    // Flat fallbacks
+    plastic_waste_tonne?: string;
+    ewaste_tonne?: string;
+    bio_medical_waste_tonne?: string;
+    construction_and_demolition_waste_tonne?: string;
+    battery_waste_tonne?: string;
+    radioactive_waste_tonne?: string;
+    other_hazardous_waste_tonne?: string;
+    fly_ash_tonne?: string;
+    non_hazardous_solid_waste_tonne?: string;
+    other_non_hazardous_waste_tonne?: string;
+}
 
-export type BrsrWasteDisclosureData = {
+export type BrsrWasteDisclosurePayload = BRSRWasteDisclosurePayload;
+export type BrsrWasteTotals = BRSRWasteTotalsResponse;
+
+export interface BRSRWasteDisclosureData {
     financial_year_label: string;
     turnover_inr: string;
     physical_output_tonnes: string;
-    inputs: {
-        financial_year_label: string;
-        plastic_waste_tonne: string;
-        ewaste_tonne: string;
-        bio_medical_waste_tonne: string;
-        construction_and_demolition_waste_tonne: string;
-        battery_waste_tonne: string;
-        radioactive_waste_tonne: string;
-        other_hazardous_waste_tonne: string;
-        fly_ash_tonne: string;
-        non_hazardous_solid_waste_tonne: string;
-        recycled_tonne: string;
-        reused_tonne: string;
-        other_recovery_tonne: string;
-        incineration_tonne: string;
-        landfilling_tonne: string;
-        other_disposal_tonne: string;
-        turnover_inr: string;
-        physical_output_tonnes: string;
-    };
-    totals: BrsrWasteTotals;
-};
+    totals: BRSRWasteTotalsResponse;
+    inputs?: any;
+}
 
-export type BrsrWasteDisclosureResponse = {
+export type BrsrWasteDisclosureData = BRSRWasteDisclosureData;
+
+export interface BRSRWasteDisclosureResponse {
     success: boolean;
     status_code: number;
     message: string;
-    data: BrsrWasteDisclosureData;
-    error: null | unknown;
-    method: string;
-    path: string;
-    timestamp: string;
-};
+    data: BRSRWasteDisclosureData;
+    error?: null | unknown;
+    method?: string;
+    path?: string;
+    timestamp?: string;
+}
+
+export type BrsrWasteDisclosureResponse = BRSRWasteDisclosureResponse;
 
 // ==========================================
 // BRSR Air Disclosure Types & Schema

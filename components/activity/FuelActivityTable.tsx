@@ -188,8 +188,10 @@ export function FuelActivityTable({
         mutationFn: verifyFuelActivity,
         onSuccess: () => {
             setConfirmState({ open: false, action: null, activityId: null });
+            setSelectedActivityId(null);
             setRejectReason("");
             queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
+            queryClient.invalidateQueries({ queryKey: ["fuel-activity"] });
         },
         onError: (error: Error) => {
             console.error("Verify failed", error);
@@ -200,8 +202,10 @@ export function FuelActivityTable({
         mutationFn: ({ activityId, rejected_reason }) => rejectFuelActivity(activityId, rejected_reason),
         onSuccess: () => {
             setConfirmState({ open: false, action: null, activityId: null });
+            setSelectedActivityId(null);
             setRejectReason("");
             queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
+            queryClient.invalidateQueries({ queryKey: ["fuel-activity"] });
         },
         onError: (error: Error) => {
             console.error("Reject failed", error);
@@ -212,7 +216,9 @@ export function FuelActivityTable({
         mutationFn: submitFuelActivity,
         onSuccess: () => {
             setConfirmState({ open: false, action: null, activityId: null });
+            setSelectedActivityId(null);
             queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
+            queryClient.invalidateQueries({ queryKey: ["fuel-activity"] });
         },
         onError: (error: Error) => {
             console.error("Submit failed", error);
@@ -223,7 +229,9 @@ export function FuelActivityTable({
         mutationFn: deleteFuelActivity,
         onSuccess: () => {
             setConfirmState({ open: false, action: null, activityId: null });
+            setSelectedActivityId(null);
             queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
+            queryClient.invalidateQueries({ queryKey: ["fuel-activity"] });
         },
         onError: (error: Error) => {
             console.error("Delete failed", error);
@@ -238,22 +246,26 @@ export function FuelActivityTable({
 
     async function performVerify(activityId?: string | null) {
         if (!activityId) return;
+        setSelectedActivityId(null);
         await verifyMutation.mutateAsync(activityId);
     }
 
     async function performReject(activityId?: string | null, reason?: string) {
         if (!activityId) return;
         if (!reason || reason.length < 1 || reason.length > 2000) return;
+        setSelectedActivityId(null);
         await rejectMutation.mutateAsync({ activityId, rejected_reason: reason });
     }
 
     async function performSubmit(activityId?: string | null) {
         if (!activityId) return;
+        setSelectedActivityId(null);
         await submitMutation.mutateAsync(activityId);
     }
 
     async function performDelete(activityId?: string | null) {
         if (!activityId) return;
+        setSelectedActivityId(null);
         await deleteMutation.mutateAsync(activityId);
     }
 
@@ -658,9 +670,18 @@ export function FuelActivityTable({
                 <FuelActivityDetailModal
                     activity={selectedActivity}
                     onClose={() => setSelectedActivityId(null)}
-                    onVerify={(id) => performVerify(id)}
-                    onReject={(id) => setConfirmState({ open: true, action: "reject", activityId: id })}
-                    onSubmit={(id) => performSubmit(id)}
+                    onVerify={(id) => {
+                        setSelectedActivityId(null);
+                        setConfirmState({ open: true, action: "verify", activityId: id });
+                    }}
+                    onReject={(id) => {
+                        setSelectedActivityId(null);
+                        setConfirmState({ open: true, action: "reject", activityId: id });
+                    }}
+                    onSubmit={(id) => {
+                        setSelectedActivityId(null);
+                        setConfirmState({ open: true, action: "submit", activityId: id });
+                    }}
                 />
             )}
 

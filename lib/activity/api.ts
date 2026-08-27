@@ -114,13 +114,13 @@ export async function getFuelActivities(filters?: {
     sort_order?: string;
 }): Promise<FuelActivity[]> {
     const params = new URLSearchParams();
-    if (filters?.status) params.append("status", filters.status.toUpperCase());
-    if (filters?.emission_type) params.append("emission_type", filters.emission_type.toUpperCase());
+    if (filters?.status) params.append("status", filters.status.toLowerCase());
+    if (filters?.emission_type) params.append("emission_type", filters.emission_type.toLowerCase());
     if (filters?.facility_id) params.append("facility_id", filters.facility_id);
     if (filters?.reporting_period_id) params.append("reporting_period_id", filters.reporting_period_id);
     if (filters?.meter_id) params.append("meter_id", filters.meter_id);
     if (filters?.fuel_id) params.append("fuel_id", filters.fuel_id);
-    if (filters?.data_quality_tier) params.append("data_quality_tier", filters.data_quality_tier);
+    if (filters?.data_quality_tier) params.append("data_quality_tier", filters.data_quality_tier.toLowerCase());
     if (filters?.activity_start_date) params.append("activity_start_date", filters.activity_start_date);
     if (filters?.activity_end_date) params.append("activity_end_date", filters.activity_end_date);
     if (filters?.page) params.append("page", String(filters.page));

@@ -19,23 +19,28 @@ import {
 } from "@/components/ui/table";
 import type {
     BRSRWasteDisclosurePayload,
-    BRSRWasteCategoryBreakdown,
-    BRSRWasteRecoveryInput,
-    BRSRWasteDisposalInput,
+    WasteGenerationInput,
+    WasteRecoveryInput,
+    WasteDisposalInput,
+    WasteRecoveryItem,
+    WasteDisposalItem,
 } from "@/lib/brsr/types";
 
 // Standard category descriptors aligned with BRSR Principle 6 (A through H)
-const WASTE_CATEGORIES = [
-    { key: "plastic_waste_tonne", code: "A", label: "Plastic Waste", isHazardous: true },
-    { key: "ewaste_tonne", code: "B", label: "E-Waste", isHazardous: true },
-    { key: "bio_medical_waste_tonne", code: "C", label: "Bio-Medical Waste", isHazardous: true },
-    { key: "construction_and_demolition_waste_tonne", code: "D", label: "Construction & Demolition", isHazardous: true },
-    { key: "battery_waste_tonne", code: "E", label: "Battery Waste", isHazardous: true },
-    { key: "radioactive_waste_tonne", code: "F", label: "Radioactive Waste", isHazardous: true },
-    { key: "other_hazardous_waste_tonne", code: "G", label: "Other Hazardous Waste", isHazardous: true },
-    { key: "fly_ash_tonne", code: "H.i", label: "Fly Ash Waste", isHazardous: false },
-    { key: "non_hazardous_solid_waste_tonne", code: "H.ii", label: "Non-Hazardous Solid Waste", isHazardous: false },
+const WASTE_CATEGORY_KEYS = [
+    { key: "plastic_waste", genKey: "plastic_waste_tonne", code: "A", label: "Plastic Waste", isHazardous: true },
+    { key: "ewaste", genKey: "ewaste_tonne", code: "B", label: "E-Waste", isHazardous: true },
+    { key: "bio_medical_waste", genKey: "bio_medical_waste_tonne", code: "C", label: "Bio-Medical Waste", isHazardous: true },
+    { key: "construction_and_demolition_waste", genKey: "construction_and_demolition_waste_tonne", code: "D", label: "Construction & Demolition", isHazardous: true },
+    { key: "battery_waste", genKey: "battery_waste_tonne", code: "E", label: "Battery Waste", isHazardous: true },
+    { key: "radioactive_waste", genKey: "radioactive_waste_tonne", code: "F", label: "Radioactive Waste", isHazardous: true },
+    { key: "other_hazardous_waste", genKey: "other_hazardous_waste_tonne", code: "G", label: "Other Hazardous Waste", isHazardous: true },
+    { key: "fly_ash", genKey: "fly_ash_tonne", code: "H.i", label: "Fly Ash Waste", isHazardous: false },
+    { key: "non_hazardous_solid_waste", genKey: "non_hazardous_solid_waste_tonne", code: "H.ii", label: "Non-Hazardous Solid Waste", isHazardous: false },
 ] as const;
+
+type CategoryKey = (typeof WASTE_CATEGORY_KEYS)[number]["key"];
+type GenKey = (typeof WASTE_CATEGORY_KEYS)[number]["genKey"];
 
 // Initial demonstration payload matching backend schema
 const INITIAL_PAYLOAD: BRSRWasteDisclosurePayload = {
@@ -43,67 +48,42 @@ const INITIAL_PAYLOAD: BRSRWasteDisclosurePayload = {
     turnover_inr: 50000000.0,
     physical_output_tonnes: 1000.0,
     physical_output_unit: "tonnes",
-
-    // Root-level fields (required for backend validation)
-    plastic_waste_tonne: 10.5,
-    ewaste_tonne: 2.0,
-    bio_medical_waste_tonne: 1.5,
-    construction_and_demolition_waste_tonne: 50.0,
-    battery_waste_tonne: 0.8,
-    radioactive_waste_tonne: 0.0,
-    other_hazardous_waste_tonne: 5.2,
-    fly_ash_tonne: 100.0,
-    non_hazardous_solid_waste_tonne: 30.0,
-    recycled_tonne: 100.0,
-    reused_tonne: 50.0,
-    other_recovery_tonne: 17.1,
-    incineration_tonne: 10.0,
-    landfilling_tonne: 20.0,
-    other_disposal_tonne: 2.9,
-
-    // Nested objects (for 9-category breakdown)
     generation: {
-        plastic_waste_tonne: 10.5,
-        ewaste_tonne: 2.0,
-        bio_medical_waste_tonne: 1.5,
+        plastic_waste_tonne: 10.0,
+        ewaste_tonne: 5.0,
+        bio_medical_waste_tonne: 2.0,
         construction_and_demolition_waste_tonne: 50.0,
-        battery_waste_tonne: 0.8,
+        battery_waste_tonne: 1.0,
         radioactive_waste_tonne: 0.0,
-        other_hazardous_waste_tonne: 5.2,
-        fly_ash_tonne: 100.0,
-        non_hazardous_solid_waste_tonne: 30.0,
+        other_hazardous_waste_tonne: 4.0,
+        fly_ash_tonne: 80.0,
+        non_hazardous_solid_waste_tonne: 20.0,
     },
     recovery: {
-        plastic_waste_tonne: 8.0,
-        ewaste_tonne: 1.5,
-        bio_medical_waste_tonne: 0.0,
-        construction_and_demolition_waste_tonne: 40.0,
-        battery_waste_tonne: 0.6,
-        radioactive_waste_tonne: 0.0,
-        other_hazardous_waste_tonne: 2.0,
-        fly_ash_tonne: 90.0,
-        non_hazardous_solid_waste_tonne: 25.0,
-        recycled_tonne: 100.0,
-        reused_tonne: 50.0,
-        other_recovery_tonne: 17.1,
+        plastic_waste: { recycled_tonne: 6.0, reused_tonne: 2.0, other_recovery_tonne: 0.5 },
+        ewaste: { recycled_tonne: 3.0, reused_tonne: 1.0, other_recovery_tonne: 0.0 },
+        bio_medical_waste: { recycled_tonne: 0.0, reused_tonne: 0.0, other_recovery_tonne: 0.0 },
+        construction_and_demolition_waste: { recycled_tonne: 20.0, reused_tonne: 15.0, other_recovery_tonne: 5.0 },
+        battery_waste: { recycled_tonne: 0.5, reused_tonne: 0.2, other_recovery_tonne: 0.1 },
+        radioactive_waste: { recycled_tonne: 0.0, reused_tonne: 0.0, other_recovery_tonne: 0.0 },
+        other_hazardous_waste: { recycled_tonne: 1.0, reused_tonne: 0.5, other_recovery_tonne: 0.5 },
+        fly_ash: { recycled_tonne: 50.0, reused_tonne: 20.0, other_recovery_tonne: 5.0 },
+        non_hazardous_solid_waste: { recycled_tonne: 10.0, reused_tonne: 5.0, other_recovery_tonne: 2.0 },
     },
     disposal: {
-        plastic_waste_tonne: 2.5,
-        ewaste_tonne: 0.5,
-        bio_medical_waste_tonne: 1.5,
-        construction_and_demolition_waste_tonne: 10.0,
-        battery_waste_tonne: 0.2,
-        radioactive_waste_tonne: 0.0,
-        other_hazardous_waste_tonne: 3.2,
-        fly_ash_tonne: 10.0,
-        non_hazardous_solid_waste_tonne: 5.0,
-        incineration_tonne: 10.0,
-        landfilling_tonne: 20.0,
-        other_disposal_tonne: 2.9,
+        plastic_waste: { incineration_tonne: 1.0, landfilling_tonne: 0.5, other_disposal_tonne: 0.0 },
+        ewaste: { incineration_tonne: 0.5, landfilling_tonne: 0.5, other_disposal_tonne: 0.0 },
+        bio_medical_waste: { incineration_tonne: 1.5, landfilling_tonne: 0.5, other_disposal_tonne: 0.0 },
+        construction_and_demolition_waste: { incineration_tonne: 0.0, landfilling_tonne: 10.0, other_disposal_tonne: 0.0 },
+        battery_waste: { incineration_tonne: 0.0, landfilling_tonne: 0.2, other_disposal_tonne: 0.0 },
+        radioactive_waste: { incineration_tonne: 0.0, landfilling_tonne: 0.0, other_disposal_tonne: 0.0 },
+        other_hazardous_waste: { incineration_tonne: 1.0, landfilling_tonne: 1.0, other_disposal_tonne: 0.0 },
+        fly_ash: { incineration_tonne: 0.0, landfilling_tonne: 5.0, other_disposal_tonne: 0.0 },
+        non_hazardous_solid_waste: { incineration_tonne: 0.0, landfilling_tonne: 3.0, other_disposal_tonne: 0.0 },
     },
 };
 
-const createEmptyBreakdown = (): BRSRWasteCategoryBreakdown => ({
+const createEmptyGen = (): WasteGenerationInput => ({
     plastic_waste_tonne: 0,
     ewaste_tonne: 0,
     bio_medical_waste_tonne: 0,
@@ -115,6 +95,30 @@ const createEmptyBreakdown = (): BRSRWasteCategoryBreakdown => ({
     non_hazardous_solid_waste_tonne: 0,
 });
 
+const createEmptyRec = (): WasteRecoveryInput => ({
+    plastic_waste: { recycled_tonne: 0, reused_tonne: 0, other_recovery_tonne: 0 },
+    ewaste: { recycled_tonne: 0, reused_tonne: 0, other_recovery_tonne: 0 },
+    bio_medical_waste: { recycled_tonne: 0, reused_tonne: 0, other_recovery_tonne: 0 },
+    construction_and_demolition_waste: { recycled_tonne: 0, reused_tonne: 0, other_recovery_tonne: 0 },
+    battery_waste: { recycled_tonne: 0, reused_tonne: 0, other_recovery_tonne: 0 },
+    radioactive_waste: { recycled_tonne: 0, reused_tonne: 0, other_recovery_tonne: 0 },
+    other_hazardous_waste: { recycled_tonne: 0, reused_tonne: 0, other_recovery_tonne: 0 },
+    fly_ash: { recycled_tonne: 0, reused_tonne: 0, other_recovery_tonne: 0 },
+    non_hazardous_solid_waste: { recycled_tonne: 0, reused_tonne: 0, other_recovery_tonne: 0 },
+});
+
+const createEmptyDisp = (): WasteDisposalInput => ({
+    plastic_waste: { incineration_tonne: 0, landfilling_tonne: 0, other_disposal_tonne: 0 },
+    ewaste: { incineration_tonne: 0, landfilling_tonne: 0, other_disposal_tonne: 0 },
+    bio_medical_waste: { incineration_tonne: 0, landfilling_tonne: 0, other_disposal_tonne: 0 },
+    construction_and_demolition_waste: { incineration_tonne: 0, landfilling_tonne: 0, other_disposal_tonne: 0 },
+    battery_waste: { incineration_tonne: 0, landfilling_tonne: 0, other_disposal_tonne: 0 },
+    radioactive_waste: { incineration_tonne: 0, landfilling_tonne: 0, other_disposal_tonne: 0 },
+    other_hazardous_waste: { incineration_tonne: 0, landfilling_tonne: 0, other_disposal_tonne: 0 },
+    fly_ash: { incineration_tonne: 0, landfilling_tonne: 0, other_disposal_tonne: 0 },
+    non_hazardous_solid_waste: { incineration_tonne: 0, landfilling_tonne: 0, other_disposal_tonne: 0 },
+});
+
 export default function BrsrWastePage() {
     // Form Input States
     const [fyLabel, setFyLabel] = useState("FY 2024-25");
@@ -123,9 +127,9 @@ export default function BrsrWastePage() {
     const [physicalOutputUnit, setPhysicalOutputUnit] = useState("tonnes");
 
     // Symmetric 9-category stream states
-    const [genInputs, setGenInputs] = useState<BRSRWasteCategoryBreakdown>(INITIAL_PAYLOAD.generation);
-    const [recInputs, setRecInputs] = useState<BRSRWasteRecoveryInput>(INITIAL_PAYLOAD.recovery);
-    const [dispInputs, setDispInputs] = useState<BRSRWasteDisposalInput>(INITIAL_PAYLOAD.disposal);
+    const [genInputs, setGenInputs] = useState<WasteGenerationInput>(INITIAL_PAYLOAD.generation);
+    const [recInputs, setRecInputs] = useState<WasteRecoveryInput>(INITIAL_PAYLOAD.recovery);
+    const [dispInputs, setDispInputs] = useState<WasteDisposalInput>(INITIAL_PAYLOAD.disposal);
 
     // Active payload for API calculation
     const [activePayload, setActivePayload] = useState<BRSRWasteDisclosurePayload>(INITIAL_PAYLOAD);
@@ -138,16 +142,28 @@ export default function BrsrWastePage() {
     const { data, isPending, isError, error } = useBrsrWasteDisclosure(activePayload);
 
     // Handlers
-    const handleGenFieldChange = (key: keyof BRSRWasteCategoryBreakdown, value: string) => {
+    const handleGenFieldChange = (key: GenKey, value: string) => {
         setGenInputs((prev) => ({ ...prev, [key]: Number(value) || 0 }));
     };
 
-    const handleRecFieldChange = (key: keyof BRSRWasteRecoveryInput, value: string) => {
-        setRecInputs((prev) => ({ ...prev, [key]: Number(value) || 0 }));
+    const handleRecMatrixChange = (catKey: CategoryKey, field: keyof WasteRecoveryItem, value: string) => {
+        setRecInputs((prev) => ({
+            ...prev,
+            [catKey]: {
+                ...prev[catKey],
+                [field]: Number(value) || 0,
+            },
+        }));
     };
 
-    const handleDispFieldChange = (key: keyof BRSRWasteDisposalInput, value: string) => {
-        setDispInputs((prev) => ({ ...prev, [key]: Number(value) || 0 }));
+    const handleDispMatrixChange = (catKey: CategoryKey, field: keyof WasteDisposalItem, value: string) => {
+        setDispInputs((prev) => ({
+            ...prev,
+            [catKey]: {
+                ...prev[catKey],
+                [field]: Number(value) || 0,
+            },
+        }));
     };
 
     const handleGenerate = () => {
@@ -156,25 +172,6 @@ export default function BrsrWastePage() {
             turnover_inr: Number(turnover) || 0,
             physical_output_tonnes: Number(physicalOutput) || 0,
             physical_output_unit: physicalOutputUnit.trim() || "tonnes",
-
-            // Root-level fields (required for backend validation)
-            plastic_waste_tonne: genInputs.plastic_waste_tonne ?? 0,
-            ewaste_tonne: genInputs.ewaste_tonne ?? 0,
-            bio_medical_waste_tonne: genInputs.bio_medical_waste_tonne ?? 0,
-            construction_and_demolition_waste_tonne: genInputs.construction_and_demolition_waste_tonne ?? 0,
-            battery_waste_tonne: genInputs.battery_waste_tonne ?? 0,
-            radioactive_waste_tonne: genInputs.radioactive_waste_tonne ?? 0,
-            other_hazardous_waste_tonne: genInputs.other_hazardous_waste_tonne ?? 0,
-            fly_ash_tonne: genInputs.fly_ash_tonne ?? 0,
-            non_hazardous_solid_waste_tonne: genInputs.non_hazardous_solid_waste_tonne ?? 0,
-            recycled_tonne: recInputs.recycled_tonne ?? 0,
-            reused_tonne: recInputs.reused_tonne ?? 0,
-            other_recovery_tonne: recInputs.other_recovery_tonne ?? 0,
-            incineration_tonne: dispInputs.incineration_tonne ?? 0,
-            landfilling_tonne: dispInputs.landfilling_tonne ?? 0,
-            other_disposal_tonne: dispInputs.other_disposal_tonne ?? 0,
-
-            // Nested objects
             generation: genInputs,
             recovery: recInputs,
             disposal: dispInputs,
@@ -187,35 +184,21 @@ export default function BrsrWastePage() {
         setPhysicalOutput("");
         setPhysicalOutputUnit("");
 
-        const empty = createEmptyBreakdown();
-        setGenInputs(empty);
-        setRecInputs({ ...empty, recycled_tonne: 0, reused_tonne: 0, other_recovery_tonne: 0 });
-        setDispInputs({ ...empty, incineration_tonne: 0, landfilling_tonne: 0, other_disposal_tonne: 0 });
+        const emptyGen = createEmptyGen();
+        const emptyRec = createEmptyRec();
+        const emptyDisp = createEmptyDisp();
+
+        setGenInputs(emptyGen);
+        setRecInputs(emptyRec);
+        setDispInputs(emptyDisp);
 
         setActivePayload({
             financial_year_label: "",
             turnover_inr: 0,
             physical_output_tonnes: 0,
-
-            plastic_waste_tonne: 0,
-            ewaste_tonne: 0,
-            bio_medical_waste_tonne: 0,
-            construction_and_demolition_waste_tonne: 0,
-            battery_waste_tonne: 0,
-            radioactive_waste_tonne: 0,
-            other_hazardous_waste_tonne: 0,
-            fly_ash_tonne: 0,
-            non_hazardous_solid_waste_tonne: 0,
-            recycled_tonne: 0,
-            reused_tonne: 0,
-            other_recovery_tonne: 0,
-            incineration_tonne: 0,
-            landfilling_tonne: 0,
-            other_disposal_tonne: 0,
-
-            generation: empty,
-            recovery: { ...empty, recycled_tonne: 0, reused_tonne: 0, other_recovery_tonne: 0 },
-            disposal: { ...empty, incineration_tonne: 0, landfilling_tonne: 0, other_disposal_tonne: 0 },
+            generation: emptyGen,
+            recovery: emptyRec,
+            disposal: emptyDisp,
         });
     };
 
@@ -241,30 +224,11 @@ export default function BrsrWastePage() {
 
     const { totals } = data || {};
     const totalGen = Number(totals?.total_waste_tonne) || 0;
-    const totalRec = Number(totals?.total_recovered_tonne) || 0;
-    const totalDisp = Number(totals?.total_disposed_tonne) || 0;
+    const totalRec = Number(totals?.recovery?.total_recovered_tonne ?? totals?.total_recovered_tonne) || 0;
+    const totalDisp = Number(totals?.disposal?.total_disposed_tonne ?? totals?.total_disposed_tonne) || 0;
 
     const recoveryRate = totalGen > 0 ? (totalRec / totalGen) * 100 : 0;
     const disposalRate = totalGen > 0 ? (totalDisp / totalGen) * 100 : 0;
-
-    // Subtotal for other non-hazardous waste (Fly ash + Solid waste)
-    const genFlyAsh = Number(totals?.generation?.fly_ash_tonne ?? totals?.fly_ash_tonne) || 0;
-    const genSolid = Number(totals?.generation?.non_hazardous_solid_waste_tonne ?? totals?.non_hazardous_solid_waste_tonne) || 0;
-    const genOtherNonHaz = totals?.generation?.other_non_hazardous_waste_tonne
-        ? Number(totals.generation.other_non_hazardous_waste_tonne)
-        : genFlyAsh + genSolid;
-
-    const recFlyAsh = Number(totals?.recovery?.fly_ash_tonne) || 0;
-    const recSolid = Number(totals?.recovery?.non_hazardous_solid_waste_tonne) || 0;
-    const recOtherNonHaz = totals?.recovery?.other_non_hazardous_waste_tonne
-        ? Number(totals.recovery.other_non_hazardous_waste_tonne)
-        : recFlyAsh + recSolid;
-
-    const dispFlyAsh = Number(totals?.disposal?.fly_ash_tonne) || 0;
-    const dispSolid = Number(totals?.disposal?.non_hazardous_solid_waste_tonne) || 0;
-    const dispOtherNonHaz = totals?.disposal?.other_non_hazardous_waste_tonne
-        ? Number(totals.disposal.other_non_hazardous_waste_tonne)
-        : dispFlyAsh + dispSolid;
 
     return (
         <div className="space-y-8 max-w-7xl mx-auto animate-fade-up font-sans">
@@ -285,7 +249,7 @@ export default function BrsrWastePage() {
                         BRSR Waste Disclosure &amp; Management
                     </h1>
                     <p className="text-sm text-on-surface-variant">
-                        Symmetric 9-category breakdown for waste generation, circular economy recovery, and final disposal in accordance with BRSR Principle 6.
+                        Principle 6 Waste Disclosure: 9-category breakdown across Waste Generation, Recovery matrix (Recycled / Reused / Other), and Disposal matrix (Incineration / Landfill / Other).
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -313,7 +277,7 @@ export default function BrsrWastePage() {
                         <div className="flex items-center gap-2">
                             <MaterialIcon name="tune" size="sm" className="text-primary" />
                             <span className="font-sans text-body-sm font-bold text-on-surface">
-                                9-Category Waste Parameter Entry &amp; Configuration
+                                Waste Disclosure Parameter Entry &amp; Operations Matrix
                             </span>
                         </div>
                         {/* Tab Switcher for Controls */}
@@ -340,7 +304,7 @@ export default function BrsrWastePage() {
                                 className={`px-2.5 py-1 rounded-md transition-all ${
                                     activeInputTab === "recovery" ? "bg-white text-emerald-700 shadow-xs font-bold" : "text-slate-600 hover:text-slate-900"
                                 }`}>
-                                2. Recovery
+                                2. Recovery Matrix
                             </button>
                             <button
                                 type="button"
@@ -348,7 +312,7 @@ export default function BrsrWastePage() {
                                 className={`px-2.5 py-1 rounded-md transition-all ${
                                     activeInputTab === "disposal" ? "bg-white text-amber-700 shadow-xs font-bold" : "text-slate-600 hover:text-slate-900"
                                 }`}>
-                                3. Disposal
+                                3. Disposal Matrix
                             </button>
                         </div>
                     </CardHeader>
@@ -416,19 +380,19 @@ export default function BrsrWastePage() {
                             </div>
                         )}
 
-                        {/* Tab 2: Waste Generation (9 Categories) */}
+                        {/* Tab 2: Table 1 - Waste Generation (9 Categories) */}
                         {activeInputTab === "generation" && (
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-bold text-blue-700 uppercase tracking-wider block">
-                                        1. Waste Generation — 9 Categories (Tonnes)
+                                        Table 1: Waste Generation — 9 Categories (Tonnes)
                                     </span>
                                     <span className="text-[11px] text-slate-500 font-mono">
                                         Total: {Object.values(genInputs).reduce((a, b) => a + (Number(b) || 0), 0).toFixed(2)} t
                                     </span>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
-                                    {WASTE_CATEGORIES.map((cat) => (
+                                    {WASTE_CATEGORY_KEYS.map((cat) => (
                                         <div key={cat.key} className="space-y-1 bg-slate-50/70 p-2.5 rounded-lg border border-slate-200/80">
                                             <label className="text-xs font-semibold text-slate-800 flex items-center justify-between">
                                                 <span>{cat.label}</span>
@@ -438,8 +402,8 @@ export default function BrsrWastePage() {
                                                 type="number"
                                                 step="0.01"
                                                 placeholder="0.00"
-                                                value={genInputs[cat.key] || ""}
-                                                onChange={(e) => handleGenFieldChange(cat.key, e.target.value)}
+                                                value={genInputs[cat.genKey] || ""}
+                                                onChange={(e) => handleGenFieldChange(cat.genKey, e.target.value)}
                                                 className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface focus:outline-none focus:border-primary"
                                             />
                                         </div>
@@ -448,158 +412,158 @@ export default function BrsrWastePage() {
                             </div>
                         )}
 
-                        {/* Tab 3: Waste Recovery (9 Categories + Methods) */}
+                        {/* Tab 3: Table 2 - Waste Recovery (Category-Wise Matrix) */}
                         {activeInputTab === "recovery" && (
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider block">
-                                        2. Waste Recovery — 9 Categories &amp; Methods (Tonnes)
-                                    </span>
-                                </div>
-
-                                {/* Category Streams in Recovery */}
-                                <div className="space-y-2">
-                                    <span className="text-[11px] font-bold text-slate-600 uppercase">
-                                        Recovery by Category Stream
-                                    </span>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
-                                        {WASTE_CATEGORIES.map((cat) => (
-                                            <div key={cat.key} className="space-y-1 bg-emerald-50/30 p-2.5 rounded-lg border border-emerald-200/60">
-                                                <label className="text-xs font-semibold text-slate-800 flex items-center justify-between">
-                                                    <span>{cat.label}</span>
-                                                    <span className="font-mono text-[10px] text-emerald-700 font-bold">({cat.code})</span>
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    step="0.01"
-                                                    placeholder="0.00"
-                                                    value={recInputs[cat.key] || ""}
-                                                    onChange={(e) => handleRecFieldChange(cat.key, e.target.value)}
-                                                    className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface focus:outline-none focus:border-emerald-600"
-                                                />
-                                            </div>
-                                        ))}
+                                    <div>
+                                        <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider block">
+                                            Table 2: Waste Recovered — Category-Wise Operations Matrix
+                                        </span>
+                                        <p className="text-[11px] text-slate-500">
+                                            Enter operations for each category. Row totals are calculated automatically.
+                                        </p>
                                     </div>
                                 </div>
 
-                                {/* Recovery by Method */}
-                                <div className="border-t border-slate-200 pt-3 space-y-2">
-                                    <span className="text-[11px] font-bold text-slate-600 uppercase">
-                                        Recovery by Destination Method
-                                    </span>
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                        <div className="space-y-1 bg-white p-2.5 rounded-lg border border-slate-200">
-                                            <label className="text-xs font-semibold text-slate-800 block">Recycled (t)</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                placeholder="0.00"
-                                                value={recInputs.recycled_tonne || ""}
-                                                onChange={(e) => handleRecFieldChange("recycled_tonne", e.target.value)}
-                                                className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface"
-                                            />
-                                        </div>
-                                        <div className="space-y-1 bg-white p-2.5 rounded-lg border border-slate-200">
-                                            <label className="text-xs font-semibold text-slate-800 block">Reused (t)</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                placeholder="0.00"
-                                                value={recInputs.reused_tonne || ""}
-                                                onChange={(e) => handleRecFieldChange("reused_tonne", e.target.value)}
-                                                className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface"
-                                            />
-                                        </div>
-                                        <div className="space-y-1 bg-white p-2.5 rounded-lg border border-slate-200">
-                                            <label className="text-xs font-semibold text-slate-800 block">Other Recovery Operations (t)</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                placeholder="0.00"
-                                                value={recInputs.other_recovery_tonne || ""}
-                                                onChange={(e) => handleRecFieldChange("other_recovery_tonne", e.target.value)}
-                                                className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface"
-                                            />
-                                        </div>
-                                    </div>
+                                <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+                                    <table className="w-full text-xs text-left">
+                                        <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold">
+                                            <tr>
+                                                <th className="py-2.5 px-3">Category</th>
+                                                <th className="py-2.5 px-3">Recycled (t)</th>
+                                                <th className="py-2.5 px-3">Re-used (t)</th>
+                                                <th className="py-2.5 px-3">Other Recovery (t)</th>
+                                                <th className="py-2.5 px-3 text-right">Row Total (t)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100">
+                                            {WASTE_CATEGORY_KEYS.map((cat) => {
+                                                const row = recInputs[cat.key];
+                                                const rowTotal = (Number(row.recycled_tonne) || 0) + (Number(row.reused_tonne) || 0) + (Number(row.other_recovery_tonne) || 0);
+
+                                                return (
+                                                    <tr key={cat.key} className="hover:bg-slate-50/60">
+                                                        <td className="py-2 px-3 font-medium text-slate-900 whitespace-nowrap">
+                                                            <span>{cat.label}</span>{" "}
+                                                            <span className="text-[10px] text-slate-400 font-mono">({cat.code})</span>
+                                                        </td>
+                                                        <td className="py-2 px-3">
+                                                            <input
+                                                                type="number"
+                                                                step="0.01"
+                                                                placeholder="0.00"
+                                                                value={row.recycled_tonne || ""}
+                                                                onChange={(e) => handleRecMatrixChange(cat.key, "recycled_tonne", e.target.value)}
+                                                                className="w-24 rounded border border-slate-200 px-2 py-1 font-mono text-xs focus:border-emerald-600 focus:outline-none"
+                                                            />
+                                                        </td>
+                                                        <td className="py-2 px-3">
+                                                            <input
+                                                                type="number"
+                                                                step="0.01"
+                                                                placeholder="0.00"
+                                                                value={row.reused_tonne || ""}
+                                                                onChange={(e) => handleRecMatrixChange(cat.key, "reused_tonne", e.target.value)}
+                                                                className="w-24 rounded border border-slate-200 px-2 py-1 font-mono text-xs focus:border-emerald-600 focus:outline-none"
+                                                            />
+                                                        </td>
+                                                        <td className="py-2 px-3">
+                                                            <input
+                                                                type="number"
+                                                                step="0.01"
+                                                                placeholder="0.00"
+                                                                value={row.other_recovery_tonne || ""}
+                                                                onChange={(e) => handleRecMatrixChange(cat.key, "other_recovery_tonne", e.target.value)}
+                                                                className="w-24 rounded border border-slate-200 px-2 py-1 font-mono text-xs focus:border-emerald-600 focus:outline-none"
+                                                            />
+                                                        </td>
+                                                        <td className="py-2 px-3 text-right font-mono font-bold text-emerald-700">
+                                                            {rowTotal.toFixed(2)}
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         )}
 
-                        {/* Tab 4: Waste Disposal (9 Categories + Methods) */}
+                        {/* Tab 4: Table 3 - Waste Disposal (Category-Wise Matrix) */}
                         {activeInputTab === "disposal" && (
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-amber-700 uppercase tracking-wider block">
-                                        3. Waste Disposal — 9 Categories &amp; Methods (Tonnes)
-                                    </span>
-                                </div>
-
-                                {/* Category Streams in Disposal */}
-                                <div className="space-y-2">
-                                    <span className="text-[11px] font-bold text-slate-600 uppercase">
-                                        Disposal by Category Stream
-                                    </span>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
-                                        {WASTE_CATEGORIES.map((cat) => (
-                                            <div key={cat.key} className="space-y-1 bg-amber-50/30 p-2.5 rounded-lg border border-amber-200/60">
-                                                <label className="text-xs font-semibold text-slate-800 flex items-center justify-between">
-                                                    <span>{cat.label}</span>
-                                                    <span className="font-mono text-[10px] text-amber-700 font-bold">({cat.code})</span>
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    step="0.01"
-                                                    placeholder="0.00"
-                                                    value={dispInputs[cat.key] || ""}
-                                                    onChange={(e) => handleDispFieldChange(cat.key, e.target.value)}
-                                                    className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface focus:outline-none focus:border-amber-600"
-                                                />
-                                            </div>
-                                        ))}
+                                    <div>
+                                        <span className="text-xs font-bold text-amber-700 uppercase tracking-wider block">
+                                            Table 3: Waste Disposed — Category-Wise Operations Matrix
+                                        </span>
+                                        <p className="text-[11px] text-slate-500">
+                                            Enter operations for each category. Row totals are calculated automatically.
+                                        </p>
                                     </div>
                                 </div>
 
-                                {/* Disposal by Method */}
-                                <div className="border-t border-slate-200 pt-3 space-y-2">
-                                    <span className="text-[11px] font-bold text-slate-600 uppercase">
-                                        Disposal by Treatment Method
-                                    </span>
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                        <div className="space-y-1 bg-white p-2.5 rounded-lg border border-slate-200">
-                                            <label className="text-xs font-semibold text-slate-800 block">Incineration (t)</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                placeholder="0.00"
-                                                value={dispInputs.incineration_tonne || ""}
-                                                onChange={(e) => handleDispFieldChange("incineration_tonne", e.target.value)}
-                                                className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface"
-                                            />
-                                        </div>
-                                        <div className="space-y-1 bg-white p-2.5 rounded-lg border border-slate-200">
-                                            <label className="text-xs font-semibold text-slate-800 block">Landfilling (t)</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                placeholder="0.00"
-                                                value={dispInputs.landfilling_tonne || ""}
-                                                onChange={(e) => handleDispFieldChange("landfilling_tonne", e.target.value)}
-                                                className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface"
-                                            />
-                                        </div>
-                                        <div className="space-y-1 bg-white p-2.5 rounded-lg border border-slate-200">
-                                            <label className="text-xs font-semibold text-slate-800 block">Other Disposal Operations (t)</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                placeholder="0.00"
-                                                value={dispInputs.other_disposal_tonne || ""}
-                                                onChange={(e) => handleDispFieldChange("other_disposal_tonne", e.target.value)}
-                                                className="w-full rounded-md border border-outline-variant bg-white px-2.5 py-1 font-mono text-xs text-on-surface"
-                                            />
-                                        </div>
-                                    </div>
+                                <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+                                    <table className="w-full text-xs text-left">
+                                        <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold">
+                                            <tr>
+                                                <th className="py-2.5 px-3">Category</th>
+                                                <th className="py-2.5 px-3">Incineration (t)</th>
+                                                <th className="py-2.5 px-3">Landfilling (t)</th>
+                                                <th className="py-2.5 px-3">Other Disposal (t)</th>
+                                                <th className="py-2.5 px-3 text-right">Row Total (t)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100">
+                                            {WASTE_CATEGORY_KEYS.map((cat) => {
+                                                const row = dispInputs[cat.key];
+                                                const rowTotal = (Number(row.incineration_tonne) || 0) + (Number(row.landfilling_tonne) || 0) + (Number(row.other_disposal_tonne) || 0);
+
+                                                return (
+                                                    <tr key={cat.key} className="hover:bg-slate-50/60">
+                                                        <td className="py-2 px-3 font-medium text-slate-900 whitespace-nowrap">
+                                                            <span>{cat.label}</span>{" "}
+                                                            <span className="text-[10px] text-slate-400 font-mono">({cat.code})</span>
+                                                        </td>
+                                                        <td className="py-2 px-3">
+                                                            <input
+                                                                type="number"
+                                                                step="0.01"
+                                                                placeholder="0.00"
+                                                                value={row.incineration_tonne || ""}
+                                                                onChange={(e) => handleDispMatrixChange(cat.key, "incineration_tonne", e.target.value)}
+                                                                className="w-24 rounded border border-slate-200 px-2 py-1 font-mono text-xs focus:border-amber-600 focus:outline-none"
+                                                            />
+                                                        </td>
+                                                        <td className="py-2 px-3">
+                                                            <input
+                                                                type="number"
+                                                                step="0.01"
+                                                                placeholder="0.00"
+                                                                value={row.landfilling_tonne || ""}
+                                                                onChange={(e) => handleDispMatrixChange(cat.key, "landfilling_tonne", e.target.value)}
+                                                                className="w-24 rounded border border-slate-200 px-2 py-1 font-mono text-xs focus:border-amber-600 focus:outline-none"
+                                                            />
+                                                        </td>
+                                                        <td className="py-2 px-3">
+                                                            <input
+                                                                type="number"
+                                                                step="0.01"
+                                                                placeholder="0.00"
+                                                                value={row.other_disposal_tonne || ""}
+                                                                onChange={(e) => handleDispMatrixChange(cat.key, "other_disposal_tonne", e.target.value)}
+                                                                className="w-24 rounded border border-slate-200 px-2 py-1 font-mono text-xs focus:border-amber-600 focus:outline-none"
+                                                            />
+                                                        </td>
+                                                        <td className="py-2 px-3 text-right font-mono font-bold text-amber-700">
+                                                            {rowTotal.toFixed(2)}
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         )}
@@ -619,7 +583,7 @@ export default function BrsrWastePage() {
                                 disabled={isPending}
                                 className="flex items-center gap-2">
                                 <MaterialIcon name="refresh" size="sm" />
-                                Generate 9-Category Metrics
+                                Calculate &amp; Preview Report
                             </Button>
                         </div>
                     </CardBody>
@@ -636,14 +600,14 @@ export default function BrsrWastePage() {
                         Configure Waste Disclosure Parameters
                     </h3>
                     <p className="mt-2 text-body-md text-on-surface-variant max-w-md mx-auto">
-                        Enter the Financial Year, Turnover, and 9-category waste streams in the controls panel above, then click Generate 9-Category Metrics.
+                        Enter the Financial Year, Turnover, and operations matrix in the controls panel above, then click Calculate &amp; Preview Report.
                     </p>
                 </div>
             ) : isPending ? (
                 <div className="flex h-48 flex-col items-center justify-center gap-2">
                     <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
                     <p className="font-mono text-label-md text-on-surface-variant animate-pulse">
-                        Calculating 9-category waste metrics...
+                        Calculating BRSR waste disclosure report...
                     </p>
                 </div>
             ) : isError ? (
@@ -658,13 +622,13 @@ export default function BrsrWastePage() {
                         {/* 4-Card Overview Metrics Grid */}
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             {/* 1. Total Generated */}
-                            <Card interactive className="border-l-4 border-l-red-500">
+                            <Card interactive className="border-l-4 border-l-blue-600">
                                 <CardBody className="flex flex-col justify-between h-full p-card-padding">
                                     <div className="flex items-start justify-between gap-2 mb-2">
                                         <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                                             Total Waste Generated
                                         </span>
-                                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 text-red-600">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600">
                                             <MaterialIcon name="delete_sweep" size="sm" />
                                         </div>
                                     </div>
@@ -673,7 +637,7 @@ export default function BrsrWastePage() {
                                             <span className="text-headline-md font-bold text-primary">
                                                 {formatTonne(totals.total_waste_tonne)}
                                             </span>
-                                            <span className="text-xs font-sans text-on-surface-variant">tonnes</span>
+                                            <span className="text-xs font-sans text-on-surface-variant">MT</span>
                                         </div>
                                         <p className="text-[11px] text-on-surface-variant mt-1">
                                             Section Total (A through H)
@@ -696,9 +660,9 @@ export default function BrsrWastePage() {
                                     <div>
                                         <div className="flex items-baseline gap-1.5 font-mono">
                                             <span className="text-headline-md font-bold text-emerald-600">
-                                                {formatTonne(totals.total_recovered_tonne)}
+                                                {formatTonne(totals.recovery?.total_recovered_tonne ?? totals.total_recovered_tonne)}
                                             </span>
-                                            <span className="text-xs font-sans text-on-surface-variant">tonnes</span>
+                                            <span className="text-xs font-sans text-on-surface-variant">MT</span>
                                         </div>
                                         <p className="text-[11px] text-on-surface-variant mt-1 font-semibold text-emerald-700">
                                             {recoveryRate.toFixed(1)}% Circular Recovery Rate
@@ -721,9 +685,9 @@ export default function BrsrWastePage() {
                                     <div>
                                         <div className="flex items-baseline gap-1.5 font-mono">
                                             <span className="text-headline-md font-bold text-amber-600">
-                                                {formatTonne(totals.total_disposed_tonne)}
+                                                {formatTonne(totals.disposal?.total_disposed_tonne ?? totals.total_disposed_tonne)}
                                             </span>
-                                            <span className="text-xs font-sans text-on-surface-variant">tonnes</span>
+                                            <span className="text-xs font-sans text-on-surface-variant">MT</span>
                                         </div>
                                         <p className="text-[11px] text-on-surface-variant mt-1 font-semibold text-amber-700">
                                             {disposalRate.toFixed(1)}% Final Treatment Rate
@@ -748,52 +712,44 @@ export default function BrsrWastePage() {
                                             {Number(totals.waste_intensity_per_inr).toFixed(8)}
                                         </div>
                                         <p className="text-[11px] text-on-surface-variant mt-1">
-                                            tonnes / ₹ turnover ({formatTonne(totals.waste_intensity_per_physical_output)} t/output)
+                                            MT / ₹ turnover ({formatTonne(totals.waste_intensity_per_physical_output)} MT/output)
                                         </p>
                                     </div>
                                 </CardBody>
                             </Card>
                         </div>
 
-                        {/* Symmetric 9-Category Master Comparison Table */}
+                        {/* Table 1: Waste Generated (MT) */}
                         <Card>
                             <CardHeader tone="flat" className="flex-wrap items-center justify-between gap-2">
                                 <div className="flex items-center gap-2.5">
-                                    <MaterialIcon name="table_chart" size="sm" className="text-primary" />
+                                    <MaterialIcon name="delete_sweep" size="sm" className="text-blue-600" />
                                     <div>
                                         <h3 className="text-headline-sm font-semibold text-primary">
-                                            Symmetric 9-Category Waste Balance Table
+                                            Table 1: Waste Generated (MT)
                                         </h3>
                                         <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
-                                            BRSR Standard Categories (A through H): Generation, Recovery, and Disposal streams (tonnes)
+                                            Category breakdown A through G, H (Fly ash + Solid waste), and Total Waste Generated
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <Badge variant="active" size="md">
-                                        {formatTonne(totals.total_waste_tonne)} t Generated
-                                    </Badge>
-                                </div>
+                                <Badge variant="active" size="md">
+                                    {formatTonne(totals.total_waste_tonne)} MT Total
+                                </Badge>
                             </CardHeader>
                             <CardBody className="p-0 overflow-x-auto">
-                                <Table className="min-w-[760px]">
+                                <Table className="min-w-[680px]">
                                     <TableHeader className="bg-slate-50 border-b border-slate-200">
                                         <TableRow className="hover:bg-transparent">
                                             <TableHead className="py-3 pl-6 font-semibold text-xs text-slate-700">Code</TableHead>
                                             <TableHead className="py-3 font-semibold text-xs text-slate-700">Category Parameter</TableHead>
-                                            <TableHead className="py-3 font-semibold text-xs text-slate-700">Stream Type</TableHead>
-                                            <TableHead className="py-3 font-semibold text-xs text-right text-blue-700">Generated (t)</TableHead>
-                                            <TableHead className="py-3 font-semibold text-xs text-right text-emerald-700">Recovered (t)</TableHead>
-                                            <TableHead className="py-3 font-semibold text-xs text-right text-amber-700">Disposed (t)</TableHead>
-                                            <TableHead className="py-3 pr-6 font-semibold text-xs text-right text-slate-700">Recovery Rate</TableHead>
+                                            <TableHead className="py-3 font-semibold text-xs text-slate-700">Stream Classification</TableHead>
+                                            <TableHead className="py-3 pr-6 font-semibold text-xs text-right text-blue-700">Generated (MT)</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody className="divide-y divide-slate-100">
-                                        {WASTE_CATEGORIES.map((cat) => {
-                                            const genVal = Number(totals.generation?.[cat.key] ?? totals[cat.key]) || 0;
-                                            const recVal = Number(totals.recovery?.[cat.key]) || 0;
-                                            const dispVal = Number(totals.disposal?.[cat.key]) || 0;
-                                            const catRecRate = genVal > 0 ? (recVal / genVal) * 100 : 0;
+                                        {WASTE_CATEGORY_KEYS.map((cat) => {
+                                            const genVal = totals.generation?.[cat.genKey];
 
                                             return (
                                                 <TableRow key={cat.key} className="hover:bg-slate-50/80 transition-colors">
@@ -814,63 +770,36 @@ export default function BrsrWastePage() {
                                                             </span>
                                                         )}
                                                     </TableCell>
-                                                    <TableCell className="py-3 font-mono text-xs text-right font-semibold text-slate-800">
+                                                    <TableCell className="pr-6 py-3 font-mono text-xs text-right font-semibold text-slate-900">
                                                         {formatTonne(genVal)}
-                                                    </TableCell>
-                                                    <TableCell className="py-3 font-mono text-xs text-right font-semibold text-emerald-700">
-                                                        {formatTonne(recVal)}
-                                                    </TableCell>
-                                                    <TableCell className="py-3 font-mono text-xs text-right font-semibold text-amber-700">
-                                                        {formatTonne(dispVal)}
-                                                    </TableCell>
-                                                    <TableCell className="pr-6 py-3 font-mono text-xs text-right text-slate-600">
-                                                        {genVal > 0 ? `${catRecRate.toFixed(1)}%` : "—"}
                                                     </TableCell>
                                                 </TableRow>
                                             );
                                         })}
 
                                         {/* Subtotal Category H (Other Non-Hazardous Waste = Fly ash + Solid waste) */}
-                                        <TableRow className="bg-slate-50/60 font-semibold border-t-2 border-slate-200">
+                                        <TableRow className="bg-slate-50/70 font-semibold border-t-2 border-slate-200">
                                             <TableCell className="pl-6 py-3 font-mono text-xs font-bold text-slate-700">
                                                 H
                                             </TableCell>
-                                            <TableCell className="py-3 text-xs text-slate-900" colSpan={2}>
+                                            <TableCell className="py-3 text-xs text-slate-900 font-bold" colSpan={2}>
                                                 Total Other Non-Hazardous Waste (H.i + H.ii)
                                             </TableCell>
-                                            <TableCell className="py-3 font-mono text-xs text-right font-bold text-slate-900">
-                                                {formatTonne(genOtherNonHaz)}
-                                            </TableCell>
-                                            <TableCell className="py-3 font-mono text-xs text-right font-bold text-emerald-800">
-                                                {formatTonne(recOtherNonHaz)}
-                                            </TableCell>
-                                            <TableCell className="py-3 font-mono text-xs text-right font-bold text-amber-800">
-                                                {formatTonne(dispOtherNonHaz)}
-                                            </TableCell>
-                                            <TableCell className="pr-6 py-3 font-mono text-xs text-right font-bold text-slate-700">
-                                                {genOtherNonHaz > 0 ? `${((recOtherNonHaz / genOtherNonHaz) * 100).toFixed(1)}%` : "—"}
+                                            <TableCell className="pr-6 py-3 font-mono text-xs text-right font-bold text-slate-900">
+                                                {formatTonne(totals.generation?.other_non_hazardous_waste_tonne)}
                                             </TableCell>
                                         </TableRow>
 
-                                        {/* Section Grand Totals (A through H) */}
+                                        {/* Total Waste Generated */}
                                         <TableRow className="bg-primary/5 font-bold border-t-2 border-primary/20">
                                             <TableCell className="pl-6 py-3.5 font-mono text-xs text-primary">
                                                 TOTAL
                                             </TableCell>
                                             <TableCell className="py-3.5 text-xs text-primary font-bold" colSpan={2}>
-                                                Section Grand Total (A + B + C + D + E + F + G + H)
+                                                Total Waste Generated (A + B + C + D + E + F + G + H)
                                             </TableCell>
-                                            <TableCell className="py-3.5 font-mono text-sm text-right text-primary font-bold">
-                                                {formatTonne(totals.total_waste_tonne)} t
-                                            </TableCell>
-                                            <TableCell className="py-3.5 font-mono text-sm text-right text-emerald-800 font-bold">
-                                                {formatTonne(totals.total_recovered_tonne)} t
-                                            </TableCell>
-                                            <TableCell className="py-3.5 font-mono text-sm text-right text-amber-800 font-bold">
-                                                {formatTonne(totals.total_disposed_tonne)} t
-                                            </TableCell>
-                                            <TableCell className="pr-6 py-3.5 font-mono text-sm text-right text-emerald-700 font-bold">
-                                                {recoveryRate.toFixed(1)}%
+                                            <TableCell className="pr-6 py-3.5 font-mono text-sm text-right text-primary font-bold">
+                                                {formatTonne(totals.total_waste_tonne)} MT
                                             </TableCell>
                                         </TableRow>
                                     </TableBody>
@@ -878,72 +807,217 @@ export default function BrsrWastePage() {
                             </CardBody>
                         </Card>
 
-                        {/* Recovery & Disposal Method Breakdown Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Circular Recovery by Method Card */}
-                            <Card>
-                                <CardHeader tone="flat" className="flex-wrap items-center justify-between gap-2">
-                                    <div className="flex items-center gap-2">
-                                        <MaterialIcon name="recycling" size="sm" className="text-emerald-500" />
-                                        <div>
-                                            <h3 className="text-headline-sm font-semibold text-primary">
-                                                Circular Economy Recovery by Method
-                                            </h3>
-                                            <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
-                                                Destination breakdown for recycled, reused, and recovered waste (tonnes)
-                                            </p>
-                                        </div>
+                        {/* Table 2: Waste Recovered (MT) - Category-Wise Operations Matrix */}
+                        <Card>
+                            <CardHeader tone="flat" className="flex-wrap items-center justify-between gap-2">
+                                <div className="flex items-center gap-2.5">
+                                    <MaterialIcon name="recycling" size="sm" className="text-emerald-600" />
+                                    <div>
+                                        <h3 className="text-headline-sm font-semibold text-primary">
+                                            Table 2: Waste Recovered (MT)
+                                        </h3>
+                                        <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
+                                            Category-wise recovery operation matrix: Recycled, Re-used, and Other recovery operations
+                                        </p>
                                     </div>
-                                    <Badge variant="positive" size="sm">
-                                        {formatTonne(totals.total_recovered_by_method_tonne ?? totals.total_recovered_tonne)} t
-                                    </Badge>
-                                </CardHeader>
-                                <CardBody className="p-card-padding space-y-4">
-                                    <WasteStreamRow label="Recycled Waste" val={totals.recycled_tonne} total={totalGen} color="#10b981" />
-                                    <WasteStreamRow label="Reused Waste" val={totals.reused_tonne} total={totalGen} color="#059669" />
-                                    <WasteStreamRow label="Other Recovery Operations" val={totals.other_recovery_tonne} total={totalGen} color="#047857" />
+                                </div>
+                                <Badge variant="positive" size="md">
+                                    {formatTonne(totals.recovery?.total_recovered_tonne)} MT Recovered
+                                </Badge>
+                            </CardHeader>
+                            <CardBody className="p-0 overflow-x-auto">
+                                <Table className="min-w-[760px]">
+                                    <TableHeader className="bg-slate-50 border-b border-slate-200">
+                                        <TableRow className="hover:bg-transparent">
+                                            <TableHead className="py-3 pl-6 font-semibold text-xs text-slate-700">Code</TableHead>
+                                            <TableHead className="py-3 font-semibold text-xs text-slate-700">Category Parameter</TableHead>
+                                            <TableHead className="py-3 font-semibold text-xs text-right text-emerald-800">Recycled (MT)</TableHead>
+                                            <TableHead className="py-3 font-semibold text-xs text-right text-emerald-800">Re-used (MT)</TableHead>
+                                            <TableHead className="py-3 font-semibold text-xs text-right text-emerald-800">Other Recovery (MT)</TableHead>
+                                            <TableHead className="py-3 pr-6 font-semibold text-xs text-right text-emerald-900 font-bold">Total (MT)</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody className="divide-y divide-slate-100">
+                                        {WASTE_CATEGORY_KEYS.map((cat) => {
+                                            const recItem = totals.recovery?.[cat.key];
 
-                                    <div className="flex items-center justify-between rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3.5 mt-2">
-                                        <span className="text-sm font-bold text-emerald-900">Total Recovered by Method</span>
-                                        <span className="font-mono text-base font-bold text-emerald-900">
-                                            {formatTonne(totals.total_recovered_by_method_tonne ?? totals.total_recovered_tonne)} <span className="text-xs font-sans font-normal">t</span>
-                                        </span>
-                                    </div>
-                                </CardBody>
-                            </Card>
+                                            return (
+                                                <TableRow key={cat.key} className="hover:bg-slate-50/80 transition-colors">
+                                                    <TableCell className="pl-6 py-3 font-mono text-xs font-bold text-slate-500">
+                                                        {cat.code}
+                                                    </TableCell>
+                                                    <TableCell className="py-3 font-medium text-xs text-slate-900">
+                                                        {cat.label}
+                                                    </TableCell>
+                                                    <TableCell className="py-3 font-mono text-xs text-right text-slate-800">
+                                                        {formatTonne(recItem?.recycled_tonne)}
+                                                    </TableCell>
+                                                    <TableCell className="py-3 font-mono text-xs text-right text-slate-800">
+                                                        {formatTonne(recItem?.reused_tonne)}
+                                                    </TableCell>
+                                                    <TableCell className="py-3 font-mono text-xs text-right text-slate-800">
+                                                        {formatTonne(recItem?.other_recovery_tonne)}
+                                                    </TableCell>
+                                                    <TableCell className="pr-6 py-3 font-mono text-xs text-right font-bold text-emerald-700">
+                                                        {formatTonne(recItem?.total_tonne)}
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
 
-                            {/* Final Disposal by Method Card */}
-                            <Card>
-                                <CardHeader tone="flat" className="flex-wrap items-center justify-between gap-2">
-                                    <div className="flex items-center gap-2">
-                                        <MaterialIcon name="delete_outline" size="sm" className="text-amber-500" />
-                                        <div>
-                                            <h3 className="text-headline-sm font-semibold text-primary">
-                                                Final Waste Disposal by Method
-                                            </h3>
-                                            <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
-                                                Treatment breakdown for incinerated, landfilled, and disposed waste (tonnes)
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <Badge variant="neutral" size="sm">
-                                        {formatTonne(totals.total_disposed_by_method_tonne ?? totals.total_disposed_tonne)} t
-                                    </Badge>
-                                </CardHeader>
-                                <CardBody className="p-card-padding space-y-4">
-                                    <WasteStreamRow label="Incineration" val={totals.incineration_tonne} total={totalGen} color="#f59e0b" />
-                                    <WasteStreamRow label="Landfilling" val={totals.landfilling_tonne} total={totalGen} color="#d97706" />
-                                    <WasteStreamRow label="Other Disposal Operations" val={totals.other_disposal_tonne} total={totalGen} color="#b45309" />
+                                        {/* Subtotal Category H (Other Non-Hazardous Waste in Recovery) */}
+                                        <TableRow className="bg-slate-50/70 font-semibold border-t-2 border-slate-200">
+                                            <TableCell className="pl-6 py-3 font-mono text-xs font-bold text-slate-700">
+                                                H
+                                            </TableCell>
+                                            <TableCell className="py-3 text-xs text-slate-900 font-bold">
+                                                Other Non-Hazardous Waste (H.i + H.ii)
+                                            </TableCell>
+                                            <TableCell className="py-3 font-mono text-xs text-right font-bold text-slate-900">
+                                                {formatTonne(totals.recovery?.other_non_hazardous_waste?.recycled_tonne)}
+                                            </TableCell>
+                                            <TableCell className="py-3 font-mono text-xs text-right font-bold text-slate-900">
+                                                {formatTonne(totals.recovery?.other_non_hazardous_waste?.reused_tonne)}
+                                            </TableCell>
+                                            <TableCell className="py-3 font-mono text-xs text-right font-bold text-slate-900">
+                                                {formatTonne(totals.recovery?.other_non_hazardous_waste?.other_recovery_tonne)}
+                                            </TableCell>
+                                            <TableCell className="pr-6 py-3 font-mono text-xs text-right font-bold text-emerald-800">
+                                                {formatTonne(totals.recovery?.other_non_hazardous_waste?.total_tonne)}
+                                            </TableCell>
+                                        </TableRow>
 
-                                    <div className="flex items-center justify-between rounded-lg border border-amber-500/20 bg-amber-500/5 p-3.5 mt-2">
-                                        <span className="text-sm font-bold text-amber-900">Total Disposed by Method</span>
-                                        <span className="font-mono text-base font-bold text-amber-900">
-                                            {formatTonne(totals.total_disposed_by_method_tonne ?? totals.total_disposed_tonne)} <span className="text-xs font-sans font-normal">t</span>
-                                        </span>
+                                        {/* Footer Row: Total Recovered */}
+                                        <TableRow className="bg-emerald-500/10 font-bold border-t-2 border-emerald-500/30">
+                                            <TableCell className="pl-6 py-3.5 font-mono text-xs text-emerald-950">
+                                                TOTAL
+                                            </TableCell>
+                                            <TableCell className="py-3.5 text-xs text-emerald-950 font-bold">
+                                                Total Recovered Operations
+                                            </TableCell>
+                                            <TableCell className="py-3.5 font-mono text-xs text-right text-emerald-950 font-bold">
+                                                {formatTonne(totals.recovery?.total_recycled_tonne)} MT
+                                            </TableCell>
+                                            <TableCell className="py-3.5 font-mono text-xs text-right text-emerald-950 font-bold">
+                                                {formatTonne(totals.recovery?.total_reused_tonne)} MT
+                                            </TableCell>
+                                            <TableCell className="py-3.5 font-mono text-xs text-right text-emerald-950 font-bold">
+                                                {formatTonne(totals.recovery?.total_other_recovery_tonne)} MT
+                                            </TableCell>
+                                            <TableCell className="pr-6 py-3.5 font-mono text-sm text-right text-emerald-900 font-bold">
+                                                {formatTonne(totals.recovery?.total_recovered_tonne)} MT
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+                            </CardBody>
+                        </Card>
+
+                        {/* Table 3: Waste Disposed (MT) - Category-Wise Operations Matrix */}
+                        <Card>
+                            <CardHeader tone="flat" className="flex-wrap items-center justify-between gap-2">
+                                <div className="flex items-center gap-2.5">
+                                    <MaterialIcon name="delete_outline" size="sm" className="text-amber-600" />
+                                    <div>
+                                        <h3 className="text-headline-sm font-semibold text-primary">
+                                            Table 3: Waste Disposed (MT)
+                                        </h3>
+                                        <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
+                                            Category-wise disposal operation matrix: Incineration, Landfilling, and Other disposal operations
+                                        </p>
                                     </div>
-                                </CardBody>
-                            </Card>
-                        </div>
+                                </div>
+                                <Badge variant="neutral" size="md">
+                                    {formatTonne(totals.disposal?.total_disposed_tonne)} MT Disposed
+                                </Badge>
+                            </CardHeader>
+                            <CardBody className="p-0 overflow-x-auto">
+                                <Table className="min-w-[760px]">
+                                    <TableHeader className="bg-slate-50 border-b border-slate-200">
+                                        <TableRow className="hover:bg-transparent">
+                                            <TableHead className="py-3 pl-6 font-semibold text-xs text-slate-700">Code</TableHead>
+                                            <TableHead className="py-3 font-semibold text-xs text-slate-700">Category Parameter</TableHead>
+                                            <TableHead className="py-3 font-semibold text-xs text-right text-amber-800">Incineration (MT)</TableHead>
+                                            <TableHead className="py-3 font-semibold text-xs text-right text-amber-800">Landfilling (MT)</TableHead>
+                                            <TableHead className="py-3 font-semibold text-xs text-right text-amber-800">Other Disposal (MT)</TableHead>
+                                            <TableHead className="py-3 pr-6 font-semibold text-xs text-right text-amber-900 font-bold">Total (MT)</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody className="divide-y divide-slate-100">
+                                        {WASTE_CATEGORY_KEYS.map((cat) => {
+                                            const dispItem = totals.disposal?.[cat.key];
+
+                                            return (
+                                                <TableRow key={cat.key} className="hover:bg-slate-50/80 transition-colors">
+                                                    <TableCell className="pl-6 py-3 font-mono text-xs font-bold text-slate-500">
+                                                        {cat.code}
+                                                    </TableCell>
+                                                    <TableCell className="py-3 font-medium text-xs text-slate-900">
+                                                        {cat.label}
+                                                    </TableCell>
+                                                    <TableCell className="py-3 font-mono text-xs text-right text-slate-800">
+                                                        {formatTonne(dispItem?.incineration_tonne)}
+                                                    </TableCell>
+                                                    <TableCell className="py-3 font-mono text-xs text-right text-slate-800">
+                                                        {formatTonne(dispItem?.landfilling_tonne)}
+                                                    </TableCell>
+                                                    <TableCell className="py-3 font-mono text-xs text-right text-slate-800">
+                                                        {formatTonne(dispItem?.other_disposal_tonne)}
+                                                    </TableCell>
+                                                    <TableCell className="pr-6 py-3 font-mono text-xs text-right font-bold text-amber-700">
+                                                        {formatTonne(dispItem?.total_tonne)}
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+
+                                        {/* Subtotal Category H (Other Non-Hazardous Waste in Disposal) */}
+                                        <TableRow className="bg-slate-50/70 font-semibold border-t-2 border-slate-200">
+                                            <TableCell className="pl-6 py-3 font-mono text-xs font-bold text-slate-700">
+                                                H
+                                            </TableCell>
+                                            <TableCell className="py-3 text-xs text-slate-900 font-bold">
+                                                Other Non-Hazardous Waste (H.i + H.ii)
+                                            </TableCell>
+                                            <TableCell className="py-3 font-mono text-xs text-right font-bold text-slate-900">
+                                                {formatTonne(totals.disposal?.other_non_hazardous_waste?.incineration_tonne)}
+                                            </TableCell>
+                                            <TableCell className="py-3 font-mono text-xs text-right font-bold text-slate-900">
+                                                {formatTonne(totals.disposal?.other_non_hazardous_waste?.landfilling_tonne)}
+                                            </TableCell>
+                                            <TableCell className="py-3 font-mono text-xs text-right font-bold text-slate-900">
+                                                {formatTonne(totals.disposal?.other_non_hazardous_waste?.other_disposal_tonne)}
+                                            </TableCell>
+                                            <TableCell className="pr-6 py-3 font-mono text-xs text-right font-bold text-amber-800">
+                                                {formatTonne(totals.disposal?.other_non_hazardous_waste?.total_tonne)}
+                                            </TableCell>
+                                        </TableRow>
+
+                                        {/* Footer Row: Total Disposed */}
+                                        <TableRow className="bg-amber-500/10 font-bold border-t-2 border-amber-500/30">
+                                            <TableCell className="pl-6 py-3.5 font-mono text-xs text-amber-950">
+                                                TOTAL
+                                            </TableCell>
+                                            <TableCell className="py-3.5 text-xs text-amber-950 font-bold">
+                                                Total Disposed Operations
+                                            </TableCell>
+                                            <TableCell className="py-3.5 font-mono text-xs text-right text-amber-950 font-bold">
+                                                {formatTonne(totals.disposal?.total_incineration_tonne)} MT
+                                            </TableCell>
+                                            <TableCell className="py-3.5 font-mono text-xs text-right text-amber-950 font-bold">
+                                                {formatTonne(totals.disposal?.total_landfilling_tonne)} MT
+                                            </TableCell>
+                                            <TableCell className="py-3.5 font-mono text-xs text-right text-amber-950 font-bold">
+                                                {formatTonne(totals.disposal?.total_other_disposal_tonne)} MT
+                                            </TableCell>
+                                            <TableCell className="pr-6 py-3.5 font-mono text-sm text-right text-amber-900 font-bold">
+                                                {formatTonne(totals.disposal?.total_disposed_tonne)} MT
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+                            </CardBody>
+                        </Card>
                     </>
                 )
             )}
@@ -954,48 +1028,6 @@ export default function BrsrWastePage() {
                 onClose={() => setIsDownloadOpen(false)}
                 onDownload={handleDownloadReport}
             />
-        </div>
-    );
-}
-
-function WasteStreamRow({
-    label,
-    val,
-    total,
-    color,
-}: {
-    label: string;
-    val: string | number | undefined;
-    total: number;
-    color: string;
-}) {
-    const num = Number(val) || 0;
-    const share = total > 0 ? (num / total) * 100 : 0;
-
-    return (
-        <div className="space-y-1.5 rounded-lg border border-outline-variant/30 bg-surface-container-low p-3 transition-colors hover:border-outline-variant">
-            <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-on-surface">{label}</span>
-                <div className="flex items-baseline gap-1.5 font-mono">
-                    <span className="text-sm font-bold text-primary">
-                        {num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                    <span className="text-[10px] text-on-surface-variant">t</span>
-                    <span className="ml-1.5 rounded bg-surface-container-high px-1.5 py-0.5 text-[9px] font-bold text-on-surface">
-                        {share.toFixed(1)}%
-                    </span>
-                </div>
-            </div>
-
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-container-highest">
-                <div
-                    className="h-full rounded-full transition-all duration-700"
-                    style={{
-                        width: `${Math.min(Math.max(share, 0), 100)}%`,
-                        backgroundColor: color,
-                    }}
-                />
-            </div>
         </div>
     );
 }

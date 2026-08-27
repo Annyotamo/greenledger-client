@@ -78,6 +78,16 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                 non_hazardous_solid_waste_tonne: Number(nonHazardousSolid) || 0,
             };
 
+            const recVal = Number(recycled) || 0;
+            const reuseVal = Number(reused) || 0;
+            const otherRecVal = Number(otherRecovery) || 0;
+            const incinVal = Number(incineration) || 0;
+            const landVal = Number(landfilling) || 0;
+            const otherDispVal = Number(otherDisposal) || 0;
+
+            const emptyRec = { recycled_tonne: 0, reused_tonne: 0, other_recovery_tonne: 0 };
+            const emptyDisp = { incineration_tonne: 0, landfilling_tonne: 0, other_disposal_tonne: 0 };
+
             await onDownload({
                 financial_year_label: fyLabel,
                 turnover_inr: Number(turnover) || 0,
@@ -85,25 +95,27 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                 physical_output_unit: physicalOutputUnit || undefined,
                 generation: genBreakdown,
                 recovery: {
-                    ...genBreakdown,
-                    recycled_tonne: Number(recycled) || 0,
-                    reused_tonne: Number(reused) || 0,
-                    other_recovery_tonne: Number(otherRecovery) || 0,
+                    plastic_waste: { recycled_tonne: recVal, reused_tonne: reuseVal, other_recovery_tonne: otherRecVal },
+                    ewaste: emptyRec,
+                    bio_medical_waste: emptyRec,
+                    construction_and_demolition_waste: emptyRec,
+                    battery_waste: emptyRec,
+                    radioactive_waste: emptyRec,
+                    other_hazardous_waste: emptyRec,
+                    fly_ash: emptyRec,
+                    non_hazardous_solid_waste: emptyRec,
                 },
                 disposal: {
-                    ...genBreakdown,
-                    incineration_tonne: Number(incineration) || 0,
-                    landfilling_tonne: Number(landfilling) || 0,
-                    other_disposal_tonne: Number(otherDisposal) || 0,
+                    plastic_waste: { incineration_tonne: incinVal, landfilling_tonne: landVal, other_disposal_tonne: otherDispVal },
+                    ewaste: emptyDisp,
+                    bio_medical_waste: emptyDisp,
+                    construction_and_demolition_waste: emptyDisp,
+                    battery_waste: emptyDisp,
+                    radioactive_waste: emptyDisp,
+                    other_hazardous_waste: emptyDisp,
+                    fly_ash: emptyDisp,
+                    non_hazardous_solid_waste: emptyDisp,
                 },
-                // Fallback flat fields
-                ...genBreakdown,
-                recycled_tonne: Number(recycled) || 0,
-                reused_tonne: Number(reused) || 0,
-                other_recovery_tonne: Number(otherRecovery) || 0,
-                incineration_tonne: Number(incineration) || 0,
-                landfilling_tonne: Number(landfilling) || 0,
-                other_disposal_tonne: Number(otherDisposal) || 0,
             });
             onClose();
         } catch (err) {

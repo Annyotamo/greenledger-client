@@ -84,7 +84,7 @@ export async function postBrsrWasteDisclosure(
     payload: BrsrWasteDisclosurePayload,
 ): Promise<BrsrWasteDisclosureData> {
     const response = await privateApi.post<BrsrWasteDisclosureResponse>(
-        "/tenant/brsr/waste",
+        "/tenant/brsr/waste-disclosure-report",
         payload,
     );
     if (!response.data?.success || !response.data?.data) {
@@ -97,7 +97,7 @@ export async function postBrsrWasteReport(
     payload: BrsrWasteDisclosurePayload,
 ): Promise<Blob> {
     const response = await privateApi.post(
-        "/tenant/brsr/waste/report",
+        "/tenant/brsr/waste-disclosure-report/export",
         payload,
         {
             responseType: "blob",

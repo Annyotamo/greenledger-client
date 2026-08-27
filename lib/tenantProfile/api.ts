@@ -17,6 +17,7 @@ function mapTenantProfile(dto: TenantProfileDto): TenantProfile {
         industryType: dto.industry_type,
         sector: dto.sector,
         organizationSize: dto.organization_size,
+        consolidationApproach: dto.consolidation_approach ?? null,
         id: dto.id,
         tenantCode: dto.tenant_code,
         slug: dto.slug,

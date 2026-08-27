@@ -117,9 +117,9 @@ export function CustomFuelSection({
     // Fetch categories specifically for IPCC source for custom fuels
     const ipccSource = emissionSourcesQuery.data?.find((s) => s.standard.toUpperCase().includes("IPCC"));
     const ipccSourceId = ipccSource ? String(ipccSource.id) : sourceId;
-    const ipccFuelCategoriesQuery = useFuelCategories(fuelQueryType, ipccSourceId);
+    const ipccFuelCategoriesQuery = useFuelCategories(fuelQueryType, ipccSourceId, false);
 
-    const fuelCategoriesQuery = useFuelCategories(fuelQueryType, sourceId);
+    const fuelCategoriesQuery = useFuelCategories(fuelQueryType, sourceId, false);
     const fuelsQuery = useFuels(fuelQueryType, fuelCategory, sourceId);
 
     // Use units query based on selected standard fuel OR custom fuel API /user/custom-fuels/units

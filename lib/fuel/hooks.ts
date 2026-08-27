@@ -3,10 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { getFuelCategories, getFuels, getUnitsForFuel, FuelQueryType } from "./api";
 
-export function useFuelCategories(type: FuelQueryType = "FUEL", sourceId?: string) {
+export function useFuelCategories(type: FuelQueryType = "FUEL", sourceId?: string, wtt: boolean = false) {
     return useQuery({
-        queryKey: ["fuelCategories", type, sourceId],
-        queryFn: () => getFuelCategories(type, sourceId),
+        queryKey: ["fuelCategories", type, sourceId, wtt],
+        queryFn: () => getFuelCategories(type, sourceId, wtt),
     });
 }
 

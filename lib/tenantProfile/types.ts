@@ -13,6 +13,7 @@ export type TenantProfileDto = {
     industry_type: string;
     sector: string;
     organization_size: number;
+    consolidation_approach?: string | null;
     id: string;
     tenant_code: string;
     slug: string;
@@ -41,6 +42,7 @@ export type TenantProfile = {
     industryType: string;
     sector: string;
     organizationSize: number;
+    consolidationApproach?: string | null;
     id: string;
     tenantCode: string;
     slug: string;

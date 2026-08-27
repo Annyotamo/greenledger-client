@@ -25,9 +25,10 @@ export type FuelUnitsDto = {
 
 export type FuelQueryType = "FUEL" | "REFRIGERANT";
 
-export async function getFuelCategories(type: FuelQueryType = "FUEL", sourceId?: string) {
+export async function getFuelCategories(type: FuelQueryType = "FUEL", sourceId?: string, wtt: boolean = false) {
     const query = new URLSearchParams({ type });
     if (sourceId) query.append("source_id", sourceId);
+    if (wtt !== undefined) query.append("wtt", String(wtt));
     const response = await privateApi.get<{
         success: boolean;
         status_code: number;

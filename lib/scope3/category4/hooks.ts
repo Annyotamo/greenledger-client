@@ -2,92 +2,112 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-    amendCategory4SpendEntry,
-    createCategory4SpendEntry,
-    deleteCategory4SpendEntry,
-    getCategory4SpendEntries,
-    getCategory4SpendFactors,
-    rejectCategory4SpendEntry,
-    submitCategory4SpendEntry,
-    updateCategory4SpendEntry,
-    verifyCategory4SpendEntry,
+    amendCategory4TransportEntry,
+    createCategory4TransportEntry,
+    deleteCategory4TransportEntry,
+    getCategory4TransportEntries,
+    getCategory4TransportSummary,
+    rejectCategory4TransportEntry,
+    submitCategory4TransportEntry,
+    updateCategory4TransportEntry,
+    verifyCategory4TransportEntry,
 } from "./api";
 import type {
-    AmendCategory4SpendPayload,
-    Category4SpendEntry,
-    Category4SpendFilterParams,
-    CreateCategory4SpendPayload,
-    Scope3SpendFactor,
-    UpdateCategory4SpendPayload,
+    AmendCategory4TransportPayload,
+    Category4SummaryRollup,
+    Category4TransportActivityEntry,
+    Category4TransportFilterParams,
+    CreateCategory4TransportPayload,
+    UpdateCategory4TransportPayload,
 } from "./types";
 
-export function useCategory4SpendEntries(filters?: Category4SpendFilterParams) {
-    return useQuery<Category4SpendEntry[], Error>({
-        queryKey: ["scope3-category4-spend", filters],
-        queryFn: () => getCategory4SpendEntries(filters),
+export function useCategory4TransportEntries(filters?: Category4TransportFilterParams) {
+    return useQuery<Category4TransportActivityEntry[], Error>({
+        queryKey: ["scope3-category4-transport", filters],
+        queryFn: () => getCategory4TransportEntries(filters),
     });
 }
 
-export function useCategory4SpendFactors(sourceId?: string) {
-    return useQuery<Scope3SpendFactor[], Error>({
-        queryKey: ["scope3-category4-factors", sourceId],
-        queryFn: () => getCategory4SpendFactors(sourceId),
-        staleTime: 1000 * 60 * 30,
+export function useCategory4TransportSummary(filters?: Category4TransportFilterParams) {
+    return useQuery<Category4SummaryRollup, Error>({
+        queryKey: ["scope3-category4-transport-summary", filters],
+        queryFn: () => getCategory4TransportSummary(filters),
     });
 }
 
-export function useCreateCategory4SpendEntry() {
+export function useCreateCategory4Transport() {
     const queryClient = useQueryClient();
-    return useMutation<Category4SpendEntry, Error, CreateCategory4SpendPayload>({
-        mutationFn: createCategory4SpendEntry,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["scope3-category4-spend"] }),
+    return useMutation<Category4TransportActivityEntry, Error, CreateCategory4TransportPayload>({
+        mutationFn: createCategory4TransportEntry,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["scope3-category4-transport"] });
+            queryClient.invalidateQueries({ queryKey: ["scope3-category4-transport-summary"] });
+        },
     });
 }
 
-export function useUpdateCategory4SpendEntry() {
+export function useUpdateCategory4Transport() {
     const queryClient = useQueryClient();
-    return useMutation<Category4SpendEntry, Error, { activityId: string; payload: UpdateCategory4SpendPayload }>({
-        mutationFn: ({ activityId, payload }) => updateCategory4SpendEntry(activityId, payload),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["scope3-category4-spend"] }),
+    return useMutation<Category4TransportActivityEntry, Error, { activityId: string; payload: UpdateCategory4TransportPayload }>({
+        mutationFn: ({ activityId, payload }) => updateCategory4TransportEntry(activityId, payload),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["scope3-category4-transport"] });
+            queryClient.invalidateQueries({ queryKey: ["scope3-category4-transport-summary"] });
+        },
     });
 }
 
-export function useDeleteCategory4SpendEntry() {
+export function useDeleteCategory4Transport() {
     const queryClient = useQueryClient();
     return useMutation<boolean, Error, string>({
-        mutationFn: deleteCategory4SpendEntry,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["scope3-category4-spend"] }),
+        mutationFn: deleteCategory4TransportEntry,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["scope3-category4-transport"] });
+            queryClient.invalidateQueries({ queryKey: ["scope3-category4-transport-summary"] });
+        },
     });
 }
 
-export function useSubmitCategory4SpendEntry() {
+export function useSubmitCategory4Transport() {
     const queryClient = useQueryClient();
-    return useMutation<Category4SpendEntry, Error, string>({
-        mutationFn: submitCategory4SpendEntry,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["scope3-category4-spend"] }),
+    return useMutation<Category4TransportActivityEntry, Error, string>({
+        mutationFn: submitCategory4TransportEntry,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["scope3-category4-transport"] });
+            queryClient.invalidateQueries({ queryKey: ["scope3-category4-transport-summary"] });
+        },
     });
 }
 
-export function useVerifyCategory4SpendEntry() {
+export function useVerifyCategory4Transport() {
     const queryClient = useQueryClient();
-    return useMutation<Category4SpendEntry, Error, string>({
-        mutationFn: verifyCategory4SpendEntry,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["scope3-category4-spend"] }),
+    return useMutation<Category4TransportActivityEntry, Error, string>({
+        mutationFn: verifyCategory4TransportEntry,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["scope3-category4-transport"] });
+            queryClient.invalidateQueries({ queryKey: ["scope3-category4-transport-summary"] });
+        },
     });
 }
 
-export function useRejectCategory4SpendEntry() {
+export function useRejectCategory4Transport() {
     const queryClient = useQueryClient();
-    return useMutation<Category4SpendEntry, Error, { activityId: string; reason: string }>({
-        mutationFn: ({ activityId, reason }) => rejectCategory4SpendEntry(activityId, reason),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["scope3-category4-spend"] }),
+    return useMutation<Category4TransportActivityEntry, Error, { activityId: string; reason: string }>({
+        mutationFn: ({ activityId, reason }) => rejectCategory4TransportEntry(activityId, reason),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["scope3-category4-transport"] });
+            queryClient.invalidateQueries({ queryKey: ["scope3-category4-transport-summary"] });
+        },
     });
 }
 
-export function useAmendCategory4SpendEntry() {
+export function useAmendCategory4Transport() {
     const queryClient = useQueryClient();
-    return useMutation<Category4SpendEntry, Error, { activityId: string; payload: AmendCategory4SpendPayload }>({
-        mutationFn: ({ activityId, payload }) => amendCategory4SpendEntry(activityId, payload),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["scope3-category4-spend"] }),
+    return useMutation<Category4TransportActivityEntry, Error, AmendCategory4TransportPayload>({
+        mutationFn: amendCategory4TransportEntry,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["scope3-category4-transport"] });
+            queryClient.invalidateQueries({ queryKey: ["scope3-category4-transport-summary"] });
+        },
     });
 }

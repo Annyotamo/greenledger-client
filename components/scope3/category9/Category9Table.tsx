@@ -6,22 +6,22 @@ import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Category4TransportActivityEntry } from "@/lib/scope3/category4/types";
+import { Category9TransportActivityEntry } from "@/lib/scope3/category9/types";
 import { cn } from "@/lib/utils/cn";
 
-interface Category4TableProps {
-    entries: Category4TransportActivityEntry[];
+interface Category9TableProps {
+    entries: Category9TransportActivityEntry[];
     isLoading: boolean;
-    onViewDetail: (entry: Category4TransportActivityEntry) => void;
-    onEdit: (entry: Category4TransportActivityEntry) => void;
-    onAmend: (entry: Category4TransportActivityEntry) => void;
+    onViewDetail: (entry: Category9TransportActivityEntry) => void;
+    onEdit: (entry: Category9TransportActivityEntry) => void;
+    onAmend: (entry: Category9TransportActivityEntry) => void;
     onSubmitEntry: (id: string) => void;
     onVerifyEntry: (id: string) => void;
-    onRejectEntry: (entry: Category4TransportActivityEntry) => void;
+    onRejectEntry: (entry: Category9TransportActivityEntry) => void;
     onDeleteEntry: (id: string) => void;
 }
 
-export function Category4Table({
+export function Category9Table({
     entries,
     isLoading,
     onViewDetail,
@@ -31,7 +31,7 @@ export function Category4Table({
     onVerifyEntry,
     onRejectEntry,
     onDeleteEntry,
-}: Category4TableProps) {
+}: Category9TableProps) {
     const [openActionId, setOpenActionId] = useState<string | null>(null);
 
     return (
@@ -53,13 +53,13 @@ export function Category4Table({
                         {isLoading ? (
                             <TableRow>
                                 <TableCell colSpan={7} className="py-12 text-center font-mono text-xs text-on-surface-variant">
-                                    Loading Category 4 freight transport activities...
+                                    Loading Category 9 downstream transport activities...
                                 </TableCell>
                             </TableRow>
                         ) : entries.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={7} className="py-12 text-center font-mono text-xs text-on-surface-variant">
-                                    No Upstream Transportation activity recorded yet. Click &quot;Log Freight Transport Activity&quot; to begin.
+                                    No Downstream Transportation activity recorded yet. Click &quot;Log Freight Transport Activity&quot; to begin.
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -253,7 +253,7 @@ export function Category4Table({
                                                             onClick={() => {
                                                                 setOpenActionId(null);
                                                                 onDeleteEntry(entry.id);
-                                                             }}
+                                                            }}
                                                             className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-error hover:bg-error-container/20 border-t border-outline-variant/30 mt-1 pt-1.5">
                                                             <MaterialIcon name="delete" size="xs" />
                                                             <span>Delete Entry</span>

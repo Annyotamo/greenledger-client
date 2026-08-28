@@ -2,14 +2,14 @@
 
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
-import { Category4TransportActivityEntry } from "@/lib/scope3/category4/types";
+import { Category9TransportActivityEntry } from "@/lib/scope3/category9/types";
 
-interface Category4DetailModalProps {
-    entry: Category4TransportActivityEntry | null;
+interface Category9DetailModalProps {
+    entry: Category9TransportActivityEntry | null;
     onClose: () => void;
 }
 
-export function Category4DetailModal({ entry, onClose }: Category4DetailModalProps) {
+export function Category9DetailModal({ entry, onClose }: Category9DetailModalProps) {
     if (!entry) return null;
 
     return (
@@ -21,7 +21,7 @@ export function Category4DetailModal({ entry, onClose }: Category4DetailModalPro
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <span className="rounded bg-secondary/15 px-2 py-0.5 font-mono text-[10px] font-bold text-secondary uppercase">
-                                Category 4 Upstream Freight Transport Detail
+                                Category 9 Downstream Freight Transport Detail
                             </span>
                             <span
                                 className={`rounded px-2 py-0.5 font-mono text-[10px] font-bold uppercase ${
@@ -97,7 +97,7 @@ export function Category4DetailModal({ entry, onClose }: Category4DetailModalPro
 
                 {entry.notes && (
                     <div className="space-y-1 font-mono text-xs">
-                        <span className="font-bold text-primary">Notes & Manifest Remarks:</span>
+                        <span className="font-bold text-primary">Notes & Invoice Remarks:</span>
                         <p className="text-on-surface-variant bg-surface-container-low p-3 rounded-lg">
                             {entry.notes}
                         </p>

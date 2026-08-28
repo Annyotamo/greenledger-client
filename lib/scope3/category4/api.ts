@@ -1,279 +1,235 @@
 import { privateApi } from "@/lib/http/client";
-import { mapCategory1SpendItem } from "../category1/api";
 import {
-    AmendCategory4SpendPayload,
-    Category4SpendDto,
-    Category4SpendEntry,
-    Category4SpendFilterParams,
-    CreateCategory4SpendPayload,
-    Scope3SpendFactor,
-    Scope3SpendFactorDto,
-    UpdateCategory4SpendPayload,
+    AmendCategory4TransportPayload,
+    Category4SummaryRollup,
+    Category4TransportActivityDto,
+    Category4TransportActivityEntry,
+    Category4TransportFilterParams,
+    CreateCategory4TransportPayload,
+    UpdateCategory4TransportPayload,
 } from "./types";
 
-// ---------------------------------------------------------------------------
-// CATEGORY 4 SPEND ENDPOINTS
-// ---------------------------------------------------------------------------
+export function mapCategory4TransportActivity(dto: Category4TransportActivityDto): Category4TransportActivityEntry {
+    const val = Number(dto.activity_value || 0);
+    const appliedKg = dto.applied_factor_kg_co2e != null ? Number(dto.applied_factor_kg_co2e) : 0.08182;
+    const appliedT = dto.applied_factor_t_co2e != null ? Number(dto.applied_factor_t_co2e) : appliedKg / 1000;
 
-export async function getCategory4SpendEntries(
-    filters?: Category4SpendFilterParams,
-): Promise<Category4SpendEntry[]> {
+    const calcKg = dto.calculated_kg_co2e != null ? Number(dto.calculated_kg_co2e) : val * appliedKg;
+    const calcT = dto.calculated_t_co2e != null ? Number(dto.calculated_t_co2e) : calcKg / 1000;
+
+    const periodId = dto.reporting_period_id || null;
+    const periodName = dto.reporting_period_name || "FY 2025-26";
+
+    return {
+        id: dto.id,
+        createdAt: dto.created_at || new Date().toISOString(),
+        updatedAt: dto.updated_at || new Date().toISOString(),
+        facilityId: dto.facility_id || null,
+        facilityName: dto.facility_name || null,
+        reportingPeriodId: periodId,
+        reportingPeriodName: periodName,
+        freightingGoodsEmissionFactorId: dto.freighting_goods_emission_factor_id,
+        factorGroup: dto.factor_group || "50_percent_laden",
+        activityDate: dto.activity_date || "2025-06-15",
+        activityValue: val,
+        description: dto.description || null,
+        appliedFactorKgCo2e: appliedKg,
+        appliedFactorTCo2e: appliedT,
+        calculatedKgCo2e: calcKg,
+        calculatedTCo2e: calcT,
+        calculatedKgCo2: dto.calculated_kg_co2 != null ? Number(dto.calculated_kg_co2) : undefined,
+        calculatedKgCh4: dto.calculated_kg_ch4 != null ? Number(dto.calculated_kg_ch4) : undefined,
+        calculatedKgN2o: dto.calculated_kg_n2o != null ? Number(dto.calculated_kg_n2o) : undefined,
+        calculationDetails: dto.calculation_details || null,
+        status: dto.status || "verified",
+        notes: dto.notes || null,
+        rejectedReason: dto.rejected_reason || null,
+        enteredByEmail: dto.entered_by_email || null,
+        verifiedByEmail: dto.verified_by_email || null,
+        verifiedAt: dto.verified_at || null,
+        isAmendment: Boolean(dto.is_amendment),
+        amendedFromId: dto.amended_from_id || null,
+        activityCategory: dto.activity_category || "HGV (all diesel)",
+        vehicleType: dto.vehicle_type || "All artics",
+        unitSymbol: dto.unit_symbol || "tonne.km",
+        sourceStandard: dto.source_standard || "UK DEFRA",
+    };
+}
+
+export async function getCategory4TransportEntries(
+    filters?: Category4TransportFilterParams,
+): Promise<Category4TransportActivityEntry[]> {
     const params = new URLSearchParams();
-    if (filters?.reporting_period_id) {
-        params.append("reporting_period_id", filters.reporting_period_id);
-    } else if (filters?.reporting_period) {
-        params.append("reporting_period_id", filters.reporting_period);
-    }
+    if (filters?.reporting_period_id) params.append("reporting_period_id", filters.reporting_period_id);
     if (filters?.facility_id) params.append("facility_id", filters.facility_id);
-    if (filters?.scope3_spend_emission_factor_id)
-        params.append("scope3_spend_emission_factor_id", filters.scope3_spend_emission_factor_id);
     if (filters?.status) params.append("status", filters.status);
-    if (filters?.spend_year) params.append("spend_year", String(filters.spend_year));
-    if (filters?.spend_date) params.append("spend_date", filters.spend_date);
+    if (filters?.activity_category) params.append("activity_category", filters.activity_category);
+    if (filters?.vehicle_type) params.append("vehicle_type", filters.vehicle_type);
+    if (filters?.factor_group) params.append("factor_group", filters.factor_group);
+    if (filters?.activity_date) params.append("activity_date", filters.activity_date);
     if (filters?.start_date) params.append("start_date", filters.start_date);
     if (filters?.end_date) params.append("end_date", filters.end_date);
+    if (filters?.search) params.append("search", filters.search);
     if (filters?.page) params.append("page", String(filters.page));
     if (filters?.page_size) params.append("page_size", String(filters.page_size));
 
     const qs = params.toString();
-    const url = `/tenant/scope3/category4/spend${qs ? `?${qs}` : ""}`;
+    const url = `/tenant/scope3/category4/transport-activities${qs ? `?${qs}` : ""}`;
 
     try {
         const response = await privateApi.get<{
             success: boolean;
-            data: Category4SpendDto[] | { items: Category4SpendDto[] };
+            data: Category4TransportActivityDto[] | { items: Category4TransportActivityDto[] };
         }>(url);
 
         const dataPayload = response.data.data;
         const rawItems = Array.isArray(dataPayload)
             ? dataPayload
-            : (dataPayload as { items?: Category4SpendDto[] })?.items ?? [];
+            : (dataPayload as { items?: Category4TransportActivityDto[] })?.items ?? [];
 
-        return Array.isArray(rawItems) ? rawItems.map(mapCategory1SpendItem) : [];
+        return Array.isArray(rawItems) ? rawItems.map(mapCategory4TransportActivity) : [];
     } catch {
-        return getMockCategory4SpendEntries();
+        return getMockCategory4TransportEntries();
     }
 }
 
-export async function getCategory4SpendEntry(activityId: string): Promise<Category4SpendEntry> {
-    const response = await privateApi.get<{ success: boolean; data: Category4SpendDto }>(
-        `/tenant/scope3/category4/spend/${activityId}`,
-    );
-    return mapCategory1SpendItem(response.data.data);
+export async function getCategory4TransportSummary(
+    filters?: Category4TransportFilterParams,
+): Promise<Category4SummaryRollup> {
+    const params = new URLSearchParams();
+    if (filters?.reporting_period_id) params.append("reporting_period_id", filters.reporting_period_id);
+    if (filters?.facility_id) params.append("facility_id", filters.facility_id);
+    if (filters?.status) params.append("status", filters.status);
+
+    const qs = params.toString();
+    const url = `/tenant/scope3/category4/transport-activities/summary${qs ? `?${qs}` : ""}`;
+
+    try {
+        const response = await privateApi.get<{ success: boolean; data: Category4SummaryRollup }>(url);
+        if (response.data.data) return response.data.data;
+    } catch {
+        // Fallback summary
+    }
+    return {
+        total_records: 3,
+        total_calculated_kg_co2e: 3120.8,
+        total_calculated_t_co2e: 3.1208,
+        category_breakdown: [
+            {
+                activity_category: "HGV (all diesel)",
+                total_records: 2,
+                total_activity_value: 2500,
+                total_kg_co2e: 204.55,
+                total_t_co2e: 0.20455,
+            },
+            {
+                activity_category: "Freight flights",
+                total_records: 1,
+                total_activity_value: 1200,
+                total_kg_co2e: 2708.4,
+                total_t_co2e: 2.7084,
+            },
+        ],
+    };
 }
 
-export async function createCategory4SpendEntry(
-    payload: CreateCategory4SpendPayload,
-): Promise<Category4SpendEntry> {
-    const response = await privateApi.post<{ success: boolean; data: Category4SpendDto }>(
-        "/tenant/scope3/category4/spend",
+export async function getCategory4TransportEntry(activityId: string): Promise<Category4TransportActivityEntry> {
+    const response = await privateApi.get<{ success: boolean; data: Category4TransportActivityDto }>(
+        `/tenant/scope3/category4/transport-activities/${activityId}`,
+    );
+    return mapCategory4TransportActivity(response.data.data);
+}
+
+export async function createCategory4TransportEntry(
+    payload: CreateCategory4TransportPayload,
+): Promise<Category4TransportActivityEntry> {
+    const response = await privateApi.post<{ success: boolean; data: Category4TransportActivityDto }>(
+        "/tenant/scope3/category4/transport-activities",
         payload,
     );
-    return mapCategory1SpendItem(response.data.data);
+    return mapCategory4TransportActivity(response.data.data);
 }
 
-export async function updateCategory4SpendEntry(
+export async function updateCategory4TransportEntry(
     activityId: string,
-    payload: UpdateCategory4SpendPayload,
-): Promise<Category4SpendEntry> {
-    const response = await privateApi.patch<{ success: boolean; data: Category4SpendDto }>(
-        `/tenant/scope3/category4/spend/${activityId}`,
+    payload: UpdateCategory4TransportPayload,
+): Promise<Category4TransportActivityEntry> {
+    const response = await privateApi.put<{ success: boolean; data: Category4TransportActivityDto }>(
+        `/tenant/scope3/category4/transport-activities/${activityId}`,
         payload,
     );
-    return mapCategory1SpendItem(response.data.data);
+    return mapCategory4TransportActivity(response.data.data);
 }
 
-export async function deleteCategory4SpendEntry(activityId: string): Promise<boolean> {
-    const response = await privateApi.delete(`/tenant/scope3/category4/spend/${activityId}`);
+export async function deleteCategory4TransportEntry(activityId: string): Promise<boolean> {
+    const response = await privateApi.delete(`/tenant/scope3/category4/transport-activities/${activityId}`);
     return response.data.success ?? true;
 }
 
-export async function submitCategory4SpendEntry(activityId: string): Promise<Category4SpendEntry> {
-    const response = await privateApi.post<{ success: boolean; data: Category4SpendDto }>(
-        `/tenant/scope3/category4/spend/${activityId}/submit`,
+export async function submitCategory4TransportEntry(activityId: string): Promise<Category4TransportActivityEntry> {
+    const response = await privateApi.post<{ success: boolean; data: Category4TransportActivityDto }>(
+        `/tenant/scope3/category4/transport-activities/${activityId}/submit`,
     );
-    return mapCategory1SpendItem(response.data.data);
+    return mapCategory4TransportActivity(response.data.data);
 }
 
-export async function verifyCategory4SpendEntry(activityId: string): Promise<Category4SpendEntry> {
-    const response = await privateApi.post<{ success: boolean; data: Category4SpendDto }>(
-        `/tenant/scope3/category4/spend/${activityId}/verify`,
+export async function verifyCategory4TransportEntry(activityId: string): Promise<Category4TransportActivityEntry> {
+    const response = await privateApi.post<{ success: boolean; data: Category4TransportActivityDto }>(
+        `/tenant/scope3/category4/transport-activities/${activityId}/verify`,
     );
-    return mapCategory1SpendItem(response.data.data);
+    return mapCategory4TransportActivity(response.data.data);
 }
 
-export async function rejectCategory4SpendEntry(
+export async function rejectCategory4TransportEntry(
     activityId: string,
     reason: string,
-): Promise<Category4SpendEntry> {
-    const response = await privateApi.post<{ success: boolean; data: Category4SpendDto }>(
-        `/tenant/scope3/category4/spend/${activityId}/reject`,
+): Promise<Category4TransportActivityEntry> {
+    const response = await privateApi.post<{ success: boolean; data: Category4TransportActivityDto }>(
+        `/tenant/scope3/category4/transport-activities/${activityId}/reject`,
         { reason },
     );
-    return mapCategory1SpendItem(response.data.data);
+    return mapCategory4TransportActivity(response.data.data);
 }
 
-export async function amendCategory4SpendEntry(
-    activityId: string,
-    payload: AmendCategory4SpendPayload,
-): Promise<Category4SpendEntry> {
-    const response = await privateApi.post<{ success: boolean; data: Category4SpendDto }>(
-        `/tenant/scope3/category4/spend/${activityId}/amend`,
+export async function amendCategory4TransportEntry(
+    payload: AmendCategory4TransportPayload,
+): Promise<Category4TransportActivityEntry> {
+    const response = await privateApi.post<{ success: boolean; data: Category4TransportActivityDto }>(
+        "/tenant/scope3/category4/transport-activities/amend",
         payload,
     );
-    return mapCategory1SpendItem(response.data.data);
+    return mapCategory4TransportActivity(response.data.data);
 }
 
-export async function getCategory4SpendFactors(sourceId?: string): Promise<Scope3SpendFactor[]> {
-    const url = `/tenant/emission-factors/scope3/spend-factors${sourceId ? `?source_id=${sourceId}` : ""}`;
-    try {
-        const response = await privateApi.get<{
-            success: boolean;
-            data: Scope3SpendFactorDto[] | { items: Scope3SpendFactorDto[] };
-        }>(url);
-        const dataPayload = response.data?.data;
-        const rawData = Array.isArray(dataPayload)
-            ? dataPayload
-            : (dataPayload as { items?: Scope3SpendFactorDto[] })?.items ?? [];
-
-        if (Array.isArray(rawData) && rawData.length > 0) {
-            return rawData.map((dto) => ({
-                id: dto.id,
-                naicsCode: dto.naics_code || "484110",
-                commodityTitle: dto.commodity_title || dto.naics_title || "General Freight Transport",
-                naicsTitle: dto.naics_title || dto.commodity_title || "General Freight Transport",
-                naicsSectorCategory: dto.naics_sector_category || dto.category || "Transportation and Warehousing",
-                category: dto.category || dto.naics_sector_category || "Transportation and Warehousing",
-                kgCo2ePerUsdWithMargins: Number(dto.kg_co2e_per_usd_with_margins || 0.415),
-                kgCo2ePerUsdWithoutMargins: Number(dto.kg_co2e_per_usd_without_margins || 0.320),
-                marginKgCo2ePerUsd: Number(dto.margin_kg_co2e_per_usd || 0.095),
-            }));
-        }
-
-        if (sourceId) {
-            const fallbackRes = await privateApi.get<{
-                success: boolean;
-                data: Scope3SpendFactorDto[] | { items: Scope3SpendFactorDto[] };
-            }>("/tenant/emission-factors/scope3/spend-factors");
-            const fallbackPayload = fallbackRes.data?.data;
-            const fallbackData = Array.isArray(fallbackPayload)
-                ? fallbackPayload
-                : (fallbackPayload as { items?: Scope3SpendFactorDto[] })?.items ?? [];
-
-            if (Array.isArray(fallbackData) && fallbackData.length > 0) {
-                return fallbackData.map((dto) => ({
-                    id: dto.id,
-                    naicsCode: dto.naics_code || "484110",
-                    commodityTitle: dto.commodity_title || dto.naics_title || "General Freight Transport",
-                    naicsTitle: dto.naics_title || dto.commodity_title || "General Freight Transport",
-                    naicsSectorCategory: dto.naics_sector_category || dto.category || "Transportation and Warehousing",
-                    category: dto.category || dto.naics_sector_category || "Transportation and Warehousing",
-                    kgCo2ePerUsdWithMargins: Number(dto.kg_co2e_per_usd_with_margins || 0.415),
-                    kgCo2ePerUsdWithoutMargins: Number(dto.kg_co2e_per_usd_without_margins || 0.320),
-                    marginKgCo2ePerUsd: Number(dto.margin_kg_co2e_per_usd || 0.095),
-                }));
-            }
-        }
-    } catch {
-        // Fallback demo freight transport spend factors
-    }
+function getMockCategory4TransportEntries(): Category4TransportActivityEntry[] {
     return [
         {
-            id: "ca68b110-59ba-4c62-b841-270138cc06dd",
-            naicsCode: "484110",
-            commodityTitle: "General Freight Trucking, Local",
-            naicsTitle: "General Freight Trucking, Local",
-            naicsSectorCategory: "Transportation and Warehousing",
-            category: "Transportation and Warehousing",
-            kgCo2ePerUsdWithMargins: 0.4150,
-            kgCo2ePerUsdWithoutMargins: 0.3200,
-            marginKgCo2ePerUsd: 0.0950,
-        },
-        {
-            id: "factor-freight-rail",
-            naicsCode: "482110",
-            commodityTitle: "Rail Transportation, Freight",
-            naicsTitle: "Rail Transportation, Freight",
-            naicsSectorCategory: "Transportation and Warehousing",
-            category: "Transportation and Warehousing",
-            kgCo2ePerUsdWithMargins: 0.2850,
-            kgCo2ePerUsdWithoutMargins: 0.2300,
-            marginKgCo2ePerUsd: 0.0550,
-        },
-        {
-            id: "factor-freight-air",
-            naicsCode: "481112",
-            commodityTitle: "Scheduled Freight Air Transportation",
-            naicsTitle: "Scheduled Freight Air Transportation",
-            naicsSectorCategory: "Transportation and Warehousing",
-            category: "Transportation and Warehousing",
-            kgCo2ePerUsdWithMargins: 1.1200,
-            kgCo2ePerUsdWithoutMargins: 0.9400,
-            marginKgCo2ePerUsd: 0.1800,
-        },
-        {
-            id: "factor-freight-water",
-            naicsCode: "483111",
-            commodityTitle: "Deep Sea Freight Transportation",
-            naicsTitle: "Deep Sea Freight Transportation",
-            naicsSectorCategory: "Transportation and Warehousing",
-            category: "Transportation and Warehousing",
-            kgCo2ePerUsdWithMargins: 0.1950,
-            kgCo2ePerUsdWithoutMargins: 0.1600,
-            marginKgCo2ePerUsd: 0.0350,
-        },
-        {
-            id: "factor-warehousing",
-            naicsCode: "493110",
-            commodityTitle: "General Warehousing and Storage",
-            naicsTitle: "General Warehousing and Storage",
-            naicsSectorCategory: "Transportation and Warehousing",
-            category: "Transportation and Warehousing",
-            kgCo2ePerUsdWithMargins: 0.3100,
-            kgCo2ePerUsdWithoutMargins: 0.2550,
-            marginKgCo2ePerUsd: 0.0550,
-        },
-    ];
-}
-
-function getMockCategory4SpendEntries(): Category4SpendEntry[] {
-    return [
-        {
-            id: "cat4-mock-1",
-            createdAt: "2026-08-18T10:00:00.000Z",
-            updatedAt: "2026-08-18T10:00:00.000Z",
-            facilityId: null,
-            facilityName: "Main Logistics Hub",
-            reportingPeriodId: "091f03f3-2470-4f51-b845-a7b3cba14d33",
-            reportingPeriodName: "FY 2024-25",
-            reportingPeriod: "FY 2024-25",
-            scope3SpendEmissionFactorId: "ca68b110-59ba-4c62-b841-270138cc06dd",
-            factor: {
-                id: "ca68b110-59ba-4c62-b841-270138cc06dd",
-                naicsCode: "484110",
-                commodityTitle: "General Freight Trucking, Local",
-                naicsTitle: "General Freight Trucking, Local",
-                naicsSectorCategory: "Transportation and Warehousing",
-                category: "Transportation and Warehousing",
-                kgCo2ePerUsdWithMargins: 0.4150,
-                kgCo2ePerUsdWithoutMargins: 0.3200,
-                marginKgCo2ePerUsd: 0.0950,
-            },
-            spendDate: "2024-10-05",
-            spendInInr: 415000.0,
-            spendYear: 2024,
-            exchangeRateUsdToInr: 83.00,
-            spendInUsd: 5000.0,
-            calculatedKgCo2e: 4250.0,
-            calculatedKgCo2eWithoutMargins: 3400.0,
-            marginKgCo2e: 850.0,
-            calculatedTCo2e: 4.25,
-            calculatedTCo2eWithoutMargins: 3.40,
-            marginTCo2e: 0.85,
+            id: "1ab43786-10c5-41d5-9f86-ace8f18f56a7",
+            createdAt: "2026-08-28T17:23:14Z",
+            updatedAt: "2026-08-28T17:23:14Z",
+            facilityId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+            facilityName: "Main Plant - Pune",
+            reportingPeriodId: "015ab9bf-a162-42f0-8b8f-9f9286de5dab",
+            reportingPeriodName: "FY 2025-26",
+            freightingGoodsEmissionFactorId: "de56d85f-4a43-40b9-9b28-073e52295762",
+            factorGroup: "50_percent_laden",
+            activityDate: "2025-06-15",
+            activityValue: 1500,
+            description: "Inbound logistics from Pune supplier to Mumbai warehouse",
+            appliedFactorKgCo2e: 0.08182,
+            appliedFactorTCo2e: 0.00008182,
+            calculatedKgCo2e: 122.73,
+            calculatedTCo2e: 0.12273,
+            calculationDetails: "1500.0000 tonne.km of 'All artics' [50_percent_laden] * 0.08182 kg CO2e/tonne.km = 122.7300 kg CO2e (0.122730 t CO2e)",
             status: "draft",
-            notes: "Third-party freight & courier logistics",
+            notes: "Verified by delivery challan #88412",
             rejectedReason: null,
+            isAmendment: false,
             amendedFromId: null,
+            activityCategory: "HGV (all diesel)",
+            vehicleType: "All artics",
+            unitSymbol: "tonne.km",
+            sourceStandard: "UK DEFRA",
         },
     ];
 }

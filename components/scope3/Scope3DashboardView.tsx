@@ -88,7 +88,7 @@ export function Scope3DashboardView() {
                         </span>
                         <span className="flex items-center gap-1.5 text-tertiary-container font-bold">
                             <MaterialIcon name="arrow_circle_down" size="sm" />
-                            Downstream (Cat 15): {SCOPE3_SUMMARY.downstreamEmissionsTco2e.toLocaleString()} tCO₂e ({SCOPE3_SUMMARY.downstreamSharePercent}%)
+                            Downstream (Cat 9, 15): {SCOPE3_SUMMARY.downstreamEmissionsTco2e.toLocaleString()} tCO₂e ({SCOPE3_SUMMARY.downstreamSharePercent}%)
                         </span>
                     </div>
 
@@ -144,7 +144,7 @@ export function Scope3DashboardView() {
 
                 <Card className="p-5 border-outline-variant/60">
                     <div className="flex items-center justify-between text-on-surface-variant">
-                        <span className="font-mono text-xs font-semibold uppercase tracking-wider">Downstream & Investments</span>
+                        <span className="font-mono text-xs font-semibold uppercase tracking-wider">Downstream Logistics & Finance</span>
                         <MaterialIcon name="account_balance" className="text-tertiary" />
                     </div>
                     <div className="mt-2 space-y-1">
@@ -152,7 +152,7 @@ export function Scope3DashboardView() {
                             {SCOPE3_SUMMARY.downstreamEmissionsTco2e.toLocaleString()} <span className="text-xs font-normal">tCO₂e</span>
                         </p>
                         <p className="font-mono text-[11px] text-on-surface-variant">
-                            Category 15 (PCAF Financed)
+                            Cat 9 & Cat 15 Active
                         </p>
                     </div>
                 </Card>
@@ -203,7 +203,7 @@ export function Scope3DashboardView() {
                                 "rounded-md px-3 py-1 font-mono text-xs font-semibold transition-colors",
                                 filterScope === "downstream" ? "bg-surface-container-lowest text-primary shadow-sm" : "text-on-surface-variant",
                             )}>
-                            Downstream (Cat 15)
+                            Downstream (Cat 9, 15)
                         </button>
                     </div>
                 </div>
@@ -217,6 +217,7 @@ export function Scope3DashboardView() {
                         <option value="all">All Groups</option>
                         <option value="Corporate & Operations">Corporate & Operations</option>
                         <option value="Supply Chain & Goods">Supply Chain & Goods</option>
+                        <option value="Product Lifecycle">Product Lifecycle</option>
                         <option value="Business Model">Business Model</option>
                     </select>
                 </div>

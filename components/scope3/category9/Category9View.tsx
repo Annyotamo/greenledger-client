@@ -6,38 +6,38 @@ import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Scope3Navbar } from "@/components/scope3/Scope3Navbar";
-import { Category4Summary } from "./Category4Summary";
-import { Category4Table } from "./Category4Table";
-import { Category4FormModal } from "./Category4FormModal";
-import { Category4DetailModal } from "./Category4DetailModal";
-import { Category4RejectModal } from "./Category4RejectModal";
+import { Category9Summary } from "./Category9Summary";
+import { Category9Table } from "./Category9Table";
+import { Category9FormModal } from "./Category9FormModal";
+import { Category9DetailModal } from "./Category9DetailModal";
+import { Category9RejectModal } from "./Category9RejectModal";
 import {
-    useAmendCategory4Transport,
-    useCategory4TransportEntries,
-    useCreateCategory4Transport,
-    useDeleteCategory4Transport,
-    useRejectCategory4Transport,
-    useSubmitCategory4Transport,
-    useUpdateCategory4Transport,
-    useVerifyCategory4Transport,
-} from "@/lib/scope3/category4/hooks";
+    useAmendCategory9Transport,
+    useCategory9TransportEntries,
+    useCreateCategory9Transport,
+    useDeleteCategory9Transport,
+    useRejectCategory9Transport,
+    useSubmitCategory9Transport,
+    useUpdateCategory9Transport,
+    useVerifyCategory9Transport,
+} from "@/lib/scope3/category9/hooks";
 import {
-    AmendCategory4TransportPayload,
-    Category4TransportActivityEntry,
-    Category4TransportFilterParams,
-    CreateCategory4TransportPayload,
-} from "@/lib/scope3/category4/types";
+    AmendCategory9TransportPayload,
+    Category9TransportActivityEntry,
+    Category9TransportFilterParams,
+    CreateCategory9TransportPayload,
+} from "@/lib/scope3/category9/types";
 import { useFacilities } from "@/lib/facility/hooks";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { AiAssistantFAB } from "@/components/dashboard/AiAssistantFAB";
 
-export function Category4View() {
+export function Category9View() {
     // Filter State
     const [statusFilter, setStatusFilter] = useState<string>("");
     const [facilityFilter, setFacilityFilter] = useState<string>("");
     const [periodIdFilter, setPeriodIdFilter] = useState<string>("");
 
-    const filterParams: Category4TransportFilterParams = useMemo(
+    const filterParams: Category9TransportFilterParams = useMemo(
         () => ({
             status: statusFilter || undefined,
             facility_id: facilityFilter || undefined,
@@ -47,26 +47,26 @@ export function Category4View() {
     );
 
     // Queries
-    const transportQuery = useCategory4TransportEntries(filterParams);
+    const transportQuery = useCategory9TransportEntries(filterParams);
     const facilitiesQuery = useFacilities();
     const reportingPeriodsQuery = useReportingPeriods();
 
     // Mutations
-    const createMutation = useCreateCategory4Transport();
-    const updateMutation = useUpdateCategory4Transport();
-    const deleteMutation = useDeleteCategory4Transport();
-    const submitMutation = useSubmitCategory4Transport();
-    const verifyMutation = useVerifyCategory4Transport();
-    const rejectMutation = useRejectCategory4Transport();
-    const amendMutation = useAmendCategory4Transport();
+    const createMutation = useCreateCategory9Transport();
+    const updateMutation = useUpdateCategory9Transport();
+    const deleteMutation = useDeleteCategory9Transport();
+    const submitMutation = useSubmitCategory9Transport();
+    const verifyMutation = useVerifyCategory9Transport();
+    const rejectMutation = useRejectCategory9Transport();
+    const amendMutation = useAmendCategory9Transport();
 
     // Modal State
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [formMode, setFormMode] = useState<"create" | "edit" | "amend">("create");
-    const [selectedEntry, setSelectedEntry] = useState<Category4TransportActivityEntry | null>(null);
+    const [selectedEntry, setSelectedEntry] = useState<Category9TransportActivityEntry | null>(null);
 
-    const [detailEntry, setDetailEntry] = useState<Category4TransportActivityEntry | null>(null);
-    const [rejectTarget, setRejectTarget] = useState<Category4TransportActivityEntry | null>(null);
+    const [detailEntry, setDetailEntry] = useState<Category9TransportActivityEntry | null>(null);
+    const [rejectTarget, setRejectTarget] = useState<Category9TransportActivityEntry | null>(null);
     const [isRejectOpen, setIsRejectOpen] = useState(false);
 
     const [notification, setNotification] = useState<{ type: "success" | "error"; message: string } | null>(null);
@@ -82,41 +82,41 @@ export function Category4View() {
         setIsFormOpen(true);
     }
 
-    function handleOpenEdit(entry: Category4TransportActivityEntry) {
+    function handleOpenEdit(entry: Category9TransportActivityEntry) {
         setSelectedEntry(entry);
         setFormMode("edit");
         setIsFormOpen(true);
     }
 
-    function handleOpenAmend(entry: Category4TransportActivityEntry) {
+    function handleOpenAmend(entry: Category9TransportActivityEntry) {
         setSelectedEntry(entry);
         setFormMode("amend");
         setIsFormOpen(true);
     }
 
-    function handleOpenDetail(entry: Category4TransportActivityEntry) {
+    function handleOpenDetail(entry: Category9TransportActivityEntry) {
         setDetailEntry(entry);
     }
 
-    function handleOpenReject(entry: Category4TransportActivityEntry) {
+    function handleOpenReject(entry: Category9TransportActivityEntry) {
         setRejectTarget(entry);
         setIsRejectOpen(true);
     }
 
-    async function handleFormSubmit(payload: CreateCategory4TransportPayload | AmendCategory4TransportPayload) {
+    async function handleFormSubmit(payload: CreateCategory9TransportPayload | AmendCategory9TransportPayload) {
         try {
             if (formMode === "create") {
-                await createMutation.mutateAsync(payload as CreateCategory4TransportPayload);
-                showNotify("success", "Category 4 upstream transport activity created.");
+                await createMutation.mutateAsync(payload as CreateCategory9TransportPayload);
+                showNotify("success", "Category 9 downstream transport activity created.");
             } else if (formMode === "edit" && selectedEntry) {
                 await updateMutation.mutateAsync({
                     activityId: selectedEntry.id,
-                    payload: payload as CreateCategory4TransportPayload,
+                    payload: payload as CreateCategory9TransportPayload,
                 });
-                showNotify("success", "Category 4 upstream transport activity updated.");
+                showNotify("success", "Category 9 downstream transport activity updated.");
             } else if (formMode === "amend" && selectedEntry) {
-                await amendMutation.mutateAsync(payload as AmendCategory4TransportPayload);
-                showNotify("success", "Verified Category 4 transport entry amended.");
+                await amendMutation.mutateAsync(payload as AmendCategory9TransportPayload);
+                showNotify("success", "Verified Category 9 transport entry amended.");
             }
             setIsFormOpen(false);
         } catch (err: unknown) {
@@ -129,7 +129,7 @@ export function Category4View() {
         if (!rejectTarget) return;
         try {
             await rejectMutation.mutateAsync({ activityId: rejectTarget.id, reason });
-            showNotify("success", "Category 4 transport entry rejected.");
+            showNotify("success", "Category 9 transport entry rejected.");
             setIsRejectOpen(false);
             setRejectTarget(null);
         } catch (err: unknown) {
@@ -167,13 +167,13 @@ export function Category4View() {
                             Scope 3 Value Chain
                         </Link>
                         <span>/</span>
-                        <span className="text-secondary font-bold">Cat 4: Upstream Transportation & Distribution</span>
+                        <span className="text-secondary font-bold">Cat 9: Downstream Transportation & Distribution</span>
                     </div>
                     <h1 className="text-headline-md font-bold text-primary tracking-tight">
-                        Upstream Transportation & Distribution (Category 4)
+                        Downstream Transportation & Distribution (Category 9)
                     </h1>
                     <p className="font-mono text-xs text-on-surface-variant max-w-3xl">
-                        Quantify Scope 3 Category 4 emissions from upstream freight transport (vans, HGVs, cargo ships, rail, air freight) using DEFRA weight-distance factor accounting.
+                        Quantify Scope 3 Category 9 emissions from downstream product logistics and last-mile distribution (vans, HGVs, cargo ships, rail, air freight) using DEFRA weight-distance factor accounting.
                     </p>
                 </div>
 
@@ -244,10 +244,10 @@ export function Category4View() {
             </Card>
 
             {/* Summary KPI Cards */}
-            <Category4Summary entries={transportQuery.data ?? []} />
+            <Category9Summary entries={transportQuery.data ?? []} />
 
             {/* High-density Data Table */}
-            <Category4Table
+            <Category9Table
                 entries={transportQuery.data ?? []}
                 isLoading={transportQuery.isLoading}
                 onViewDetail={handleOpenDetail}
@@ -256,7 +256,7 @@ export function Category4View() {
                 onSubmitEntry={async (id) => {
                     try {
                         await submitMutation.mutateAsync(id);
-                        showNotify("success", "Category 4 transport entry submitted for review.");
+                        showNotify("success", "Category 9 transport entry submitted for review.");
                     } catch (err: unknown) {
                         const msg = err instanceof Error ? err.message : "Submit failed.";
                         showNotify("error", msg);
@@ -265,7 +265,7 @@ export function Category4View() {
                 onVerifyEntry={async (id) => {
                     try {
                         await verifyMutation.mutateAsync(id);
-                        showNotify("success", "Category 4 transport entry verified.");
+                        showNotify("success", "Category 9 transport entry verified.");
                     } catch (err: unknown) {
                         const msg = err instanceof Error ? err.message : "Verify failed.";
                         showNotify("error", msg);
@@ -273,10 +273,10 @@ export function Category4View() {
                 }}
                 onRejectEntry={handleOpenReject}
                 onDeleteEntry={async (id) => {
-                    if (!confirm("Are you sure you want to delete this freight transport activity?")) return;
+                    if (!confirm("Are you sure you want to delete this downstream transport activity?")) return;
                     try {
                         await deleteMutation.mutateAsync(id);
-                        showNotify("success", "Category 4 transport entry deleted.");
+                        showNotify("success", "Category 9 transport entry deleted.");
                     } catch (err: unknown) {
                         const msg = err instanceof Error ? err.message : "Delete failed.";
                         showNotify("error", msg);
@@ -285,8 +285,8 @@ export function Category4View() {
             />
 
             {/* Form Modal */}
-            <Category4FormModal
-                key={`cat4-${selectedEntry?.id ?? "new"}-${formMode}-${isFormOpen}`}
+            <Category9FormModal
+                key={`cat9-${selectedEntry?.id ?? "new"}-${formMode}-${isFormOpen}`}
                 isOpen={isFormOpen}
                 mode={formMode}
                 initialEntry={selectedEntry}
@@ -300,10 +300,10 @@ export function Category4View() {
             />
 
             {/* Detail Modal */}
-            <Category4DetailModal entry={detailEntry} onClose={() => setDetailEntry(null)} />
+            <Category9DetailModal entry={detailEntry} onClose={() => setDetailEntry(null)} />
 
             {/* Reject Modal */}
-            <Category4RejectModal
+            <Category9RejectModal
                 isOpen={isRejectOpen}
                 onClose={() => {
                     setIsRejectOpen(false);

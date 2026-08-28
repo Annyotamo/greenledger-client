@@ -14,18 +14,18 @@ import {
     useFreightingGoodsTypes,
 } from "@/lib/scope3/freighting-goods/hooks";
 import {
-    AmendCategory4TransportPayload,
-    Category4TransportActivityEntry,
-    CreateCategory4TransportPayload,
-} from "@/lib/scope3/category4/types";
+    AmendCategory9TransportPayload,
+    Category9TransportActivityEntry,
+    CreateCategory9TransportPayload,
+} from "@/lib/scope3/category9/types";
 import { DEFAULT_FREIGHTING_FACTORS, FreightingGoodsFactor, GasEmissionsDto } from "@/lib/scope3/freighting-goods/types";
 
-interface Category4FormModalProps {
+interface Category9FormModalProps {
     isOpen: boolean;
     mode: "create" | "edit" | "amend";
-    initialEntry?: Category4TransportActivityEntry | null;
+    initialEntry?: Category9TransportActivityEntry | null;
     onClose: () => void;
-    onSubmit: (payload: CreateCategory4TransportPayload | AmendCategory4TransportPayload) => Promise<void>;
+    onSubmit: (payload: CreateCategory9TransportPayload | AmendCategory9TransportPayload) => Promise<void>;
     isSubmitting: boolean;
 }
 
@@ -124,14 +124,14 @@ function extractActiveFactorsMap(selectedFactor: unknown): Record<string, GasEmi
     return result;
 }
 
-export function Category4FormModal({
+export function Category9FormModal({
     isOpen,
     mode,
     initialEntry,
     onClose,
     onSubmit,
     isSubmitting,
-}: Category4FormModalProps) {
+}: Category9FormModalProps) {
     const reportingPeriodsQuery = useReportingPeriods();
     const periods = useMemo(() => reportingPeriodsQuery.data ?? [], [reportingPeriodsQuery.data]);
 
@@ -144,10 +144,10 @@ export function Category4FormModal({
     const categoriesQuery = useFreightingGoodsCategories();
     const categories = useMemo(() => categoriesQuery.data ?? [], [categoriesQuery.data]);
     const [selectedCategory, setSelectedCategory] = useState<string>(
-        () => (isEditOrAmend ? initialEntry?.activityCategory || "HGV (all diesel)" : "HGV (all diesel)"),
+        () => (isEditOrAmend ? initialEntry?.activityCategory || "Vans" : "Vans"),
     );
 
-    const activeCategory = selectedCategory || categories[0] || "HGV (all diesel)";
+    const activeCategory = selectedCategory || categories[0] || "Vans";
 
     // Step 2: Types filtered by category
     const typesQuery = useFreightingGoodsTypes(activeCategory);
@@ -156,7 +156,7 @@ export function Category4FormModal({
 
     const activeTypeId = selectedTypeId && types.some((t) => t.id === selectedTypeId)
         ? selectedTypeId
-        : (types[0]?.id ?? "hgv-artics-type-id");
+        : (types[0]?.id ?? "7ca648b2-4d1a-4638-b7eb-6c1c38547432");
 
     // Step 3: Factors filtered by type ID
     const factorsQuery = useFreightingGoodsFactors(activeTypeId);
@@ -172,7 +172,7 @@ export function Category4FormModal({
 
     const activeFactorId = selectedFactorId && factors.some((f: FreightingGoodsFactor) => f.id === selectedFactorId)
         ? selectedFactorId
-        : (factors[0]?.id ?? "de56d85f-4a43-40b9-9b28-073e52295762");
+        : (factors[0]?.id ?? "18f8e02d-05e8-4a94-916c-03d36b801a61");
 
     const selectedFactor: FreightingGoodsFactor | undefined = useMemo(
         () => factors.find((f: FreightingGoodsFactor) => f.id === activeFactorId) ?? factors[0],
@@ -189,16 +189,16 @@ export function Category4FormModal({
     const availableGroups = useMemo(() => {
         const keys = Object.keys(activeFactorsMap);
         if (keys.length > 0) return keys;
-        return ["fifty_percent_laden"];
+        return ["diesel"];
     }, [activeFactorsMap]);
 
     const [selectedFactorGroup, setSelectedFactorGroup] = useState<string>(
-        () => (isEditOrAmend ? initialEntry?.factorGroup || "50_percent_laden" : "50_percent_laden"),
+        () => (isEditOrAmend ? initialEntry?.factorGroup || "diesel" : "diesel"),
     );
 
     const activeFactorGroup = selectedFactorGroup && availableGroups.includes(selectedFactorGroup)
         ? selectedFactorGroup
-        : (availableGroups[0] ?? "50_percent_laden");
+        : (availableGroups[0] ?? "diesel");
 
     const activeEmissionsDetail = useMemo(() => {
         if (!activeFactorsMap) return null;
@@ -210,10 +210,10 @@ export function Category4FormModal({
         () => (isEditOrAmend ? initialEntry?.reportingPeriodId || periods[0]?.id || "" : periods[0]?.id || ""),
     );
     const [activityDate, setActivityDate] = useState(
-        () => (isEditOrAmend ? initialEntry?.activityDate || "2025-06-15" : "2025-06-15"),
+        () => (isEditOrAmend ? initialEntry?.activityDate || "2025-07-10" : "2025-07-10"),
     );
     const [activityValue, setActivityValue] = useState(
-        () => (isEditOrAmend ? String(initialEntry?.activityValue || "1500") : "1500"),
+        () => (isEditOrAmend ? String(initialEntry?.activityValue || "3200") : "3200"),
     );
     const [description, setDescription] = useState(
         () => (isEditOrAmend ? initialEntry?.description || "" : ""),
@@ -293,7 +293,7 @@ export function Category4FormModal({
         try {
             const activePeriodId = reportingPeriodId || periods[0]?.id || "";
 
-            const basePayload: CreateCategory4TransportPayload = {
+            const basePayload: CreateCategory9TransportPayload = {
                 reporting_period_id: activePeriodId,
                 facility_id: null,
                 freighting_goods_emission_factor_id: activeFactorId,
@@ -306,7 +306,7 @@ export function Category4FormModal({
             };
 
             if (mode === "amend" && initialEntry) {
-                const amendPayload: AmendCategory4TransportPayload = {
+                const amendPayload: AmendCategory9TransportPayload = {
                     ...basePayload,
                     amended_from_id: initialEntry.id,
                 };
@@ -332,15 +332,15 @@ export function Category4FormModal({
                 <div className="flex items-center justify-between border-b border-outline-variant/60 px-6 py-4 bg-surface-container-low/80">
                     <div className="flex items-center gap-2">
                         <span className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary text-on-secondary font-mono text-xs font-bold">
-                            4
+                            9
                         </span>
                         <div>
                             <h3 className="font-mono text-headline-sm font-bold text-primary">
                                 {mode === "create"
-                                    ? "Log Category 4 Upstream Transport Activity"
+                                    ? "Log Category 9 Downstream Transport Activity"
                                     : mode === "edit"
-                                      ? "Edit Category 4 Transport Activity"
-                                      : "Amend Verified Upstream Transport Entry"}
+                                      ? "Edit Category 9 Transport Activity"
+                                      : "Amend Verified Downstream Transport Entry"}
                             </h3>
                             <p className="font-mono text-[11px] text-on-surface-variant">
                                 DEFRA Freighting Goods Distance / Weight-Distance Protocol
@@ -465,7 +465,7 @@ export function Category4FormModal({
                             type="text"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            placeholder="e.g. Inbound logistics from Pune supplier to Mumbai warehouse"
+                            placeholder="e.g. Outbound last-mile product delivery to retail outlets"
                             className="font-mono text-xs"
                         />
                     </div>
@@ -489,7 +489,7 @@ export function Category4FormModal({
                                 min="0.01"
                                 value={activityValue}
                                 onChange={(e) => setActivityValue(e.target.value)}
-                                placeholder={`e.g. 1500 ${activeUnitSymbol}`}
+                                placeholder={`e.g. 3200 ${activeUnitSymbol}`}
                                 className="font-mono text-xs font-bold"
                             />
                         </div>
@@ -498,7 +498,7 @@ export function Category4FormModal({
                     {/* Live Preview Box */}
                     <div className="rounded-lg bg-surface-container-low p-3 border border-outline-variant/40 space-y-1">
                         <span className="font-mono text-[10px] uppercase font-bold text-on-surface-variant">
-                            Transport Emission Calculation Preview
+                            Downstream Transport Emission Calculation Preview
                         </span>
                         <div className="flex items-baseline justify-between">
                             <span className="font-mono text-xs font-bold text-primary">
@@ -516,13 +516,13 @@ export function Category4FormModal({
                     {/* Internal Notes */}
                     <div>
                         <label className="block font-mono text-xs font-semibold text-primary mb-1">
-                            Notes & Delivery Receipt Remarks
+                            Notes & Dispatch Invoice Remarks
                         </label>
                         <textarea
                             rows={2}
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
-                            placeholder="Enter delivery challan numbers, bill of lading, 3PL carrier receipts, or audit notes..."
+                            placeholder="Enter dispatch invoices, customer receipts, distribution partner notes..."
                             className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         />
                     </div>

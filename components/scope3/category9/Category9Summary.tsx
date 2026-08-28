@@ -1,8 +1,8 @@
 import { Card } from "@/components/ui/card";
-import { Category4TransportActivityEntry } from "@/lib/scope3/category4/types";
+import { Category9TransportActivityEntry } from "@/lib/scope3/category9/types";
 
-type Category4SummaryProps = {
-    entries: Category4TransportActivityEntry[];
+type Category9SummaryProps = {
+    entries: Category9TransportActivityEntry[];
 };
 
 function formatNumber(value: number, digits = 2) {
@@ -12,7 +12,7 @@ function formatNumber(value: number, digits = 2) {
     }).format(value);
 }
 
-export function Category4Summary({ entries }: Category4SummaryProps) {
+export function Category9Summary({ entries }: Category9SummaryProps) {
     const totalActivityValue = entries.reduce((sum, e) => sum + e.activityValue, 0);
     const totalEmissionsTco2e = entries.reduce((sum, e) => sum + e.calculatedTCo2e, 0);
     const totalEmissionsKgCo2e = entries.reduce((sum, e) => sum + e.calculatedKgCo2e, 0);
@@ -31,13 +31,13 @@ export function Category4Summary({ entries }: Category4SummaryProps) {
                     {formatNumber(totalActivityValue, 0)}
                 </p>
                 <p className="mt-2 font-mono text-[11px] font-medium text-secondary">
-                    Across {entries.length} Upstream Freight Logs (tonne.km / km)
+                    Across {entries.length} Downstream Freight Logs (tonne.km / km)
                 </p>
             </Card>
 
             <Card className="p-5 border-outline-variant/60">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-                    Headline Upstream Freight Emissions
+                    Headline Downstream Freight Emissions
                 </p>
                 <p className="mt-2 font-mono text-headline-md font-bold text-primary">
                     {formatNumber(totalEmissionsTco2e, 4)} <span className="text-xs font-normal text-on-surface-variant">tCO₂e</span>

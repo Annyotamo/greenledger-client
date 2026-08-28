@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { CustomSelect, CustomSelectOption } from "@/components/ui/select";
 import { FormErrorSummary } from "@/components/ui/FormErrorSummary";
-import { useFacilities } from "@/lib/facility/hooks";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import {
     AmendCategory15InvestmentPayload,
@@ -34,12 +33,10 @@ export function Category15FormModal({
     onSubmit,
     isSubmitting,
 }: Category15FormModalProps) {
-    const facilitiesQuery = useFacilities();
     const assetClassesQuery = useAssetClasses();
     const reportingPeriodsQuery = useReportingPeriods();
 
     const assetClasses = useMemo(() => assetClassesQuery.data ?? [], [assetClassesQuery.data]);
-    const facilities = useMemo(() => facilitiesQuery.data ?? [], [facilitiesQuery.data]);
     const periods = useMemo(() => reportingPeriodsQuery.data ?? [], [reportingPeriodsQuery.data]);
 
     const isEditOrAmend = (mode === "edit" || mode === "amend") && Boolean(initialEntry);
@@ -58,9 +55,6 @@ export function Category15FormModal({
     );
     const [assetClass, setAssetClass] = useState<AssetClassEnum>(
         () => (isEditOrAmend ? initialEntry?.assetClass || "listed_shares_or_corporate_bonds" : "listed_shares_or_corporate_bonds"),
-    );
-    const [facilityId, setFacilityId] = useState(
-        () => (isEditOrAmend ? initialEntry?.facilityId || "" : ""),
     );
     const [outstandingAmount, setOutstandingAmount] = useState(
         () => (isEditOrAmend ? String(initialEntry?.outstandingAmountCrores || "250") : "250"),
@@ -103,6 +97,7 @@ export function Category15FormModal({
     const financedScope1 = attributionFactor * numScope1;
     const financedScope2 = attributionFactor * numScope2;
     const financedScope3 = attributionFactor * numScope3;
+
     const totalFinancedEmissionsTco2e = financedScope1 + financedScope2 + financedScope3;
 
     function validate() {
@@ -156,7 +151,7 @@ export function Category15FormModal({
                 company_scope1_emissions: numScope1,
                 company_scope2_emissions: numScope2,
                 company_scope3_emissions: numScope3,
-                facility_id: facilityId || null,
+                facility_id: null,
                 status: "draft",
                 notes: notes.trim() || null,
             };
@@ -277,24 +272,7 @@ export function Category15FormModal({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
-                                Facility / Portfolio Site
-                            </label>
-                            <select
-                                value={facilityId}
-                                onChange={(e) => setFacilityId(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
-                                <option value="">No facility (Corporate)</option>
-                                {facilities.map((fac) => (
-                                    <option key={fac.id} value={fac.id}>
-                                        {fac.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                             <label className="block font-mono text-xs font-semibold text-primary mb-1">
                                 Outstanding (₹ Crores) <span className="text-error">*</span>

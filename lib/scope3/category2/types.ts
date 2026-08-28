@@ -7,8 +7,10 @@ export type Category2SpendItemDto = {
     created_at: string;
     updated_at: string;
     tenant_id?: string;
+    reporting_period_id?: string | null;
+    reporting_period_name?: string | null;
+    reporting_period?: string;
     facility_id: string | null;
-    reporting_period: string;
     scope3_spend_emission_factor_id: string;
     spend_date: string;
     spend_year: number;
@@ -33,9 +35,11 @@ export type Category2SpendEntry = {
     id: string;
     createdAt: string;
     updatedAt: string;
+    reportingPeriodId: string | null;
+    reportingPeriodName: string;
+    reportingPeriod: string;
     facilityId: string | null;
     facilityName: string | null;
-    reportingPeriod: string;
     scope3SpendEmissionFactorId: string;
     spendDate: string;
     spendYear: number;
@@ -67,12 +71,13 @@ export type Category2SpendApiResponse<T = Category2SpendItemDto[]> = {
 };
 
 export type CreateCategory2SpendPayload = {
-    reporting_period: string;
+    reporting_period_id?: string | null;
     facility_id?: string | null;
     scope3_spend_emission_factor_id: string;
     spend_date: string;
     spend_in_inr: number;
     spend_year: number;
+    status?: Scope3SpendStatus;
     notes?: string | null;
 };
 
@@ -83,6 +88,7 @@ export type AmendCategory2SpendPayload = CreateCategory2SpendPayload & {
 };
 
 export type Category2FilterParams = {
+    reporting_period_id?: string;
     reporting_period?: string;
     facility_id?: string;
     scope3_spend_emission_factor_id?: string;
@@ -153,5 +159,60 @@ export const DEFAULT_CATEGORY2_USEEIO_FACTORS: Scope3SpendFactor[] = [
         kgCo2ePerUsdWithMargins: 0.5820,
         kgCo2ePerUsdWithoutMargins: 0.5110,
         marginKgCo2ePerUsd: 0.0710,
+    },
+    {
+        id: "cat2-factor-6",
+        naicsCode: "334111",
+        naicsSectorCategory: "IT & Electronics Hardware",
+        naicsTitle: "Electronic Computer Manufacturing (Servers & Datacenter Hardware)",
+        commodityTitle: "Electronic Computer Manufacturing",
+        category: "IT & Electronics Hardware",
+        kgCo2ePerUsdWithMargins: 0.3850,
+        kgCo2ePerUsdWithoutMargins: 0.3350,
+        marginKgCo2ePerUsd: 0.0500,
+    },
+    {
+        id: "cat2-factor-7",
+        naicsCode: "334510",
+        naicsSectorCategory: "Medical & Precision Equipment",
+        naicsTitle: "Electromedical and Electrotherapeutic Apparatus Manufacturing",
+        commodityTitle: "Electromedical Apparatus Manufacturing",
+        category: "Medical & Precision Equipment",
+        kgCo2ePerUsdWithMargins: 0.4120,
+        kgCo2ePerUsdWithoutMargins: 0.3620,
+        marginKgCo2ePerUsd: 0.0500,
+    },
+    {
+        id: "cat2-factor-8",
+        naicsCode: "333415",
+        naicsSectorCategory: "HVAC & Commercial Appliances",
+        naicsTitle: "Air-Conditioning and Warm Air Heating Equipment Manufacturing",
+        commodityTitle: "HVAC Equipment Manufacturing",
+        category: "HVAC & Commercial Appliances",
+        kgCo2ePerUsdWithMargins: 0.6210,
+        kgCo2ePerUsdWithoutMargins: 0.5430,
+        marginKgCo2ePerUsd: 0.0780,
+    },
+    {
+        id: "cat2-factor-9",
+        naicsCode: "332312",
+        naicsSectorCategory: "Buildings & Infrastructure",
+        naicsTitle: "Fabricated Structural Metal Manufacturing (Steel Frames)",
+        commodityTitle: "Fabricated Structural Metal Manufacturing",
+        category: "Buildings & Infrastructure",
+        kgCo2ePerUsdWithMargins: 0.8140,
+        kgCo2ePerUsdWithoutMargins: 0.7240,
+        marginKgCo2ePerUsd: 0.0900,
+    },
+    {
+        id: "cat2-factor-10",
+        naicsCode: "335311",
+        naicsSectorCategory: "Electrical Equipment",
+        naicsTitle: "Power, Distribution, and Specialty Transformer Manufacturing",
+        commodityTitle: "Power Transformer Manufacturing",
+        category: "Electrical Equipment",
+        kgCo2ePerUsdWithMargins: 0.5480,
+        kgCo2ePerUsdWithoutMargins: 0.4820,
+        marginKgCo2ePerUsd: 0.0660,
     },
 ];

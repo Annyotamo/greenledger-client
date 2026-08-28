@@ -40,9 +40,11 @@ export type Category5WasteActivityDto = {
     created_at: string;
     updated_at: string;
     tenant_id?: string;
+    reporting_period_id?: string | null;
+    reporting_period_name?: string | null;
+    reporting_period?: string;
     facility_id: string | null;
     facility_name?: string | null;
-    reporting_period: string;
     waste_type_id: string;
     waste_type_name?: string;
     category_name?: string;
@@ -63,9 +65,11 @@ export type Category5WasteActivityEntry = {
     id: string;
     createdAt: string;
     updatedAt: string;
+    reportingPeriodId: string | null;
+    reportingPeriodName: string;
+    reportingPeriod: string;
     facilityId: string | null;
     facilityName: string | null;
-    reportingPeriod: string;
     wasteTypeId: string;
     wasteTypeName: string;
     categoryName: string;
@@ -83,12 +87,13 @@ export type Category5WasteActivityEntry = {
 };
 
 export type CreateCategory5WastePayload = {
-    reporting_period: string;
+    reporting_period_id?: string | null;
     facility_id?: string | null;
     waste_type_id: string;
     treatment_method: WasteTreatmentMethodEnum;
     activity_date: string;
     waste_generated_tonnes: number;
+    status?: Scope3SpendStatus;
     notes?: string | null;
 };
 
@@ -99,6 +104,7 @@ export type AmendCategory5WastePayload = CreateCategory5WastePayload & {
 };
 
 export type Category5FilterParams = {
+    reporting_period_id?: string;
     reporting_period?: string;
     facility_id?: string;
     status?: string;

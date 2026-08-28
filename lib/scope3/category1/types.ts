@@ -51,8 +51,10 @@ export type Category1SpendItemDto = {
     created_at: string;
     updated_at: string;
     tenant_id?: string;
+    reporting_period_id?: string | null;
+    reporting_period_name?: string | null;
+    reporting_period?: string;
     facility_id: string | null;
-    reporting_period: string;
     scope3_spend_emission_factor_id: string;
     spend_date: string;
     spend_year: number;
@@ -77,9 +79,11 @@ export type Category1SpendEntry = {
     id: string;
     createdAt: string;
     updatedAt: string;
+    reportingPeriodId: string | null;
+    reportingPeriodName: string;
+    reportingPeriod: string;
     facilityId: string | null;
     facilityName: string | null;
-    reportingPeriod: string;
     scope3SpendEmissionFactorId: string;
     spendDate: string;
     spendYear: number;
@@ -111,12 +115,13 @@ export type Category1SpendApiResponse<T = Category1SpendItemDto[]> = {
 };
 
 export type CreateCategory1SpendPayload = {
-    reporting_period: string;
+    reporting_period_id?: string | null;
     facility_id?: string | null;
     scope3_spend_emission_factor_id: string;
     spend_date: string;
     spend_in_inr: number;
     spend_year: number;
+    status?: Scope3SpendStatus;
     notes?: string | null;
 };
 
@@ -127,6 +132,7 @@ export type AmendCategory1SpendPayload = CreateCategory1SpendPayload & {
 };
 
 export type Category1FilterParams = {
+    reporting_period_id?: string;
     reporting_period?: string;
     facility_id?: string;
     scope3_spend_emission_factor_id?: string;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { CustomSelect, CustomSelectOption } from "@/components/ui/select";
 import { FormErrorSummary } from "@/components/ui/FormErrorSummary";
 import { useFacilities } from "@/lib/facility/hooks";
+import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import {
     AirCabinClass,
     AirHaulType,
@@ -48,20 +49,28 @@ export function Category6FormModal({
     const airHaulTypesQuery = useAirHaulTypes();
     const airCabinClassesQuery = useAirCabinClasses();
     const seaPassengerTypesQuery = useSeaPassengerTypes();
+    const reportingPeriodsQuery = useReportingPeriods();
 
     const facilities = useMemo(() => facilitiesQuery.data ?? [], [facilitiesQuery.data]);
     const carTypes = useMemo(() => carTypesQuery.data ?? [], [carTypesQuery.data]);
     const airHaulTypes = useMemo(() => airHaulTypesQuery.data ?? [], [airHaulTypesQuery.data]);
     const airCabinClasses = useMemo(() => airCabinClassesQuery.data ?? [], [airCabinClassesQuery.data]);
     const seaPassengerTypes = useMemo(() => seaPassengerTypesQuery.data ?? [], [seaPassengerTypesQuery.data]);
+    const periods = useMemo(() => reportingPeriodsQuery.data ?? [], [reportingPeriodsQuery.data]);
 
     const isEditOrAmend = (mode === "edit" || mode === "amend") && Boolean(initialEntry);
+
+    const [submitting, setSubmitting] = useState(false);
+    const submittingRef = useRef(false);
 
     const [title, setTitle] = useState(
         () => (isEditOrAmend ? initialEntry?.title || "" : ""),
     );
     const [description, setDescription] = useState(
         () => (isEditOrAmend ? initialEntry?.description || "" : ""),
+    );
+    const [reportingPeriodId, setReportingPeriodId] = useState(
+        () => (isEditOrAmend ? initialEntry?.reportingPeriodId || periods[0]?.id || "" : periods[0]?.id || ""),
     );
     const [facilityId, setFacilityId] = useState(
         () => (isEditOrAmend ? initialEntry?.facilityId || "" : ""),
@@ -157,6 +166,10 @@ export function Category6FormModal({
     function validate() {
         const newErrors: Record<string, string> = {};
 
+        const activePeriodId = reportingPeriodId || periods[0]?.id;
+        if (!activePeriodId) {
+            newErrors.reportingPeriodId = "Reporting period is required.";
+        }
         if (!title.trim()) {
             newErrors.title = "Journey title is required (e.g. Global Sales Summit Q1).";
         }
@@ -188,34 +201,47 @@ export function Category6FormModal({
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        if (submittingRef.current || isSubmitting || submitting) return;
+
         if (!validate()) return;
 
-        const basePayload: CreateTravelActivityPayload = {
-            category: "BUSINESS_TRAVEL",
-            title: title.trim(),
-            description: description.trim() || null,
-            facility_id: facilityId || null,
-            start_date: startDate,
-            end_date: endDate,
-            status: "submitted",
-            trips: trips.map((t, idx) => ({
-                ...t,
-                trip_order: idx + 1,
-            })),
-        };
+        submittingRef.current = true;
+        setSubmitting(true);
 
-        if (mode === "amend" && initialEntry) {
-            const amendPayload: AmendTravelActivityPayload = {
-                ...basePayload,
-                amended_from_id: initialEntry.id,
+        try {
+            const basePayload: CreateTravelActivityPayload = {
+                category: "BUSINESS_TRAVEL",
+                title: title.trim(),
+                description: description.trim() || null,
+                facility_id: facilityId || null,
+                reporting_period_id: reportingPeriodId || periods[0]?.id || null,
+                start_date: startDate,
+                end_date: endDate,
+                status: "draft",
+                trips: trips.map((t, idx) => ({
+                    ...t,
+                    trip_order: idx + 1,
+                })),
             };
-            await onSubmit(amendPayload);
-        } else {
-            await onSubmit(basePayload);
+
+            if (mode === "amend" && initialEntry) {
+                const amendPayload: AmendTravelActivityPayload = {
+                    ...basePayload,
+                    amended_from_id: initialEntry.id,
+                };
+                await onSubmit(amendPayload);
+            } else {
+                await onSubmit(basePayload);
+            }
+        } finally {
+            submittingRef.current = false;
+            setSubmitting(false);
         }
     }
 
     if (!isOpen) return null;
+
+    const busy = isSubmitting || submitting;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
@@ -258,6 +284,23 @@ export function Category6FormModal({
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                             <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                                Reporting Period <span className="text-error">*</span>
+                            </label>
+                            <select
+                                value={reportingPeriodId || (periods[0]?.id ?? "")}
+                                onChange={(e) => setReportingPeriodId(e.target.value)}
+                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                {periods.length === 0 && <option value="">Loading reporting periods...</option>}
+                                {periods.map((p) => (
+                                    <option key={p.id} value={p.id}>
+                                        {p.name} ({p.reportingYear})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
                                 Journey Title <span className="text-error">*</span>
                             </label>
                             <Input
@@ -267,7 +310,9 @@ export function Category6FormModal({
                                 className="font-mono text-xs font-bold"
                             />
                         </div>
+                    </div>
 
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div>
                             <label className="block font-mono text-xs font-semibold text-primary mb-1">
                                 Facility / Site (Optional)
@@ -284,9 +329,7 @@ export function Category6FormModal({
                                 ))}
                             </select>
                         </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                             <label className="block font-mono text-xs font-semibold text-primary mb-1">
                                 Travel Start Date <span className="text-error">*</span>
@@ -557,11 +600,11 @@ export function Category6FormModal({
                     </div>
 
                     <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/40">
-                        <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={isSubmitting}>
+                        <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={busy}>
                             Cancel
                         </Button>
-                        <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
-                            {isSubmitting
+                        <Button type="submit" variant="primary" size="md" disabled={busy}>
+                            {busy
                                 ? "Saving..."
                                 : mode === "create"
                                   ? "Create Travel Journey"

@@ -46,9 +46,11 @@ export type WttFuelActivityDto = {
     created_at: string;
     updated_at: string;
     tenant_id?: string;
+    reporting_period_id?: string | null;
+    reporting_period_name?: string | null;
+    reporting_period?: string;
     facility_id: string | null;
     facility_name?: string | null;
-    reporting_period: string;
     wtt_fuel_emission_factor_id: string;
     fuel_id: string;
     fuel_name?: string;
@@ -68,9 +70,11 @@ export type WttFuelActivityEntry = {
     id: string;
     createdAt: string;
     updatedAt: string;
+    reportingPeriodId: string | null;
+    reportingPeriodName: string;
+    reportingPeriod: string;
     facilityId: string | null;
     facilityName: string | null;
-    reportingPeriod: string;
     wttFuelEmissionFactorId: string;
     fuelId: string;
     fuelName: string;
@@ -87,13 +91,14 @@ export type WttFuelActivityEntry = {
 };
 
 export type CreateWttFuelPayload = {
-    reporting_period: string;
+    reporting_period_id?: string | null;
     facility_id?: string | null;
     wtt_fuel_emission_factor_id: string;
     fuel_id: string;
     unit_id: string;
     activity_date: string;
     fuel_quantity: number;
+    status?: Scope3SpendStatus;
     notes?: string | null;
 };
 
@@ -112,9 +117,11 @@ export type ElectricityTdActivityDto = {
     created_at: string;
     updated_at: string;
     tenant_id?: string;
+    reporting_period_id?: string | null;
+    reporting_period_name?: string | null;
+    reporting_period?: string;
     facility_id: string | null;
     facility_name?: string | null;
-    reporting_period: string;
     electricity_emission_factor_id: string | null;
     activity_date: string;
     electricity_consumed_kwh: number;
@@ -132,9 +139,11 @@ export type ElectricityTdActivityEntry = {
     id: string;
     createdAt: string;
     updatedAt: string;
+    reportingPeriodId: string | null;
+    reportingPeriodName: string;
+    reportingPeriod: string;
     facilityId: string | null;
     facilityName: string | null;
-    reportingPeriod: string;
     electricityEmissionFactorId: string | null;
     activityDate: string;
     electricityConsumedKwh: number;
@@ -149,12 +158,13 @@ export type ElectricityTdActivityEntry = {
 };
 
 export type CreateElectricityTdPayload = {
-    reporting_period: string;
+    reporting_period_id?: string | null;
     facility_id?: string | null;
     electricity_emission_factor_id?: string | null;
     activity_date: string;
     electricity_consumed_kwh: number;
     td_loss_rate?: number;
+    status?: Scope3SpendStatus;
     notes?: string | null;
 };
 
@@ -165,6 +175,7 @@ export type AmendElectricityTdPayload = CreateElectricityTdPayload & {
 };
 
 export type Category3FilterParams = {
+    reporting_period_id?: string;
     reporting_period?: string;
     facility_id?: string;
     status?: string;

@@ -19,7 +19,11 @@ export async function getCategory4SpendEntries(
     filters?: Category4SpendFilterParams,
 ): Promise<Category4SpendEntry[]> {
     const params = new URLSearchParams();
-    if (filters?.reporting_period) params.append("reporting_period", filters.reporting_period);
+    if (filters?.reporting_period_id) {
+        params.append("reporting_period_id", filters.reporting_period_id);
+    } else if (filters?.reporting_period) {
+        params.append("reporting_period_id", filters.reporting_period);
+    }
     if (filters?.facility_id) params.append("facility_id", filters.facility_id);
     if (filters?.scope3_spend_emission_factor_id)
         params.append("scope3_spend_emission_factor_id", filters.scope3_spend_emission_factor_id);
@@ -123,19 +127,52 @@ export async function amendCategory4SpendEntry(
 export async function getCategory4SpendFactors(sourceId?: string): Promise<Scope3SpendFactor[]> {
     const url = `/tenant/emission-factors/scope3/spend-factors${sourceId ? `?source_id=${sourceId}` : ""}`;
     try {
-        const response = await privateApi.get<{ success: boolean; data: Scope3SpendFactorDto[] }>(url);
-        if (Array.isArray(response.data.data) && response.data.data.length > 0) {
-            return response.data.data.map((dto) => ({
+        const response = await privateApi.get<{
+            success: boolean;
+            data: Scope3SpendFactorDto[] | { items: Scope3SpendFactorDto[] };
+        }>(url);
+        const dataPayload = response.data?.data;
+        const rawData = Array.isArray(dataPayload)
+            ? dataPayload
+            : (dataPayload as { items?: Scope3SpendFactorDto[] })?.items ?? [];
+
+        if (Array.isArray(rawData) && rawData.length > 0) {
+            return rawData.map((dto) => ({
                 id: dto.id,
                 naicsCode: dto.naics_code || "484110",
-                commodityTitle: dto.commodity_title || "General Freight Trucking, Local",
-                naicsTitle: dto.naics_title || dto.commodity_title || "General Freight Trucking, Local",
-                naicsSectorCategory: dto.naics_sector_category || "Transportation and Warehousing",
+                commodityTitle: dto.commodity_title || dto.naics_title || "General Freight Transport",
+                naicsTitle: dto.naics_title || dto.commodity_title || "General Freight Transport",
+                naicsSectorCategory: dto.naics_sector_category || dto.category || "Transportation and Warehousing",
                 category: dto.category || dto.naics_sector_category || "Transportation and Warehousing",
                 kgCo2ePerUsdWithMargins: Number(dto.kg_co2e_per_usd_with_margins || 0.415),
                 kgCo2ePerUsdWithoutMargins: Number(dto.kg_co2e_per_usd_without_margins || 0.320),
                 marginKgCo2ePerUsd: Number(dto.margin_kg_co2e_per_usd || 0.095),
             }));
+        }
+
+        if (sourceId) {
+            const fallbackRes = await privateApi.get<{
+                success: boolean;
+                data: Scope3SpendFactorDto[] | { items: Scope3SpendFactorDto[] };
+            }>("/tenant/emission-factors/scope3/spend-factors");
+            const fallbackPayload = fallbackRes.data?.data;
+            const fallbackData = Array.isArray(fallbackPayload)
+                ? fallbackPayload
+                : (fallbackPayload as { items?: Scope3SpendFactorDto[] })?.items ?? [];
+
+            if (Array.isArray(fallbackData) && fallbackData.length > 0) {
+                return fallbackData.map((dto) => ({
+                    id: dto.id,
+                    naicsCode: dto.naics_code || "484110",
+                    commodityTitle: dto.commodity_title || dto.naics_title || "General Freight Transport",
+                    naicsTitle: dto.naics_title || dto.commodity_title || "General Freight Transport",
+                    naicsSectorCategory: dto.naics_sector_category || dto.category || "Transportation and Warehousing",
+                    category: dto.category || dto.naics_sector_category || "Transportation and Warehousing",
+                    kgCo2ePerUsdWithMargins: Number(dto.kg_co2e_per_usd_with_margins || 0.415),
+                    kgCo2ePerUsdWithoutMargins: Number(dto.kg_co2e_per_usd_without_margins || 0.320),
+                    marginKgCo2ePerUsd: Number(dto.margin_kg_co2e_per_usd || 0.095),
+                }));
+            }
         }
     } catch {
         // Fallback demo freight transport spend factors
@@ -207,7 +244,9 @@ function getMockCategory4SpendEntries(): Category4SpendEntry[] {
             updatedAt: "2026-08-18T10:00:00.000Z",
             facilityId: null,
             facilityName: "Main Logistics Hub",
-            reportingPeriod: "FY 2021-22",
+            reportingPeriodId: "091f03f3-2470-4f51-b845-a7b3cba14d33",
+            reportingPeriodName: "FY 2024-25",
+            reportingPeriod: "FY 2024-25",
             scope3SpendEmissionFactorId: "ca68b110-59ba-4c62-b841-270138cc06dd",
             factor: {
                 id: "ca68b110-59ba-4c62-b841-270138cc06dd",
@@ -220,19 +259,19 @@ function getMockCategory4SpendEntries(): Category4SpendEntry[] {
                 kgCo2ePerUsdWithoutMargins: 0.3200,
                 marginKgCo2ePerUsd: 0.0950,
             },
-            spendDate: "2021-12-09",
-            spendInInr: 75000.0,
-            spendYear: 2021,
-            exchangeRateUsdToInr: 73.92,
-            spendInUsd: 1014.61,
-            calculatedKgCo2e: 421.06,
-            calculatedKgCo2eWithoutMargins: 324.70,
-            marginKgCo2e: 96.36,
-            calculatedTCo2e: 0.4211,
-            calculatedTCo2eWithoutMargins: 0.3247,
-            marginTCo2e: 0.0964,
-            status: "verified",
-            notes: "Upstream freight transportation spend for raw materials delivery",
+            spendDate: "2024-10-05",
+            spendInInr: 415000.0,
+            spendYear: 2024,
+            exchangeRateUsdToInr: 83.00,
+            spendInUsd: 5000.0,
+            calculatedKgCo2e: 4250.0,
+            calculatedKgCo2eWithoutMargins: 3400.0,
+            marginKgCo2e: 850.0,
+            calculatedTCo2e: 4.25,
+            calculatedTCo2eWithoutMargins: 3.40,
+            marginTCo2e: 0.85,
+            status: "draft",
+            notes: "Third-party freight & courier logistics",
             rejectedReason: null,
             amendedFromId: null,
         },

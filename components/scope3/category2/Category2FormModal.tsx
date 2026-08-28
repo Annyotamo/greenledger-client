@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,11 +8,13 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { CustomSelect, CustomSelectOption } from "@/components/ui/select";
 import { FormErrorSummary } from "@/components/ui/FormErrorSummary";
 import { useFacilities } from "@/lib/facility/hooks";
+import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { ANNUAL_USD_INR_EXCHANGE_RATES } from "@/lib/scope3/category1/types";
 import {
     Category2SpendEntry,
     CreateCategory2SpendPayload,
     AmendCategory2SpendPayload,
+    DEFAULT_CATEGORY2_USEEIO_FACTORS,
 } from "@/lib/scope3/category2/types";
 import { useActiveEmissionFactorSources } from "@/lib/scope3/category1/hooks";
 import { useCategory2SpendFactors } from "@/lib/scope3/category2/hooks";
@@ -36,11 +38,16 @@ export function Category2FormModal({
 }: Category2FormModalProps) {
     const facilitiesQuery = useFacilities();
     const sourcesQuery = useActiveEmissionFactorSources("other");
+    const reportingPeriodsQuery = useReportingPeriods();
 
     const sources = useMemo(() => sourcesQuery.data ?? [], [sourcesQuery.data]);
     const facilities = useMemo(() => facilitiesQuery.data ?? [], [facilitiesQuery.data]);
+    const periods = useMemo(() => reportingPeriodsQuery.data ?? [], [reportingPeriodsQuery.data]);
 
     const isEditOrAmend = (mode === "edit" || mode === "amend") && Boolean(initialEntry);
+
+    const [submitting, setSubmitting] = useState(false);
+    const submittingRef = useRef(false);
 
     const [sourceId, setSourceId] = useState<string>(
         () => initialEntry?.factor?.source?.id || sources[0]?.id || "ce689b2d-6882-4c9b-9cc5-45d65f21d42e",
@@ -48,7 +55,11 @@ export function Category2FormModal({
 
     const selectedSourceId = sourceId || sources[0]?.id || "ce689b2d-6882-4c9b-9cc5-45d65f21d42e";
     const factorsQuery = useCategory2SpendFactors(selectedSourceId);
-    const factors = useMemo(() => factorsQuery.data ?? [], [factorsQuery.data]);
+    const rawFactors = useMemo(() => factorsQuery.data ?? [], [factorsQuery.data]);
+    const factors = useMemo(
+        () => (rawFactors.length > 0 ? rawFactors : DEFAULT_CATEGORY2_USEEIO_FACTORS),
+        [rawFactors],
+    );
 
     const [sectorCategory, setSectorCategory] = useState<string>("");
 
@@ -77,8 +88,8 @@ export function Category2FormModal({
         return factors.filter((f) => (f.naicsSectorCategory || f.category) === sectorCategory);
     }, [factors, sectorCategory]);
 
-    const [reportingPeriod, setReportingPeriod] = useState(
-        () => (isEditOrAmend ? initialEntry?.reportingPeriod || "FY 2021-22" : "FY 2021-22"),
+    const [reportingPeriodId, setReportingPeriodId] = useState(
+        () => (isEditOrAmend ? initialEntry?.reportingPeriodId || periods[0]?.id || "" : periods[0]?.id || ""),
     );
     const [facilityId, setFacilityId] = useState(
         () => (isEditOrAmend ? initialEntry?.facilityId || "" : ""),
@@ -87,13 +98,13 @@ export function Category2FormModal({
         () => (isEditOrAmend ? initialEntry?.scope3SpendEmissionFactorId || "" : ""),
     );
     const [spendDate, setSpendDate] = useState(
-        () => (isEditOrAmend ? initialEntry?.spendDate || "2021-12-09" : "2021-12-09"),
+        () => (isEditOrAmend ? initialEntry?.spendDate || "2024-07-20" : "2024-07-20"),
     );
     const [spendYear, setSpendYear] = useState<number>(
-        () => (isEditOrAmend ? initialEntry?.spendYear || 2021 : 2021),
+        () => (isEditOrAmend ? initialEntry?.spendYear || 2024 : 2024),
     );
     const [spendInInr, setSpendInInr] = useState(
-        () => (isEditOrAmend ? String(initialEntry?.spendInInr || "200000") : "200000"),
+        () => (isEditOrAmend ? String(initialEntry?.spendInInr || "2490000") : "2490000"),
     );
     const [notes, setNotes] = useState(
         () => (isEditOrAmend ? initialEntry?.notes || "" : ""),
@@ -125,7 +136,7 @@ export function Category2FormModal({
         }
     }
 
-    const exchangeRate = ANNUAL_USD_INR_EXCHANGE_RATES[spendYear] || 73.92;
+    const exchangeRate = ANNUAL_USD_INR_EXCHANGE_RATES[spendYear] || 83.45;
     const numSpendInr = parseFloat(spendInInr) || 0;
     const numSpendUsd = numSpendInr > 0 ? numSpendInr / exchangeRate : 0;
 
@@ -135,8 +146,9 @@ export function Category2FormModal({
     function validate() {
         const newErrors: Record<string, string> = {};
 
-        if (!reportingPeriod.trim()) {
-            newErrors.reportingPeriod = "Reporting period is required (e.g. FY 2021-22).";
+        const activePeriodId = reportingPeriodId || periods[0]?.id;
+        if (!activePeriodId) {
+            newErrors.reportingPeriodId = "Reporting period is required.";
         }
         if (!selectedFactorId) {
             newErrors.factorId = "Please select a USEEIO capital goods emission factor.";
@@ -162,40 +174,51 @@ export function Category2FormModal({
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        if (submittingRef.current || isSubmitting || submitting) return;
+
         if (!validate()) return;
 
-        const basePayload: CreateCategory2SpendPayload = {
-            reporting_period: reportingPeriod.trim(),
-            facility_id: facilityId || null,
-            scope3_spend_emission_factor_id: selectedFactorId,
-            spend_date: spendDate,
-            spend_in_inr: numSpendInr,
-            spend_year: spendYear,
-            notes: notes.trim() || null,
-        };
+        submittingRef.current = true;
+        setSubmitting(true);
 
-        if (mode === "amend" && initialEntry) {
-            const amendPayload: AmendCategory2SpendPayload = {
-                ...basePayload,
-                amended_from_id: initialEntry.id,
+        try {
+            const basePayload: CreateCategory2SpendPayload = {
+                reporting_period_id: reportingPeriodId || periods[0]?.id || null,
+                facility_id: facilityId || null,
+                scope3_spend_emission_factor_id: selectedFactorId,
+                spend_date: spendDate,
+                spend_in_inr: numSpendInr,
+                spend_year: spendYear,
+                status: "draft",
+                notes: notes.trim() || null,
             };
-            await onSubmit(amendPayload);
-        } else {
-            await onSubmit(basePayload);
+
+            if (mode === "amend" && initialEntry) {
+                const amendPayload: AmendCategory2SpendPayload = {
+                    ...basePayload,
+                    amended_from_id: initialEntry.id,
+                };
+                await onSubmit(amendPayload);
+            } else {
+                await onSubmit(basePayload);
+            }
+        } finally {
+            submittingRef.current = false;
+            setSubmitting(false);
         }
     }
 
     if (!isOpen) return null;
 
+    const busy = isSubmitting || submitting;
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-            {/* Full-screen Backdrop Blur Overlay */}
             <div
                 className="fixed inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity"
                 onClick={onClose}
             />
 
-            {/* Modal Dialog Box */}
             <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-2xl z-10 max-h-[85vh] flex flex-col my-auto">
                 <div className="flex items-center justify-between border-b border-outline-variant/60 px-6 py-4 bg-surface-container-low/80">
                     <div className="flex items-center gap-2">
@@ -232,12 +255,17 @@ export function Category2FormModal({
                             <label className="block font-mono text-xs font-semibold text-primary mb-1">
                                 Reporting Period <span className="text-error">*</span>
                             </label>
-                            <Input
-                                value={reportingPeriod}
-                                onChange={(e) => setReportingPeriod(e.target.value)}
-                                placeholder="e.g. FY 2021-22"
-                                className="font-mono text-xs"
-                            />
+                            <select
+                                value={reportingPeriodId || (periods[0]?.id ?? "")}
+                                onChange={(e) => setReportingPeriodId(e.target.value)}
+                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                {periods.length === 0 && <option value="">Loading reporting periods...</option>}
+                                {periods.map((p) => (
+                                    <option key={p.id} value={p.id}>
+                                        {p.name} ({p.reportingYear})
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <div>
@@ -354,7 +382,7 @@ export function Category2FormModal({
                                 min="0.01"
                                 value={spendInInr}
                                 onChange={(e) => setSpendInInr(e.target.value)}
-                                placeholder="e.g. 200000"
+                                placeholder="e.g. 2490000"
                                 className="font-mono text-xs font-bold"
                             />
                         </div>
@@ -391,11 +419,11 @@ export function Category2FormModal({
                     </div>
 
                     <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/40">
-                        <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={isSubmitting}>
+                        <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={busy}>
                             Cancel
                         </Button>
-                        <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
-                            {isSubmitting
+                        <Button type="submit" variant="primary" size="md" disabled={busy}>
+                            {busy
                                 ? "Saving..."
                                 : mode === "create"
                                   ? "Create Capital Spend Entry"

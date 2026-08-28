@@ -29,26 +29,30 @@ import {
     TravelFilterParams,
 } from "@/lib/scope3/travel/types";
 import { useFacilities } from "@/lib/facility/hooks";
+import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { AiAssistantFAB } from "@/components/dashboard/AiAssistantFAB";
 
 export function Category7View() {
     // Filter State
     const [statusFilter, setStatusFilter] = useState<string>("");
     const [facilityFilter, setFacilityFilter] = useState<string>("");
+    const [periodIdFilter, setPeriodIdFilter] = useState<string>("");
 
     const filterParams: TravelFilterParams = useMemo(
         () => ({
             category: "EMPLOYEE_COMMUTING",
             status: statusFilter || undefined,
             facility_id: facilityFilter || undefined,
+            reporting_period_id: periodIdFilter || undefined,
         }),
-        [statusFilter, facilityFilter],
+        [statusFilter, facilityFilter, periodIdFilter],
     );
 
     // Queries
     const travelQuery = useTravelActivities("EMPLOYEE_COMMUTING", filterParams);
-    const summaryQuery = useTravelSummary("EMPLOYEE_COMMUTING");
+    const summaryQuery = useTravelSummary("EMPLOYEE_COMMUTING", periodIdFilter || undefined);
     const facilitiesQuery = useFacilities();
+    const reportingPeriodsQuery = useReportingPeriods();
 
     // Mutations
     const createMutation = useCreateTravelActivity();
@@ -201,7 +205,7 @@ export function Category7View() {
 
             {/* Filter Control Toolbar */}
             <Card className="p-4 border-outline-variant/60">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 font-mono text-xs">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 font-mono text-xs">
                     <div>
                         <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Status Filter</label>
                         <select
@@ -226,6 +230,21 @@ export function Category7View() {
                             {(facilitiesQuery.data ?? []).map((fac) => (
                                 <option key={fac.id} value={fac.id}>
                                     {fac.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Reporting Period</label>
+                        <select
+                            value={periodIdFilter}
+                            onChange={(e) => setPeriodIdFilter(e.target.value)}
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            <option value="">All Reporting Periods</option>
+                            {(reportingPeriodsQuery.data ?? []).map((p) => (
+                                <option key={p.id} value={p.id}>
+                                    {p.name} ({p.reportingYear})
                                 </option>
                             ))}
                         </select>

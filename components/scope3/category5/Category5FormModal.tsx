@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { CustomSelect, CustomSelectOption } from "@/components/ui/select";
 import { FormErrorSummary } from "@/components/ui/FormErrorSummary";
 import { useFacilities } from "@/lib/facility/hooks";
+import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import {
     AmendCategory5WastePayload,
     Category5WasteActivityEntry,
@@ -15,8 +16,20 @@ import {
     TREATMENT_METHOD_LABELS,
     WasteTreatmentFactorDetail,
     WasteTreatmentMethodEnum,
+    WasteType,
 } from "@/lib/scope3/category5/types";
 import { useWasteTypes } from "@/lib/scope3/category5/hooks";
+
+type RawWasteTypeItem = Partial<WasteType> & {
+    id?: string;
+    name?: string;
+    title?: string;
+    waste_id?: string;
+    waste_name?: string;
+    category?: string;
+    category_title?: string;
+    methods?: unknown;
+};
 
 interface Category5FormModalProps {
     isOpen: boolean;
@@ -37,18 +50,25 @@ export function Category5FormModal({
 }: Category5FormModalProps) {
     const facilitiesQuery = useFacilities();
     const wasteTypesQuery = useWasteTypes();
+    const reportingPeriodsQuery = useReportingPeriods();
 
     const wasteTypes = useMemo(() => wasteTypesQuery.data ?? [], [wasteTypesQuery.data]);
     const facilities = useMemo(() => facilitiesQuery.data ?? [], [facilitiesQuery.data]);
+    const periods = useMemo(() => reportingPeriodsQuery.data ?? [], [reportingPeriodsQuery.data]);
 
     const isEditOrAmend = (mode === "edit" || mode === "amend") && Boolean(initialEntry);
+
+    const [submitting, setSubmitting] = useState(false);
+    const submittingRef = useRef(false);
 
     const [wasteCategory, setWasteCategory] = useState<string>("");
 
     const wasteCategories = useMemo(() => {
         const set = new Set<string>();
         wasteTypes.forEach((w) => {
-            if (w.category_name) set.add(w.category_name);
+            const raw = w as RawWasteTypeItem;
+            const catName = raw.category_name || raw.category || raw.category_title;
+            if (catName) set.add(catName);
         });
         return Array.from(set);
     }, [wasteTypes]);
@@ -58,7 +78,10 @@ export function Category5FormModal({
             { label: `All Waste Categories (${wasteTypes.length} materials)`, value: "" },
         ];
         wasteCategories.forEach((cat) => {
-            const count = wasteTypes.filter((w) => w.category_name === cat).length;
+            const count = wasteTypes.filter((w) => {
+                const raw = w as RawWasteTypeItem;
+                return (raw.category_name || raw.category || raw.category_title) === cat;
+            }).length;
             options.push({ label: `${cat} (${count} materials)`, value: cat });
         });
         return options;
@@ -66,25 +89,41 @@ export function Category5FormModal({
 
     const filteredWasteTypes = useMemo(() => {
         if (!wasteCategory) return wasteTypes;
-        return wasteTypes.filter((w) => w.category_name === wasteCategory);
+        return wasteTypes.filter((w) => {
+            const raw = w as RawWasteTypeItem;
+            return (raw.category_name || raw.category || raw.category_title) === wasteCategory;
+        });
     }, [wasteTypes, wasteCategory]);
 
     const [wasteTypeId, setWasteTypeId] = useState<string>(
         () => (isEditOrAmend ? initialEntry?.wasteTypeId || "" : ""),
     );
 
-    const activeWasteTypeId = wasteTypeId && filteredWasteTypes.some((w) => w.waste_type_id === wasteTypeId)
-        ? wasteTypeId
-        : (filteredWasteTypes[0]?.waste_type_id ?? wasteTypes[0]?.waste_type_id ?? "faa2ea7e-1fe8-46e4-a349-68562c882cf8");
+    const activeWasteTypeId = useMemo(() => {
+        if (wasteTypeId && filteredWasteTypes.some((w) => {
+            const raw = w as RawWasteTypeItem;
+            return (raw.waste_type_id || raw.id || raw.waste_id) === wasteTypeId;
+        })) {
+            return wasteTypeId;
+        }
+
+        const firstFiltered = filteredWasteTypes[0] as RawWasteTypeItem | undefined;
+        const firstAll = wasteTypes[0] as RawWasteTypeItem | undefined;
+
+        return firstFiltered?.waste_type_id ?? firstFiltered?.id ?? firstFiltered?.waste_id ?? firstAll?.waste_type_id ?? firstAll?.id ?? firstAll?.waste_id ?? "faa2ea7e-1fe8-46e4-a349-68562c882cf8";
+    }, [wasteTypeId, filteredWasteTypes, wasteTypes]);
 
     const selectedWasteType = useMemo(
-        () => wasteTypes.find((w) => w.waste_type_id === activeWasteTypeId) ?? wasteTypes[0],
+        () => wasteTypes.find((w) => {
+            const raw = w as RawWasteTypeItem;
+            return (raw.waste_type_id || raw.id || raw.waste_id) === activeWasteTypeId;
+        }) ?? wasteTypes[0],
         [wasteTypes, activeWasteTypeId],
     );
 
     // Extract supported treatment methods for the selected waste type
     const supportedMethods = useMemo(() => {
-        if (!selectedWasteType || !selectedWasteType.treatment_methods) {
+        if (!selectedWasteType) {
             return [
                 {
                     method: "landfill" as WasteTreatmentMethodEnum,
@@ -95,13 +134,25 @@ export function Category5FormModal({
             ];
         }
 
-        const methodsRaw = selectedWasteType.treatment_methods;
+        const rawSelected = selectedWasteType as RawWasteTypeItem;
+        const methodsRaw = rawSelected.treatment_methods || rawSelected.methods;
+        if (!methodsRaw) {
+            return [
+                {
+                    method: "landfill" as WasteTreatmentMethodEnum,
+                    method_label: "Landfill Disposal",
+                    kg_co2e: 925.34348,
+                    t_co2e: 0.92534348,
+                },
+            ];
+        }
+
         if (Array.isArray(methodsRaw)) {
             return methodsRaw as WasteTreatmentFactorDetail[];
         }
 
         const list: WasteTreatmentFactorDetail[] = [];
-        Object.entries(methodsRaw).forEach(([key, val]) => {
+        Object.entries(methodsRaw as Record<string, unknown>).forEach(([key, val]) => {
             const methodKey = key as WasteTreatmentMethodEnum;
             const kg = typeof val === "number" ? val : Number((val as { kg_co2e?: number })?.kg_co2e || 0);
             const t = kg / 1000;
@@ -128,14 +179,14 @@ export function Category5FormModal({
         [supportedMethods, activeTreatmentMethod],
     );
 
-    const [reportingPeriod, setReportingPeriod] = useState(
-        () => (isEditOrAmend ? initialEntry?.reportingPeriod || "FY 2021-22" : "FY 2021-22"),
+    const [reportingPeriodId, setReportingPeriodId] = useState(
+        () => (isEditOrAmend ? initialEntry?.reportingPeriodId || periods[0]?.id || "" : periods[0]?.id || ""),
     );
     const [facilityId, setFacilityId] = useState(
         () => (isEditOrAmend ? initialEntry?.facilityId || "" : ""),
     );
     const [activityDate, setActivityDate] = useState(
-        () => (isEditOrAmend ? initialEntry?.activityDate || "2021-12-09" : "2021-12-09"),
+        () => (isEditOrAmend ? initialEntry?.activityDate || "2024-11-15" : "2024-11-15"),
     );
     const [wasteTonnes, setWasteTonnes] = useState(
         () => (isEditOrAmend ? String(initialEntry?.wasteGeneratedTonnes || "10.5") : "10.5"),
@@ -147,10 +198,15 @@ export function Category5FormModal({
 
     const wasteTypeSelectOptions: CustomSelectOption[] = useMemo(
         () =>
-            filteredWasteTypes.map((w) => ({
-                value: w.waste_type_id,
-                label: w.waste_type_name,
-            })),
+            filteredWasteTypes.map((w) => {
+                const raw = w as RawWasteTypeItem;
+                const id = raw.waste_type_id || raw.id || raw.waste_id || "";
+                const name = raw.waste_type_name || raw.name || raw.title || raw.waste_name || "Unknown Waste Material";
+                return {
+                    value: id,
+                    label: name,
+                };
+            }),
         [filteredWasteTypes],
     );
 
@@ -175,8 +231,9 @@ export function Category5FormModal({
     function validate() {
         const newErrors: Record<string, string> = {};
 
-        if (!reportingPeriod.trim()) {
-            newErrors.reportingPeriod = "Reporting period is required (e.g. FY 2021-22).";
+        const activePeriodId = reportingPeriodId || periods[0]?.id;
+        if (!activePeriodId) {
+            newErrors.reportingPeriodId = "Reporting period is required.";
         }
         if (!activeWasteTypeId) {
             newErrors.wasteTypeId = "Please select a valid operational waste material.";
@@ -197,30 +254,43 @@ export function Category5FormModal({
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        if (submittingRef.current || isSubmitting || submitting) return;
+
         if (!validate()) return;
 
-        const basePayload: CreateCategory5WastePayload = {
-            reporting_period: reportingPeriod.trim(),
-            facility_id: facilityId || null,
-            waste_type_id: activeWasteTypeId,
-            treatment_method: activeTreatmentMethod,
-            activity_date: activityDate,
-            waste_generated_tonnes: numTonnes,
-            notes: notes.trim() || null,
-        };
+        submittingRef.current = true;
+        setSubmitting(true);
 
-        if (mode === "amend" && initialEntry) {
-            const amendPayload: AmendCategory5WastePayload = {
-                ...basePayload,
-                amended_from_id: initialEntry.id,
+        try {
+            const basePayload: CreateCategory5WastePayload = {
+                reporting_period_id: reportingPeriodId || periods[0]?.id || null,
+                facility_id: facilityId || null,
+                waste_type_id: activeWasteTypeId,
+                treatment_method: activeTreatmentMethod,
+                activity_date: activityDate,
+                waste_generated_tonnes: numTonnes,
+                status: "draft",
+                notes: notes.trim() || null,
             };
-            await onSubmit(amendPayload);
-        } else {
-            await onSubmit(basePayload);
+
+            if (mode === "amend" && initialEntry) {
+                const amendPayload: AmendCategory5WastePayload = {
+                    ...basePayload,
+                    amended_from_id: initialEntry.id,
+                };
+                await onSubmit(amendPayload);
+            } else {
+                await onSubmit(basePayload);
+            }
+        } finally {
+            submittingRef.current = false;
+            setSubmitting(false);
         }
     }
 
     if (!isOpen) return null;
+
+    const busy = isSubmitting || submitting;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
@@ -265,12 +335,17 @@ export function Category5FormModal({
                             <label className="block font-mono text-xs font-semibold text-primary mb-1">
                                 Reporting Period <span className="text-error">*</span>
                             </label>
-                            <Input
-                                value={reportingPeriod}
-                                onChange={(e) => setReportingPeriod(e.target.value)}
-                                placeholder="e.g. FY 2021-22"
-                                className="font-mono text-xs"
-                            />
+                            <select
+                                value={reportingPeriodId || (periods[0]?.id ?? "")}
+                                onChange={(e) => setReportingPeriodId(e.target.value)}
+                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                {periods.length === 0 && <option value="">Loading reporting periods...</option>}
+                                {periods.map((p) => (
+                                    <option key={p.id} value={p.id}>
+                                        {p.name} ({p.reportingYear})
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <div>
@@ -403,11 +478,11 @@ export function Category5FormModal({
                     </div>
 
                     <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/40">
-                        <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={isSubmitting}>
+                        <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={busy}>
                             Cancel
                         </Button>
-                        <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
-                            {isSubmitting
+                        <Button type="submit" variant="primary" size="md" disabled={busy}>
+                            {busy
                                 ? "Saving..."
                                 : mode === "create"
                                   ? "Create Waste Activity"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { CustomSelect, CustomSelectOption } from "@/components/ui/select";
 import { FormErrorSummary } from "@/components/ui/FormErrorSummary";
 import { useFacilities } from "@/lib/facility/hooks";
+import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import {
     AmendWttFuelPayload,
     CreateWttFuelPayload,
@@ -34,11 +35,16 @@ export function Category3FuelFormModal({
 }: Category3FuelFormModalProps) {
     const facilitiesQuery = useFacilities();
     const fuelsQuery = useWttFuels();
+    const reportingPeriodsQuery = useReportingPeriods();
 
     const fuels = useMemo(() => fuelsQuery.data ?? [], [fuelsQuery.data]);
     const facilities = useMemo(() => facilitiesQuery.data ?? [], [facilitiesQuery.data]);
+    const periods = useMemo(() => reportingPeriodsQuery.data ?? [], [reportingPeriodsQuery.data]);
 
     const isEditOrAmend = (mode === "edit" || mode === "amend") && Boolean(initialEntry);
+
+    const [submitting, setSubmitting] = useState(false);
+    const submittingRef = useRef(false);
 
     const [fuelCategory, setFuelCategory] = useState<string>("");
 
@@ -90,17 +96,17 @@ export function Category3FuelFormModal({
         [units, activeUnitId],
     );
 
-    const [reportingPeriod, setReportingPeriod] = useState(
-        () => (isEditOrAmend ? initialEntry?.reportingPeriod || "FY 2021-22" : "FY 2021-22"),
+    const [reportingPeriodId, setReportingPeriodId] = useState(
+        () => (isEditOrAmend ? initialEntry?.reportingPeriodId || periods[0]?.id || "" : periods[0]?.id || ""),
     );
     const [facilityId, setFacilityId] = useState(
         () => (isEditOrAmend ? initialEntry?.facilityId || "" : ""),
     );
     const [activityDate, setActivityDate] = useState(
-        () => (isEditOrAmend ? initialEntry?.activityDate || "2021-12-09" : "2021-12-09"),
+        () => (isEditOrAmend ? initialEntry?.activityDate || "2024-08-10" : "2024-08-10"),
     );
     const [fuelQuantity, setFuelQuantity] = useState(
-        () => (isEditOrAmend ? String(initialEntry?.fuelQuantity || "100.5") : "100.5"),
+        () => (isEditOrAmend ? String(initialEntry?.fuelQuantity || "1500.5") : "1500.5"),
     );
     const [notes, setNotes] = useState(
         () => (isEditOrAmend ? initialEntry?.notes || "" : ""),
@@ -131,16 +137,17 @@ export function Category3FuelFormModal({
     );
 
     const numQuantity = parseFloat(fuelQuantity) || 0;
-    const kgPerUnit = Number(selectedUnit?.kg_co2e ?? 418.14964);
-    const validKgPerUnit = isNaN(kgPerUnit) ? 418.14964 : kgPerUnit;
+    const kgPerUnit = Number(selectedUnit?.kg_co2e ?? 0.6240);
+    const validKgPerUnit = isNaN(kgPerUnit) ? 0.6240 : kgPerUnit;
     const estimatedKgCo2e = numQuantity > 0 ? numQuantity * validKgPerUnit : 0;
     const estimatedTCo2e = estimatedKgCo2e / 1000;
 
     function validate() {
         const newErrors: Record<string, string> = {};
 
-        if (!reportingPeriod.trim()) {
-            newErrors.reportingPeriod = "Reporting period is required (e.g. FY 2021-22).";
+        const activePeriodId = reportingPeriodId || periods[0]?.id;
+        if (!activePeriodId) {
+            newErrors.reportingPeriodId = "Reporting period is required.";
         }
         if (!activeFuelId) {
             newErrors.fuelId = "Please select a WTT supported fuel.";
@@ -161,33 +168,46 @@ export function Category3FuelFormModal({
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        if (submittingRef.current || isSubmitting || submitting) return;
+
         if (!validate()) return;
 
-        const factorIdToUse = selectedUnit?.wtt_emission_factor_id || "a1b2c3d4-5678-90ab-cdef-1234567890ab";
+        submittingRef.current = true;
+        setSubmitting(true);
 
-        const basePayload: CreateWttFuelPayload = {
-            reporting_period: reportingPeriod.trim(),
-            facility_id: facilityId || null,
-            wtt_fuel_emission_factor_id: factorIdToUse,
-            fuel_id: activeFuelId,
-            unit_id: activeUnitId,
-            activity_date: activityDate,
-            fuel_quantity: numQuantity,
-            notes: notes.trim() || null,
-        };
+        try {
+            const factorIdToUse = selectedUnit?.wtt_emission_factor_id || "7fa85f64-5717-4562-b3fc-2c963f66afa7";
 
-        if (mode === "amend" && initialEntry) {
-            const amendPayload: AmendWttFuelPayload = {
-                ...basePayload,
-                amended_from_id: initialEntry.id,
+            const basePayload: CreateWttFuelPayload = {
+                reporting_period_id: reportingPeriodId || periods[0]?.id || null,
+                facility_id: facilityId || null,
+                wtt_fuel_emission_factor_id: factorIdToUse,
+                fuel_id: activeFuelId,
+                unit_id: activeUnitId,
+                activity_date: activityDate,
+                fuel_quantity: numQuantity,
+                status: "draft",
+                notes: notes.trim() || null,
             };
-            await onSubmit(amendPayload);
-        } else {
-            await onSubmit(basePayload);
+
+            if (mode === "amend" && initialEntry) {
+                const amendPayload: AmendWttFuelPayload = {
+                    ...basePayload,
+                    amended_from_id: initialEntry.id,
+                };
+                await onSubmit(amendPayload);
+            } else {
+                await onSubmit(basePayload);
+            }
+        } finally {
+            submittingRef.current = false;
+            setSubmitting(false);
         }
     }
 
     if (!isOpen) return null;
+
+    const busy = isSubmitting || submitting;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
@@ -232,12 +252,17 @@ export function Category3FuelFormModal({
                             <label className="block font-mono text-xs font-semibold text-primary mb-1">
                                 Reporting Period <span className="text-error">*</span>
                             </label>
-                            <Input
-                                value={reportingPeriod}
-                                onChange={(e) => setReportingPeriod(e.target.value)}
-                                placeholder="e.g. FY 2021-22"
-                                className="font-mono text-xs"
-                            />
+                            <select
+                                value={reportingPeriodId || (periods[0]?.id ?? "")}
+                                onChange={(e) => setReportingPeriodId(e.target.value)}
+                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                {periods.length === 0 && <option value="">Loading reporting periods...</option>}
+                                {periods.map((p) => (
+                                    <option key={p.id} value={p.id}>
+                                        {p.name} ({p.reportingYear})
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <div>
@@ -336,7 +361,7 @@ export function Category3FuelFormModal({
                                 min="0.01"
                                 value={fuelQuantity}
                                 onChange={(e) => setFuelQuantity(e.target.value)}
-                                placeholder="e.g. 100.5"
+                                placeholder="e.g. 1500.5"
                                 className="font-mono text-xs font-bold"
                             />
                         </div>
@@ -374,11 +399,11 @@ export function Category3FuelFormModal({
                     </div>
 
                     <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/40">
-                        <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={isSubmitting}>
+                        <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={busy}>
                             Cancel
                         </Button>
-                        <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
-                            {isSubmitting
+                        <Button type="submit" variant="primary" size="md" disabled={busy}>
+                            {busy
                                 ? "Saving..."
                                 : mode === "create"
                                   ? "Create WTT Activity"

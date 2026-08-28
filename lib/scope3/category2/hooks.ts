@@ -1,12 +1,12 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getScope3SpendFactors } from "../category1/api";
 import {
     amendCategory2SpendEntry,
     createCategory2SpendEntry,
     deleteCategory2SpendEntry,
     getCategory2SpendEntries,
-    getCategory2SpendFactors,
     rejectCategory2SpendEntry,
     submitCategory2SpendEntry,
     updateCategory2SpendEntry,
@@ -30,8 +30,8 @@ export function useCategory2SpendEntries(filters?: Category2FilterParams) {
 
 export function useCategory2SpendFactors(sourceId?: string) {
     return useQuery<Scope3SpendFactor[], Error>({
-        queryKey: ["scope3-category2-factors", sourceId],
-        queryFn: () => getCategory2SpendFactors(sourceId),
+        queryKey: ["scope3-spend-factors", sourceId],
+        queryFn: () => getScope3SpendFactors(sourceId),
         staleTime: 1000 * 60 * 30,
     });
 }

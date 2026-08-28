@@ -27,13 +27,18 @@ export function mapWttFuelActivityItem(dto: WttFuelActivityDto): WttFuelActivity
     const calcKg = dto.calculated_kg_co2e != null ? Number(dto.calculated_kg_co2e) : 0;
     const calcT = dto.calculated_t_co2e != null ? Number(dto.calculated_t_co2e) : calcKg / 1000;
 
+    const periodId = dto.reporting_period_id || null;
+    const periodName = dto.reporting_period_name || dto.reporting_period || "FY 2024-25";
+
     return {
         id: dto.id,
         createdAt: dto.created_at || new Date().toISOString(),
         updatedAt: dto.updated_at || new Date().toISOString(),
         facilityId: dto.facility_id || null,
         facilityName: dto.facility_name || null,
-        reportingPeriod: dto.reporting_period || "FY 2021-22",
+        reportingPeriodId: periodId,
+        reportingPeriodName: periodName,
+        reportingPeriod: periodName,
         wttFuelEmissionFactorId: dto.wtt_fuel_emission_factor_id,
         fuelId: dto.fuel_id,
         fuelName: dto.fuel_name || "Coal (industrial)",
@@ -58,13 +63,18 @@ export function mapElectricityTdActivityItem(dto: ElectricityTdActivityDto): Ele
     const calcKg = dto.calculated_kg_co2e != null ? Number(dto.calculated_kg_co2e) : kwh * gridFactor * tdLossRate;
     const calcT = dto.calculated_t_co2e != null ? Number(dto.calculated_t_co2e) : calcKg / 1000;
 
+    const periodId = dto.reporting_period_id || null;
+    const periodName = dto.reporting_period_name || dto.reporting_period || "FY 2024-25";
+
     return {
         id: dto.id,
         createdAt: dto.created_at || new Date().toISOString(),
         updatedAt: dto.updated_at || new Date().toISOString(),
         facilityId: dto.facility_id || null,
         facilityName: dto.facility_name || null,
-        reportingPeriod: dto.reporting_period || "FY 2021-22",
+        reportingPeriodId: periodId,
+        reportingPeriodName: periodName,
+        reportingPeriod: periodName,
         electricityEmissionFactorId: dto.electricity_emission_factor_id || null,
         activityDate: dto.activity_date,
         electricityConsumedKwh: kwh,
@@ -118,7 +128,11 @@ export async function getWttFuelUnits(fuelId: string): Promise<WttFuelUnit[]> {
 
 export async function getWttFuelActivities(filters?: Category3FilterParams): Promise<WttFuelActivityEntry[]> {
     const params = new URLSearchParams();
-    if (filters?.reporting_period) params.append("reporting_period", filters.reporting_period);
+    if (filters?.reporting_period_id) {
+        params.append("reporting_period_id", filters.reporting_period_id);
+    } else if (filters?.reporting_period) {
+        params.append("reporting_period_id", filters.reporting_period);
+    }
     if (filters?.facility_id) params.append("facility_id", filters.facility_id);
     if (filters?.status) params.append("status", filters.status);
     if (filters?.activity_date) params.append("activity_date", filters.activity_date);
@@ -200,7 +214,11 @@ export async function amendWttFuelActivity(activityId: string, payload: AmendWtt
 
 export async function getElectricityTdActivities(filters?: Category3FilterParams): Promise<ElectricityTdActivityEntry[]> {
     const params = new URLSearchParams();
-    if (filters?.reporting_period) params.append("reporting_period", filters.reporting_period);
+    if (filters?.reporting_period_id) {
+        params.append("reporting_period_id", filters.reporting_period_id);
+    } else if (filters?.reporting_period) {
+        params.append("reporting_period_id", filters.reporting_period);
+    }
     if (filters?.facility_id) params.append("facility_id", filters.facility_id);
     if (filters?.status) params.append("status", filters.status);
     if (filters?.activity_date) params.append("activity_date", filters.activity_date);
@@ -288,18 +306,20 @@ function getMockWttFuelEntries(): WttFuelActivityEntry[] {
             updatedAt: "2026-08-12T12:00:00.000Z",
             facilityId: null,
             facilityName: "Main Plant Boilers",
-            reportingPeriod: "FY 2021-22",
-            wttFuelEmissionFactorId: "a1b2c3d4-5678-90ab-cdef-1234567890ab",
-            fuelId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            fuelName: "Coal (industrial)",
-            unitId: "unit-tonne-coal",
-            unitSymbol: "tonnes",
-            activityDate: "2021-12-09",
-            fuelQuantity: 100.50,
-            calculatedKgCo2e: 42024.04,
-            calculatedTCo2e: 42.0240,
-            status: "verified",
-            notes: "Upstream WTT coal consumption for plant boilers",
+            reportingPeriodId: "091f03f3-2470-4f51-b845-a7b3cba14d33",
+            reportingPeriodName: "FY 2024-25",
+            reportingPeriod: "FY 2024-25",
+            wttFuelEmissionFactorId: "7fa85f64-5717-4562-b3fc-2c963f66afa7",
+            fuelId: "8fa85f64-5717-4562-b3fc-2c963f66afa8",
+            fuelName: "Diesel (100% mineral diesel)",
+            unitId: "9fa85f64-5717-4562-b3fc-2c963f66afa9",
+            unitSymbol: "litres",
+            activityDate: "2024-08-10",
+            fuelQuantity: 1500.50,
+            calculatedKgCo2e: 936.312,
+            calculatedTCo2e: 0.936312,
+            status: "draft",
+            notes: "Upstream diesel supply extraction & refining emissions",
             rejectedReason: null,
             amendedFromId: null,
         },
@@ -314,16 +334,18 @@ function getMockElectricityTdEntries(): ElectricityTdActivityEntry[] {
             updatedAt: "2026-08-14T14:00:00.000Z",
             facilityId: null,
             facilityName: "Corporate HQ Grid Meter",
-            reportingPeriod: "FY 2021-22",
+            reportingPeriodId: "091f03f3-2470-4f51-b845-a7b3cba14d33",
+            reportingPeriodName: "FY 2024-25",
+            reportingPeriod: "FY 2024-25",
             electricityEmissionFactorId: null,
-            activityDate: "2021-12-09",
-            electricityConsumedKwh: 10000.00,
+            activityDate: "2024-09-01",
+            electricityConsumedKwh: 50000.00,
             tdLossRate: 0.1700,
             gridKgCo2ePerKwh: 0.7160,
-            calculatedKgCo2e: 1217.20,
-            calculatedTCo2e: 1.2172,
-            status: "verified",
-            notes: "Facility Scope 3 Category 3 electricity grid T&D losses",
+            calculatedKgCo2e: 6086.00,
+            calculatedTCo2e: 6.0860,
+            status: "draft",
+            notes: "Grid electricity T&D loss calculation",
             rejectedReason: null,
             amendedFromId: null,
         },

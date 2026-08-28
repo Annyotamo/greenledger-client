@@ -28,26 +28,28 @@ import {
     CreateCategory2SpendPayload,
 } from "@/lib/scope3/category2/types";
 import { useFacilities } from "@/lib/facility/hooks";
+import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { AiAssistantFAB } from "@/components/dashboard/AiAssistantFAB";
 
 export function Category2View() {
     const [statusFilter, setStatusFilter] = useState<string>("");
     const [yearFilter, setYearFilter] = useState<string>("");
     const [facilityFilter, setFacilityFilter] = useState<string>("");
-    const [periodFilter, setPeriodFilter] = useState<string>("");
+    const [periodIdFilter, setPeriodIdFilter] = useState<string>("");
 
     const filterParams: Category2FilterParams = useMemo(
         () => ({
             status: statusFilter || undefined,
             spend_year: yearFilter ? Number(yearFilter) : undefined,
             facility_id: facilityFilter || undefined,
-            reporting_period: periodFilter || undefined,
+            reporting_period_id: periodIdFilter || undefined,
         }),
-        [statusFilter, yearFilter, facilityFilter, periodFilter],
+        [statusFilter, yearFilter, facilityFilter, periodIdFilter],
     );
 
     const { data: entries = [], isLoading, refetch } = useCategory2SpendEntries(filterParams);
     const facilitiesQuery = useFacilities();
+    const reportingPeriodsQuery = useReportingPeriods();
 
     const createMutation = useCreateCategory2Spend();
     const updateMutation = useUpdateCategory2Spend();
@@ -267,13 +269,17 @@ export function Category2View() {
 
                     <div>
                         <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Reporting Period</label>
-                        <input
-                            type="text"
-                            value={periodFilter}
-                            onChange={(e) => setPeriodFilter(e.target.value)}
-                            placeholder="Search period (e.g. FY 2021-22)"
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                        />
+                        <select
+                            value={periodIdFilter}
+                            onChange={(e) => setPeriodIdFilter(e.target.value)}
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            <option value="">All Reporting Periods</option>
+                            {(reportingPeriodsQuery.data ?? []).map((p) => (
+                                <option key={p.id} value={p.id}>
+                                    {p.name} ({p.reportingYear})
+                                </option>
+                            ))}
+                        </select>
                     </div>
                 </div>
             </Card>

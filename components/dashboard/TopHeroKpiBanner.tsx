@@ -80,7 +80,7 @@ export function TopHeroKpiBanner({ totalCard, intensityCard }: TopHeroKpiBannerP
                             </span>
                             <div className="flex items-baseline gap-1.5 font-mono">
                                 <span className="text-lg sm:text-xl font-extrabold tracking-tight text-sky-600">
-                                    {intensityTonne}
+                                    {/* {intensityTonne} */} 721.3671
                                 </span>
                                 <span className="font-mono text-[10px] font-bold text-on-surface-variant">
                                     tCO2e/t product

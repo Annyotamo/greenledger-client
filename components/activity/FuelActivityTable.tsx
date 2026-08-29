@@ -495,7 +495,7 @@ export function FuelActivityTable({
                                         <TableCell className="py-2.5 px-4">
                                             <div className="font-bold text-xs text-slate-900">{activity.fuelName}</div>
                                             <div className="text-[10px] text-slate-500 font-medium truncate max-w-[150px]">
-                                                {activity.fuelFactorStandard} • {activity.fuelFactorVersion}
+                                                {activity.fuelFactorStandard} {activity.fuelFactorVersion ? `(GWP: ${activity.fuelFactorVersion})` : ""}
                                             </div>
                                         </TableCell>
                                         <TableCell className="py-2.5 px-4 font-mono text-xs">

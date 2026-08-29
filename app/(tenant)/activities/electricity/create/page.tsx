@@ -27,11 +27,14 @@ import { getErrorMessage } from "@/lib/utils/error";
 import { CustomFuelSection } from "@/components/activity/CustomFuelSection";
 import { useCustomFuelUnits } from "@/lib/customFuel/hooks";
 
-const locationActivityTypeOptions = [
-    { label: "Grid Import", value: "grid_import" },
+const scope2DisabledActivityTypeOptions = [
     { label: "Renewable", value: "renewable" },
     { label: "Captive", value: "captive" },
     { label: "Other", value: "other" },
+];
+
+const scope2EnabledActivityTypeOptions = [
+    { label: "Grid Import", value: "grid_import" },
 ];
 
 const locationSourceTypesByActivity: Record<string, { label: string; value: string }[]> = {
@@ -86,6 +89,7 @@ function formFieldClass(error?: boolean) {
 }
 
 export default function LogElectricityActivityPage() {
+    const [enableScope2Tracking, setEnableScope2Tracking] = useState(false);
     const [accountingMethod, setAccountingMethod] = useState<AccountingMethod>("location_based");
 
     const [form, setForm] = useState({
@@ -94,8 +98,8 @@ export default function LogElectricityActivityPage() {
         source: "",
         electricityKwh: "",
         electricityUnit: "kwh",
-        electricityActivityType: "",
-        sourceType: "",
+        electricityActivityType: "renewable",
+        sourceType: "solar",
         supplierName: "",
         dataQualityTier: "",
         activityStartDate: "",
@@ -129,6 +133,31 @@ export default function LogElectricityActivityPage() {
         coolingEmissionFactor: "",
         purchasedEnergyEfUnit: "kgco2_per_gj",
     });
+
+    const activeActivityTypeOptions = useMemo(() => {
+        if (enableScope2Tracking) {
+            return scope2EnabledActivityTypeOptions;
+        }
+        return scope2DisabledActivityTypeOptions;
+    }, [enableScope2Tracking]);
+
+    function handleScope2TrackingToggle(enabled: boolean) {
+        setEnableScope2Tracking(enabled);
+        if (enabled) {
+            setForm((current) => ({
+                ...current,
+                electricityActivityType: "grid_import",
+                sourceType: "national_grid",
+            }));
+        } else {
+            setAccountingMethod("location_based");
+            setForm((current) => ({
+                ...current,
+                electricityActivityType: current.electricityActivityType === "grid_import" ? "renewable" : (current.electricityActivityType || "renewable"),
+                sourceType: current.electricityActivityType === "grid_import" ? "solar" : (current.sourceType || "solar"),
+            }));
+        }
+    }
 
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
@@ -170,7 +199,7 @@ export default function LogElectricityActivityPage() {
     useEffect(() => {
         if (emissionSourcesQuery.data && emissionSourcesQuery.data.length > 0) {
             const ceaSource = emissionSourcesQuery.data.find(
-                (s: any) =>
+                (s: { standard: string; id: string }) =>
                     s.standard.toLowerCase().includes("cea") ||
                     s.standard.toLowerCase().includes("central electricity authority")
             );
@@ -225,7 +254,7 @@ export default function LogElectricityActivityPage() {
         setErrors((current) => ({ ...current, [field]: "" }));
     }
 
-    function handleMarketChange(field: string, value: any) {
+    function handleMarketChange(field: string, value: string | boolean | number) {
         setMarketForm((current) => ({ ...current, [field]: value }));
         setErrors((current) => ({ ...current, [field]: "" }));
     }
@@ -554,10 +583,10 @@ export default function LogElectricityActivityPage() {
                 if (fuelForm.customFuelId && customFuelUnitsQuery.data && customFuelUnitsQuery.data.length > 0) {
                     const unitsList = customFuelUnitsQuery.data;
                     const kgUnit = unitsList.find(
-                        (u: any) => u.symbol.toLowerCase() === "kg" || u.name.toLowerCase().includes("kilograms")
+                        (u: { symbol: string; name: string }) => u.symbol.toLowerCase() === "kg" || u.name.toLowerCase().includes("kilograms")
                     );
                     const tonneUnit = unitsList.find(
-                        (u: any) =>
+                        (u: { symbol: string; name: string }) =>
                             u.symbol.toLowerCase().includes("tonne") ||
                             u.symbol.toLowerCase() === "t" ||
                             u.name.toLowerCase().includes("tonne")
@@ -667,74 +696,105 @@ export default function LogElectricityActivityPage() {
             <FormErrorSummary errors={errors} />
 
             <form id="logElectricityForm" onSubmit={handleSubmit} className="space-y-6">
-                {/* 1. Accounting Method Selector */}
-                <section className="bg-white rounded-xl border border-outline-variant relative overflow-hidden">
-                    <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center justify-between">
+                {/* Scope 2 Activity Tracking Toggle Card */}
+                <section className="bg-white rounded-xl border border-outline-variant p-4 sm:p-5 shadow-sm">
+                    <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                <MaterialIcon name="tune" size="sm" />
+                            <div className={`flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${enableScope2Tracking ? "bg-primary text-on-primary" : "bg-surface-container-high text-on-surface-variant"}`}>
+                                <MaterialIcon name="offline_bolt" size="sm" />
                             </div>
                             <div>
-                                <h2 className="text-headline-sm font-semibold text-primary">Accounting Method</h2>
+                                <h3 className="text-body-lg font-semibold text-primary">Enable Activity Tracking for Scope 2</h3>
                                 <p className="text-xs text-on-surface-variant">
-                                    Select location-based (grid average) or market-based (contractual instruments).
+                                    {enableScope2Tracking
+                                        ? "Scope 2 dual-reporting accounting enabled. Tracks Grid Import emissions under GHG Protocol Scope 2."
+                                        : "Scope 2 tracking disabled. Select onsite renewable, captive, or other energy generation options."}
                                 </p>
                             </div>
                         </div>
-                    </div>
 
-                    <div className="p-card-padding">
-                        <div className="grid gap-4 sm:grid-cols-2" id="form-field-accountingMethod">
-                            <button
-                                type="button"
-                                onClick={() => handleAccountingMethodChange("location_based")}
-                                className={`flex flex-col text-left p-4 rounded-xl border-2 transition-all ${
-                                    accountingMethod === "location_based"
-                                        ? "border-primary bg-primary/5 shadow-sm"
-                                        : "border-outline-variant bg-white hover:border-primary/50"
-                                }`}>
-                                <div className="flex items-center justify-between w-full mb-2">
-                                    <div className="flex items-center gap-2">
-                                        <MaterialIcon name="grid_view" size="sm" className="text-primary" />
-                                        <span className="font-semibold text-primary text-body-md">Location-Based Method</span>
-                                    </div>
-                                    {accountingMethod === "location_based" && (
-                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-on-primary">
-                                            <MaterialIcon name="check" size="xs" />
-                                        </span>
-                                    )}
-                                </div>
-                                <p className="text-xs text-on-surface-variant leading-relaxed">
-                                    Uses regional grid average emission factors. Standard for default utility grid consumption without specific contracts.
-                                </p>
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => handleAccountingMethodChange("market_based")}
-                                className={`flex flex-col text-left p-4 rounded-xl border-2 transition-all ${
-                                    accountingMethod === "market_based"
-                                        ? "border-secondary bg-secondary/5 shadow-sm"
-                                        : "border-outline-variant bg-white hover:border-secondary/50"
-                                }`}>
-                                <div className="flex items-center justify-between w-full mb-2">
-                                    <div className="flex items-center gap-2">
-                                        <MaterialIcon name="verified" size="sm" className="text-secondary" />
-                                        <span className="font-semibold text-secondary text-body-md">Market-Based Method</span>
-                                    </div>
-                                    {accountingMethod === "market_based" && (
-                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-secondary text-on-secondary">
-                                            <MaterialIcon name="check" size="xs" />
-                                        </span>
-                                    )}
-                                </div>
-                                <p className="text-xs text-on-surface-variant leading-relaxed">
-                                    Quantifies GHG emissions based on contractual agreements (PPAs, RECs, I-RECs). Supports zero emission factors for green energy.
-                                </p>
-                            </button>
-                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={enableScope2Tracking}
+                                onChange={(e) => handleScope2TrackingToggle(e.target.checked)}
+                                className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                        </label>
                     </div>
                 </section>
+
+                {/* 1. Accounting Method Selector - Only displayed when Scope 2 Activity Tracking is enabled */}
+                {/* {enableScope2Tracking && (
+                    <section className="bg-white rounded-xl border border-outline-variant relative overflow-hidden">
+                        <div className="px-card-padding py-4 bg-surface-container-low border-b border-outline-variant rounded-t-xl flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                    <MaterialIcon name="tune" size="sm" />
+                                </div>
+                                <div>
+                                    <h2 className="text-headline-sm font-semibold text-primary">Accounting Method</h2>
+                                    <p className="text-xs text-on-surface-variant">
+                                        Select location-based (grid average) or market-based (contractual instruments).
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-card-padding">
+                            <div className="grid gap-4 sm:grid-cols-2" id="form-field-accountingMethod">
+                                <button
+                                    type="button"
+                                    onClick={() => handleAccountingMethodChange("location_based")}
+                                    className={`flex flex-col text-left p-4 rounded-xl border-2 transition-all ${
+                                        accountingMethod === "location_based"
+                                            ? "border-primary bg-primary/5 shadow-sm"
+                                            : "border-outline-variant bg-white hover:border-primary/50"
+                                    }`}>
+                                    <div className="flex items-center justify-between w-full mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <MaterialIcon name="grid_view" size="sm" className="text-primary" />
+                                            <span className="font-semibold text-primary text-body-md">Location-Based Method</span>
+                                        </div>
+                                        {accountingMethod === "location_based" && (
+                                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-on-primary">
+                                                <MaterialIcon name="check" size="xs" />
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-on-surface-variant leading-relaxed">
+                                        Uses regional grid average emission factors. Standard for default utility grid consumption without specific contracts.
+                                    </p>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => handleAccountingMethodChange("market_based")}
+                                    className={`flex flex-col text-left p-4 rounded-xl border-2 transition-all ${
+                                        accountingMethod === "market_based"
+                                            ? "border-secondary bg-secondary/5 shadow-sm"
+                                            : "border-outline-variant bg-white hover:border-secondary/50"
+                                    }`}>
+                                    <div className="flex items-center justify-between w-full mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <MaterialIcon name="verified" size="sm" className="text-secondary" />
+                                            <span className="font-semibold text-secondary text-body-md">Market-Based Method</span>
+                                        </div>
+                                        {accountingMethod === "market_based" && (
+                                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-secondary text-on-secondary">
+                                                <MaterialIcon name="check" size="xs" />
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-on-surface-variant leading-relaxed">
+                                        Quantifies GHG emissions based on contractual agreements (PPAs, RECs, I-RECs). Supports zero emission factors for green energy.
+                                    </p>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                )} */}
 
                 {/* 2. Activity Context Section */}
                 <section className="bg-white rounded-xl border border-outline-variant relative">
@@ -758,7 +818,7 @@ export default function LogElectricityActivityPage() {
                             </label>
                             <CustomSelect
                                 options={
-                                    reportingPeriodsQuery.data?.map((p: any) => ({
+                                    reportingPeriodsQuery.data?.map((p: { id: string; name: string }) => ({
                                         label: p.name,
                                         value: String(p.id),
                                     })) || []
@@ -778,7 +838,7 @@ export default function LogElectricityActivityPage() {
                             </label>
                             <CustomSelect
                                 options={
-                                    facilitiesQuery.data?.map((f: any) => ({
+                                    facilitiesQuery.data?.map((f: { id: string; name: string }) => ({
                                         label: f.name,
                                         value: String(f.id),
                                     })) || []
@@ -886,7 +946,7 @@ export default function LogElectricityActivityPage() {
                                     Activity Type <span className="text-error">*</span>
                                 </label>
                                 <CustomSelect
-                                    options={locationActivityTypeOptions}
+                                    options={activeActivityTypeOptions}
                                     value={form.electricityActivityType}
                                     onChange={handleActivityTypeChange}
                                     error={Boolean(errors.electricityActivityType)}
@@ -1449,7 +1509,7 @@ export default function LogElectricityActivityPage() {
                                 </label>
                                 <CustomSelect
                                     options={
-                                        fuelEmissionSourcesQuery.data?.map((s: any) => ({
+                                        fuelEmissionSourcesQuery.data?.map((s: { id: string; standard: string; version?: string }) => ({
                                             label: s.version ? `${s.standard} (${s.version})` : s.standard,
                                             value: String(s.id),
                                         })) || []

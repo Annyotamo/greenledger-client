@@ -339,18 +339,30 @@ export function FuelActivityDetailModal({
                                 </h3>
                                 <p className="text-[11px] text-slate-400 mt-0.5">Factor dataset used for combustion GHG calculation</p>
                             </div>
-                            <span className="px-2.5 py-0.5 rounded bg-primary/10 text-primary font-mono text-xs font-bold">
-                                {activity.fuelFactorStandard || "IPCC"} {activity.fuelFactorVersion && `(${activity.fuelFactorVersion})`}
-                            </span>
+                            <div className="flex items-center gap-1.5 font-mono text-xs">
+                                <span className="px-2.5 py-0.5 rounded bg-primary/10 text-primary font-bold">
+                                    {activity.fuelFactorStandard || "IPCC"}
+                                </span>
+                                {activity.fuelFactorVersion && (
+                                    <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold border border-slate-200 text-[11px]">
+                                        GWP: {activity.fuelFactorVersion}
+                                    </span>
+                                )}
+                            </div>
                         </div>
 
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 pt-1 font-mono text-xs">
                             <div className="rounded-lg bg-slate-50 p-3">
                                 <span className="text-[10px] uppercase font-bold text-slate-500 block font-sans">Database Standard</span>
                                 <span className="text-xs font-bold text-slate-900 mt-1 block">
-                                    {activity.fuelFactorStandard} {activity.fuelFactorVersion}
+                                    {activity.fuelFactorStandard || "IPCC"}
                                 </span>
-                                <span className="text-[10px] text-slate-500 block">Region: {activity.fuelFactorRegion || "GLOBAL"}</span>
+                                {activity.fuelFactorVersion && (
+                                    <span className="text-[10px] text-slate-600 block mt-0.5 font-sans">
+                                        GWP Basis: <span className="font-semibold text-slate-800">{activity.fuelFactorVersion}</span>
+                                    </span>
+                                )}
+                                <span className="text-[10px] text-slate-500 block mt-0.5">Region: {activity.fuelFactorRegion || "GLOBAL"}</span>
                             </div>
 
                             <div className="rounded-lg bg-slate-50 p-3">

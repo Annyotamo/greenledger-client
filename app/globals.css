@@ -496,3 +496,58 @@ body {
         animation: none;
     }
 }
+
+/* Hero Vertical Marquee */
+@keyframes heroVerticalTicker {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(0, -50%, 0);
+    }
+}
+
+.hero-vertical-marquee-track {
+    animation: heroVerticalTicker 22s linear infinite;
+    will-change: transform;
+}
+
+.hero-vertical-marquee-track:hover {
+    animation-play-state: paused;
+}
+
+.hero-marquee-mask {
+    mask-image: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(0, 0, 0, 0.05) 3%,
+        rgba(0, 0, 0, 0.4) 9%,
+        rgba(0, 0, 0, 0.85) 17%,
+        rgba(0, 0, 0, 1) 24%,
+        rgba(0, 0, 0, 1) 76%,
+        rgba(0, 0, 0, 0.85) 83%,
+        rgba(0, 0, 0, 0.4) 91%,
+        rgba(0, 0, 0, 0.05) 97%,
+        transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(0, 0, 0, 0.05) 3%,
+        rgba(0, 0, 0, 0.4) 9%,
+        rgba(0, 0, 0, 0.85) 17%,
+        rgba(0, 0, 0, 1) 24%,
+        rgba(0, 0, 0, 1) 76%,
+        rgba(0, 0, 0, 0.85) 83%,
+        rgba(0, 0, 0, 0.4) 91%,
+        rgba(0, 0, 0, 0.05) 97%,
+        transparent 100%
+    );
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-vertical-marquee-track {
+        animation: none;
+    }
+}
+

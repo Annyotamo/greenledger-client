@@ -73,11 +73,7 @@ const Navbar = ({ variant = "landing" }: NavbarProps) => {
                     </Link>
                     <Link
                         href="/login"
-                        className={
-                            isLight
-                                ? "hidden shrink-0 rounded-full border border-emerald-900/10 bg-emerald-50/50 px-3 py-2 text-xs font-semibold text-emerald-900 shadow-sm backdrop-blur-sm transition hover:bg-emerald-50 hover:border-emerald-950/20 sm:inline-flex sm:px-4 sm:text-sm"
-                                : "hidden shrink-0 rounded-full border border-white/30 bg-white/10 px-3 py-2 text-xs font-semibold text-white shadow-sm backdrop-blur-sm transition hover:border-white/50 hover:bg-white/20 sm:inline-flex sm:px-4 sm:text-sm"
-                        }
+                        className="hidden shrink-0 rounded-full border border-white/30 bg-white/10 px-3 py-2 text-xs font-semibold text-white shadow-sm backdrop-blur-sm transition hover:border-white/50 hover:bg-white/20 sm:inline-flex sm:px-4 sm:text-sm mr-7"
                     >
                         Client login
                     </Link>

@@ -35,14 +35,14 @@ export default function HeroSection() {
 
             <div className="relative z-10 mx-auto flex w-full max-w-none flex-col gap-10 px-4 py-14 sm:px-5 md:flex-row md:items-stretch md:justify-between md:px-6 md:py-16 lg:px-12 lg:py-20 lg:my-28">
                 <div className="min-w-0 flex-1">
-                    <h1 className="text-balance text-3xl font-extrabold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_28px_rgba(0,0,0,0.35)] sm:text-4xl lg:text-4xl">
+                    <h1 className="text-balance text-3xl font-extrabold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_28px_rgba(0,0,0,0.35)] sm:text-4xl lg:text-[45px]">
                         The Industrial Carbon & Resource Engine
-Bridging the gap between raw plant operations and enterprise-grade compliance.
+                    <p className="mt-1 display-block text-pretty leading-relaxed text-emerald-50/65 sm:text-2xl ">Bridging the gap between raw plant operations and enterprise-grade compliance.</p>
                     </h1>
-                    <p className="mt-6 max-w-3xl text-pretty text-base leading-relaxed text-emerald-50/95 sm:text-md ">
+                    <p className="mt-10 max-w-3xl text-pretty leading-relaxed text-emerald-50/95 sm:text-md">
                         GreenLedger is not an abstract corporate reporting tool; it is an engine engineered specifically for the factory floor. Instead of asking your plant teams to change how they work, the platform automatically organizes your existing fuel receipts, power bills, weighbridge slips, and laboratory test reports into a verified, audit-ready data stream.
                     </p>
-                    <div className="mt-32 flex flex-wrap gap-3">
+                    {/* <div className="mt-32 flex flex-wrap gap-3">
                         <a
                             href="#pillars"
                             className="rounded-xl bg-emerald-400 px-5 py-3 text-sm font-semibold text-emerald-950 shadow-lg shadow-black/20 transition hover:bg-emerald-300">
@@ -53,8 +53,8 @@ Bridging the gap between raw plant operations and enterprise-grade compliance.
                             className="rounded-xl border border-white/35 bg-white/10 px-5 py-3 text-sm font-semibold text-white shadow-sm backdrop-blur-md transition hover:bg-white/20">
                             Read how it works
                         </a>
-                    </div>
-                    <div className="mt-7 flex flex-col">
+                    </div> */}
+                    <div className="mt-22 flex flex-col">
                         <div className="inline-flex items-center gap-3 rounded-2xl px-1 py-2">
                             <span className="text-[0.7rem] font-bold uppercase tracking-[0.22em] text-emerald-50/85">
                                 Supported by

@@ -129,7 +129,7 @@ export default function LandingLoader() {
                                     onEnded={handleClose}
                                     onError={handleClose}
                                     className="w-full h-full object-cover">
-                                    <source src="/GreenLedger Video Gen 2.mp4" type="video/mp4" />
+                                    <source src="/GL video improved.mp4" type="video/mp4" />
                                     <source src="/api/media/landing-intro" type="video/mp4" />
                                 </video>
 

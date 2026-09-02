@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 export async function GET() {
-    const videoPath = path.join(process.cwd(), "assets", "GreenLedger Video Gen 2.mp4");
+    const videoPath = path.join(process.cwd(), "assets", "GL video improved.mp4");
     const videoBuffer = await readFile(videoPath);
 
     return new Response(videoBuffer, {

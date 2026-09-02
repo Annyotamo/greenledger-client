@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getFuelActivities, getFuelActivityById, getElectricityActivities } from "./api";
 
 export function useFuelActivities(filters?: {

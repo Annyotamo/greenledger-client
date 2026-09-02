@@ -19,6 +19,90 @@ function mapFuelActivityItem(dto: any): FuelActivity {
     const fuelObj = act.fuel || fac.fuel || {};
     const unitObj = dto.quantity_unit || act.quantity_unit || fac.unit || {};
 
+    const fuelProfileRaw = dto.fuel_profile || act.fuel?.profile || fac.fuel?.profile;
+    const fuelProfile = fuelProfileRaw
+        ? {
+              id: fuelProfileRaw.id,
+              netCvGjPerTonne: fuelProfileRaw.net_cv_gj_per_tonne != null ? Number(fuelProfileRaw.net_cv_gj_per_tonne) : null,
+              netCvKwhPerTonne: fuelProfileRaw.net_cv_kwh_per_tonne != null ? Number(fuelProfileRaw.net_cv_kwh_per_tonne) : null,
+              netCvKwhPerLitre: fuelProfileRaw.net_cv_kwh_per_litre != null ? Number(fuelProfileRaw.net_cv_kwh_per_litre) : null,
+              grossCvGjPerTonne: fuelProfileRaw.gross_cv_gj_per_tonne != null ? Number(fuelProfileRaw.gross_cv_gj_per_tonne) : null,
+              grossCvKwhPerTonne: fuelProfileRaw.gross_cv_kwh_per_tonne != null ? Number(fuelProfileRaw.gross_cv_kwh_per_tonne) : null,
+              grossCvKwhPerLitre: fuelProfileRaw.gross_cv_kwh_per_litre != null ? Number(fuelProfileRaw.gross_cv_kwh_per_litre) : null,
+              densityKgPerMetreCube: fuelProfileRaw.density_kg_per_metre_cube != null ? Number(fuelProfileRaw.density_kg_per_metre_cube) : null,
+              densityLitresPerTonne: fuelProfileRaw.density_litres_per_tonne != null ? Number(fuelProfileRaw.density_litres_per_tonne) : null,
+              densityKgPerLitre: fuelProfileRaw.density_kg_per_litre != null ? Number(fuelProfileRaw.density_kg_per_litre) : null,
+              densityTonnePerLitre: fuelProfileRaw.density_tonne_per_litre != null ? Number(fuelProfileRaw.density_tonne_per_litre) : null,
+          }
+        : null;
+
+    const sourceRaw = dto.source || act.source || fac.source;
+    const source = sourceRaw
+        ? {
+              id: sourceRaw.id || "",
+              standard: sourceRaw.standard || "",
+              version: sourceRaw.version || "",
+              region: sourceRaw.region || "GLOBAL",
+              dataYear: sourceRaw.data_year != null ? Number(sourceRaw.data_year) : null,
+              publishedAt: sourceRaw.published_at || null,
+              effectiveFrom: sourceRaw.effective_from || null,
+              effectiveTo: sourceRaw.effective_to || null,
+              isActive: sourceRaw.is_active ?? true,
+              emissionUnit: sourceRaw.emission_unit || "kg",
+              tableName: sourceRaw.tablename || null,
+              gwpBasis: sourceRaw.gwp_basis || null,
+              description: sourceRaw.description || null,
+              sourceUrl: sourceRaw.source_url || null,
+              type: sourceRaw.type || "fuel",
+          }
+        : null;
+
+    const attachedDocs = Array.isArray(docs.items)
+        ? docs.items.map((d: any) => ({
+              id: d.id || "",
+              documentName: d.document_name || d.file_name || "Document",
+              documentType: d.document_type || "other",
+              sourceUrl: d.source_url || d.download_url || "",
+              downloadUrl: d.download_url || null,
+              viewUrl: d.view_url || null,
+              s3PresignedUrl: d.s3_presigned_url || null,
+              fileName: d.file_name || null,
+              fileExtension: d.file_extension || null,
+              mimeType: d.mime_type || null,
+              documentDate: d.document_date || null,
+              notes: d.notes || null,
+              issuedBy: d.issued_by || null,
+              uploadedBy: d.uploaded_by || null,
+              createdAt: d.created_at || null,
+              updatedAt: d.updated_at || null,
+              document_name: d.document_name || d.file_name || "Document",
+              document_type: d.document_type || "other",
+              document_date: d.document_date || null,
+              source_url: d.source_url || d.download_url || "",
+          }))
+        : undefined;
+
+    const units = dto.units
+        ? {
+              quantityUnit: dto.units.quantity_unit
+                  ? {
+                        id: dto.units.quantity_unit.id || "",
+                        name: dto.units.quantity_unit.name || "",
+                        symbol: dto.units.quantity_unit.symbol || "",
+                        unitType: dto.units.quantity_unit.unit_type || "mass",
+                        conversionToBase: dto.units.quantity_unit.conversion_to_base != null ? Number(dto.units.quantity_unit.conversion_to_base) : null,
+                        baseUnitSymbol: dto.units.quantity_unit.base_unit_symbol || null,
+                    }
+                  : null,
+              energyContentUnit: dto.units.energy_content_unit || "GJ",
+              generatedElectricityUnits: Array.isArray(dto.units.generated_electricity_units) ? dto.units.generated_electricity_units : ["kWh", "MWh"],
+              generatedSteamUnit: dto.units.generated_steam_unit || "GJ",
+              emissionFactorUnit: dto.units.emission_factor_unit || "tonnes",
+              sourceEmissionUnit: dto.units.source_emission_unit || "kg",
+              emissionsMassUnits: dto.units.emissions_mass_units || {},
+          }
+        : null;
+
     return {
         id: dto.id,
         createdAt: dto.created_at || "",
@@ -46,7 +130,7 @@ function mapFuelActivityItem(dto: any): FuelActivity {
         quantityUnitId: act.quantity_unit_id || unitObj.id || "",
         unitName: unitObj.name || "",
         unitSymbol: unitObj.symbol || "",
-        unitType: unitObj.unit_type || "energy",
+        unitType: unitObj.unit_type || "mass",
         usageType: act.usage_type || undefined,
         emissionType: act.emission_type || "stationary",
         cost: act.cost ? Number(act.cost) : null,
@@ -55,6 +139,7 @@ function mapFuelActivityItem(dto: any): FuelActivity {
         generatedElectricityKwh: act.generated_electricity_kwh ? Number(act.generated_electricity_kwh) : 0,
         generatedElectricityMwh: act.generated_electricity_mwh ? Number(act.generated_electricity_mwh) : 0,
         generatedSteamGJ: act.generated_steam_gj ? Number(act.generated_steam_gj) : null,
+        electricityActivityId: act.electricity_activity_id || null,
         dataQualityTier: act.data_quality_tier || "measured",
         estimationBasis: act.estimation_basis || null,
         notes: act.notes || null,
@@ -64,16 +149,17 @@ function mapFuelActivityItem(dto: any): FuelActivity {
         verifiedAt: wf.verified_at || null,
         enteredBy: wf.entered_by || null,
         isAmendment: wf.is_amendment || false,
+        amendedFromId: wf.amended_from_id || null,
         sourceReferenceCode: fac.source_reference_code || fac.source?.reference_code || null,
         calculatedTCo2e: Number(calc.calculated_t_co2e || 0),
         calculatedKgCo2e: Number(calc.calculated_kg_co2e || 0),
         documentsCount: docs.count || (Array.isArray(docs.items) ? docs.items.length : 0),
-        attachedDocuments: Array.isArray(docs.items) ? docs.items : undefined,
-        fuelFactorStandard: fac.source?.standard || fac.source_reference_code || "",
-        fuelFactorVersion: fac.source?.version || "",
-        fuelFactorRegion: fac.source?.region || "",
-        factorDataYear: fac.source?.data_year || null,
-        factorEmissionUnit: fac.source?.emission_unit || "kg",
+        attachedDocuments: attachedDocs,
+        fuelFactorStandard: fac.source?.standard || source?.standard || fac.source_reference_code || "",
+        fuelFactorVersion: fac.source?.version || source?.version || "",
+        fuelFactorRegion: fac.source?.region || source?.region || "",
+        factorDataYear: fac.source?.data_year || source?.dataYear || null,
+        factorEmissionUnit: fac.source?.emission_unit || source?.emissionUnit || "kg",
         calculatedKgCo2: Number(calc.calculated_kg_co2 || 0),
         calculatedTCo2: Number(calc.calculated_t_co2 || 0),
         calculatedKgCh4: Number(calc.calculated_kg_ch4 || 0),
@@ -95,6 +181,9 @@ function mapFuelActivityItem(dto: any): FuelActivity {
         factorTCo2eOfN2o: fac.factors?.tonnes ? Number(fac.factors.tonnes.t_co2e_of_n2o) : 0,
         factorOtherGhgTCo2e: fac.factors?.tonnes?.other_ghg_t_co2e ? Number(fac.factors.tonnes.other_ghg_t_co2e) : null,
         biogenicFactorId: fac.biogenic_factor_id || null,
+        fuelProfile,
+        source,
+        units,
     };
 }
 

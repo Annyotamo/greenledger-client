@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { format, isAfter } from "date-fns";
 import { getScope1Report } from "@/lib/ghg/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -123,6 +124,7 @@ export function FuelActivityTable({
     showFilters?: boolean;
     onToggleFilters?: (v: boolean) => void;
 }) {
+    const router = useRouter();
     const [isDateModalOpen, setIsDateModalOpen] = useState(false);
     const [selectedRange, setSelectedRange] = useState<DateRange>({ start: null, end: null });
     const [draftRange, setDraftRange] = useState<DateRange>(selectedRange);
@@ -472,7 +474,7 @@ export function FuelActivityTable({
                                 return (
                                     <TableRow
                                         key={activity.id}
-                                        onClick={() => setSelectedActivityId(activity.id)}
+                                        onClick={() => router.push(`/activities/fuel/${activity.id}`)}
                                         className="hover:bg-slate-50/90 transition-colors cursor-pointer border-b border-slate-100 last:border-none">
                                         <TableCell className="py-2.5 px-4 text-nowrap">
                                             <div className="flex items-center gap-2">
@@ -528,7 +530,7 @@ export function FuelActivityTable({
                                                 {status}
                                             </span>
                                         </TableCell>
-                                        <TableCell className="relative">
+                                        <TableCell className="relative" onClick={(e) => e.stopPropagation()}>
                                             <button
                                                 aria-label="Open actions"
                                                 data-action-toggle
@@ -548,13 +550,13 @@ export function FuelActivityTable({
                                                     className="absolute right-0 top-8 z-50 w-44 rounded-md border border-outline-variant bg-white shadow-lg">
                                                     <button
                                                         onClick={() => {
-                                                            setSelectedActivityId(activity.id);
                                                             setOpenMenuId(null);
+                                                            router.push(`/activities/fuel/${activity.id}`);
                                                         }}
                                                         className="w-full text-left px-3 py-2 hover:bg-surface-container-high">
                                                         <div className="flex items-center gap-2">
                                                             <MaterialIcon name="visibility" size="sm" />
-                                                            <span>View</span>
+                                                            <span>View Details</span>
                                                         </div>
                                                     </button>
                                                     <Link

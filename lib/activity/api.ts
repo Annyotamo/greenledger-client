@@ -158,6 +158,8 @@ function mapFuelActivityItem(dto: any): FuelActivity {
         fuelFactorStandard: fac.source?.standard || source?.standard || fac.source_reference_code || "",
         fuelFactorVersion: fac.source?.version || source?.version || "",
         fuelFactorRegion: fac.source?.region || source?.region || "",
+        fuelFactorGwpBasis: fac.source?.gwp_basis || source?.gwpBasis || (fac as any).gwp_basis || (dto as any).gwp_basis || null,
+        gwpBasis: fac.source?.gwp_basis || source?.gwpBasis || (fac as any).gwp_basis || (dto as any).gwp_basis || null,
         factorDataYear: fac.source?.data_year || source?.dataYear || null,
         factorEmissionUnit: fac.source?.emission_unit || source?.emissionUnit || "kg",
         calculatedKgCo2: Number(calc.calculated_kg_co2 || 0),

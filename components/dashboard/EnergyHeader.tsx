@@ -1,6 +1,10 @@
+"use client";
+
+import { useState } from "react";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
-import { DATE_RANGE_LABEL } from "@/lib/dashboard/data";
+import { ExportReportModal } from "@/components/activity/ExportReportModal";
+import { getScope2Report } from "@/lib/ghg/api";
 
 type EnergyHeaderProps = {
     reportingPeriod?: string;
@@ -8,6 +12,8 @@ type EnergyHeaderProps = {
 };
 
 export function EnergyHeader({ reportingPeriod, facilitiesCount }: EnergyHeaderProps) {
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -26,16 +32,30 @@ export function EnergyHeader({ reportingPeriod, facilitiesCount }: EnergyHeaderP
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                    <Button variant="secondary" size="sm">
-                        <MaterialIcon name="calendar_today" size="sm" />
-                        {reportingPeriod || DATE_RANGE_LABEL}
-                    </Button>
-                    <Button variant="secondary" size="sm">
+                    <Button variant="secondary" size="sm" onClick={() => setIsExportModalOpen(true)}>
                         <MaterialIcon name="file_download" size="sm" />
-                        Export Report
+                        <span>Export Report</span>
                     </Button>
                 </div>
             </div>
+
+            <ExportReportModal
+                isOpen={isExportModalOpen}
+                onClose={() => setIsExportModalOpen(false)}
+                title="Export Energy Consumption Report"
+                description="Select a date range to generate and download the energy consumption report (.xlsx)."
+                onExport={async (startDate, endDate) => {
+                    const blob = await getScope2Report(startDate, endDate);
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `energy-report-${startDate}-to-${endDate}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                }}
+            />
         </div>
     );
 }

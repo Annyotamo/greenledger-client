@@ -308,6 +308,8 @@ export type FuelActivity = {
     fuelFactorStandard: string;
     fuelFactorVersion: string;
     fuelFactorRegion: string;
+    fuelFactorGwpBasis?: string | null;
+    gwpBasis?: string | null;
     biogenicFactorId?: string | null;
     // Facility & Period Context
     facilityName?: string;

@@ -343,9 +343,9 @@ export function FuelActivityDetailModal({
                                 <span className="px-2.5 py-0.5 rounded bg-primary/10 text-primary font-bold">
                                     {activity.fuelFactorStandard || "IPCC"}
                                 </span>
-                                {activity.fuelFactorVersion && (
+                                {(activity.fuelFactorGwpBasis || activity.gwpBasis || activity.source?.gwpBasis) && (
                                     <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold border border-slate-200 text-[11px]">
-                                        GWP: {activity.fuelFactorVersion}
+                                        GWP: {activity.fuelFactorGwpBasis || activity.gwpBasis || activity.source?.gwpBasis}
                                     </span>
                                 )}
                             </div>
@@ -357,9 +357,9 @@ export function FuelActivityDetailModal({
                                 <span className="text-xs font-bold text-slate-900 mt-1 block">
                                     {activity.fuelFactorStandard || "IPCC"}
                                 </span>
-                                {activity.fuelFactorVersion && (
+                                {(activity.fuelFactorGwpBasis || activity.gwpBasis || activity.source?.gwpBasis) && (
                                     <span className="text-[10px] text-slate-600 block mt-0.5 font-sans">
-                                        GWP Basis: <span className="font-semibold text-slate-800">{activity.fuelFactorVersion}</span>
+                                        GWP Basis: <span className="font-semibold text-slate-800">{activity.fuelFactorGwpBasis || activity.gwpBasis || activity.source?.gwpBasis}</span>
                                     </span>
                                 )}
                                 <span className="text-[10px] text-slate-500 block mt-0.5">Region: {activity.fuelFactorRegion || "GLOBAL"}</span>

@@ -165,7 +165,6 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
             kgValue: activity.calculatedKgCo2 || 0,
             percent: totalTCo2e > 0 ? (co2Tons / totalTCo2e) * 100 : 0,
             color: GHG_COLORS.co2,
-            gwp: "1 (Direct)",
         },
         {
             name: "CH₄ (Methane)",
@@ -174,7 +173,6 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
             kgValue: activity.calculatedKgCh4 || 0,
             percent: totalTCo2e > 0 ? (ch4Tons / totalTCo2e) * 100 : 0,
             color: GHG_COLORS.ch4,
-            gwp: "27.9 (AR6 100yr)",
         },
         {
             name: "N₂O (Nitrous Oxide)",
@@ -183,7 +181,6 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
             kgValue: activity.calculatedKgN2o || 0,
             percent: totalTCo2e > 0 ? (n2oTons / totalTCo2e) * 100 : 0,
             color: GHG_COLORS.n2o,
-            gwp: "273 (AR6 100yr)",
         },
     ].filter((g) => g.value > 0);
 
@@ -218,15 +215,16 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
     const emissionTypeClass = emissionTypeStyles[activity.emissionType.toLowerCase()] || "bg-slate-100 text-slate-700";
 
     const attachedDocs = activity.attachedDocuments || [];
+    const activeGwpBasis = activity.fuelFactorGwpBasis || activity.gwpBasis || activity.source?.gwpBasis || "";
     const sourceData = activity.source || {
         standard: activity.fuelFactorStandard || "IPCC",
         version: activity.fuelFactorVersion || "2006",
         region: activity.fuelFactorRegion || "GLOBAL",
         dataYear: activity.factorDataYear || 2023,
-        gwpBasis: "AR6",
+        gwpBasis: activeGwpBasis || "AR5",
         tableName: "ipcc_fuel_emission_factors",
         description:
-            "Standard greenhouse gas emission factors and scientific baselines for stationary fuel combustion sourced from IPCC Sixth Assessment Report (AR6).",
+            `Standard greenhouse gas emission factors and scientific baselines for stationary fuel combustion sourced from ${activity.fuelFactorStandard || "IPCC"}${activeGwpBasis ? ` (${activeGwpBasis})` : ""}.`,
         sourceUrl: "https://www.ipcc-nggip.iges.or.jp/public/2019rf/index.html",
         effectiveFrom: "2023-03-20",
         effectiveTo: "2030-12-31",
@@ -537,11 +535,8 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                                             key={gas.name}
                                             className="p-2.5 rounded-lg border border-outline-variant/60 bg-surface-container-low/60 flex items-center justify-between">
                                             <div className="flex items-center gap-2">
-                                                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: gas.color }} />
-                                                <div>
-                                                    <div className="font-mono text-xs font-bold text-primary">{gas.shortName}</div>
-                                                    <div className="text-[10px] text-on-surface-variant font-mono">GWP: {gas.gwp}</div>
-                                                </div>
+                                                <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: gas.color }} />
+                                                <div className="font-mono text-xs font-bold text-primary">{gas.shortName}</div>
                                             </div>
                                             <div className="text-right font-mono">
                                                 <div className="text-xs font-bold text-primary">{formatNumber(gas.value)} t</div>
@@ -570,7 +565,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                                         />
                                         <Bar dataKey="factorKg" radius={[0, 4, 4, 0]}>
                                             {factorBarData.map((entry, index) => (
-                                                <Cell key={`bar-${index}`} fill={entry.fill} />
+                                              <Cell key={`bar-${index}`} fill={entry.fill} />
                                             ))}
                                         </Bar>
                                     </BarChart>
@@ -579,7 +574,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                         )}
 
                         <div className="mt-4 pt-3 border-t border-outline-variant flex flex-wrap items-center justify-between text-[11px] font-mono text-on-surface-variant">
-                            <span>Standard Basis: {sourceData.standard} {sourceData.version} ({sourceData.gwpBasis || "AR6"} 100-Year)</span>
+                            <span>Standard Basis: {sourceData.standard} {sourceData.version}{sourceData.gwpBasis ? ` (${sourceData.gwpBasis} 100-Year)` : ""}</span>
                             <span className="text-emerald-700 font-semibold">100% Calculated Coverage</span>
                         </div>
                     </div>
@@ -804,7 +799,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                             </div>
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">GWP Metric Standard</span>
-                                <span className="font-bold text-primary">{sourceData.gwpBasis || "AR6 (Sixth Assessment Report)"}</span>
+                                <span className="font-bold text-primary">{sourceData.gwpBasis ? `${sourceData.gwpBasis}` : "IPCC Guidelines"}</span>
                             </div>
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">Geographical Region</span>
@@ -887,7 +882,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                                 <TableRow>
                                     <TableHead>Greenhouse Gas Constituent</TableHead>
                                     <TableHead>Formula / Symbol</TableHead>
-                                    <TableHead>GWP Multiplier (AR6)</TableHead>
+                                    <TableHead>GWP Multiplier{sourceData.gwpBasis ? ` (${sourceData.gwpBasis})` : ""}</TableHead>
                                     <TableHead className="text-right">Calculated Mass (kg)</TableHead>
                                     <TableHead className="text-right">Calculated Mass (tonnes)</TableHead>
                                     <TableHead className="text-right">% of Total CO₂e</TableHead>

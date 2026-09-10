@@ -2,9 +2,12 @@ import { privateApi } from "@/lib/http/client";
 import type { FuelActivity, FuelActivityApiResponse, FuelActivityItemDto } from "./types";
 import type {
     ElectricityActivity,
+    ElectricityActivityApiResponse,
+    ElectricityActivityDocumentItem,
     ElectricityActivityItemDto,
     MarketAllocation,
     MarketCertificate,
+    MarketInstrumentType,
     PurchasedEnergy,
 } from "./electricityTypes";
 
@@ -306,11 +309,13 @@ export async function uploadFuelActivityDocument(activityId: string, payload: Re
     return response.data;
 }
 
-function mapElectricityActivityItem(dto: ElectricityActivityItemDto): ElectricityActivity {
+function mapElectricityActivityItem(dto: any): ElectricityActivity {
     const act = dto.activity ?? dto;
     const ctx = dto.context ?? dto;
     const wf = dto.workflow ?? dto;
     const calc = dto.calculated ?? dto;
+    const fac = dto.factor ?? {};
+    const docs = dto.documents ?? {};
 
     const marketAllocDto = act.market_allocation ?? dto.market_allocation;
     const marketAlloc: MarketAllocation | null = marketAllocDto
@@ -321,6 +326,8 @@ function mapElectricityActivityItem(dto: ElectricityActivityItemDto): Electricit
               contractedEmissionFactorUnit: marketAllocDto.contracted_emission_factor_unit || "tco2_per_mwh",
               uncoveredElectricityKwh: marketAllocDto.uncovered_electricity_kwh != null ? Number(marketAllocDto.uncovered_electricity_kwh) : undefined,
               uncoveredElectricityMwh: marketAllocDto.uncovered_electricity_mwh != null ? Number(marketAllocDto.uncovered_electricity_mwh) : undefined,
+              contractedElectricityTco2e: marketAllocDto.contracted_electricity_tco2e != null ? Number(marketAllocDto.contracted_electricity_tco2e) : undefined,
+              uncoveredElectricityTco2e: marketAllocDto.uncovered_electricity_tco2e != null ? Number(marketAllocDto.uncovered_electricity_tco2e) : undefined,
           }
         : null;
 
@@ -351,38 +358,119 @@ function mapElectricityActivityItem(dto: ElectricityActivityItemDto): Electricit
           }
         : null;
 
+    const hasMarketInstrument = Boolean(
+        act.has_market_instrument ??
+        calc.has_market_instrument ??
+        dto.has_market_instrument ??
+        (act.market_instrument_type && act.market_instrument_type !== "none") ??
+        Boolean(marketAllocDto)
+    );
+
+    const marketInstrumentType = (
+        act.market_instrument_type ??
+        calc.market_instrument_type ??
+        dto.market_instrument_type ??
+        null
+    ) as MarketInstrumentType | null;
+
+    const attachedDocs: ElectricityActivityDocumentItem[] | undefined = Array.isArray(docs.items)
+        ? docs.items.map((d: any) => ({
+              id: d.id || "",
+              documentName: d.document_name || d.file_name || "Document",
+              documentType: d.document_type || "other",
+              sourceUrl: d.source_url || d.download_url || "",
+              downloadUrl: d.download_url || null,
+              viewUrl: d.view_url || null,
+              s3PresignedUrl: d.s3_presigned_url || null,
+              fileName: d.file_name || null,
+              fileExtension: d.file_extension || null,
+              mimeType: d.mime_type || null,
+              documentDate: d.document_date || null,
+              notes: d.notes || null,
+              issuedBy: d.issued_by || null,
+              uploadedBy: d.uploaded_by || null,
+              createdAt: d.created_at || null,
+              updatedAt: d.updated_at || null,
+              document_name: d.document_name || d.file_name || "Document",
+              document_type: d.document_type || "other",
+              document_date: d.document_date || null,
+              source_url: d.source_url || d.download_url || "",
+          }))
+        : undefined;
+
     return {
         id: dto.id,
         createdAt: dto.created_at || "",
         updatedAt: dto.updated_at || "",
-        facilityId: (ctx as any).facility_id || (dto as any).facility_id || "",
-        reportingPeriodId: (ctx as any).reporting_period_id || (dto as any).reporting_period_id || "",
-        activityStartDate: (ctx as any).activity_start_date || (dto as any).activity_start_date || "",
-        activityEndDate: (ctx as any).activity_end_date || (dto as any).activity_end_date || "",
-        scopeType: (act as any).scope_type || "scope_2",
-        accountingMethod: (act as any).accounting_method || (dto as any).accounting_method || null,
-        electricityActivityType: (act as any).electricity_activity_type || (dto as any).electricity_activity_type || "",
-        sourceType: (act as any).source_type || (dto as any).source_type || "",
-        electricityKwh: Number((act as any).electricity_kwh ?? (dto as any).electricity_kwh ?? 0),
-        electricityMwh: Number((act as any).electricity_mwh ?? (dto as any).electricity_mwh ?? 0),
-        sourceFuelActivityId: (act as any).source_fuel_activity_id ?? null,
-        supplierName: (act as any).supplier_name ?? (dto as any).supplier_name ?? null,
-        isRenewableCertified: Boolean((act as any).is_renewable_certified ?? (dto as any).is_renewable_certified ?? false),
-        dataQualityTier: (act as any).data_quality_tier || (dto as any).data_quality_tier || "measured",
-        estimationBasis: (act as any).estimation_basis ?? null,
-        notes: (act as any).notes ?? (dto as any).notes ?? null,
-        workflowStatus: (wf as any).status || dto.workflow_status || dto.status || "pending",
-        calculatedTCo2e: (calc as any).calculated_t_co2e != null ? Number((calc as any).calculated_t_co2e) : Number((dto as any).calculated_t_co2e ?? 0),
-        calculatedKgCo2e: (calc as any).calculated_kg_co2e != null ? Number((calc as any).calculated_kg_co2e) : Number((dto as any).calculated_kg_co2e ?? 0),
-        documentsCount: dto.documents?.count ?? 0,
-        factorSourceStandard: dto.factor?.source?.standard ?? null,
-        factorSourceVersion: dto.factor?.source?.version ?? null,
-        factorSourceRegion: dto.factor?.source?.region ?? null,
+        facilityId: ctx.facility_id || ctx.facility?.id || dto.facility_id || "",
+        facilityName: ctx.facility?.name,
+        facilityCode: ctx.facility?.facility_code,
+        facilityCity: ctx.facility?.city,
+        facilityCountry: ctx.facility?.country,
+        reportingPeriodId: ctx.reporting_period_id || ctx.reporting_period?.id || dto.reporting_period_id || "",
+        reportingPeriodName: ctx.reporting_period?.name,
+        periodStatus: ctx.reporting_period?.period_status,
+        periodStartDate: ctx.reporting_period?.period_start || ctx.reporting_period?.start_date,
+        periodEndDate: ctx.reporting_period?.period_end || ctx.reporting_period?.end_date,
+        meterId: ctx.meter_id || null,
+        activityStartDate: ctx.activity_start_date || dto.activity_start_date || "",
+        activityEndDate: ctx.activity_end_date || dto.activity_end_date || "",
+        scopeType: act.scope_type !== undefined ? act.scope_type : (dto.scope_type !== undefined ? dto.scope_type : "scope_2"),
+        accountingMethod: act.accounting_method || dto.accounting_method || null,
+        electricityActivityType: act.electricity_activity_type || dto.electricity_activity_type || "",
+        sourceType: act.source_type || dto.source_type || "",
+        electricityKwh: Number(act.electricity_kwh ?? dto.electricity_kwh ?? 0),
+        electricityMwh: Number(act.electricity_mwh ?? dto.electricity_mwh ?? 0),
+        hasMarketInstrument,
+        marketInstrumentType,
+        locationSourceId: act.location_source_id ?? dto.location_source_id ?? null,
+        marketSourceId: act.market_source_id ?? dto.market_source_id ?? null,
+        sourceFuelActivityId: act.source_fuel_activity_id ?? dto.source_fuel_activity_id ?? null,
+        supplierName: act.supplier_name ?? dto.supplier_name ?? null,
+        isRenewableCertified: Boolean(act.is_renewable_certified ?? dto.is_renewable_certified ?? false),
+        dataQualityTier: act.data_quality_tier || dto.data_quality_tier || "measured",
+        estimationBasis: act.estimation_basis ?? dto.estimation_basis ?? null,
+        notes: act.notes ?? dto.notes ?? null,
+        workflowStatus: wf.status || dto.workflow_status || dto.status || "pending",
+        rejectedReason: wf.rejected_reason || null,
+        verifiedBy: wf.verified_by || null,
+        verifiedAt: wf.verified_at || null,
+        isAmendment: Boolean(wf.is_amendment),
+        amendedFromId: wf.amended_from_id || null,
+        enteredBy: wf.entered_by || null,
+        calculatedTCo2e: Number(calc.calculated_t_co2e ?? dto.calculated_t_co2e ?? 0),
+        calculatedKgCo2e: Number(calc.calculated_kg_co2e ?? dto.calculated_kg_co2e ?? 0),
+        locationCalculatedTCo2e: calc.location_calculated_t_co2e != null
+            ? Number(calc.location_calculated_t_co2e)
+            : (dto.location_calculated_t_co2e != null ? Number(dto.location_calculated_t_co2e) : null),
+        locationCalculatedKgCo2e: calc.location_calculated_kg_co2e != null
+            ? Number(calc.location_calculated_kg_co2e)
+            : (dto.location_calculated_kg_co2e != null ? Number(dto.location_calculated_kg_co2e) : null),
+        locationKgCo2: calc.location_kg_co2 != null
+            ? Number(calc.location_kg_co2)
+            : (dto.location_kg_co2 != null ? Number(dto.location_kg_co2) : null),
+        locationKgCh4: calc.location_kg_ch4 != null
+            ? Number(calc.location_kg_ch4)
+            : (dto.location_kg_ch4 != null ? Number(dto.location_kg_ch4) : null),
+        locationKgN2o: calc.location_kg_n2o != null
+            ? Number(calc.location_kg_n2o)
+            : (dto.location_kg_n2o != null ? Number(dto.location_kg_n2o) : null),
+        marketCalculatedTCo2e: calc.market_calculated_t_co2e != null
+            ? Number(calc.market_calculated_t_co2e)
+            : (dto.market_calculated_t_co2e != null ? Number(dto.market_calculated_t_co2e) : null),
+        marketCalculatedKgCo2e: calc.market_calculated_kg_co2e != null
+            ? Number(calc.market_calculated_kg_co2e)
+            : (dto.market_calculated_kg_co2e != null ? Number(dto.market_calculated_kg_co2e) : null),
+        documentsCount: docs.count || (Array.isArray(docs.items) ? docs.items.length : (dto.documents_count ?? 0)),
+        attachedDocuments: attachedDocs,
+        factorSourceStandard: fac.source?.standard || dto.factor?.source?.standard || null,
+        factorSourceVersion: fac.source?.version || dto.factor?.source?.version || null,
+        factorSourceRegion: fac.source?.region || dto.factor?.source?.region || null,
         marketAllocation: marketAlloc,
         marketCertificate: marketCert,
-        includePurchasedEnergy: Boolean((act as any).include_purchased_energy ?? (dto as any).include_purchased_energy ?? false),
+        includePurchasedEnergy: Boolean(act.include_purchased_energy ?? dto.include_purchased_energy ?? false),
         purchasedEnergy,
-        calculationMethod: (calc as any).calculation_method ?? null,
+        calculationMethod: calc.calculation_method ?? dto.calculation_method ?? null,
     };
 }
 
@@ -390,27 +478,55 @@ export async function getElectricityActivities(filters?: {
     status?: string;
     accounting_method?: string;
     electricity_activity_type?: string;
+    has_market_instrument?: boolean;
+    market_instrument_type?: string;
     data_quality_tier?: string;
     source_type?: string;
     facility_id?: string;
+    reporting_period_id?: string;
+    activity_start_date?: string;
+    activity_end_date?: string;
+    page?: number;
+    page_size?: number;
+    sort_by?: string;
+    sort_order?: string;
 }): Promise<ElectricityActivity[]> {
     const params = new URLSearchParams();
-    if (filters?.status) params.append("status", filters.status);
+    if (filters?.status) params.append("status", filters.status.toLowerCase());
     if (filters?.accounting_method) params.append("accounting_method", filters.accounting_method);
     if (filters?.electricity_activity_type) {
         params.append("electricity_activity_type", filters.electricity_activity_type);
     }
+    if (filters?.has_market_instrument !== undefined) {
+        params.append("has_market_instrument", String(filters.has_market_instrument));
+    }
+    if (filters?.market_instrument_type) {
+        params.append("market_instrument_type", filters.market_instrument_type);
+    }
     if (filters?.data_quality_tier) {
-        params.append("data_quality_tier", filters.data_quality_tier);
+        params.append("data_quality_tier", filters.data_quality_tier.toLowerCase());
     }
     if (filters?.source_type) params.append("source_type", filters.source_type);
     if (filters?.facility_id) params.append("facility_id", filters.facility_id);
+    if (filters?.reporting_period_id) params.append("reporting_period_id", filters.reporting_period_id);
+    if (filters?.activity_start_date) params.append("activity_start_date", filters.activity_start_date);
+    if (filters?.activity_end_date) params.append("activity_end_date", filters.activity_end_date);
+    if (filters?.page) params.append("page", String(filters.page));
+    if (filters?.page_size) params.append("page_size", String(filters.page_size));
+    if (filters?.sort_by) params.append("sort_by", filters.sort_by);
+    if (filters?.sort_order) params.append("sort_order", filters.sort_order);
 
     const qs = params.toString();
     const url = `/tenant/activity/electricity${qs ? `?${qs}` : ""}`;
-    const response = await privateApi.get(url);
+    const response = await privateApi.get<ElectricityActivityApiResponse>(url);
     const rawItems = response.data.data?.items ?? response.data.data ?? [];
     return Array.isArray(rawItems) ? rawItems.map(mapElectricityActivityItem) : [];
+}
+
+export async function getElectricityActivityById(activityId: string): Promise<ElectricityActivity> {
+    const response = await privateApi.get(`/tenant/activity/electricity/${activityId}`);
+    const data = response.data?.data ?? response.data;
+    return mapElectricityActivityItem(data);
 }
 
 export async function createElectricityActivity(payload: Record<string, unknown>) {
@@ -418,8 +534,74 @@ export async function createElectricityActivity(payload: Record<string, unknown>
     return response.data;
 }
 
+export async function updateElectricityActivity(activityId: string, payload: Record<string, unknown>) {
+    const response = await privateApi.patch(`/tenant/activity/electricity/${activityId}`, payload);
+    return response.data;
+}
+
+export async function deleteElectricityActivity(activityId: string) {
+    const response = await privateApi.delete(`/tenant/activity/electricity/${activityId}`);
+    return response.data;
+}
+
+export async function submitElectricityActivity(activityId: string) {
+    const response = await privateApi.post(`/tenant/activity/electricity/${activityId}/submit`);
+    return response.data;
+}
+
+export async function verifyElectricityActivity(activityId: string) {
+    const response = await privateApi.post(`/tenant/activity/electricity/${activityId}/verify`);
+    return response.data;
+}
+
+export async function rejectElectricityActivity(activityId: string, rejected_reason: string) {
+    const response = await privateApi.post(`/tenant/activity/electricity/${activityId}/reject`, {
+        rejected_reason,
+    });
+    return response.data;
+}
+
+export async function amendElectricityActivity(activityId: string, payload: Record<string, unknown>) {
+    const response = await privateApi.post(`/tenant/activity/electricity/${activityId}/amend`, payload);
+    return response.data;
+}
+
+export async function bulkCreateElectricityActivities(payload: Record<string, unknown>) {
+    const response = await privateApi.post("/tenant/activity/electricity/bulk", payload);
+    return response.data;
+}
+
+export async function getElectricityActivityDocuments(activityId: string) {
+    const response = await privateApi.get(`/tenant/activity/electricity/${activityId}/documents`);
+    return response.data?.data ?? response.data;
+}
+
 export async function uploadElectricityActivityDocument(activityId: string, payload: Record<string, unknown>) {
     const response = await privateApi.post(`/tenant/activity/electricity/${activityId}/documents`, payload);
     return response.data;
+}
+
+export async function deleteElectricityActivityDocument(activityId: string, documentId: string) {
+    const response = await privateApi.delete(`/tenant/activity/electricity/${activityId}/documents/${documentId}`);
+    return response.data;
+}
+
+export async function getScope2ExcelReport(startDate?: string, endDate?: string) {
+    const params: Record<string, string> = {};
+    if (startDate) params.start_date = startDate;
+    if (endDate) params.end_date = endDate;
+    try {
+        const response = await privateApi.get("/tenant/reports/scope2/excel", {
+            params,
+            responseType: "blob",
+        });
+        return response.data as Blob;
+    } catch {
+        const fallback = await privateApi.get("/tenant/ghg/scope-2/report", {
+            params,
+            responseType: "blob",
+        });
+        return fallback.data as Blob;
+    }
 }
 

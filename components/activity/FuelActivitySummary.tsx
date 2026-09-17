@@ -56,7 +56,7 @@ export function FuelActivitySummary({ activities }: FuelActivitySummaryProps) {
                     {formatNumber(totalActivities, 0)}
                 </p>
                 <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-on-surface-variant">
-                    Across {uniqueFacilities} facility{uniqueFacilities === 1 ? "" : "ies"}
+                    Across {uniqueFacilities} facilit{uniqueFacilities === 1 ? "y" : "ies"}
                 </p>
             </Card>
 

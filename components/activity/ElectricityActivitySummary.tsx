@@ -53,7 +53,7 @@ export function ElectricityActivitySummary({ activities }: ElectricityActivitySu
                     {formatNumber(activities.length, 0)}
                 </p>
                 <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-on-surface-variant">
-                    Across {activeFacilities} facility{activeFacilities === 1 ? "" : "ies"} • {marketCount} Market-Based
+                    Across {activeFacilities} facilit{activeFacilities === 1 ? "y" : "ies"} • {marketCount} Market-Based
                 </p>
             </Card>
 

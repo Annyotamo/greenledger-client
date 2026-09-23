@@ -8,6 +8,7 @@ export type Scope3Category = {
     slug: string;
     type: "upstream" | "downstream";
     isImplemented: boolean;
+    color: string;
     
     // View 1 (Operational vs Product Focus) Grouping
     view1Group: "Corporate & Operations" | "Supply Chain & Goods" | "Product Lifecycle" | "Business Model";
@@ -43,6 +44,7 @@ export const SCOPE3_CATEGORIES: Scope3Category[] = [
         slug: "category-1",
         type: "upstream",
         isImplemented: true,
+        color: "#10b981", // Emerald
         view1Group: "Supply Chain & Goods",
         view2Section: "Upstream (Supply Chain)",
         view2Subgroup: "Procurement & Assets",
@@ -64,6 +66,7 @@ export const SCOPE3_CATEGORIES: Scope3Category[] = [
         slug: "category-2",
         type: "upstream",
         isImplemented: true,
+        color: "#059669", // Dark Emerald
         view1Group: "Corporate & Operations",
         view2Section: "Upstream (Supply Chain)",
         view2Subgroup: "Procurement & Assets",
@@ -85,6 +88,7 @@ export const SCOPE3_CATEGORIES: Scope3Category[] = [
         slug: "category-3",
         type: "upstream",
         isImplemented: true,
+        color: "#3b82f6", // Blue
         view1Group: "Corporate & Operations",
         view2Section: "Upstream (Supply Chain)",
         view2Subgroup: "Logistics & Energy",
@@ -106,6 +110,7 @@ export const SCOPE3_CATEGORIES: Scope3Category[] = [
         slug: "category-4",
         type: "upstream",
         isImplemented: true,
+        color: "#f59e0b", // Amber
         view1Group: "Supply Chain & Goods",
         view2Section: "Upstream (Supply Chain)",
         view2Subgroup: "Logistics & Energy",
@@ -127,6 +132,7 @@ export const SCOPE3_CATEGORIES: Scope3Category[] = [
         slug: "category-5",
         type: "upstream",
         isImplemented: true,
+        color: "#84cc16", // Lime
         view1Group: "Corporate & Operations",
         view2Section: "Upstream (Supply Chain)",
         view2Subgroup: "Workforce & Waste",
@@ -148,6 +154,7 @@ export const SCOPE3_CATEGORIES: Scope3Category[] = [
         slug: "category-6",
         type: "upstream",
         isImplemented: true,
+        color: "#06b6d4", // Cyan
         view1Group: "Corporate & Operations",
         view2Section: "Upstream (Supply Chain)",
         view2Subgroup: "Workforce & Waste",
@@ -169,6 +176,7 @@ export const SCOPE3_CATEGORIES: Scope3Category[] = [
         slug: "category-7",
         type: "upstream",
         isImplemented: true,
+        color: "#8b5cf6", // Purple
         view1Group: "Corporate & Operations",
         view2Section: "Upstream (Supply Chain)",
         view2Subgroup: "Workforce & Waste",
@@ -190,6 +198,7 @@ export const SCOPE3_CATEGORIES: Scope3Category[] = [
         slug: "category-9",
         type: "downstream",
         isImplemented: true,
+        color: "#ec4899", // Pink
         view1Group: "Product Lifecycle",
         view2Section: "Downstream (Product & Market)",
         view2Subgroup: "Logistics & Expansion",
@@ -211,6 +220,7 @@ export const SCOPE3_CATEGORIES: Scope3Category[] = [
         slug: "category-15",
         type: "downstream",
         isImplemented: true,
+        color: "#6366f1", // Indigo
         view1Group: "Business Model",
         view2Section: "Downstream (Product & Market)",
         view2Subgroup: "Finance",
@@ -225,7 +235,7 @@ export const SCOPE3_CATEGORIES: Scope3Category[] = [
         status: "Verified",
     },
 
-    // ------------------- UNIMPLEMENTED CATEGORIES (FILTERED OUT IN UI) -------------------
+    // ------------------- UNIMPLEMENTED CATEGORIES (FILTERED OUT IN ACTIVE TRACKING) -------------------
     {
         id: 8,
         code: "Cat 8",
@@ -234,6 +244,7 @@ export const SCOPE3_CATEGORIES: Scope3Category[] = [
         slug: "category-8",
         type: "upstream",
         isImplemented: false,
+        color: "#94a3b8",
         view1Group: "Supply Chain & Goods",
         view2Section: "Upstream (Supply Chain)",
         view2Subgroup: "Procurement & Assets",
@@ -255,6 +266,7 @@ export const SCOPE3_CATEGORIES: Scope3Category[] = [
         slug: "category-10",
         type: "downstream",
         isImplemented: false,
+        color: "#94a3b8",
         view1Group: "Product Lifecycle",
         view2Section: "Downstream (Product & Market)",
         view2Subgroup: "Product Use Phase",
@@ -276,6 +288,7 @@ export const SCOPE3_CATEGORIES: Scope3Category[] = [
         slug: "category-11",
         type: "downstream",
         isImplemented: false,
+        color: "#94a3b8",
         view1Group: "Product Lifecycle",
         view2Section: "Downstream (Product & Market)",
         view2Subgroup: "Product Use Phase",
@@ -297,6 +310,7 @@ export const SCOPE3_CATEGORIES: Scope3Category[] = [
         slug: "category-12",
         type: "downstream",
         isImplemented: false,
+        color: "#94a3b8",
         view1Group: "Product Lifecycle",
         view2Section: "Downstream (Product & Market)",
         view2Subgroup: "Product Use Phase",
@@ -318,6 +332,7 @@ export const SCOPE3_CATEGORIES: Scope3Category[] = [
         slug: "category-13",
         type: "downstream",
         isImplemented: false,
+        color: "#94a3b8",
         view1Group: "Business Model",
         view2Section: "Downstream (Product & Market)",
         view2Subgroup: "Logistics & Expansion",
@@ -339,6 +354,7 @@ export const SCOPE3_CATEGORIES: Scope3Category[] = [
         slug: "category-14",
         type: "downstream",
         isImplemented: false,
+        color: "#94a3b8",
         view1Group: "Business Model",
         view2Section: "Downstream (Product & Market)",
         view2Subgroup: "Logistics & Expansion",
@@ -364,6 +380,8 @@ export const SCOPE3_SUMMARY = {
     overallCoveragePercent: 95.4,
     trackedCategoriesCount: 9,
     verifiedSpendUsd: 46960000,
+    carbonIntensityPerSpend: 0.727, // kgCO2e / USD spend
+    activeSuppliersCount: 128,
 };
 
 export const SCOPE3_TREND_DATA = [
@@ -431,5 +449,144 @@ export const VENDOR_HOTSPOTS = [
         intensity: "0.05 kgCO2e/$",
         dataQuality: "PCAF Standard",
         status: "Low Impact",
+    },
+];
+
+export interface Scope3ActivityItem {
+    id: string;
+    icon: string;
+    iconBgClassName: string;
+    iconColorClassName: string;
+    categoryCode: string;
+    title: string;
+    subtitle: string;
+    tco2e: string;
+    timeAgo: string;
+    statusBadge: {
+        label: string;
+        className: string;
+    };
+}
+
+export const SCOPE3_RECENT_ACTIVITIES: Scope3ActivityItem[] = [
+    {
+        id: "s3-act-1",
+        icon: "shopping_cart",
+        iconBgClassName: "bg-emerald-500/10 text-emerald-600",
+        iconColorClassName: "text-emerald-600",
+        categoryCode: "Cat 1",
+        title: "Raw Material Invoice • 350t Structural Steel Batch",
+        subtitle: "Titanium Metalwork Corp • Facility Alpha • Spend: $412,000",
+        tco2e: "482.5 tCO2e",
+        timeAgo: "2 hours ago",
+        statusBadge: {
+            label: "Verified",
+            className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        },
+    },
+    {
+        id: "s3-act-2",
+        icon: "local_shipping",
+        iconBgClassName: "bg-amber-500/10 text-amber-600",
+        iconColorClassName: "text-amber-600",
+        categoryCode: "Cat 4",
+        title: "DEFRA Freight Logistics • Mumbai to Nhava Sheva",
+        subtitle: "Apex Logistics Global • 4,200 t-km via Articulated HGV",
+        tco2e: "128.4 tCO2e",
+        timeAgo: "5 hours ago",
+        statusBadge: {
+            label: "Audited",
+            className: "bg-blue-50 text-blue-700 border-blue-200",
+        },
+    },
+    {
+        id: "s3-act-3",
+        icon: "flight_takeoff",
+        iconBgClassName: "bg-cyan-500/10 text-cyan-600",
+        iconColorClassName: "text-cyan-600",
+        categoryCode: "Cat 6",
+        title: "Executive Business Flight Audit • EMEA & APAC Routes",
+        subtitle: "Commercial Air Fleet • 18 Long-haul Segments with Radiative Forcing",
+        tco2e: "42.1 tCO2e",
+        timeAgo: "Yesterday",
+        statusBadge: {
+            label: "Verified",
+            className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        },
+    },
+    {
+        id: "s3-act-4",
+        icon: "bolt",
+        iconBgClassName: "bg-blue-500/10 text-blue-600",
+        iconColorClassName: "text-blue-600",
+        categoryCode: "Cat 3",
+        title: "WTT & Grid T&D Losses Allocation • Q2 Energy Statement",
+        subtitle: "National Power Distribution Grid • 2.4 GWh Consumed Base",
+        tco2e: "215.0 tCO2e",
+        timeAgo: "1 day ago",
+        statusBadge: {
+            label: "Audited",
+            className: "bg-blue-50 text-blue-700 border-blue-200",
+        },
+    },
+    {
+        id: "s3-act-5",
+        icon: "commute",
+        iconBgClassName: "bg-purple-500/10 text-purple-600",
+        iconColorClassName: "text-purple-600",
+        categoryCode: "Cat 7",
+        title: "Employee Commute Survey Batch • Tech Hub Bengaluru",
+        subtitle: "450 Responders • Metro, EV Carpooling & Hybrid Commutes",
+        tco2e: "38.6 tCO2e",
+        timeAgo: "2 days ago",
+        statusBadge: {
+            label: "Estimated",
+            className: "bg-amber-50 text-amber-700 border-amber-200",
+        },
+    },
+    {
+        id: "s3-act-6",
+        icon: "account_balance",
+        iconBgClassName: "bg-indigo-500/10 text-indigo-600",
+        iconColorClassName: "text-indigo-600",
+        categoryCode: "Cat 15",
+        title: "PCAF Financed Portfolio Recalculation • Clean Energy Assets",
+        subtitle: "GreenTech Energy Systems • Attribution Factor: 2.5%",
+        tco2e: "12.5 tCO2e",
+        timeAgo: "3 days ago",
+        statusBadge: {
+            label: "Verified",
+            className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        },
+    },
+    {
+        id: "s3-act-7",
+        icon: "delete_sweep",
+        iconBgClassName: "bg-lime-500/10 text-lime-600",
+        iconColorClassName: "text-lime-600",
+        categoryCode: "Cat 5",
+        title: "Industrial Operations Waste Disposal & Composting Audit",
+        subtitle: "Facility Beta • 65t Recycled Metals & 12t Landfill Diverted",
+        tco2e: "18.2 tCO2e",
+        timeAgo: "4 days ago",
+        statusBadge: {
+            label: "Verified",
+            className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        },
+    },
+    {
+        id: "s3-act-8",
+        icon: "package_2",
+        iconBgClassName: "bg-pink-500/10 text-pink-600",
+        iconColorClassName: "text-pink-600",
+        categoryCode: "Cat 9",
+        title: "Downstream Last-Mile Distribution Ledger • Northern Region",
+        subtitle: "Swift Distribution Logistics • 1,200 Delivery Dispatches",
+        tco2e: "88.0 tCO2e",
+        timeAgo: "5 days ago",
+        statusBadge: {
+            label: "Verified",
+            className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        },
     },
 ];

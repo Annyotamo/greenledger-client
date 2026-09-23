@@ -74,7 +74,6 @@ const CARBON_CONTENT_UNIT_OPTIONS = [
     { label: "kg/GJ", value: "kg/GJ" },
 ];
 
-
 function formFieldClass(error?: boolean, disabled?: boolean) {
     return `w-full rounded-lg border ${
         error ? "border-error" : "border-outline-variant"
@@ -97,8 +96,8 @@ export function CustomFuelSection({
     errors,
 }: CustomFuelSectionProps) {
     const [useCustomFuel, setUseCustomFuel] = useState<boolean>(Boolean(selectedCustomFuelId));
-    const [customMode, setCustomMode] = useState<"create" | "view_edit">("create");
-    const [isEditing, setIsEditing] = useState<boolean>(true);
+    const [customMode, setCustomMode] = useState<"create" | "view_edit">(selectedCustomFuelId ? "view_edit" : "create");
+    const [isEditing, setIsEditing] = useState<boolean>(!selectedCustomFuelId);
 
     const [customForm, setCustomForm] = useState<CustomFuelFormState>(initialCustomFuelFormState);
     const [customFormErrors, setCustomFormErrors] = useState<Record<string, string>>({});
@@ -111,21 +110,19 @@ export function CustomFuelSection({
     // Queries
     const fuelQueryType = emissionType === "process" || emissionType === "fugitive" ? "REFRIGERANT" : "FUEL";
     const emissionSourcesQuery = useEmissionSources("fuel");
-    const currentSource = emissionSourcesQuery.data?.find((s) => String(s.id) === String(sourceId));
-    const isIpccSource = currentSource ? currentSource.standard.toUpperCase().includes("IPCC") : true;
 
-    // Fetch categories specifically for IPCC source for custom fuels
+    // Fetch categories specifically for IPCC source for custom fuels or fallback to active source
     const ipccSource = emissionSourcesQuery.data?.find((s) => s.standard.toUpperCase().includes("IPCC"));
-    const ipccSourceId = ipccSource ? String(ipccSource.id) : sourceId;
+    const ipccSourceId = ipccSource ? String(ipccSource.id) : (sourceId ? String(sourceId) : "");
     const ipccFuelCategoriesQuery = useFuelCategories(fuelQueryType, ipccSourceId, false);
 
     const fuelCategoriesQuery = useFuelCategories(fuelQueryType, sourceId, false);
     const fuelsQuery = useFuels(fuelQueryType, fuelCategory, sourceId);
 
-    // Use units query based on selected standard fuel OR custom fuel API /user/custom-fuels/units
-    const customFuelsQuery = useCustomFuels(sourceId);
-    const selectedCustomFuel = customFuelsQuery.data?.find((cf) => cf.id === selectedCustomFuelId);
-    const activeFuelIdForUnits = useCustomFuel ? (selectedCustomFuel?.default_fuel_id || fuelType) : fuelType;
+    // Fetch custom fuels without filtering by sourceId so all tenant custom fuels are accessible
+    const customFuelsQuery = useCustomFuels();
+    const selectedCustomFuel = customFuelsQuery.data?.find((cf) => String(cf.id) === String(selectedCustomFuelId));
+    const activeFuelIdForUnits = useCustomFuel ? (selectedCustomFuel?.default_fuel_id ? String(selectedCustomFuel.default_fuel_id) : fuelType) : fuelType;
     const standardUnitsQuery = useFuelUnits(activeFuelIdForUnits);
     const customFuelUnitsQuery = useCustomFuelUnits(useCustomFuel);
     const unitsQuery = useCustomFuel ? customFuelUnitsQuery : standardUnitsQuery;
@@ -136,20 +133,17 @@ export function CustomFuelSection({
     const createMutation = useCreateCustomFuel();
     const updateMutation = useUpdateCustomFuel();
 
-    // If source changes to non-IPCC (e.g. DEFRA), automatically turn off custom fuel mode
+    // Sync useCustomFuel if selectedCustomFuelId prop changes externally
     useEffect(() => {
-        if (currentSource && !currentSource.standard.toUpperCase().includes("IPCC")) {
-            if (useCustomFuel || selectedCustomFuelId) {
-                setUseCustomFuel(false);
-                onCustomFuelSelect("");
-            }
+        if (selectedCustomFuelId) {
+            setUseCustomFuel(true);
         }
-    }, [currentSource, useCustomFuel, selectedCustomFuelId, onCustomFuelSelect]);
+    }, [selectedCustomFuelId]);
 
     // When custom fuels list loads or selectedCustomFuelId changes, populate form if in view_edit mode
     useEffect(() => {
         if (selectedCustomFuelId && customFuelsQuery.data) {
-            const found = customFuelsQuery.data.find((f) => f.id === selectedCustomFuelId);
+            const found = customFuelsQuery.data.find((f) => String(f.id) === String(selectedCustomFuelId));
             if (found) {
                 populateCustomFuelForm(found);
                 setCustomMode("view_edit");
@@ -166,7 +160,7 @@ export function CustomFuelSection({
 
         setCustomForm({
             name: cf.name || "",
-            category_id: cf.category_id || "",
+            category_id: cf.category_id ? String(cf.category_id) : "",
             description: cf.description || "",
             gcv: fp.gcv != null ? String(fp.gcv) : "",
             ncv: fp.ncv != null ? String(fp.ncv) : "",
@@ -209,10 +203,15 @@ export function CustomFuelSection({
             return;
         }
         setUseCustomFuel(true);
-        const cf = customFuelsQuery.data?.find((item) => item.id === cfId);
+        const cf = customFuelsQuery.data?.find((item) => String(item.id) === String(cfId));
         if (cf) {
-            onCustomFuelSelect(cf.id, cf.default_fuel_id);
+            onCustomFuelSelect(String(cf.id), cf.default_fuel_id ? String(cf.default_fuel_id) : undefined);
             populateCustomFuelForm(cf);
+            setCustomMode("view_edit");
+            setIsEditing(false);
+            setHasFormChangedSinceSave(false);
+        } else {
+            onCustomFuelSelect(String(cfId));
             setCustomMode("view_edit");
             setIsEditing(false);
             setHasFormChangedSinceSave(false);
@@ -283,7 +282,7 @@ export function CustomFuelSection({
 
             const payload: CreateCustomFuelPayload = {
                 name: customForm.name.trim(),
-                source_id: sourceId,
+                source_id: sourceId || ipccSourceId || "",
                 category_id: customForm.category_id,
                 description: customForm.description.trim() || undefined,
                 fuel_properties: {
@@ -312,21 +311,23 @@ export function CustomFuelSection({
 
             if (customMode === "view_edit" && selectedCustomFuelId) {
                 const res = await updateMutation.mutateAsync({
-                    customFuelId: selectedCustomFuelId,
+                    customFuelId: String(selectedCustomFuelId),
                     payload,
                 });
-                savedId = res.data?.id || selectedCustomFuelId;
-                defaultFuelId = res.data?.default_fuel_id || selectedCustomFuel?.default_fuel_id || "";
+                const resData = (res as any)?.data?.data ?? (res as any)?.data ?? res;
+                savedId = String(resData?.id || (res as any)?.id || selectedCustomFuelId);
+                defaultFuelId = resData?.default_fuel_id ? String(resData.default_fuel_id) : (selectedCustomFuel?.default_fuel_id ? String(selectedCustomFuel.default_fuel_id) : "");
             } else {
                 const res = await createMutation.mutateAsync(payload);
-                savedId = res.data?.id || "";
-                defaultFuelId = res.data?.default_fuel_id || "";
+                const resData = (res as any)?.data?.data ?? (res as any)?.data ?? res;
+                savedId = String(resData?.id || (res as any)?.id || "");
+                defaultFuelId = resData?.default_fuel_id ? String(resData.default_fuel_id) : "";
             }
 
-            // Refresh custom fuels and select new/updated item
+            // Refresh custom fuels list
             await customFuelsQuery.refetch();
             if (savedId) {
-                onCustomFuelSelect(savedId, defaultFuelId);
+                onCustomFuelSelect(savedId, defaultFuelId || undefined);
             }
 
             // UI behavior after success
@@ -350,6 +351,15 @@ export function CustomFuelSection({
         isUploadingFile ||
         (!hasFormChangedSinceSave && customMode === "view_edit");
 
+    const customFuelCategoryOptions = (
+        ipccFuelCategoriesQuery.data && ipccFuelCategoriesQuery.data.length > 0
+            ? ipccFuelCategoriesQuery.data
+            : fuelCategoriesQuery.data || []
+    ).map((c: { id: string | number; name: string }) => ({
+        label: c.name,
+        value: String(c.id),
+    }));
+
     return (
         <section className="bg-white rounded-xl border border-outline-variant relative overflow-hidden transition-all">
             {/* Header */}
@@ -361,41 +371,37 @@ export function CustomFuelSection({
                     <div>
                         <h2 className="text-headline-sm font-semibold text-primary">Fuel Details</h2>
                         <p className="text-xs text-on-surface-variant">
-                            {isIpccSource
-                                ? "Choose standard fuel type or configure a custom fuel blend."
-                                : "Choose standard fuel type."}
+                            Choose standard fuel type or configure a custom fuel blend.
                         </p>
                     </div>
                 </div>
 
-                {/* Workflow mode switches - Only displayed if Emission Standard is IPCC */}
-                {isIpccSource && (
-                    <div className="flex items-center gap-2">
-                        <button
-                            type="button"
-                            onClick={() => handleToggleCustomFuelMode(false)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                                !useCustomFuel
-                                    ? "bg-primary text-on-primary shadow-sm"
-                                    : "bg-white border border-outline-variant text-on-surface hover:bg-surface-container-low"
-                            }`}
-                        >
-                            Standard Fuel
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => handleToggleCustomFuelMode(true)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
-                                useCustomFuel
-                                    ? "bg-primary text-on-primary shadow-sm"
-                                    : "bg-white border border-outline-variant text-primary hover:bg-surface-container-low"
-                            }`}
-                        >
-                            <MaterialIcon name="add_circle" size="xs" />
-                            Custom Fuel
-                        </button>
-                    </div>
-                )}
+                {/* Workflow mode switches */}
+                <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => handleToggleCustomFuelMode(false)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                            !useCustomFuel
+                                ? "bg-primary text-on-primary shadow-sm"
+                                : "bg-white border border-outline-variant text-on-surface hover:bg-surface-container-low"
+                        }`}
+                    >
+                        Standard Fuel
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleToggleCustomFuelMode(true)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
+                            useCustomFuel
+                                ? "bg-primary text-on-primary shadow-sm"
+                                : "bg-white border border-outline-variant text-primary hover:bg-surface-container-low"
+                        }`}
+                    >
+                        <MaterialIcon name="add_circle" size="xs" />
+                        Custom Fuel
+                    </button>
+                </div>
             </div>
 
             {/* Card Content Body */}
@@ -415,7 +421,7 @@ export function CustomFuelSection({
                     </div>
                 )}
 
-                {!isIpccSource || !useCustomFuel ? (
+                {!useCustomFuel ? (
                     /* Standard Fuel Selection Mode */
                     <div className="grid gap-4 lg:grid-cols-2">
                         <div id="form-field-fuelCategory">
@@ -515,12 +521,12 @@ export function CustomFuelSection({
                             </label>
                             <CustomSelect
                                 options={
-                                     unitsQuery.data?.map((u: { id: string; name: string }) => ({
-                                         label: u.name,
+                                     unitsQuery.data?.map((u: { id: string | number; name: string; symbol?: string }) => ({
+                                         label: u.symbol ? `${u.name} (${u.symbol})` : u.name,
                                          value: String(u.id),
                                      })) || []
                                 }
-                                value={unit}
+                                value={unit ? String(unit) : ""}
                                 onChange={(val) => onFieldChange("unit", val)}
                                 error={Boolean(errors.unit)}
                                 placeholder={
@@ -565,10 +571,10 @@ export function CustomFuelSection({
                                             { label: "+ Add New Custom Fuel", value: "" },
                                             ...(customFuelsQuery.data?.map((cf) => ({
                                                 label: `${cf.name} (${cf.fuel_properties?.lab_report ? "Lab Verified" : "Custom"})`,
-                                                value: cf.id,
+                                                value: String(cf.id),
                                             })) || []),
                                         ]}
-                                        value={selectedCustomFuelId}
+                                        value={selectedCustomFuelId ? String(selectedCustomFuelId) : ""}
                                         onChange={handleSelectExistingCustomFuel}
                                         placeholder={
                                             customFuelsQuery.isLoading
@@ -594,6 +600,13 @@ export function CustomFuelSection({
                                 )}
                             </div>
                         </div>
+
+                        {errors.fuelType && !selectedCustomFuelId && (
+                            <div id="form-field-fuelType" className="p-3 rounded-lg bg-amber-50 text-amber-900 text-xs border border-amber-300 flex items-center gap-2">
+                                <MaterialIcon name="info" size="xs" className="text-amber-700 shrink-0" />
+                                <span>{errors.fuelType}</span>
+                            </div>
+                        )}
 
                         {customFormErrors.general && (
                             <div className="p-3 rounded-lg bg-error-container text-on-error-container text-xs border border-error/30">
@@ -627,18 +640,13 @@ export function CustomFuelSection({
                                         Fuel Category <span className="text-error">*</span>
                                     </label>
                                     <CustomSelect
-                                        options={
-                                            ipccFuelCategoriesQuery.data?.map((c) => ({
-                                                label: c.name,
-                                                value: String(c.id),
-                                            })) || []
-                                        }
+                                        options={customFuelCategoryOptions}
                                         value={customForm.category_id}
                                         onChange={(val) => handleCustomFormChange("category_id", val)}
-                                        isDisabled={!isEditing || ipccFuelCategoriesQuery.isLoading}
+                                        isDisabled={!isEditing || (ipccFuelCategoriesQuery.isLoading && fuelCategoriesQuery.isLoading)}
                                         error={Boolean(customFormErrors.category_id)}
                                         placeholder="Select fuel category..."
-                                        isLoading={ipccFuelCategoriesQuery.isLoading}
+                                        isLoading={ipccFuelCategoriesQuery.isLoading || fuelCategoriesQuery.isLoading}
                                     />
                                     {customFormErrors.category_id && (
                                         <p className="mt-1 text-xs text-error">{customFormErrors.category_id}</p>
@@ -863,7 +871,7 @@ export function CustomFuelSection({
                                 </div>
                             </div>
 
-                            {/* Additional Properties & Lab Report */}
+                            {/* Additional Properties */}
                             <div className="grid gap-4 lg:grid-cols-3">
                                 <div>
                                     <label className="block font-label-md text-xs text-on-surface-variant mb-1">
@@ -916,7 +924,12 @@ export function CustomFuelSection({
                             </div>
 
                             {/* Custom Fuel Primary Action Button */}
-                            <div className="flex items-center justify-end gap-3 pt-2">
+                            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                                {!selectedCustomFuelId ? (
+                                    <p className="text-xs text-on-surface-variant italic">
+                                        💡 Fill in properties above and click &apos;Add&apos; to attach this custom fuel to your activity.
+                                    </p>
+                                ) : <div />}
                                 <button
                                     type="button"
                                     onClick={handleSaveCustomFuel}
@@ -936,8 +949,8 @@ export function CustomFuelSection({
                                         <>
                                             <MaterialIcon name="save" size="xs" />
                                             {customMode === "view_edit" && selectedCustomFuelId
-                                                ? "Update"
-                                                : "Add"}
+                                                ? "Update Custom Fuel"
+                                                : "Add Custom Fuel"}
                                         </>
                                     )}
                                 </button>
@@ -984,12 +997,12 @@ export function CustomFuelSection({
                                 </label>
                                 <CustomSelect
                                     options={
-                                         unitsQuery.data?.map((u: { id: string; name: string }) => ({
-                                             label: u.name,
+                                         unitsQuery.data?.map((u: { id: string | number; name: string; symbol?: string }) => ({
+                                             label: u.symbol ? `${u.name} (${u.symbol})` : u.name,
                                              value: String(u.id),
                                          })) || []
                                     }
-                                    value={unit}
+                                    value={unit ? String(unit) : ""}
                                     onChange={(val) => onFieldChange("unit", val)}
                                     error={Boolean(errors.unit)}
                                     placeholder={

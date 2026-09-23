@@ -670,10 +670,10 @@ export default function LogElectricityActivityPage() {
                     );
 
                     if (tonneUnit) {
-                        if (kgUnit && fuelForm.unit === kgUnit.id && finalQuantity !== null) {
+                        if (kgUnit && String(fuelForm.unit) === String(kgUnit.id) && finalQuantity !== null) {
                             finalQuantity = finalQuantity / 1000;
                         }
-                        finalUnitId = tonneUnit.id;
+                        finalUnitId = String(tonneUnit.id);
                     }
                 }
 

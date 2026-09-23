@@ -269,11 +269,11 @@ export default function LogFuelActivityPage() {
 
                 if (tonneUnit) {
                     // If user selected Kilograms, convert quantity from kg into tonnes
-                    if (kgUnit && form.unit === kgUnit.id && finalQuantity !== null) {
+                    if (kgUnit && String(form.unit) === String(kgUnit.id) && finalQuantity !== null) {
                         finalQuantity = finalQuantity / 1000;
                     }
                     // Always send the Tonne unit ID for custom fuel
-                    finalUnitId = tonneUnit.id;
+                    finalUnitId = String(tonneUnit.id);
                 }
             }
 

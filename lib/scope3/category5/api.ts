@@ -6,6 +6,7 @@ import {
     Category5WasteActivityEntry,
     CreateCategory5WastePayload,
     DEFAULT_WASTE_TYPES,
+    normalizeWasteTreatmentMethods,
     TREATMENT_METHOD_LABELS,
     UpdateCategory5WastePayload,
     WasteType,
@@ -30,13 +31,12 @@ type RawWasteTypeItem = Partial<WasteType> & {
 
 export function mapCategory5WasteItem(dto: Category5WasteActivityDto): Category5WasteActivityEntry {
     const tonnes = Number(dto.waste_generated_tonnes || 0);
-    const appliedKg = dto.applied_kg_co2e_per_tonne != null ? Number(dto.applied_kg_co2e_per_tonne) : 925.34348;
+    const method = dto.treatment_method || "landfill";
+    const methodLabel = dto.treatment_method_label || TREATMENT_METHOD_LABELS[method] || "Landfill Disposal";
+    const appliedKg = dto.applied_kg_co2e_per_tonne != null ? Number(dto.applied_kg_co2e_per_tonne) : 578.4;
 
     const calcKg = dto.calculated_kg_co2e != null ? Number(dto.calculated_kg_co2e) : tonnes * appliedKg;
     const calcT = dto.calculated_t_co2e != null ? Number(dto.calculated_t_co2e) : calcKg / 1000;
-
-    const method = dto.treatment_method || "landfill";
-    const methodLabel = dto.treatment_method_label || TREATMENT_METHOD_LABELS[method] || "Landfill Disposal";
 
     const periodId = dto.reporting_period_id || null;
     const periodName = dto.reporting_period_name || dto.reporting_period || "FY 2024-25";
@@ -51,8 +51,8 @@ export function mapCategory5WasteItem(dto: Category5WasteActivityDto): Category5
         reportingPeriodName: periodName,
         reportingPeriod: periodName,
         wasteTypeId: dto.waste_type_id,
-        wasteTypeName: dto.waste_type_name || "Wood & Construction Timber",
-        categoryName: dto.category_name || "Construction",
+        wasteTypeName: dto.waste_type_name || "Operational Waste Material",
+        categoryName: dto.category_name || "General Refuse",
         treatmentMethod: method,
         treatmentMethodLabel: methodLabel,
         activityDate: dto.activity_date,
@@ -81,13 +81,25 @@ export async function getWasteTypes(category?: string): Promise<WasteType[]> {
             : (dataPayload as { items?: RawWasteTypeItem[] })?.items ?? [];
 
         if (Array.isArray(rawItems) && rawItems.length > 0) {
-            return rawItems.map((item: RawWasteTypeItem) => ({
-                waste_type_id: item.waste_type_id || item.id || item.waste_id || "",
-                waste_type_name: item.waste_type_name || item.name || item.title || item.waste_name || "Unknown Waste Material",
-                category_name: item.category_name || item.category || item.category_title || "General Waste",
-                unit_symbol: item.unit_symbol || item.unit || "tonnes",
-                treatment_methods: (item.treatment_methods || item.treatment_factors || item.methods || []) as WasteType["treatment_methods"],
-            }));
+            return rawItems.map((item: RawWasteTypeItem) => {
+                const id = item.waste_type_id || item.id || item.waste_id || "";
+                const name = item.waste_type_name || item.name || item.title || item.waste_name || "Unknown Waste Material";
+                const cat = item.category_name || item.category || item.category_title || "General Waste";
+                const unit = item.unit_symbol || item.unit || "tonnes";
+                const methods = normalizeWasteTreatmentMethods(
+                    item.treatment_methods || item.treatment_factors || item.methods,
+                    cat,
+                    name,
+                );
+
+                return {
+                    waste_type_id: id,
+                    waste_type_name: name,
+                    category_name: cat,
+                    unit_symbol: unit,
+                    treatment_methods: methods,
+                };
+            });
         }
     } catch {
         // Fallback demo waste types
@@ -105,12 +117,22 @@ export async function getWasteTypeDetail(wasteTypeId: string): Promise<WasteType
         );
         const raw = response.data.data as RawWasteTypeItem | undefined;
         if (raw) {
+            const id = raw.waste_type_id || raw.id || wasteTypeId;
+            const name = raw.waste_type_name || raw.name || raw.title || raw.waste_name || "Waste Material";
+            const cat = raw.category_name || raw.category || raw.category_title || "General Waste";
+            const unit = raw.unit_symbol || raw.unit || "tonnes";
+            const methods = normalizeWasteTreatmentMethods(
+                raw.treatment_methods || raw.treatment_factors || raw.methods,
+                cat,
+                name,
+            );
+
             return {
-                waste_type_id: raw.waste_type_id || raw.id || wasteTypeId,
-                waste_type_name: raw.waste_type_name || raw.name || raw.title || "Waste Material",
-                category_name: raw.category_name || raw.category || "General Waste",
-                unit_symbol: raw.unit_symbol || raw.unit || "tonnes",
-                treatment_methods: (raw.treatment_methods || raw.treatment_factors || raw.methods || []) as WasteType["treatment_methods"],
+                waste_type_id: id,
+                waste_type_name: name,
+                category_name: cat,
+                unit_symbol: unit,
+                treatment_methods: methods,
             };
         }
     } catch {

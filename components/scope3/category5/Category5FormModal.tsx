@@ -13,12 +13,13 @@ import {
     AmendCategory5WastePayload,
     Category5WasteActivityEntry,
     CreateCategory5WastePayload,
+    normalizeWasteTreatmentMethods,
     TREATMENT_METHOD_LABELS,
     WasteTreatmentFactorDetail,
     WasteTreatmentMethodEnum,
     WasteType,
 } from "@/lib/scope3/category5/types";
-import { useWasteTypes } from "@/lib/scope3/category5/hooks";
+import { useWasteTypeDetail, useWasteTypes } from "@/lib/scope3/category5/hooks";
 
 type RawWasteTypeItem = Partial<WasteType> & {
     id?: string;
@@ -28,6 +29,7 @@ type RawWasteTypeItem = Partial<WasteType> & {
     waste_name?: string;
     category?: string;
     category_title?: string;
+    treatment_factors?: unknown;
     methods?: unknown;
 };
 
@@ -121,58 +123,30 @@ export function Category5FormModal({
         [wasteTypes, activeWasteTypeId],
     );
 
+    const wasteTypeDetailQuery = useWasteTypeDetail(activeWasteTypeId);
+    const wasteTypeDetail = wasteTypeDetailQuery.data;
+
     // Extract supported treatment methods for the selected waste type
-    const supportedMethods = useMemo(() => {
-        if (!selectedWasteType) {
-            return [
-                {
-                    method: "landfill" as WasteTreatmentMethodEnum,
-                    method_label: "Landfill Disposal",
-                    kg_co2e: 925.34348,
-                    t_co2e: 0.92534348,
-                },
-            ];
-        }
+    const supportedMethods: WasteTreatmentFactorDetail[] = useMemo(() => {
+        const item = wasteTypeDetail || selectedWasteType;
+        const raw = item as RawWasteTypeItem | undefined;
+        const catName = raw?.category_name || raw?.category || raw?.category_title || "";
+        const typeName = raw?.waste_type_name || raw?.name || raw?.title || raw?.waste_name || "";
+        const methodsRaw = raw?.treatment_methods || raw?.treatment_factors || raw?.methods;
 
-        const rawSelected = selectedWasteType as RawWasteTypeItem;
-        const methodsRaw = rawSelected.treatment_methods || rawSelected.methods;
-        if (!methodsRaw) {
-            return [
-                {
-                    method: "landfill" as WasteTreatmentMethodEnum,
-                    method_label: "Landfill Disposal",
-                    kg_co2e: 925.34348,
-                    t_co2e: 0.92534348,
-                },
-            ];
-        }
-
-        if (Array.isArray(methodsRaw)) {
-            return methodsRaw as WasteTreatmentFactorDetail[];
-        }
-
-        const list: WasteTreatmentFactorDetail[] = [];
-        Object.entries(methodsRaw as Record<string, unknown>).forEach(([key, val]) => {
-            const methodKey = key as WasteTreatmentMethodEnum;
-            const kg = typeof val === "number" ? val : Number((val as { kg_co2e?: number })?.kg_co2e || 0);
-            const t = kg / 1000;
-            list.push({
-                method: methodKey,
-                method_label: TREATMENT_METHOD_LABELS[methodKey] || key,
-                kg_co2e: kg,
-                t_co2e: t,
-            });
-        });
-        return list;
-    }, [selectedWasteType]);
+        return normalizeWasteTreatmentMethods(methodsRaw, catName, typeName);
+    }, [wasteTypeDetail, selectedWasteType]);
 
     const [treatmentMethod, setTreatmentMethod] = useState<WasteTreatmentMethodEnum>(
         () => (isEditOrAmend ? initialEntry?.treatmentMethod || "landfill" : "landfill"),
     );
 
-    const activeTreatmentMethod = treatmentMethod && supportedMethods.some((m) => m.method === treatmentMethod)
-        ? treatmentMethod
-        : (supportedMethods[0]?.method ?? "landfill");
+    const activeTreatmentMethod = useMemo(() => {
+        if (treatmentMethod && supportedMethods.some((m) => m.method === treatmentMethod)) {
+            return treatmentMethod;
+        }
+        return supportedMethods[0]?.method ?? "landfill";
+    }, [treatmentMethod, supportedMethods]);
 
     const selectedMethodDetail = useMemo(
         () => supportedMethods.find((m) => m.method === activeTreatmentMethod) ?? supportedMethods[0],
@@ -223,8 +197,8 @@ export function Category5FormModal({
     );
 
     const numTonnes = parseFloat(wasteTonnes) || 0;
-    const kgPerTonne = Number(selectedMethodDetail?.kg_co2e ?? 925.34348);
-    const validKgPerTonne = isNaN(kgPerTonne) ? 925.34348 : kgPerTonne;
+    const kgPerTonne = Number(selectedMethodDetail?.kg_co2e ?? 578.4);
+    const validKgPerTonne = isNaN(kgPerTonne) ? 578.4 : kgPerTonne;
     const estimatedKgCo2e = numTonnes > 0 ? numTonnes * validKgPerTonne : 0;
     const estimatedTCo2e = estimatedKgCo2e / 1000;
 

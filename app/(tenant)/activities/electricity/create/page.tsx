@@ -4,9 +4,10 @@ import type { FormEvent } from "react";
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { format, isAfter } from "date-fns";
+import { format, isAfter, parse, isValid, startOfDay } from "date-fns";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Calendar } from "@/components/ui/calendar";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { useFacilities } from "@/lib/facility/hooks";
@@ -75,11 +76,6 @@ const marketInstrumentTypeOptions: { label: string; value: MarketInstrumentType;
         value: "green_tariff",
         description: "Utility-offered certified green energy rider or tariff program.",
     },
-    {
-        label: "Supplier-Specific Emission Factor",
-        value: "supplier_specific",
-        description: "Certified utility supplier emission rate published under contract.",
-    },
 ];
 
 const emissionFactorUnitOptions = [
@@ -136,12 +132,12 @@ export default function LogElectricityActivityPage() {
     const [marketForm, setMarketForm] = useState({
         contractedElectricityKwh: "",
         contractedElectricityUnit: "kwh",
-        contractedEmissionFactor: "0.0",
+        contractedEmissionFactor: "",
         contractedEmissionFactorUnit: "tco2_per_mwh",
         uncoveredElectricityKwh: "",
         uncoveredElectricityUnit: "kwh",
         // Market Certificate Audit Trail (Optional)
-        showCertificateDetails: false,
+        showCertificateDetails: true,
         certSerialNumber: "",
         certDateAcquired: "",
         certExpirationDate: "",
@@ -192,7 +188,7 @@ export default function LogElectricityActivityPage() {
 
     const reportingPeriodsQuery = useReportingPeriods();
     const facilitiesQuery = useFacilities();
-    const emissionSourcesQuery = useEmissionSources();
+    const emissionSourcesQuery = useEmissionSources("electricity");
     const fuelEmissionSourcesQuery = useEmissionSources("fuel");
     const customFuelUnitsQuery = useCustomFuelUnits(Boolean(fuelForm.customFuelId));
 
@@ -215,6 +211,99 @@ export default function LogElectricityActivityPage() {
             setFuelForm((current) => ({ ...current, source: String(fuelEmissionSourcesQuery.data[0].id) }));
         }
     }, [fuelForm.source, fuelEmissionSourcesQuery.data]);
+
+    const certificateDateStatus = useMemo(() => {
+        const isRenewable = ["renewable_ppa", "rec", "irec", "green_tariff"].includes(form.marketInstrumentType) || marketForm.certIsRenewable;
+        if (!form.hasMarketInstrument || !isRenewable) {
+            return { isValid: true, isExpired: false, message: "" };
+        }
+
+        if (!marketForm.certDateAcquired && !marketForm.certExpirationDate) {
+            return {
+                isValid: false,
+                isExpired: false,
+                message: "Certificate dates are required to verify 0.0 contractual factor.",
+            };
+        }
+
+        if (!marketForm.certDateAcquired || !marketForm.certExpirationDate) {
+            return {
+                isValid: false,
+                isExpired: false,
+                message: "Both Date Acquired and Expiration Date are required.",
+            };
+        }
+
+        const acquired = parse(marketForm.certDateAcquired, "yyyy-MM-dd", new Date());
+        const expiration = parse(marketForm.certExpirationDate, "yyyy-MM-dd", new Date());
+
+        if (!isValid(acquired) || !isValid(expiration)) {
+            return { isValid: false, isExpired: false, message: "Invalid certificate date format." };
+        }
+
+        if (expiration < acquired) {
+            return {
+                isValid: false,
+                isExpired: true,
+                message: "Certificate expiration date cannot be earlier than acquisition date.",
+            };
+        }
+
+        const today = startOfDay(new Date());
+        if (expiration < today) {
+            return {
+                isValid: false,
+                isExpired: true,
+                message: `Certificate expired on ${format(expiration, "PPP")}. You need to renew your certificate.`,
+            };
+        }
+
+        if (form.activityEndDate) {
+            const activityEnd = parse(form.activityEndDate, "yyyy-MM-dd", new Date());
+            if (isValid(activityEnd) && expiration < activityEnd) {
+                return {
+                    isValid: false,
+                    isExpired: true,
+                    message: `Certificate expired on ${format(expiration, "PPP")}, which is prior to the activity end date (${format(activityEnd, "PPP")}). You need to renew your certificate.`,
+                };
+            }
+        } else if (form.activityStartDate) {
+            const activityStart = parse(form.activityStartDate, "yyyy-MM-dd", new Date());
+            if (isValid(activityStart) && expiration < activityStart) {
+                return {
+                    isValid: false,
+                    isExpired: true,
+                    message: `Certificate expired on ${format(expiration, "PPP")}, which is prior to the activity start date (${format(activityStart, "PPP")}). You need to renew your certificate.`,
+                };
+            }
+        }
+
+        return { isValid: true, isExpired: false, message: "" };
+    }, [form.hasMarketInstrument, form.marketInstrumentType, form.activityStartDate, form.activityEndDate, marketForm.certDateAcquired, marketForm.certExpirationDate, marketForm.certIsRenewable]);
+
+    const isCertificateDateRangeValid = certificateDateStatus.isValid;
+
+    useEffect(() => {
+        if (form.electricityActivityType === "grid_import" && form.hasMarketInstrument) {
+            const isRenewable = ["renewable_ppa", "rec", "irec", "green_tariff"].includes(form.marketInstrumentType) || marketForm.certIsRenewable;
+
+            if (isCertificateDateRangeValid && isRenewable) {
+                setMarketForm((current) => {
+                    if (current.contractedEmissionFactor !== "0.0") {
+                        return { ...current, contractedEmissionFactor: "0.0" };
+                    }
+                    return current;
+                });
+            } else {
+                setMarketForm((current) => {
+                    if (current.contractedEmissionFactor === "0.0") {
+                        return { ...current, contractedEmissionFactor: "" };
+                    }
+                    return current;
+                });
+            }
+        }
+    }, [isCertificateDateRangeValid, form.electricityActivityType, form.hasMarketInstrument, form.marketInstrumentType, marketForm.certIsRenewable]);
 
     function handleChange(field: string, value: string | boolean) {
         setForm((current) => ({ ...current, [field]: value }));
@@ -251,11 +340,11 @@ export default function LogElectricityActivityPage() {
         setForm((current) => ({ ...current, marketInstrumentType: value }));
         setErrors((current) => ({ ...current, marketInstrumentType: "" }));
 
-        const isZeroEf = ["renewable_ppa", "rec", "irec", "green_tariff"].includes(value);
-        if (isZeroEf) {
+        const isRenewable = ["renewable_ppa", "rec", "irec", "green_tariff"].includes(value);
+        if (isRenewable && isCertificateDateRangeValid) {
             setMarketForm((current) => ({ ...current, contractedEmissionFactor: "0.0" }));
         } else if (marketForm.contractedEmissionFactor === "0.0") {
-            setMarketForm((current) => ({ ...current, contractedEmissionFactor: "0.71" }));
+            setMarketForm((current) => ({ ...current, contractedEmissionFactor: "" }));
         }
     }
 
@@ -346,7 +435,7 @@ export default function LogElectricityActivityPage() {
                 : (Number(marketForm.uncoveredElectricityKwh) || 0))
             : Math.max(0, totalKwh - contractedKwh);
 
-        const isZeroEf = ["renewable_ppa", "rec", "irec", "green_tariff"].includes(form.marketInstrumentType);
+        const isZeroEf = ["renewable_ppa", "rec", "irec", "green_tariff"].includes(form.marketInstrumentType) && isCertificateDateRangeValid;
         const contractedEf = isZeroEf ? 0 : (Number(marketForm.contractedEmissionFactor) || 0);
 
         let contractedEfInMwh = contractedEf;
@@ -420,8 +509,20 @@ export default function LogElectricityActivityPage() {
                 nextErrors.contractedElectricityKwh = "Contracted electricity amount is required when market instrument is active.";
             }
 
-            const isZeroEf = ["renewable_ppa", "rec", "irec", "green_tariff"].includes(form.marketInstrumentType);
-            if (!isZeroEf) {
+            const isRenewable = ["renewable_ppa", "rec", "irec", "green_tariff"].includes(form.marketInstrumentType);
+            if (isRenewable) {
+                if (!isCertificateDateRangeValid) {
+                    if (!marketForm.certDateAcquired) {
+                        nextErrors.certDateAcquired = "Date acquired is required for renewable validation.";
+                    }
+                    if (!marketForm.certExpirationDate) {
+                        nextErrors.certExpirationDate = "Expiration date is required for renewable validation.";
+                    }
+                    if (marketForm.certDateAcquired && marketForm.certExpirationDate && !isCertificateDateRangeValid) {
+                        nextErrors.certExpirationDate = "Expiration date must be on or after acquired date.";
+                    }
+                }
+            } else {
                 if (marketForm.contractedEmissionFactor === "" || isNaN(Number(marketForm.contractedEmissionFactor))) {
                     nextErrors.contractedEmissionFactor = "Contracted emission factor is required for conventional contracts.";
                 }
@@ -506,7 +607,7 @@ export default function LogElectricityActivityPage() {
                         : Number(marketForm.uncoveredElectricityKwh))
                     : Math.max(0, totalKwh - contractedKwh);
 
-                const isZeroEf = ["renewable_ppa", "rec", "irec", "green_tariff"].includes(form.marketInstrumentType);
+                const isZeroEf = ["renewable_ppa", "rec", "irec", "green_tariff"].includes(form.marketInstrumentType) && isCertificateDateRangeValid;
                 const contractedEf = isZeroEf ? 0.0 : Number(marketForm.contractedEmissionFactor || 0);
 
                 payload.market_allocation = {
@@ -891,7 +992,7 @@ export default function LogElectricityActivityPage() {
                         {isGridImport && (
                             <div id="form-field-source">
                                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                    Location Grid Factor Dataset (Optional)
+                                    Location Grid Factor Dataset
                                 </label>
                                 <CustomSelect
                                     options={
@@ -958,6 +1059,137 @@ export default function LogElectricityActivityPage() {
                                         )}
                                     </div>
 
+                                    {/* Certificate & Registry Audit Trail (Compact & under Contractual Instrument Type) */}
+                                    <div className="sm:col-span-2 rounded-xl border border-outline-variant bg-surface-container-lowest p-3.5 transition-all">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleMarketChange("showCertificateDetails", !marketForm.showCertificateDetails)}
+                                            className="flex items-center justify-between w-full text-left font-medium text-primary hover:text-secondary transition-colors cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-2 text-label-md">
+                                                <MaterialIcon name="card_membership" size="sm" className="text-secondary" />
+                                                <span>Certificate & Registry Audit Trail (REC / I-REC Optional)</span>
+                                                {isCertificateDateRangeValid ? (
+                                                    <span className="inline-flex items-center gap-1 rounded-full bg-secondary/15 px-2 py-0.5 text-[10px] font-semibold text-secondary">
+                                                        <MaterialIcon name="verified" size="xs" />
+                                                        0.0 EF Verified
+                                                    </span>
+                                                ) : certificateDateStatus.isExpired ? (
+                                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                                                        <MaterialIcon name="warning" size="xs" />
+                                                        Expired / Needs Renewal
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[11px] text-on-surface-variant font-normal">
+                                                        (Set valid acquired & expiration dates for 0.0 factor)
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <MaterialIcon
+                                                name={marketForm.showCertificateDetails ? "expand_less" : "expand_more"}
+                                                size="sm"
+                                                className="text-on-surface-variant"
+                                            />
+                                        </button>
+
+                                        {marketForm.showCertificateDetails && (
+                                            <div className="mt-3 grid gap-3 sm:grid-cols-2 pt-3 border-t border-outline-variant">
+                                                <div id="form-field-certSerialNumber">
+                                                    <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
+                                                        Certificate Serial Number
+                                                    </label>
+                                                    <Input
+                                                        type="text"
+                                                        value={marketForm.certSerialNumber}
+                                                        onChange={(e) => handleMarketChange("certSerialNumber", e.target.value)}
+                                                        className={formFieldClass()}
+                                                        placeholder="e.g. REC-2026-887941-US"
+                                                    />
+                                                </div>
+
+                                                <div id="form-field-certReference">
+                                                    <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
+                                                        Public Reference / Registry ID
+                                                    </label>
+                                                    <Input
+                                                        type="text"
+                                                        value={marketForm.certReference}
+                                                        onChange={(e) => handleMarketChange("certReference", e.target.value)}
+                                                        className={formFieldClass()}
+                                                        placeholder="e.g. M-RECS Registry Ref #4092"
+                                                    />
+                                                </div>
+
+                                                <div id="form-field-certDateAcquired">
+                                                    <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
+                                                        Date Acquired
+                                                    </label>
+                                                    <DatePicker
+                                                        value={marketForm.certDateAcquired}
+                                                        onChange={(dateStr) => {
+                                                            handleMarketChange("certDateAcquired", dateStr);
+                                                            if (errors.certDateAcquired) {
+                                                                setErrors((cur) => ({ ...cur, certDateAcquired: "" }));
+                                                            }
+                                                        }}
+                                                        placeholder="Select acquired date..."
+                                                        error={Boolean(errors.certDateAcquired)}
+                                                    />
+                                                    {errors.certDateAcquired && (
+                                                        <p className="mt-1 text-xs text-error">{errors.certDateAcquired}</p>
+                                                    )}
+                                                </div>
+
+                                                <div id="form-field-certExpirationDate">
+                                                    <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
+                                                        Expiration Date
+                                                    </label>
+                                                    <DatePicker
+                                                        value={marketForm.certExpirationDate}
+                                                        onChange={(dateStr) => {
+                                                            handleMarketChange("certExpirationDate", dateStr);
+                                                            if (errors.certExpirationDate) {
+                                                                setErrors((cur) => ({ ...cur, certExpirationDate: "" }));
+                                                            }
+                                                        }}
+                                                        placeholder="Select expiration date..."
+                                                        error={Boolean(errors.certExpirationDate)}
+                                                    />
+                                                    {errors.certExpirationDate && (
+                                                        <p className="mt-1 text-xs text-error">{errors.certExpirationDate}</p>
+                                                    )}
+                                                </div>
+
+                                                <div id="form-field-certQuantity">
+                                                    <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
+                                                        Certificate Quantity (MWh)
+                                                    </label>
+                                                    <Input
+                                                        type="number"
+                                                        step="0.01"
+                                                        value={marketForm.certQuantity}
+                                                        onChange={(e) => handleMarketChange("certQuantity", e.target.value)}
+                                                        className={formFieldClass()}
+                                                        placeholder="e.g. 50"
+                                                    />
+                                                </div>
+
+                                                <div className="flex items-center gap-2 pt-2 sm:pt-5">
+                                                    <input
+                                                        type="checkbox"
+                                                        id="certIsRenewable"
+                                                        checked={marketForm.certIsRenewable}
+                                                        onChange={(e) => handleMarketChange("certIsRenewable", e.target.checked)}
+                                                        className="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer"
+                                                    />
+                                                    <label htmlFor="certIsRenewable" className="text-xs sm:text-sm text-on-surface font-medium cursor-pointer">
+                                                        Certified Renewable Instrument
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
                                     {/* Contracted Quantity */}
                                     <div id="form-field-contractedElectricityKwh" className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant">
                                         <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
@@ -1021,6 +1253,22 @@ export default function LogElectricityActivityPage() {
                                                 className="w-[150px]"
                                             />
                                         </div>
+
+                                        {/* Notice / Warning below Contract Emission Factor */}
+                                        {certificateDateStatus.isExpired ? (
+                                            <div className="mt-2.5 flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 p-2.5 text-xs text-amber-900">
+                                                <MaterialIcon name="warning" size="xs" className="text-amber-600 mt-0.5 shrink-0" />
+                                                <div className="leading-tight">
+                                                    <span className="font-semibold text-amber-950">Certificate Expired: </span>
+                                                    {certificateDateStatus.message}
+                                                </div>
+                                            </div>
+                                        ) : !isCertificateDateRangeValid && ["renewable_ppa", "rec", "irec", "green_tariff"].includes(form.marketInstrumentType) ? (
+                                            <p className="mt-2 text-[11px] text-on-surface-variant">
+                                                Valid certificate acquisition & expiration dates covering the activity period are required to claim a 0.0 factor.
+                                            </p>
+                                        ) : null}
+
                                         {errors.contractedEmissionFactor && (
                                             <p className="mt-2 text-xs text-error">{errors.contractedEmissionFactor}</p>
                                         )}
@@ -1051,103 +1299,8 @@ export default function LogElectricityActivityPage() {
                                                 className="w-[110px]"
                                             />
                                         </div>
-                                        <p className="mt-1.5 text-[11px] text-on-surface-variant">
-                                            Any grid electricity volume not covered under the contract will be calculated at the standard grid factor.
-                                        </p>
+
                                     </div>
-                                </div>
-
-                                {/* Optional Certificate Audit Trail Collapsible */}
-                                <div className="border border-outline-variant rounded-xl p-4 bg-surface-container-lowest">
-                                    <button
-                                        type="button"
-                                        onClick={() => handleMarketChange("showCertificateDetails", !marketForm.showCertificateDetails)}
-                                        className="flex items-center justify-between w-full text-left font-semibold text-primary hover:text-secondary transition-colors">
-                                        <div className="flex items-center gap-2 text-body-md">
-                                            <MaterialIcon name="card_membership" size="sm" className="text-secondary" />
-                                            Certificate & Registry Audit Trail (REC / I-REC Optional)
-                                        </div>
-                                        <MaterialIcon
-                                            name={marketForm.showCertificateDetails ? "expand_less" : "expand_more"}
-                                            size="sm"
-                                        />
-                                    </button>
-
-                                    {marketForm.showCertificateDetails && (
-                                        <div className="mt-4 grid gap-4 sm:grid-cols-2 pt-3 border-t border-outline-variant">
-                                            <div>
-                                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                                    Certificate Serial Number
-                                                </label>
-                                                <Input
-                                                    type="text"
-                                                    value={marketForm.certSerialNumber}
-                                                    onChange={(e) => handleMarketChange("certSerialNumber", e.target.value)}
-                                                    className={formFieldClass()}
-                                                    placeholder="e.g. REC-2026-887941-US"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                                    Public Reference / Registry ID
-                                                </label>
-                                                <Input
-                                                    type="text"
-                                                    value={marketForm.certReference}
-                                                    onChange={(e) => handleMarketChange("certReference", e.target.value)}
-                                                    className={formFieldClass()}
-                                                    placeholder="e.g. M-RECS Registry Ref #4092"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                                    Date Acquired
-                                                </label>
-                                                <Input
-                                                    type="date"
-                                                    value={marketForm.certDateAcquired}
-                                                    onChange={(e) => handleMarketChange("certDateAcquired", e.target.value)}
-                                                    className={formFieldClass()}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                                    Expiration Date
-                                                </label>
-                                                <Input
-                                                    type="date"
-                                                    value={marketForm.certExpirationDate}
-                                                    onChange={(e) => handleMarketChange("certExpirationDate", e.target.value)}
-                                                    className={formFieldClass()}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                                                    Certificate Quantity (MWh)
-                                                </label>
-                                                <Input
-                                                    type="number"
-                                                    step="0.01"
-                                                    value={marketForm.certQuantity}
-                                                    onChange={(e) => handleMarketChange("certQuantity", e.target.value)}
-                                                    className={formFieldClass()}
-                                                    placeholder="e.g. 50"
-                                                />
-                                            </div>
-                                            <div className="flex items-center gap-3 pt-6">
-                                                <input
-                                                    type="checkbox"
-                                                    id="certIsRenewable"
-                                                    checked={marketForm.certIsRenewable}
-                                                    onChange={(e) => handleMarketChange("certIsRenewable", e.target.checked)}
-                                                    className="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
-                                                />
-                                                <label htmlFor="certIsRenewable" className="text-sm text-on-surface font-medium cursor-pointer">
-                                                    Certified Renewable Instrument
-                                                </label>
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
 
                                 {/* Optional Purchased Thermal Energy */}

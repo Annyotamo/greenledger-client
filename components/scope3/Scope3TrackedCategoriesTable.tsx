@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { SCOPE3_CATEGORIES, Scope3Category } from "@/lib/scope3/data";
+import { formatInrSpend, SCOPE3_CATEGORIES, Scope3Category } from "@/lib/scope3/data";
 import { cn } from "@/lib/utils/cn";
 
 export function Scope3TrackedCategoriesTable() {
@@ -114,7 +114,7 @@ export function Scope3TrackedCategoriesTable() {
                                 Data Assurance
                             </TableHead>
                             <TableHead className="text-right font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
-                                Mapped Spend / Base
+                                Mapped Spend (INR)
                             </TableHead>
                             <TableHead className="text-right font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
                                 Action
@@ -200,7 +200,7 @@ export function Scope3TrackedCategoriesTable() {
 
                                 {/* Mapped Spend */}
                                 <TableCell className="text-right font-mono text-xs text-primary font-bold">
-                                    ${(item.spendUsd / 1000000).toFixed(2)}M
+                                    {formatInrSpend(item.spendInr)}
                                 </TableCell>
 
                                 {/* Action link */}

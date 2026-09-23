@@ -25,7 +25,7 @@ export function Scope3Header() {
                     <div className="flex items-center gap-1.5">
                         <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 border border-emerald-200 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-800">
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                            GHG Protocol Standard
+                            SEBI BRSR & GHG Protocol
                         </span>
                         <span className="inline-flex items-center gap-1 rounded-md bg-surface-container-high border border-outline-variant/60 px-2 py-0.5 font-mono text-[10px] font-bold text-on-surface-variant">
                             FY 2025-26 Active

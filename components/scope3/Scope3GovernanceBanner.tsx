@@ -10,11 +10,11 @@ export function Scope3GovernanceBanner() {
                     <div className="flex items-center gap-2">
                         <MaterialIcon name="verified_user" size="sm" className="text-emerald-700 !text-[18px]" />
                         <h4 className="font-headline-sm text-[14px] font-bold text-primary">
-                            GHG Protocol Value Chain Protocol Compliance
+                            SEBI BRSR Core & GHG Protocol Scope 3 Compliance
                         </h4>
                     </div>
                     <p className="font-mono text-[11px] text-on-surface-variant max-w-2xl">
-                        Calculations follow the GHG Protocol Corporate Value Chain (Scope 3) Standard with hybrid DEFRA 2024, IPCC AR6, USEEIO, and PCAF Financed Emission attribution models.
+                        Calculations adhere to SEBI BRSR Core Value Chain Disclosures & GHG Protocol Corporate Value Chain Standard with Central Electricity Authority (CEA) Grid Factors and verified supplier data.
                     </p>
                 </div>
 

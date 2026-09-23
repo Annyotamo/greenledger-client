@@ -52,7 +52,6 @@ export function Scope3KpiCardsGrid() {
                         </div>
                         <div className="flex items-center justify-between text-[11px] font-mono text-on-surface-variant pt-1 border-t border-outline-variant/30">
                             <span>7 Categories Active (Cat 1–7)</span>
-                            <span className="text-emerald-700 font-bold">$28.86M Spend</span>
                         </div>
                     </div>
                 </Card>
@@ -84,7 +83,6 @@ export function Scope3KpiCardsGrid() {
                         </div>
                         <div className="flex items-center justify-between text-[11px] font-mono text-on-surface-variant pt-1 border-t border-outline-variant/30">
                             <span>2 Categories Active (Cat 9, 15)</span>
-                            <span className="text-blue-700 font-bold">PCAF & DEFRA</span>
                         </div>
                     </div>
                 </Card>
@@ -116,7 +114,6 @@ export function Scope3KpiCardsGrid() {
                         </div>
                         <div className="flex items-center justify-between text-[11px] font-mono text-on-surface-variant pt-1 border-t border-outline-variant/30">
                             <span>Purchased Goods & Services</span>
-                            <span className="text-amber-700 font-bold">53.9% of Scope 3</span>
                         </div>
                     </div>
                 </Card>
@@ -148,7 +145,6 @@ export function Scope3KpiCardsGrid() {
                         </div>
                         <div className="flex items-center justify-between text-[11px] font-mono text-on-surface-variant pt-1 border-t border-outline-variant/30">
                             <span>128 Active Supplier Returns</span>
-                            <span className="text-teal-700 font-bold">0 Non-conformances</span>
                         </div>
                     </div>
                 </Card>

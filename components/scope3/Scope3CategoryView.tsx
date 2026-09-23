@@ -4,7 +4,7 @@ import Link from "next/link";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import { SCOPE3_CATEGORIES, Scope3Category } from "@/lib/scope3/data";
+import { formatInrSpend, SCOPE3_CATEGORIES, Scope3Category } from "@/lib/scope3/data";
 import { Scope3Navbar } from "./Scope3Navbar";
 import { cn } from "@/lib/utils/cn";
 import { AiAssistantFAB } from "@/components/dashboard/AiAssistantFAB";
@@ -90,10 +90,10 @@ export function Scope3CategoryView({ slug }: Scope3CategoryViewProps) {
                 <Card className="p-5 border-outline-variant/60">
                     <span className="font-mono text-xs font-semibold uppercase text-on-surface-variant">Mapped Activity Spend</span>
                     <p className="font-mono text-headline-md font-bold text-primary mt-1">
-                        ${(category.spendUsd / 1000000).toFixed(2)}M
+                        {formatInrSpend(category.spendInr)}
                     </p>
                     <p className="font-mono text-[11px] text-on-surface-variant mt-1">
-                        USD Procurement / Activity
+                        INR Procurement / Activity
                     </p>
                 </Card>
 
@@ -118,7 +118,7 @@ export function Scope3CategoryView({ slug }: Scope3CategoryViewProps) {
                 </Card>
             </div>
 
-            {/* Dummy Detailed Activity Table */}
+            {/* Detailed Activity Table */}
             <Card className="p-6 border-outline-variant/60">
                 <CardHeader className="px-0 pt-0 pb-4 border-b border-outline-variant/40 flex flex-row items-center justify-between">
                     <h3 className="text-headline-sm font-bold text-primary flex items-center gap-2">
@@ -143,15 +143,15 @@ export function Scope3CategoryView({ slug }: Scope3CategoryViewProps) {
                                 <tr>
                                     <td className="py-3 px-3">2026-08-12</td>
                                     <td className="py-3 px-3 font-bold text-primary">Primary Logistics Hub A</td>
-                                    <td className="py-3 px-3">$420,000 USD</td>
-                                    <td className="py-3 px-3">0.45 kgCO2e/$</td>
+                                    <td className="py-3 px-3">₹3.48 Cr</td>
+                                    <td className="py-3 px-3">0.054 kgCO2e/₹</td>
                                     <td className="py-3 px-3 text-right font-bold text-secondary">189.0 tCO2e</td>
                                 </tr>
                                 <tr>
                                     <td className="py-3 px-3">2026-08-04</td>
                                     <td className="py-3 px-3 font-bold text-primary">Consolidated Freight Operations</td>
-                                    <td className="py-3 px-3">$850,000 USD</td>
-                                    <td className="py-3 px-3">0.62 kgCO2e/$</td>
+                                    <td className="py-3 px-3">₹7.05 Cr</td>
+                                    <td className="py-3 px-3">0.075 kgCO2e/₹</td>
                                     <td className="py-3 px-3 text-right font-bold text-secondary">527.0 tCO2e</td>
                                 </tr>
                                 <tr>

@@ -18,8 +18,8 @@ export function BoilerFuelMix({ items }: BoilerFuelMixProps) {
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="local_fire_department" size="sm" className="text-orange-500" />
                     <div>
-                        <h3 className="text-headline-sm font-semibold text-primary">Fuel Mix & Activity Summary</h3>
-                        <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
+                        <h3 className="font-display text-headline-sm font-semibold tracking-tight text-primary">Fuel Mix & Activity Summary</h3>
+                        <p className="font-sans text-[11px] font-medium tracking-tight text-on-surface-variant">
                             Fuel-to-electricity conversion metrics
                         </p>
                     </div>
@@ -31,16 +31,16 @@ export function BoilerFuelMix({ items }: BoilerFuelMixProps) {
 
             <CardBody className="flex flex-1 flex-col justify-between gap-5 p-card-padding">
                 {items.length === 0 ? (
-                    <div className="flex flex-1 items-center justify-center font-mono text-sm text-on-surface-variant py-8">
+                    <div className="flex flex-1 items-center justify-center font-sans text-sm text-on-surface-variant py-8">
                         No fuel mix summary records available.
                     </div>
                 ) : (
                     <>
                         {/* Vertical Bar Visualization Area */}
                         <div className="relative flex flex-1 flex-col justify-end rounded-lg border border-outline-variant/30 bg-surface-container-low/50 p-4">
-                            <div className="absolute inset-x-4 top-3 flex justify-between font-mono text-[10px] text-on-surface-variant opacity-70">
+                            <div className="absolute inset-x-4 top-3 flex justify-between font-sans text-[11px] font-medium text-on-surface-variant opacity-80">
                                 <span>Thermal Fuel Conversion</span>
-                                <span>{totalGen.toLocaleString("en-US", { maximumFractionDigits: 1 })} MWh Total</span>
+                                <span className="tabular-nums font-semibold">{totalGen.toLocaleString("en-US", { maximumFractionDigits: 1 })} MWh Total</span>
                             </div>
 
                             <div className="mt-6 flex h-36 items-end justify-around gap-4 border-b border-outline-variant/40 pb-2">
@@ -56,7 +56,7 @@ export function BoilerFuelMix({ items }: BoilerFuelMixProps) {
                                                     style={{ height: `${pct}%`, backgroundColor: item.color || "#fb923c" }}
                                                 />
                                             </div>
-                                            <span className="font-mono text-[11px] font-semibold text-primary text-center line-clamp-1">
+                                            <span className="font-sans text-[11px] font-semibold text-primary text-center line-clamp-1">
                                                 {item.label}
                                             </span>
                                         </div>
@@ -72,21 +72,21 @@ export function BoilerFuelMix({ items }: BoilerFuelMixProps) {
                                     key={item.label}
                                     className="flex flex-col justify-between rounded-lg border border-outline-variant/30 bg-surface-container-low p-3.5 border-l-4 border-l-orange-400">
                                     <div className="flex items-center justify-between gap-2">
-                                        <span className="text-[10px] font-bold uppercase tracking-wide text-on-surface-variant line-clamp-1">
+                                        <span className="font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant line-clamp-1">
                                             {item.label}
                                         </span>
-                                        <span className="font-mono text-[9px] rounded bg-surface-container-high px-1.5 py-0.5 font-bold text-on-surface">
+                                        <span className="font-sans text-[10px] rounded bg-surface-container-high px-1.5 py-0.5 font-bold text-on-surface tabular-nums">
                                             {item.percent}%
                                         </span>
                                     </div>
-                                    <div className="mt-2 flex items-baseline gap-1 font-mono text-sm font-bold text-primary">
-                                        <span>
+                                    <div className="mt-2 flex items-baseline gap-1 font-sans text-sm font-bold text-primary">
+                                        <span className="font-display text-sm font-bold tabular-nums">
                                             {item.value.toLocaleString("en-US", {
                                                 minimumFractionDigits: 1,
                                                 maximumFractionDigits: 1,
                                             })}
                                         </span>
-                                        <span className="text-[10px] font-normal text-on-surface-variant">MWh Gen</span>
+                                        <span className="text-[11px] font-normal text-on-surface-variant">MWh Gen</span>
                                     </div>
                                 </div>
                             ))}

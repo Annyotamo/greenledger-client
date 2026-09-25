@@ -43,10 +43,10 @@ export function EnergyDashboardView() {
                             <MaterialIcon name="warning" size="md" />
                         </div>
                         <div className="space-y-1">
-                            <h3 className="text-headline-sm font-semibold text-primary">
+                            <h3 className="font-display text-headline-sm font-semibold tracking-tight text-primary">
                                 Failed to load Energy Dashboard
                             </h3>
-                            <p className="font-mono text-xs text-on-surface-variant max-w-md mx-auto">
+                            <p className="font-sans text-xs text-on-surface-variant max-w-md mx-auto">
                                 {error?.message || "An unexpected error occurred while fetching tenant energy data."}
                             </p>
                         </div>

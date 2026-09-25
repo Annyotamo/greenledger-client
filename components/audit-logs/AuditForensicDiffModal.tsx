@@ -186,10 +186,10 @@ export function AuditForensicDiffModal({ log, isOpen, isLoading = false, onClose
                     </div>
 
                     <div>
-                        <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                        <h3 className="font-display text-base font-bold text-slate-900 tracking-tight">
                             {formatEventType(log?.event_type)}
                         </h3>
-                        <p className="text-xs text-slate-600 mt-0.5">
+                        <p className="text-xs text-slate-600 mt-0.5 font-sans">
                             {log?.description || "Forensic audit detail inspection"}
                         </p>
                     </div>

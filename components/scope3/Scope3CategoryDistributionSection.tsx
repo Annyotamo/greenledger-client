@@ -36,10 +36,10 @@ export function Scope3CategoryDistributionSection() {
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="pie_chart" size="sm" className="text-primary text-[20px]" />
                     <div>
-                        <h3 className="font-headline-sm text-headline-sm font-bold text-primary">
+                        <h3 className="font-display text-headline-sm font-bold text-primary tracking-tight">
                             Category Contribution Breakdown
                         </h3>
-                        <p className="font-mono text-[10px] uppercase tracking-tight text-on-surface-variant">
+                        <p className="font-sans text-[11px] font-medium tracking-tight text-on-surface-variant">
                             Relative share of tracked Scope 3 categories
                         </p>
                     </div>
@@ -50,9 +50,9 @@ export function Scope3CategoryDistributionSection() {
                     <button
                         type="button"
                         onClick={() => setChartMode("donut")}
-                        className={`flex items-center gap-1 px-3 py-1 rounded-full font-mono text-[11px] font-medium transition-all ${
+                        className={`flex items-center gap-1 px-3 py-1 rounded-full font-sans text-xs font-medium transition-all ${
                             chartMode === "donut"
-                                ? "bg-white text-primary shadow-xs font-bold"
+                                ? "bg-white text-primary shadow-xs font-semibold"
                                 : "text-on-surface-variant hover:text-on-surface"
                         }`}>
                         <MaterialIcon name="donut_small" size="sm" className="!text-[14px]" />
@@ -61,9 +61,9 @@ export function Scope3CategoryDistributionSection() {
                     <button
                         type="button"
                         onClick={() => setChartMode("bar")}
-                        className={`flex items-center gap-1 px-3 py-1 rounded-full font-mono text-[11px] font-medium transition-all ${
+                        className={`flex items-center gap-1 px-3 py-1 rounded-full font-sans text-xs font-medium transition-all ${
                             chartMode === "bar"
-                                ? "bg-white text-primary shadow-xs font-bold"
+                                ? "bg-white text-primary shadow-xs font-semibold"
                                 : "text-on-surface-variant hover:text-on-surface"
                         }`}>
                         <MaterialIcon name="bar_chart" size="sm" className="!text-[14px]" />
@@ -101,16 +101,16 @@ export function Scope3CategoryDistributionSection() {
                                         borderRadius: "6px",
                                         boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                                         fontSize: "12px",
-                                        fontFamily: "JetBrains Mono, monospace",
+                                        fontFamily: "var(--font-inter), sans-serif",
                                     }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span className="font-mono text-[20px] font-extrabold text-primary">
+                            <span className="font-display text-[22px] font-bold text-primary tabular-nums tracking-tight">
                                 {totalEmissions.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                             </span>
-                            <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant font-bold">
+                            <span className="text-[11px] font-sans uppercase tracking-wider text-on-surface-variant font-semibold">
                                 Scope 3 tCO2e
                             </span>
                         </div>
@@ -120,7 +120,7 @@ export function Scope3CategoryDistributionSection() {
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <BarChart data={barChartData} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                <XAxis type="number" unit=" t" tick={{ fontSize: 11, fontFamily: "JetBrains Mono" }} />
+                                <XAxis type="number" unit=" t" tick={{ fontSize: 11, fontFamily: "var(--font-inter), sans-serif" }} />
                                 <YAxis type="category" dataKey="name" hide />
                                 <Tooltip
                                     formatter={(value: any, name: any) => [
@@ -133,10 +133,10 @@ export function Scope3CategoryDistributionSection() {
                                         borderRadius: "6px",
                                         boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                                         fontSize: "12px",
-                                        fontFamily: "JetBrains Mono, monospace",
+                                        fontFamily: "var(--font-inter), sans-serif",
                                     }}
                                 />
-                                <Legend wrapperStyle={{ fontSize: "10px", fontFamily: "JetBrains Mono", paddingTop: "6px" }} />
+                                <Legend wrapperStyle={{ fontSize: "11px", fontFamily: "var(--font-inter), sans-serif", paddingTop: "6px" }} />
                                 {activeCategories.map((c) => (
                                     <Bar key={c.code} dataKey={c.code} stackId="scope3" fill={c.color} />
                                 ))}
@@ -151,13 +151,13 @@ export function Scope3CategoryDistributionSection() {
                         <div key={item.id} className="bg-surface-container-low/70 p-2 rounded border border-outline-variant/30 space-y-0.5">
                             <div className="flex items-center gap-1.5 truncate">
                                 <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                                <span className="font-mono text-[11px] font-bold text-primary truncate" title={item.name}>
+                                <span className="font-sans text-[11px] font-bold text-primary truncate" title={item.name}>
                                     {item.code}
                                 </span>
                             </div>
-                            <div className="flex justify-between items-baseline font-mono text-[10px]">
-                                <span className="font-bold text-primary">{item.emissionsTco2e.toLocaleString()} t</span>
-                                <span className="text-on-surface-variant font-semibold">{item.sharePercent}%</span>
+                            <div className="flex justify-between items-baseline font-sans text-[11px]">
+                                <span className="font-display font-bold text-primary tabular-nums">{item.emissionsTco2e.toLocaleString()} t</span>
+                                <span className="text-on-surface-variant font-semibold tabular-nums">{item.sharePercent}%</span>
                             </div>
                         </div>
                     ))}

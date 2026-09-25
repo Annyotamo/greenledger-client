@@ -132,8 +132,8 @@ export function Scope3Navbar({ currentViewMode = "operational", onViewModeChange
                                 <MaterialIcon name="hub" size="sm" className="text-secondary" />
                             </div>
                             <div className="flex items-center gap-2">
-                                <h2 className="text-xs font-bold text-primary tracking-tight font-mono">Scope 3 Value Chain</h2>
-                                <span className="rounded bg-secondary/15 px-1.5 py-0.2 font-mono text-[9px] font-bold text-secondary uppercase tracking-wider">
+                                <h2 className="text-xs font-bold text-primary tracking-tight font-display">Scope 3 Value Chain</h2>
+                                <span className="rounded bg-secondary/15 px-1.5 py-0.5 font-sans text-[10px] font-bold text-secondary uppercase tracking-wider">
                                     Cat 1–15
                                 </span>
                             </div>
@@ -142,7 +142,7 @@ export function Scope3Navbar({ currentViewMode = "operational", onViewModeChange
 
                     {/* View Mode Switcher Pill */}
                     <div className="flex items-center gap-2 self-start md:self-auto">
-                        <span className="font-mono text-[10px] font-medium text-on-surface-variant hidden sm:inline-block">
+                        <span className="font-sans text-[11px] font-medium text-on-surface-variant hidden sm:inline-block">
                             View:
                         </span>
                         <div className="relative flex items-center rounded-lg bg-surface-container-high/90 p-0.5 border border-outline-variant/40">
@@ -150,7 +150,7 @@ export function Scope3Navbar({ currentViewMode = "operational", onViewModeChange
                                 type="button"
                                 onClick={() => handleViewChange("operational")}
                                 className={cn(
-                                    "relative z-10 flex items-center gap-1 rounded-md px-2.5 py-1 font-mono text-[10px] font-semibold transition-colors duration-150",
+                                    "relative z-10 flex items-center gap-1 rounded-md px-2.5 py-1 font-sans text-[11px] font-semibold transition-colors duration-150",
                                     viewMode === "operational" ? "text-primary shadow-2xs font-bold" : "text-on-surface-variant hover:text-on-surface",
                                 )}>
                                 {viewMode === "operational" && (
@@ -168,7 +168,7 @@ export function Scope3Navbar({ currentViewMode = "operational", onViewModeChange
                                 type="button"
                                 onClick={() => handleViewChange("upstream_downstream")}
                                 className={cn(
-                                    "relative z-10 flex items-center gap-1 rounded-md px-2.5 py-1 font-mono text-[10px] font-semibold transition-colors duration-150",
+                                    "relative z-10 flex items-center gap-1 rounded-md px-2.5 py-1 font-sans text-[11px] font-semibold transition-colors duration-150",
                                     viewMode === "upstream_downstream" ? "text-primary shadow-2xs font-bold" : "text-on-surface-variant hover:text-on-surface",
                                 )}>
                                 {viewMode === "upstream_downstream" && (
@@ -208,14 +208,14 @@ export function Scope3Navbar({ currentViewMode = "operational", onViewModeChange
                                         onMouseEnter={() => setActiveFlyout(group.name)}
                                         onClick={() => setActiveFlyout(isOpen ? null : group.name)}
                                         className={cn(
-                                            "flex items-center gap-1.5 rounded-md px-2.5 py-1 font-mono text-[11px] font-semibold transition-all duration-150",
+                                            "flex items-center gap-1.5 rounded-md px-2.5 py-1 font-sans text-[12px] font-medium transition-all duration-150",
                                             isGroupActive || isOpen
-                                                ? "bg-surface-container-high text-primary shadow-2xs"
+                                                ? "bg-surface-container-high text-primary shadow-2xs font-semibold"
                                                 : "text-on-surface-variant hover:bg-surface-container-high/60 hover:text-on-surface",
                                         )}>
                                         <MaterialIcon name={group.icon} size="sm" className="!text-[15px] text-secondary" />
                                         <span>{group.name}</span>
-                                        <span className="rounded bg-surface-container-highest px-1 py-0.2 font-mono text-[9px] font-bold text-on-surface-variant">
+                                        <span className="rounded bg-surface-container-highest px-1 py-0.2 font-sans text-[10px] font-bold text-on-surface-variant">
                                             {group.categories.length}
                                         </span>
                                         <MaterialIcon
@@ -236,11 +236,11 @@ export function Scope3Navbar({ currentViewMode = "operational", onViewModeChange
                                                 onMouseLeave={() => setActiveFlyout(null)}
                                                 className="absolute left-0 top-full mt-1 w-[350px] rounded-lg border border-outline-variant/80 bg-surface-container-lowest/98 p-2.5 shadow-xl backdrop-blur-xl z-50">
                                                 <div className="mb-2 border-b border-outline-variant/40 pb-1.5 px-1">
-                                                    <p className="font-mono text-[11px] font-bold text-primary flex items-center gap-1.5">
+                                                    <p className="font-sans text-[12px] font-bold text-primary flex items-center gap-1.5">
                                                         <MaterialIcon name={group.icon} size="sm" className="!text-[15px] text-secondary" />
                                                         {group.name}
                                                     </p>
-                                                    <p className="text-[10px] text-on-surface-variant leading-tight">{group.description}</p>
+                                                    <p className="text-[11px] font-sans text-on-surface-variant leading-tight">{group.description}</p>
                                                 </div>
 
                                                 <div className="space-y-0.5">
@@ -270,9 +270,9 @@ export function Scope3Navbar({ currentViewMode = "operational", onViewModeChange
                                         onMouseEnter={() => setActiveFlyout(section.name)}
                                         onClick={() => setActiveFlyout(isOpen ? null : section.name)}
                                         className={cn(
-                                            "flex items-center gap-1.5 rounded-md px-2.5 py-1 font-mono text-[11px] font-semibold transition-all duration-150",
+                                            "flex items-center gap-1.5 rounded-md px-2.5 py-1 font-sans text-[12px] font-medium transition-all duration-150",
                                             isSectionActive || isOpen
-                                                ? "bg-surface-container-high text-primary shadow-2xs"
+                                                ? "bg-surface-container-high text-primary shadow-2xs font-semibold"
                                                 : "text-on-surface-variant hover:bg-surface-container-high/60 hover:text-on-surface",
                                         )}>
                                         <MaterialIcon name={section.icon} size="sm" className={cn("!text-[15px]", section.name.includes("Upstream") ? "text-secondary" : "text-tertiary")} />
@@ -295,17 +295,17 @@ export function Scope3Navbar({ currentViewMode = "operational", onViewModeChange
                                                 onMouseLeave={() => setActiveFlyout(null)}
                                                 className="absolute left-0 top-full mt-1 w-[480px] rounded-lg border border-outline-variant/80 bg-surface-container-lowest/98 p-3 shadow-2xl backdrop-blur-xl z-50">
                                                 <div className="mb-2 border-b border-outline-variant/40 pb-1.5">
-                                                    <p className="font-mono text-[11px] font-bold text-primary flex items-center gap-1.5">
+                                                    <p className="font-sans text-[12px] font-bold text-primary flex items-center gap-1.5">
                                                         <MaterialIcon name={section.icon} size="sm" className={cn("!text-[15px]", section.name.includes("Upstream") ? "text-secondary" : "text-tertiary")} />
                                                         {section.name}
                                                     </p>
-                                                    <p className="text-[10px] text-on-surface-variant leading-tight">{section.description}</p>
+                                                    <p className="text-[11px] font-sans text-on-surface-variant leading-tight">{section.description}</p>
                                                 </div>
 
                                                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                                                     {section.subgroups.map((sub) => (
                                                         <div key={sub.title} className="rounded-md bg-surface-container-low/70 p-2 border border-outline-variant/30">
-                                                            <p className="font-mono text-[10px] font-bold text-primary mb-1 uppercase tracking-wider">
+                                                            <p className="font-sans text-[11px] font-bold text-primary mb-1 uppercase tracking-wider">
                                                                 {sub.title}
                                                             </p>
                                                             <div className="space-y-0.5">
@@ -336,7 +336,7 @@ export function Scope3Navbar({ currentViewMode = "operational", onViewModeChange
                                 <div className="space-y-2">
                                     {view1Groups.map((g) => (
                                         <div key={g.name} className="rounded-md bg-surface-container-low p-2">
-                                            <p className="font-mono text-[11px] font-bold text-primary mb-1">{g.name}</p>
+                                            <p className="font-sans text-[12px] font-bold text-primary mb-1">{g.name}</p>
                                             <div className="space-y-0.5">
                                                 {g.categories.map((c) => (
                                                     <CategoryFlyoutItem key={c.id} category={c} onClick={() => setMobileMenuOpen(false)} compact />
@@ -349,10 +349,10 @@ export function Scope3Navbar({ currentViewMode = "operational", onViewModeChange
                                 <div className="space-y-2">
                                     {view2Sections.map((s) => (
                                         <div key={s.name} className="rounded-md bg-surface-container-low p-2">
-                                            <p className="font-mono text-[11px] font-bold text-primary mb-1">{s.name}</p>
+                                            <p className="font-sans text-[12px] font-bold text-primary mb-1">{s.name}</p>
                                             {s.subgroups.map((sg) => (
                                                 <div key={sg.title} className="mb-1.5">
-                                                    <p className="font-mono text-[9px] uppercase text-on-surface-variant font-bold">{sg.title}</p>
+                                                    <p className="font-sans text-[10px] uppercase text-on-surface-variant font-bold">{sg.title}</p>
                                                     <div className="space-y-0.5 mt-0.5">
                                                         {sg.categories.map((c) => (
                                                             <CategoryFlyoutItem key={c.id} category={c} onClick={() => setMobileMenuOpen(false)} compact />
@@ -395,15 +395,15 @@ function CategoryFlyoutItem({
                     : "hover:bg-surface-container-high/80 text-on-surface",
             )}>
             <div className="flex items-center gap-2 min-w-0">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-surface-container-highest font-mono text-[9px] font-bold text-primary">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-surface-container-highest font-sans text-[10px] font-bold text-primary">
                     {category.id}
                 </span>
-                <span className={cn("truncate font-mono font-medium text-primary group-hover:text-secondary transition-colors", compact ? "text-[10px]" : "text-[11px]")}>
+                <span className={cn("truncate font-sans font-medium text-primary group-hover:text-secondary transition-colors", compact ? "text-[11px]" : "text-[12px]")}>
                     {category.name}
                 </span>
             </div>
 
-            <span className="font-mono text-[9px] font-bold text-on-surface-variant shrink-0 ml-2">
+            <span className="font-sans text-[10px] font-bold text-on-surface-variant shrink-0 ml-2">
                 {category.code}
             </span>
         </Link>

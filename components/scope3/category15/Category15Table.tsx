@@ -35,11 +35,11 @@ export function Category15Table({
     const [openActionId, setOpenActionId] = useState<string | null>(null);
 
     return (
-        <Card className="overflow-hidden border-outline-variant/60">
+        <Card className="overflow-hidden border-outline-variant/60 font-sans">
             <div className="overflow-x-auto bg-white">
                 <Table className="w-full table-auto">
                     <TableHeader>
-                        <TableRow className="bg-surface-container-low border-b border-outline-variant/60 font-mono text-xs text-on-surface-variant">
+                        <TableRow className="bg-surface-container-low border-b border-outline-variant/60 font-sans text-xs font-semibold uppercase tracking-wider text-slate-500">
                             <TableHead className="py-3 px-4">Period & Date</TableHead>
                             <TableHead className="py-3 px-4">Financed Asset & PCAF Class</TableHead>
                             <TableHead className="py-3 px-4">Outstanding / Worth (Cr)</TableHead>
@@ -52,13 +52,13 @@ export function Category15Table({
                     <TableBody>
                         {isLoading ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="py-12 text-center font-mono text-xs text-on-surface-variant">
+                                <TableCell colSpan={7} className="py-12 text-center font-sans text-xs text-slate-500">
                                     Loading investment activities...
                                 </TableCell>
                             </TableRow>
                         ) : entries.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="py-12 text-center font-mono text-xs text-on-surface-variant">
+                                <TableCell colSpan={7} className="py-12 text-center font-sans text-xs text-slate-500">
                                     No investment activity recorded yet. Click &quot;Log Investment Activity&quot; to begin.
                                 </TableCell>
                             </TableRow>
@@ -69,49 +69,49 @@ export function Category15Table({
                                 return (
                                     <TableRow
                                         key={entry.id}
-                                        className="hover:bg-surface-container-high/50 transition-colors font-mono text-xs border-b border-outline-variant/30">
+                                        className="hover:bg-surface-container-high/50 transition-colors font-sans text-xs border-b border-outline-variant/30">
                                         <TableCell className="py-3 px-4">
-                                            <div className="font-bold text-primary">{entry.reportingPeriodName}</div>
-                                            <div className="text-[11px] text-on-surface-variant">
+                                            <div className="font-semibold text-slate-900">{entry.reportingPeriodName}</div>
+                                            <div className="text-[11px] text-slate-500 font-medium tabular-nums">
                                                 {entry.activityDate ? format(new Date(entry.activityDate), "MMM d, yyyy") : "N/A"}
                                             </div>
                                         </TableCell>
 
                                         <TableCell className="py-3 px-4">
-                                            <div className="font-bold text-primary">{entry.whatYouFinanced}</div>
+                                            <div className="font-semibold text-slate-900">{entry.whatYouFinanced}</div>
                                             <div className="flex items-center gap-1 mt-0.5">
-                                                <span className="flex h-4 w-4 items-center justify-center rounded bg-secondary/15 text-[9px] font-bold text-secondary">
+                                                <span className="flex h-4 w-4 items-center justify-center rounded bg-secondary/15 text-[9px] font-bold text-secondary tabular-nums">
                                                     #{entry.assetClassNo}
                                                 </span>
-                                                <span className="text-[10px] text-on-surface-variant font-medium truncate max-w-xs">
+                                                <span className="text-[11px] text-slate-500 font-medium truncate max-w-xs">
                                                     {entry.assetClassName}
                                                 </span>
                                             </div>
                                         </TableCell>
 
                                         <TableCell className="py-3 px-4">
-                                            <div className="font-bold text-primary">
+                                            <div className="font-semibold text-slate-900 tabular-nums">
                                                 ₹{entry.outstandingAmountCrores.toLocaleString(undefined, { minimumFractionDigits: 2 })} Cr
                                             </div>
-                                            <div className="text-[10px] text-on-surface-variant">
+                                            <div className="text-[11px] text-slate-500 font-medium tabular-nums">
                                                 Worth: ₹{entry.totalCompanyWorthCrores.toLocaleString(undefined, { minimumFractionDigits: 2 })} Cr
                                             </div>
                                         </TableCell>
 
                                         <TableCell className="py-3 px-4">
-                                            <div className="font-bold text-secondary">
+                                            <div className="font-semibold text-secondary tabular-nums">
                                                 {entry.attributionFactorPercentage.toFixed(2)}%
                                             </div>
-                                            <div className="text-[10px] text-on-surface-variant">
+                                            <div className="text-[11px] text-slate-500 font-medium tabular-nums">
                                                 Factor: {entry.attributionFactor.toFixed(4)}
                                             </div>
                                         </TableCell>
 
                                         <TableCell className="py-3 px-4">
-                                            <div className="font-bold text-secondary">
+                                            <div className="font-semibold text-secondary tabular-nums">
                                                 {entry.calculatedTCo2e.toFixed(4)} tCO₂e
                                             </div>
-                                            <div className="text-[10px] text-on-surface-variant">
+                                            <div className="text-[11px] text-slate-500 font-medium tabular-nums">
                                                 S1: {entry.financedScope1Emissions.toFixed(1)}t • S2: {entry.financedScope2Emissions.toFixed(1)}t • S3: {entry.financedScope3Emissions.toFixed(1)}t
                                             </div>
                                         </TableCell>
@@ -150,7 +150,7 @@ export function Category15Table({
                                                     variant="secondary"
                                                     size="sm"
                                                     onClick={() => onViewDetail(entry)}
-                                                    className="h-7 px-2 text-[11px]">
+                                                    className="h-7 px-2 text-[11px] font-semibold">
                                                     <MaterialIcon name="visibility" size="xs" />
                                                     <span>Details</span>
                                                 </Button>
@@ -166,7 +166,7 @@ export function Category15Table({
                                             {isMenuOpen && (
                                                 <div
                                                     onMouseLeave={() => setOpenActionId(null)}
-                                                    className="absolute right-4 top-10 z-30 w-44 rounded-xl border border-outline-variant/80 bg-surface-container-lowest p-1.5 shadow-xl text-left font-mono text-xs">
+                                                    className="absolute right-4 top-10 z-30 w-44 rounded-xl border border-outline-variant/80 bg-surface-container-lowest p-1.5 shadow-xl text-left font-sans text-xs">
                                                     {entry.status === "draft" && (
                                                         <>
                                                             <button
@@ -175,7 +175,7 @@ export function Category15Table({
                                                                     setOpenActionId(null);
                                                                     onSubmitEntry(entry.id);
                                                                 }}
-                                                                className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-primary hover:bg-surface-container-high">
+                                                                className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 font-medium text-primary hover:bg-surface-container-high">
                                                                 <MaterialIcon name="send" size="xs" className="text-secondary" />
                                                                 <span>Submit for Review</span>
                                                             </button>
@@ -186,7 +186,7 @@ export function Category15Table({
                                                                     setOpenActionId(null);
                                                                     onEdit(entry);
                                                                 }}
-                                                                className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-primary hover:bg-surface-container-high">
+                                                                className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 font-medium text-primary hover:bg-surface-container-high">
                                                                 <MaterialIcon name="edit" size="xs" />
                                                                 <span>Edit Draft</span>
                                                             </button>
@@ -201,7 +201,7 @@ export function Category15Table({
                                                                     setOpenActionId(null);
                                                                     onVerifyEntry(entry.id);
                                                                 }}
-                                                                className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-secondary hover:bg-secondary-container/20 font-bold">
+                                                                className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-secondary hover:bg-secondary-container/20 font-semibold">
                                                                 <MaterialIcon name="check_circle" size="xs" />
                                                                 <span>Verify Activity</span>
                                                             </button>
@@ -212,7 +212,7 @@ export function Category15Table({
                                                                     setOpenActionId(null);
                                                                     onRejectEntry(entry);
                                                                 }}
-                                                                className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-error hover:bg-error-container/20">
+                                                                className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-error hover:bg-error-container/20 font-medium">
                                                                 <MaterialIcon name="cancel" size="xs" />
                                                                 <span>Reject Activity</span>
                                                             </button>
@@ -239,7 +239,7 @@ export function Category15Table({
                                                                 setOpenActionId(null);
                                                                 onEdit(entry);
                                                             }}
-                                                            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-primary hover:bg-surface-container-high">
+                                                            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-primary hover:bg-surface-container-high font-medium">
                                                             <MaterialIcon name="edit" size="xs" />
                                                             <span>Edit & Resubmit</span>
                                                         </button>
@@ -252,7 +252,7 @@ export function Category15Table({
                                                                 setOpenActionId(null);
                                                                 onDeleteEntry(entry.id);
                                                             }}
-                                                            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-error hover:bg-error-container/20 border-t border-outline-variant/30 mt-1 pt-1.5">
+                                                            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-error hover:bg-error-container/20 border-t border-outline-variant/30 mt-1 pt-1.5 font-medium">
                                                             <MaterialIcon name="delete" size="xs" />
                                                             <span>Delete Entry</span>
                                                         </button>

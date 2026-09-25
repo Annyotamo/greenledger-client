@@ -66,8 +66,8 @@ export function EnergyTrendChart({ data }: EnergyTrendChartProps) {
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="analytics" size="sm" className="text-primary" />
                     <div>
-                        <h3 className="text-headline-sm font-semibold text-primary">Monthly Captive vs. Grid Energy</h3>
-                        <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
+                        <h3 className="font-display text-headline-sm font-semibold tracking-tight text-primary">Monthly Captive vs. Grid Energy</h3>
+                        <p className="font-sans text-[11px] font-medium tracking-tight text-on-surface-variant">
                             Energy Bifurcation — MWh
                         </p>
                     </div>
@@ -81,7 +81,7 @@ export function EnergyTrendChart({ data }: EnergyTrendChartProps) {
             <CardBody className="p-0">
                 <div className="chart-grid-bg relative flex h-64 w-full items-end overflow-hidden rounded-b-lg border border-t-0 border-outline-variant bg-surface-container-low px-4 py-4">
                     {data.length === 0 ? (
-                        <div className="flex h-full w-full items-center justify-center font-mono text-sm text-on-surface-variant">
+                        <div className="flex h-full w-full items-center justify-center font-sans text-sm text-on-surface-variant">
                             No monthly trend data available.
                         </div>
                     ) : (
@@ -139,7 +139,7 @@ export function EnergyTrendChart({ data }: EnergyTrendChartProps) {
                             )}
                         </svg>
                     )}
-                    <div className="pointer-events-none absolute bottom-2 left-0 right-0 flex justify-between px-4 font-mono text-[10px] text-on-surface-variant">
+                    <div className="pointer-events-none absolute bottom-2 left-0 right-0 flex justify-between px-4 font-sans text-[11px] font-medium text-on-surface-variant">
                         {data.map((point) => (
                             <span key={point.month}>{point.month}</span>
                         ))}
@@ -154,7 +154,7 @@ function LegendDot({ className, label }: { className: string; label: string }) {
     return (
         <div className="flex items-center gap-2">
             <span className={`h-3 w-3 rounded-full ${className}`} />
-            <span className="font-mono text-[11px] text-on-surface">{label}</span>
+            <span className="font-sans text-[12px] font-medium text-on-surface">{label}</span>
         </div>
     );
 }

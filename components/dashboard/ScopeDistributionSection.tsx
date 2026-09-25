@@ -30,23 +30,23 @@ export function ScopeDistributionSection({ data }: ScopeDistributionSectionProps
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="pie_chart" size="sm" className="text-primary text-[20px]" />
                     <div>
-                        <h3 className="font-headline-sm text-headline-sm font-bold text-primary">
+                        <h3 className="font-headline-sm text-headline-sm font-semibold text-primary">
                             Scope-Wise Distribution
                         </h3>
-                        <p className="font-mono text-[10px] uppercase tracking-tight text-on-surface-variant">
+                        <p className="font-sans text-xs text-on-surface-variant">
                             GHG Protocol Scope 1, 2 & 3 Breakdown
                         </p>
                     </div>
                 </div>
 
                 {/* Donut vs Stacked Bar Visualization Mode Toggle */}
-                <div className="flex bg-surface-container-low p-1 rounded-full border border-outline-variant/30">
+                <div className="flex bg-surface-container-low p-1 rounded-lg border border-outline-variant/50">
                     <button
                         type="button"
                         onClick={() => setChartMode("donut")}
-                        className={`flex items-center gap-1 px-3 py-1 rounded-full font-mono text-[11px] font-medium transition-all ${
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-sans text-xs font-medium transition-all select-none cursor-pointer ${
                             chartMode === "donut"
-                                ? "bg-white text-primary shadow-xs font-bold"
+                                ? "bg-white text-primary shadow-2xs font-semibold"
                                 : "text-on-surface-variant hover:text-on-surface"
                         }`}>
                         <MaterialIcon name="donut_small" size="sm" className="!text-[14px]" />
@@ -55,9 +55,9 @@ export function ScopeDistributionSection({ data }: ScopeDistributionSectionProps
                     <button
                         type="button"
                         onClick={() => setChartMode("bar")}
-                        className={`flex items-center gap-1 px-3 py-1 rounded-full font-mono text-[11px] font-medium transition-all ${
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-sans text-xs font-medium transition-all select-none cursor-pointer ${
                             chartMode === "bar"
-                                ? "bg-white text-primary shadow-xs font-bold"
+                                ? "bg-white text-primary shadow-2xs font-semibold"
                                 : "text-on-surface-variant hover:text-on-surface"
                         }`}>
                         <MaterialIcon name="bar_chart" size="sm" className="!text-[14px]" />
@@ -92,19 +92,19 @@ export function ScopeDistributionSection({ data }: ScopeDistributionSectionProps
                                     contentStyle={{
                                         backgroundColor: "#ffffff",
                                         borderColor: "#c6c6cd",
-                                        borderRadius: "6px",
-                                        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                                        borderRadius: "8px",
+                                        boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
                                         fontSize: "12px",
-                                        fontFamily: "JetBrains Mono, monospace",
+                                        fontFamily: "Inter, system-ui, sans-serif",
                                     }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span className="font-mono text-[22px] font-extrabold text-primary">
+                            <span className="font-display text-2xl font-bold text-primary tabular-nums">
                                 {totalEmissions.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                             </span>
-                            <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant font-bold">
+                            <span className="text-[11px] font-sans uppercase tracking-wider text-on-surface-variant font-semibold">
                                 Total tCO2e
                             </span>
                         </div>
@@ -114,7 +114,7 @@ export function ScopeDistributionSection({ data }: ScopeDistributionSectionProps
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={barChartData} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                <XAxis type="number" unit=" t" tick={{ fontSize: 11, fontFamily: "JetBrains Mono" }} />
+                                <XAxis type="number" unit=" t" tick={{ fontSize: 12, fontFamily: "Inter, system-ui, sans-serif" }} />
                                 <YAxis type="category" dataKey="name" hide />
                                 <Tooltip
                                     formatter={(value: any, name: any) => [
@@ -124,13 +124,13 @@ export function ScopeDistributionSection({ data }: ScopeDistributionSectionProps
                                     contentStyle={{
                                         backgroundColor: "#ffffff",
                                         borderColor: "#c6c6cd",
-                                        borderRadius: "6px",
-                                        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                                        borderRadius: "8px",
+                                        boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
                                         fontSize: "12px",
-                                        fontFamily: "JetBrains Mono, monospace",
+                                        fontFamily: "Inter, system-ui, sans-serif",
                                     }}
                                 />
-                                <Legend wrapperStyle={{ fontSize: "11px", fontFamily: "JetBrains Mono", paddingTop: "10px" }} />
+                                <Legend wrapperStyle={{ fontSize: "12px", fontFamily: "Inter, system-ui, sans-serif", paddingTop: "10px" }} />
                                 <Bar dataKey="Scope 1" stackId="a" fill="#f97316" radius={[4, 0, 0, 4]} />
                                 <Bar dataKey="Scope 2" stackId="a" fill="#3b82f6" />
                                 <Bar dataKey="Scope 3" stackId="a" fill="#10b981" radius={[0, 4, 4, 0]} />
@@ -142,14 +142,14 @@ export function ScopeDistributionSection({ data }: ScopeDistributionSectionProps
                 {/* Legend & Breakdown Summary List */}
                 <div className="grid grid-cols-3 gap-3 border-t border-outline-variant pt-3.5">
                     {data.map((item) => (
-                        <div key={item.scopeName} className="bg-surface-container-low p-2.5 rounded border border-outline-variant/30 space-y-1">
+                        <div key={item.scopeName} className="bg-surface-container-low p-2.5 rounded-lg border border-outline-variant/40 space-y-1">
                             <div className="flex items-center gap-1.5">
                                 <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                                <span className="font-mono text-xs font-bold text-on-surface">{item.scopeName}</span>
+                                <span className="font-sans text-xs font-semibold text-on-surface">{item.scopeName}</span>
                             </div>
-                            <div className="flex justify-between items-baseline font-mono text-[11px]">
-                                <span className="font-bold text-primary">{item.tco2e.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} t</span>
-                                <span className="text-[10px] text-on-surface-variant font-semibold">{item.sharePct.toFixed(1)}%</span>
+                            <div className="flex justify-between items-baseline font-sans text-xs">
+                                <span className="font-bold text-primary tabular-nums">{item.tco2e.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} t</span>
+                                <span className="text-[11px] text-on-surface-variant font-medium tabular-nums">{item.sharePct.toFixed(1)}%</span>
                             </div>
                         </div>
                     ))}

@@ -156,12 +156,12 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
             {/* Modal Body */}
             <div className="relative w-full max-w-3xl max-h-[85vh] my-auto flex flex-col rounded-3xl border border-outline-variant bg-surface-container-lowest shadow-2xl animate-fade-up overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-outline-variant px-6 py-4 shrink-0 bg-white">
+                <div className="flex items-center justify-between border-b border-outline-variant px-6 py-4 shrink-0 bg-white font-sans">
                     <div>
-                        <h2 className="text-headline-sm font-semibold text-primary">
+                        <h2 className="font-display text-lg font-bold tracking-tight text-primary">
                             Download BRSR Water Report
                         </h2>
-                        <p className="text-body-sm text-on-surface-variant">
+                        <p className="text-body-sm text-on-surface-variant font-sans">
                             Manually enter the water disclosure parameters to export the XLSX report.
                         </p>
                     </div>
@@ -179,7 +179,7 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
                 <div className="p-6 space-y-4 overflow-y-auto flex-1 font-sans text-body-md text-on-surface bg-white">
                     {/* General Parameters */}
                     <div className="border-b border-outline-variant/60 pb-4">
-                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-3">General Parameters</span>
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-3 font-display">General Parameters</span>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <label htmlFor="fy-label" className="text-xs font-semibold text-on-surface-variant">
@@ -215,7 +215,7 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
 
                     {/* Water Withdrawal by Source */}
                     <div className="border-b border-outline-variant/60 pb-4">
-                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-3">
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-3 font-display">
                             Water Source Quantities (kL)
                         </span>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -313,7 +313,7 @@ export function BrsrWaterReportModal({ isOpen, onClose, onDownload }: BrsrWaterR
 
                     {/* Water Discharge by Destination */}
                     <div>
-                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-3">
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-3 font-display">
                             Water Discharge by Destination (kL)
                         </span>
                         <div className="space-y-3">

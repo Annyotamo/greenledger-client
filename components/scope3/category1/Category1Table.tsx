@@ -37,9 +37,9 @@ export function Category1Table({
     return (
         <Card className="overflow-hidden border-outline-variant/60">
             <div className="overflow-x-auto bg-white">
-                <Table className="w-full table-auto">
+                <Table className="w-full table-auto font-sans">
                     <TableHeader>
-                        <TableRow className="bg-surface-container-low border-b border-outline-variant/60 font-mono text-xs text-on-surface-variant">
+                        <TableRow className="bg-surface-container-low border-b border-outline-variant/60 font-sans font-semibold text-xs text-on-surface-variant">
                             <TableHead className="py-3 px-4">Period & Date</TableHead>
                             <TableHead className="py-3 px-4">USEEIO NAICS Commodity Factor</TableHead>
                             <TableHead className="py-3 px-4">Purchase Spend (INR & USD)</TableHead>
@@ -51,13 +51,13 @@ export function Category1Table({
                     <TableBody>
                         {isLoading ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="py-12 text-center font-mono text-xs text-on-surface-variant">
+                                <TableCell colSpan={6} className="py-12 text-center font-sans text-xs text-on-surface-variant">
                                     Loading Category 1 spend records...
                                 </TableCell>
                             </TableRow>
                         ) : entries.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="py-12 text-center font-mono text-xs text-on-surface-variant">
+                                <TableCell colSpan={6} className="py-12 text-center font-sans text-xs text-on-surface-variant">
                                     No Category 1 spend entries recorded yet. Click &quot;Log Category 1 Spend&quot; to begin.
                                 </TableCell>
                             </TableRow>
@@ -68,15 +68,15 @@ export function Category1Table({
                                 return (
                                     <TableRow
                                         key={entry.id}
-                                        className="hover:bg-surface-container-high/50 transition-colors font-mono text-xs border-b border-outline-variant/30">
+                                        className="hover:bg-surface-container-high/50 transition-colors font-sans text-xs border-b border-outline-variant/30">
                                         {/* Period & Date */}
                                         <TableCell className="py-3 px-4">
-                                            <div className="font-bold text-primary">{entry.reportingPeriod}</div>
-                                            <div className="text-[11px] text-on-surface-variant">
+                                            <div className="font-semibold text-primary">{entry.reportingPeriod}</div>
+                                            <div className="text-[11px] text-on-surface-variant tabular-nums">
                                                 {entry.spendDate ? format(new Date(entry.spendDate), "MMM d, yyyy") : `Year ${entry.spendYear}`}
                                             </div>
                                             {entry.facilityName && (
-                                                <span className="inline-block mt-1 rounded bg-surface-container-high px-1.5 py-0.2 text-[10px] text-on-surface-variant">
+                                                <span className="inline-block mt-1 rounded bg-surface-container-high px-1.5 py-0.2 text-[10px] text-on-surface-variant font-medium">
                                                     {entry.facilityName}
                                                 </span>
                                             )}
@@ -84,30 +84,30 @@ export function Category1Table({
 
                                         {/* NAICS Commodity */}
                                         <TableCell className="py-3 px-4 max-w-[260px]">
-                                            <div className="font-bold text-primary truncate">
+                                            <div className="font-semibold text-primary truncate">
                                                 {entry.factor?.commodityTitle ?? "Purchased Goods Commodity"}
                                             </div>
-                                            <div className="text-[10px] text-secondary font-medium">
+                                            <div className="text-[10px] text-secondary font-medium tabular-nums">
                                                 NAICS {entry.factor?.naicsCode ?? "111110"} • {entry.factor?.kgCo2ePerUsdWithMargins ?? 0.4093} kg/USD
                                             </div>
                                         </TableCell>
 
                                         {/* Spend INR / USD */}
                                         <TableCell className="py-3 px-4">
-                                            <div className="font-bold text-primary">
+                                            <div className="font-semibold tabular-nums text-primary">
                                                 ₹{entry.spendInInr.toLocaleString()}
                                             </div>
-                                            <div className="text-[10px] text-on-surface-variant">
+                                            <div className="text-[10px] text-on-surface-variant tabular-nums">
                                                 ${entry.spendInUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD (@ ₹{entry.exchangeRateUsdToInr}/$)
                                             </div>
                                         </TableCell>
 
                                         {/* Calculated Emissions */}
                                         <TableCell className="py-3 px-4">
-                                            <div className="font-bold text-secondary">
+                                            <div className="font-semibold tabular-nums text-secondary">
                                                 {entry.calculatedTCo2e.toFixed(4)} tCO₂e
                                             </div>
-                                            <div className="text-[10px] text-on-surface-variant">
+                                            <div className="text-[10px] text-on-surface-variant tabular-nums">
                                                 Margin Split: {entry.marginTCo2e.toFixed(4)} tCO₂e
                                             </div>
                                         </TableCell>

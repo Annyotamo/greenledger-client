@@ -65,8 +65,8 @@ export function Sidebar() {
                 <motion.div
                     animate={{ opacity: collapsed ? 0 : 1 }}
                     className={cn("mb-4 px-4 py-6", collapsed && "pointer-events-none")}>
-                    <h1 className="text-headline-md font-bold tracking-tight text-primary">GreenLedger</h1>
-                    <p className="font-mono text-label-md text-on-surface-variant opacity-70">GHG Accounting</p>
+                    <h1 className="text-lg font-bold tracking-tight text-primary font-display">GreenLedger</h1>
+                    <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant/70">GHG Accounting</p>
                 </motion.div>
 
                 <nav className="flex-1 space-y-1">
@@ -78,10 +78,10 @@ export function Sidebar() {
                         <button
                             type="button"
                             onClick={() => !collapsed && setActivitiesOpen((o) => !o)}
-                            className="flex w-full items-center justify-between px-4 py-3 text-on-surface transition-colors duration-200">
+                            className="flex w-full items-center justify-between px-4 py-2.5 text-on-surface transition-colors duration-200 hover:bg-surface-container-high rounded-lg">
                             <span className="flex items-center gap-3">
                                 <MaterialIcon name="energy_savings_leaf" />
-                                {!collapsed && <span className="font-mono text-label-md">Activities</span>}
+                                {!collapsed && <span className="font-sans text-[13px] font-medium">Activities</span>}
                             </span>
                             {!collapsed && (
                                 <MaterialIcon
@@ -103,13 +103,13 @@ export function Sidebar() {
                                                 key={child.label}
                                                 href={child.href}
                                                 className={cn(
-                                                    "relative flex items-center gap-3 py-2 pl-6 transition-colors",
+                                                    "relative flex items-center gap-3 py-1.5 pl-6 transition-colors rounded-md",
                                                     childActive
-                                                        ? "text-on-surface font-semibold"
-                                                        : "text-on-surface-variant hover:text-on-surface",
+                                                        ? "text-on-surface font-semibold bg-secondary-container/40"
+                                                        : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low",
                                                 )}>
                                                 <div className="absolute left-0 top-1/2 h-[2px] w-4 -translate-y-1/2 bg-secondary opacity-40" />
-                                                <span className="font-mono text-[11px]">{child.label}</span>
+                                                <span className="font-sans text-xs">{child.label}</span>
                                             </Link>
                                         );
                                     })}
@@ -126,11 +126,11 @@ export function Sidebar() {
                         <button
                             type="button"
                             onClick={() => !collapsed && setBrsrOpen((o) => !o)}
-                            className="flex w-full items-center justify-between px-4 py-3 text-on-surface transition-colors duration-200"
+                            className="flex w-full items-center justify-between px-4 py-2.5 text-on-surface transition-colors duration-200 hover:bg-surface-container-high rounded-lg"
                             title={collapsed ? "BRSR" : undefined}>
                             <span className="flex items-center gap-3">
                                 <MaterialIcon name="analytics" />
-                                {!collapsed && <span className="font-mono text-label-md">BRSR</span>}
+                                {!collapsed && <span className="font-sans text-[13px] font-medium">BRSR</span>}
                             </span>
                             {!collapsed && (
                                 <MaterialIcon
@@ -152,13 +152,13 @@ export function Sidebar() {
                                                 key={child.label}
                                                 href={child.href}
                                                 className={cn(
-                                                    "relative flex items-center gap-3 py-2 pl-6 transition-colors",
+                                                    "relative flex items-center gap-3 py-1.5 pl-6 transition-colors rounded-md",
                                                     childActive
-                                                        ? "text-on-surface font-semibold"
-                                                        : "text-on-surface-variant hover:text-on-surface",
+                                                        ? "text-on-surface font-semibold bg-secondary-container/40"
+                                                        : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low",
                                                 )}>
                                                 <div className="absolute left-0 top-1/2 h-[2px] w-4 -translate-y-1/2 bg-secondary opacity-40" />
-                                                <span className="font-mono text-[11px]">{child.label}</span>
+                                                <span className="font-sans text-xs">{child.label}</span>
                                             </Link>
                                         );
                                     })}
@@ -179,11 +179,11 @@ export function Sidebar() {
                     <Link
                         href="/login"
                         className={cn(
-                            "mb-4 flex items-center gap-3 px-4 py-2 text-error transition-colors duration-200 hover:bg-error-container/20",
+                            "mb-4 flex items-center gap-3 px-4 py-2 text-error transition-colors duration-200 hover:bg-error-container/20 rounded-lg",
                             collapsed && "justify-center px-2",
                         )}>
                         <MaterialIcon name="logout" />
-                        {!collapsed && <span className="font-mono text-label-md">Logout</span>}
+                        {!collapsed && <span className="font-sans text-[13px] font-medium">Logout</span>}
                     </Link>
 
                     {!collapsed && (
@@ -199,7 +199,7 @@ export function Sidebar() {
                                         className="h-10 w-10 rounded-full border border-outline-variant object-cover"
                                     />
                                 ) : (
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-on-secondary font-semibold">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-on-secondary font-semibold font-sans">
                                         {user
                                             ? `${(user.first_name || "").charAt(0)}${(user.last_name || "").charAt(0)}`
                                             : "U"}
@@ -207,12 +207,12 @@ export function Sidebar() {
                                 )}
 
                                 <div className="min-w-0 overflow-hidden">
-                                    <p className="truncate font-mono text-label-md font-semibold text-primary">
+                                    <p className="truncate font-sans text-sm font-semibold text-primary">
                                         {(user?.full_name ?? user?.first_name)
                                             ? `${user.first_name} ${user.last_name}`
                                             : "User"}
                                     </p>
-                                    <p className="font-mono text-[10px] uppercase tracking-wider text-on-surface-variant">
+                                    <p className="font-sans text-[11px] font-medium text-on-surface-variant truncate">
                                         {user?.job_title ?? user?.role ?? ""}
                                     </p>
                                 </div>
@@ -242,15 +242,15 @@ function SidebarLink({
             href={item.href}
             title={collapsed ? item.label : undefined}
             className={cn(
-                "flex items-center gap-3 px-4 transition-[transform,colors] duration-150 active:scale-[0.98]",
-                compact ? "py-2" : "py-3",
+                "flex items-center gap-3 px-4 transition-[transform,colors] duration-150 active:scale-[0.98] rounded-lg",
+                compact ? "py-2" : "py-2.5",
                 collapsed && "justify-center px-2",
                 isActive
-                    ? "rounded-lg bg-secondary-container font-semibold text-on-secondary-container"
+                    ? "bg-secondary-container font-semibold text-on-secondary-container"
                     : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
             )}>
             <MaterialIcon name={item.icon} className="shrink-0" />
-            {!collapsed && <span className="font-mono text-label-md">{item.label}</span>}
+            {!collapsed && <span className="font-sans text-[13px] font-medium tracking-[-0.005em]">{item.label}</span>}
         </Link>
     );
 }

@@ -215,7 +215,7 @@ export function Category7FormModal({
     const busy = isSubmitting || submitting;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto font-sans">
             <div
                 className="fixed inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity"
                 onClick={onClose}
@@ -224,18 +224,18 @@ export function Category7FormModal({
             <div className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-2xl z-10 max-h-[90vh] flex flex-col my-auto">
                 <div className="flex items-center justify-between border-b border-outline-variant/60 px-6 py-4 bg-surface-container-low/80">
                     <div className="flex items-center gap-2">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary text-on-secondary font-mono text-xs font-bold">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary text-on-secondary font-sans text-xs font-bold">
                             7
                         </span>
                         <div>
-                            <h3 className="font-mono text-headline-sm font-bold text-primary">
+                            <h3 className="font-display text-lg font-bold text-primary tracking-tight">
                                 {mode === "create"
                                     ? "Log Employee Commute Activity"
                                     : mode === "edit"
                                       ? "Edit Employee Commute Activity"
                                       : "Amend Verified Commute Record"}
                             </h3>
-                            <p className="font-mono text-[11px] text-on-surface-variant">
+                            <p className="font-sans text-xs text-slate-500 font-medium">
                                 Scope 3: Category 7 Employee Commuting (Rail, Bus, Carpool & Personal Vehicles)
                             </p>
                         </div>
@@ -254,13 +254,13 @@ export function Category7FormModal({
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                                 Reporting Period <span className="text-error">*</span>
                             </label>
                             <select
                                 value={reportingPeriodId || (periods[0]?.id ?? "")}
                                 onChange={(e) => setReportingPeriodId(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-primary">
                                 {periods.length === 0 && <option value="">Loading reporting periods...</option>}
                                 {periods.map((p) => (
                                     <option key={p.id} value={p.id}>
@@ -271,27 +271,27 @@ export function Category7FormModal({
                         </div>
 
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                                 Commute Title <span className="text-error">*</span>
                             </label>
                             <Input
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 placeholder="e.g. Q1 Staff Rail Commute"
-                                className="font-mono text-xs font-bold"
+                                className="font-sans text-xs font-semibold"
                             />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                                 Office Facility / Work Site
                             </label>
                             <select
                                 value={facilityId}
                                 onChange={(e) => setFacilityId(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-primary">
                                 <option value="">No specific facility (Corporate level)</option>
                                 {facilities.map((fac) => (
                                     <option key={fac.id} value={fac.id}>
@@ -302,37 +302,37 @@ export function Category7FormModal({
                         </div>
 
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                                 Commute Period Start Date <span className="text-error">*</span>
                             </label>
                             <DatePicker
                                 value={startDate}
                                 onChange={setStartDate}
-                                className="font-mono text-xs"
+                                className="font-sans text-xs"
                             />
                         </div>
 
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                                 Commute Period End Date <span className="text-error">*</span>
                             </label>
                             <DatePicker
                                 value={endDate}
                                 onChange={setEndDate}
-                                className="font-mono text-xs"
+                                className="font-sans text-xs"
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                        <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                             Commute Description / Survey Remarks
                         </label>
                         <Input
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="e.g. Aggregated quarterly staff commuting survey results"
-                            className="font-mono text-xs"
+                            className="font-sans text-xs"
                         />
                     </div>
 
@@ -340,10 +340,10 @@ export function Category7FormModal({
                     <div className="space-y-3 pt-3 border-t border-outline-variant/40">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h4 className="font-mono text-xs font-bold text-primary uppercase tracking-wider">
+                                <h4 className="font-sans text-xs font-bold text-primary uppercase tracking-wider">
                                     Itemized Commute Legs ({trips.length})
                                 </h4>
-                                <p className="font-mono text-[10px] text-on-surface-variant">
+                                <p className="font-sans text-[11px] text-slate-500 font-medium">
                                     Add individual transit legs (rail, bus, carpool, personal vehicle).
                                 </p>
                             </div>
@@ -351,7 +351,7 @@ export function Category7FormModal({
                             <button
                                 type="button"
                                 onClick={handleAddTrip}
-                                className="flex items-center gap-1 rounded bg-emerald-50 px-2.5 py-1 font-mono text-[11px] font-bold text-emerald-700 hover:bg-emerald-100 border border-emerald-200">
+                                className="flex items-center gap-1 rounded bg-emerald-50 px-2.5 py-1 font-sans text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 border border-emerald-200 uppercase tracking-wider">
                                 <MaterialIcon name="add" size="xs" /> Add Commute Leg
                             </button>
                         </div>
@@ -360,13 +360,13 @@ export function Category7FormModal({
                             {trips.map((trip, idx) => (
                                 <div
                                     key={`commute-${idx}`}
-                                    className="rounded-xl bg-surface-container-low p-3.5 border border-outline-variant/60 space-y-3 relative">
+                                    className="rounded-xl bg-surface-container-low p-3.5 border border-outline-variant/60 space-y-3 relative font-sans">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-secondary/20 text-secondary font-mono text-[10px] font-bold">
+                                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-secondary/20 text-secondary text-[10px] font-bold tabular-nums">
                                                 #{idx + 1}
                                             </span>
-                                            <span className="flex items-center gap-1 rounded bg-emerald-100 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-800 uppercase">
+                                            <span className="flex items-center gap-1 rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 uppercase tracking-wider">
                                                 <MaterialIcon name="commute" size="xs" /> Commute Transit Leg
                                             </span>
                                         </div>
@@ -379,9 +379,9 @@ export function Category7FormModal({
                                         </button>
                                     </div>
 
-                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 font-sans">
                                         <div className="sm:col-span-2">
-                                            <label className="block font-mono text-[10px] font-bold text-on-surface-variant mb-0.5">
+                                            <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-0.5">
                                                 Commute Leg Description
                                             </label>
                                             <Input
@@ -390,12 +390,12 @@ export function Category7FormModal({
                                                     handleTripChange(idx, { description: e.target.value })
                                                 }
                                                 placeholder="e.g. Employee Suburban Rail Commute"
-                                                className="font-mono text-xs h-8"
+                                                className="font-sans text-xs h-8"
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block font-mono text-[10px] font-bold text-on-surface-variant mb-0.5">
+                                            <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-0.5">
                                                 Total Distance (km)
                                             </label>
                                             <Input
@@ -407,14 +407,14 @@ export function Category7FormModal({
                                                     handleTripChange(idx, { distance: Number(e.target.value) })
                                                 }
                                                 placeholder="e.g. 1420"
-                                                className="font-mono text-xs font-bold h-8"
+                                                className="font-sans text-xs font-semibold tabular-nums h-8"
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 pt-1 border-t border-outline-variant/30">
+                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 pt-1 border-t border-outline-variant/30 font-sans">
                                         <div>
-                                            <label className="block font-mono text-[10px] font-bold text-on-surface-variant mb-0.5">
+                                            <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-0.5">
                                                 Transit / Vehicle Type
                                             </label>
                                             <CustomSelect
@@ -422,14 +422,14 @@ export function Category7FormModal({
                                                 value={trip.car_type_id || carTypes[0]?.id || ""}
                                                 onChange={(val) => handleTripChange(idx, { car_type_id: val })}
                                                 placeholder="Select transit type..."
-                                                className="font-mono text-xs"
+                                                className="font-sans text-xs"
                                                 variant="form"
                                                 isSearchable={true}
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block font-mono text-[10px] font-bold text-on-surface-variant mb-0.5">
+                                            <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-0.5">
                                                 Fuel / Energy Type
                                             </label>
                                             <select
@@ -439,7 +439,7 @@ export function Category7FormModal({
                                                         fuel_type: e.target.value as LandFuelType,
                                                     })
                                                 }
-                                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 font-sans text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-primary">
                                                 <option value="general">General / Public Transit</option>
                                                 <option value="diesel">Diesel</option>
                                                 <option value="petrol">Petrol / Gasoline</option>
@@ -456,10 +456,10 @@ export function Category7FormModal({
                     </div>
 
                     <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/40">
-                        <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={busy}>
+                        <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={busy} className="font-sans text-xs font-semibold">
                             Cancel
                         </Button>
-                        <Button type="submit" variant="primary" size="md" disabled={busy}>
+                        <Button type="submit" variant="primary" size="md" disabled={busy} className="font-sans text-xs font-semibold">
                             {busy
                                 ? "Saving..."
                                 : mode === "create"

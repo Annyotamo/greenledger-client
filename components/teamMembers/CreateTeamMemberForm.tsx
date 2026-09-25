@@ -112,8 +112,8 @@ export function CreateTeamMemberForm() {
                 <div className="flex items-start gap-3 rounded-lg border border-error/20 bg-error/5 p-4">
                     <MaterialIcon name="error" size="sm" className="text-error mt-0.5 flex-shrink-0" />
                     <div>
-                        <p className="font-label-md text-label-md text-error font-semibold uppercase">Error</p>
-                        <p className="text-body-md text-error mt-1">
+                        <p className="font-sans text-[11px] text-error font-bold uppercase tracking-wider">Error</p>
+                        <p className="font-sans text-xs text-error mt-1">
                             {validationError || (error as any)?.message || "Failed to create user."}
                         </p>
                     </div>
@@ -124,13 +124,13 @@ export function CreateTeamMemberForm() {
                 <CardHeader bordered tone="strip">
                     <div className="flex items-center gap-3">
                         <MaterialIcon name="person_add" size="sm" className="text-on-secondary-container" />
-                        <h3 className="text-headline-sm font-semibold text-primary">User Details</h3>
+                        <h3 className="font-display text-headline-sm font-semibold tracking-tight text-primary">User Details</h3>
                     </div>
                 </CardHeader>
                 <CardBody className="space-y-6">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div className="grid gap-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                            <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                                 First Name <span className="text-error">*</span>
                             </label>
                             <Input
@@ -140,7 +140,7 @@ export function CreateTeamMemberForm() {
                             />
                         </div>
                         <div className="grid gap-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                            <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                                 Last Name <span className="text-error">*</span>
                             </label>
                             <Input
@@ -152,7 +152,7 @@ export function CreateTeamMemberForm() {
                     </div>
 
                     <div className="grid gap-2">
-                        <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                        <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                             Email <span className="text-error">*</span>
                         </label>
                         <Input
@@ -164,7 +164,7 @@ export function CreateTeamMemberForm() {
                     </div>
 
                     <div className="grid gap-2">
-                        <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                        <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                             Password <span className="text-error">*</span>
                         </label>
                         <Input
@@ -173,12 +173,12 @@ export function CreateTeamMemberForm() {
                             type="password"
                             placeholder="••••••••"
                         />
-                        <p className="text-body-md text-on-surface-variant">Min 8 characters.</p>
+                        <p className="font-sans text-[11px] text-on-surface-variant">Min 8 characters.</p>
                     </div>
 
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div className="grid gap-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                            <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                                 Role <span className="text-error">*</span>
                             </label>
                             <CustomSelect
@@ -190,7 +190,7 @@ export function CreateTeamMemberForm() {
                         </div>
 
                         <div className="grid gap-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                            <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                                 Job Title
                             </label>
                             <Input
@@ -202,7 +202,7 @@ export function CreateTeamMemberForm() {
                     </div>
 
                     <div className="grid gap-2">
-                        <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                        <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                             Phone Number
                         </label>
                         <Input

@@ -33,10 +33,10 @@ export function AuditLogsHeader({
                         <span>Real-Time Ingestion Logs</span>
                     </span>
                 </div>
-                <h1 className="text-headline-md font-bold tracking-tight text-primary">
+                <h1 className="font-display text-2xl font-bold tracking-tight text-primary">
                     Audit Logs &amp; Activity Trails
                 </h1>
-                <p className="text-sm text-on-surface-variant max-w-2xl">
+                <p className="text-sm text-on-surface-variant max-w-2xl font-sans">
                     Comprehensive chronological record of system events, Scope 1–3 activity submissions, user authentications, and forensic state diffs.
                 </p>
             </div>

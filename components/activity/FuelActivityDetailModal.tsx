@@ -104,23 +104,23 @@ export function FuelActivityDetailModal({
                 <div className="flex flex-col gap-3 border-b border-slate-200/80 bg-slate-50/70 px-6 py-4 sm:flex-row sm:items-center sm:justify-between shrink-0">
                     <div>
                         <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-display">
                                 Scope 1 Fuel Combustion Activity
                             </span>
                             {isLoading && (
-                                <span className="text-[10px] text-primary italic font-mono animate-pulse">
+                                <span className="text-[10px] text-primary italic font-sans animate-pulse">
                                     • Syncing live details...
                                 </span>
                             )}
                         </div>
                         <div className="mt-1 flex flex-wrap items-center gap-3">
-                            <h2 className="text-xl font-bold tracking-tight text-slate-950">
+                            <h2 className="text-xl font-bold font-display tracking-tight text-slate-950">
                                 {activity.fuelName}
                             </h2>
                             <span className="text-xs font-semibold text-slate-600">
                                 ({format(activityStart, "MMM d, yyyy")} – {format(activityEnd, "MMM d, yyyy")})
                             </span>
-                            <span className="px-2 py-0.5 rounded bg-slate-200/80 text-slate-700 font-mono text-[11px] font-bold">
+                            <span className="px-2 py-0.5 rounded bg-slate-200/80 text-slate-700 font-sans text-[11px] font-semibold tabular-nums">
                                 {activeDays} Days
                             </span>
                             <span className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs uppercase tracking-wide border ${statusStyles[statusLower] || statusStyles.default}`}>
@@ -143,8 +143,8 @@ export function FuelActivityDetailModal({
                         <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 flex items-start gap-3">
                             <MaterialIcon name="error" size="sm" className="text-rose-600 shrink-0 mt-0.5" />
                             <div>
-                                <h4 className="text-xs font-bold text-rose-900 uppercase tracking-wider">Rejection Reason</h4>
-                                <p className="text-xs text-rose-700 mt-1 leading-relaxed">{activity.rejectedReason}</p>
+                                <h4 className="text-xs font-bold text-rose-900 uppercase tracking-wider font-display">Rejection Reason</h4>
+                                <p className="text-xs text-rose-700 mt-1 leading-relaxed font-sans">{activity.rejectedReason}</p>
                             </div>
                         </div>
                     )}
@@ -152,14 +152,14 @@ export function FuelActivityDetailModal({
                     {/* Top KPI Cards (4 Grid) */}
                     <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                         <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-1">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Fuel & Emission Type</p>
-                            <p className="text-sm font-bold text-slate-950 truncate">{activity.fuelName}</p>
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-display">Fuel & Emission Type</p>
+                            <p className="text-sm font-bold text-slate-950 truncate font-display">{activity.fuelName}</p>
                             <div className="flex items-center gap-1.5 pt-0.5">
                                 <span className={`inline-flex rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-tight border ${emissionTypeStyles[activity.emissionType?.toLowerCase()] || emissionTypeStyles.default}`}>
                                     {activity.emissionType}
                                 </span>
                                 {activity.fuelFactorType && (
-                                    <span className="text-[10px] font-mono text-slate-500 uppercase">
+                                    <span className="text-[10px] font-sans text-slate-500 uppercase">
                                         • {activity.fuelFactorType}
                                     </span>
                                 )}
@@ -167,8 +167,8 @@ export function FuelActivityDetailModal({
                         </div>
 
                         <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-1">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Quantity Consumed</p>
-                            <p className="text-base font-bold font-mono text-slate-950">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-display">Quantity Consumed</p>
+                            <p className="text-base font-bold font-display tabular-nums text-slate-950">
                                 {activity.quantity.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                             </p>
                             <p className="text-xs text-slate-500 font-semibold uppercase">
@@ -177,18 +177,18 @@ export function FuelActivityDetailModal({
                         </div>
 
                         <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-1">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Total Calculated Emissions</p>
-                            <p className="text-base font-bold font-mono text-primary">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-display">Total Calculated Emissions</p>
+                            <p className="text-base font-bold font-display tabular-nums text-primary">
                                 {(activity.calculatedTCo2e || 0).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 6 })} tCO₂e
                             </p>
-                            <p className="text-[11px] text-slate-500 font-mono">
+                            <p className="text-[11px] text-slate-500 font-sans tabular-nums">
                                 {(activity.calculatedKgCo2e || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kgCO₂e
                             </p>
                         </div>
 
                         <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-1">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Cost & Quality Tier</p>
-                            <p className="text-base font-bold font-mono text-slate-950">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-display">Cost & Quality Tier</p>
+                            <p className="text-base font-bold font-display tabular-nums text-slate-950">
                                 {activity.cost != null ? `₹${activity.cost.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "N/A"}
                             </p>
                             <p className="text-xs text-slate-500 font-medium capitalize">Tier: {activity.dataQualityTier}</p>
@@ -201,10 +201,10 @@ export function FuelActivityDetailModal({
                         <div className="rounded-xl border border-slate-200 p-5 space-y-4 bg-white">
                             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                                 <div>
-                                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Greenhouse Gas Breakdown</h3>
-                                    <p className="text-[11px] text-slate-400 mt-0.5">Specific gas emissions calculated for this event</p>
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 font-display">Greenhouse Gas Breakdown</h3>
+                                    <p className="text-[11px] text-slate-400 mt-0.5 font-sans">Specific gas emissions calculated for this event</p>
                                 </div>
-                                <span className="rounded bg-slate-100 px-2.5 py-1 text-[10px] font-mono font-bold text-slate-700">
+                                <span className="rounded bg-slate-100 px-2.5 py-1 text-[10px] font-sans font-semibold tabular-nums text-slate-700">
                                     {(activity.calculatedTCo2e || 0).toFixed(4)} tCO₂e
                                 </span>
                             </div>
@@ -255,7 +255,7 @@ export function FuelActivityDetailModal({
                                                     <div className="text-[10px] text-slate-500">{item.fullName}</div>
                                                 </div>
                                             </div>
-                                            <div className="text-right font-mono">
+                                            <div className="text-right font-sans tabular-nums">
                                                 <div className="text-xs font-bold text-slate-950">{item.value.toFixed(4)} t</div>
                                                 <div className="text-[10px] text-slate-500">{item.kgValue.toFixed(2)} kg</div>
                                             </div>
@@ -270,7 +270,7 @@ export function FuelActivityDetailModal({
                                                     <div className="text-[10px] text-purple-700 font-medium">Outside of Scopes</div>
                                                 </div>
                                             </div>
-                                            <div className="text-right font-mono">
+                                            <div className="text-right font-sans tabular-nums">
                                                 <div className="text-xs font-bold text-purple-950">{activity.biogenicTCo2.toFixed(4)} t</div>
                                                 <div className="text-[10px] text-purple-700">{(activity.biogenicKgCo2 ?? (activity.biogenicTCo2 * 1000)).toFixed(2)} kg</div>
                                             </div>
@@ -282,47 +282,47 @@ export function FuelActivityDetailModal({
 
                         {/* Operational Context & Facility Details */}
                         <div className="rounded-xl border border-slate-200 p-5 bg-white space-y-4">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2 font-display">
                                 Facility & Reporting Context
                             </h3>
-                            <div className="grid gap-2.5 text-xs font-mono">
+                            <div className="grid gap-2.5 text-xs font-sans">
                                 <div className="flex items-center justify-between py-1 border-b border-slate-100/70">
-                                    <span className="text-slate-500 font-sans font-medium">Facility</span>
-                                    <span className="font-bold text-slate-900 text-right">
+                                    <span className="text-slate-500 font-medium">Facility</span>
+                                    <span className="font-semibold text-slate-900 text-right">
                                         {activity.facilityName} {activity.facilityCode && <span className="text-slate-500">({activity.facilityCode})</span>}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between py-1 border-b border-slate-100/70">
-                                    <span className="text-slate-500 font-sans font-medium">Location</span>
-                                    <span className="font-bold text-slate-900">{facilityLocation || "N/A"}</span>
+                                    <span className="text-slate-500 font-medium">Location</span>
+                                    <span className="font-semibold text-slate-900">{facilityLocation || "N/A"}</span>
                                 </div>
                                 <div className="flex items-center justify-between py-1 border-b border-slate-100/70">
-                                    <span className="text-slate-500 font-sans font-medium">Reporting Period</span>
-                                    <span className="font-bold text-slate-900">
+                                    <span className="text-slate-500 font-medium">Reporting Period</span>
+                                    <span className="font-semibold text-slate-900">
                                         {activity.reportingPeriodName} {activity.periodStatus && <span className="text-emerald-700 uppercase text-[10px]">({activity.periodStatus})</span>}
                                     </span>
                                 </div>
                                 {activity.periodStartDate && activity.periodEndDate && (
                                     <div className="flex items-center justify-between py-1 border-b border-slate-100/70">
-                                        <span className="text-slate-500 font-sans font-medium">Period Range</span>
-                                        <span className="font-medium text-slate-700 text-[11px]">
+                                        <span className="text-slate-500 font-medium">Period Range</span>
+                                        <span className="font-medium text-slate-700 text-[11px] tabular-nums">
                                             {activity.periodStartDate} to {activity.periodEndDate}
                                         </span>
                                     </div>
                                 )}
                                 <div className="flex items-center justify-between py-1 border-b border-slate-100/70">
-                                    <span className="text-slate-500 font-sans font-medium">Data Quality Tier</span>
-                                    <span className="font-bold text-slate-900 capitalize">{activity.dataQualityTier}</span>
+                                    <span className="text-slate-500 font-medium">Data Quality Tier</span>
+                                    <span className="font-semibold text-slate-900 capitalize">{activity.dataQualityTier}</span>
                                 </div>
                                 {activity.meterId && (
                                     <div className="flex items-center justify-between py-1 border-b border-slate-100/70">
-                                        <span className="text-slate-500 font-sans font-medium">Meter Reference</span>
-                                        <span className="font-bold text-slate-900">{activity.meterId}</span>
+                                        <span className="text-slate-500 font-medium">Meter Reference</span>
+                                        <span className="font-mono font-semibold text-slate-900">{activity.meterId}</span>
                                     </div>
                                 )}
                                 {activity.enteredBy && (
                                     <div className="flex items-center justify-between py-1">
-                                        <span className="text-slate-500 font-sans font-medium">Entered By</span>
+                                        <span className="text-slate-500 font-medium">Entered By</span>
                                         <span className="font-medium text-slate-600 text-[11px] truncate max-w-[200px]">{activity.enteredBy}</span>
                                     </div>
                                 )}
@@ -334,12 +334,12 @@ export function FuelActivityDetailModal({
                     <section className="rounded-xl border border-slate-200 p-5 bg-white space-y-3">
                         <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                             <div>
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 font-display">
                                     Emission Factor Reference Information
                                 </h3>
-                                <p className="text-[11px] text-slate-400 mt-0.5">Factor dataset used for combustion GHG calculation</p>
+                                <p className="text-[11px] text-slate-400 mt-0.5 font-sans">Factor dataset used for combustion GHG calculation</p>
                             </div>
-                            <div className="flex items-center gap-1.5 font-mono text-xs">
+                            <div className="flex items-center gap-1.5 font-sans text-xs">
                                 <span className="px-2.5 py-0.5 rounded bg-primary/10 text-primary font-bold">
                                     {activity.fuelFactorStandard || "IPCC"}
                                 </span>
@@ -351,14 +351,14 @@ export function FuelActivityDetailModal({
                             </div>
                         </div>
 
-                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 pt-1 font-mono text-xs">
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 pt-1 font-sans text-xs">
                             <div className="rounded-lg bg-slate-50 p-3">
-                                <span className="text-[10px] uppercase font-bold text-slate-500 block font-sans">Database Standard</span>
+                                <span className="text-[10px] uppercase font-bold text-slate-500 block font-display">Database Standard</span>
                                 <span className="text-xs font-bold text-slate-900 mt-1 block">
                                     {activity.fuelFactorStandard || "IPCC"}
                                 </span>
                                 {(activity.fuelFactorGwpBasis || activity.gwpBasis || activity.source?.gwpBasis) && (
-                                    <span className="text-[10px] text-slate-600 block mt-0.5 font-sans">
+                                    <span className="text-[10px] text-slate-600 block mt-0.5">
                                         GWP Basis: <span className="font-semibold text-slate-800">{activity.fuelFactorGwpBasis || activity.gwpBasis || activity.source?.gwpBasis}</span>
                                     </span>
                                 )}
@@ -366,24 +366,24 @@ export function FuelActivityDetailModal({
                             </div>
 
                             <div className="rounded-lg bg-slate-50 p-3">
-                                <span className="text-[10px] uppercase font-bold text-slate-500 block font-sans">Factor Data Year</span>
-                                <span className="text-xs font-bold text-slate-900 mt-1 block">
+                                <span className="text-[10px] uppercase font-bold text-slate-500 block font-display">Factor Data Year</span>
+                                <span className="text-xs font-bold text-slate-900 mt-1 block tabular-nums">
                                     {activity.factorDataYear || "2023"}
                                 </span>
                                 <span className="text-[10px] text-slate-500 block">Unit: {activity.factorEmissionUnit || "kg"}</span>
                             </div>
 
                             <div className="rounded-lg bg-slate-50 p-3">
-                                <span className="text-[10px] uppercase font-bold text-slate-500 block font-sans">Total Factor Rate (tCO₂e)</span>
-                                <span className="text-xs font-bold text-slate-900 mt-1 block">
+                                <span className="text-[10px] uppercase font-bold text-slate-500 block font-display">Total Factor Rate (tCO₂e)</span>
+                                <span className="text-xs font-bold tabular-nums text-slate-900 mt-1 block">
                                     {(activity.factorTCo2e || 0).toFixed(7)}
                                 </span>
                                 <span className="text-[10px] text-slate-500 block">per {activity.unitSymbol}</span>
                             </div>
 
                             <div className="rounded-lg bg-slate-50 p-3">
-                                <span className="text-[10px] uppercase font-bold text-slate-500 block font-sans">Total Factor Rate (kgCO₂e)</span>
-                                <span className="text-xs font-bold text-slate-900 mt-1 block">
+                                <span className="text-[10px] uppercase font-bold text-slate-500 block font-display">Total Factor Rate (kgCO₂e)</span>
+                                <span className="text-xs font-bold tabular-nums text-slate-900 mt-1 block">
                                     {(activity.factorKgCo2e || 0).toFixed(4)}
                                 </span>
                                 <span className="text-[10px] text-slate-500 block">per {activity.unitSymbol}</span>
@@ -391,18 +391,18 @@ export function FuelActivityDetailModal({
                         </div>
 
                         {/* Granular Gas Factor Rates */}
-                        <div className="grid gap-2 sm:grid-cols-3 pt-2 text-xs font-mono">
+                        <div className="grid gap-2 sm:grid-cols-3 pt-2 text-xs font-sans">
                             <div className="flex items-center justify-between px-3 py-2 rounded bg-slate-50/60 border border-slate-100">
-                                <span className="text-slate-500 font-sans">CO₂ Factor:</span>
-                                <span className="font-bold text-slate-900">{activity.factorKgCo2eOfCo2.toFixed(4)} kg/unit</span>
+                                <span className="text-slate-500">CO₂ Factor:</span>
+                                <span className="font-semibold tabular-nums text-slate-900">{activity.factorKgCo2eOfCo2.toFixed(4)} kg/unit</span>
                             </div>
                             <div className="flex items-center justify-between px-3 py-2 rounded bg-slate-50/60 border border-slate-100">
-                                <span className="text-slate-500 font-sans">N₂O Factor:</span>
-                                <span className="font-bold text-slate-900">{activity.factorKgCo2eOfN2o.toFixed(4)} kg/unit</span>
+                                <span className="text-slate-500">N₂O Factor:</span>
+                                <span className="font-semibold tabular-nums text-slate-900">{activity.factorKgCo2eOfN2o.toFixed(4)} kg/unit</span>
                             </div>
                             <div className="flex items-center justify-between px-3 py-2 rounded bg-slate-50/60 border border-slate-100">
-                                <span className="text-slate-500 font-sans">CH₄ Factor:</span>
-                                <span className="font-bold text-slate-900">{activity.factorKgCo2eOfCh4.toFixed(4)} kg/unit</span>
+                                <span className="text-slate-500">CH₄ Factor:</span>
+                                <span className="font-semibold tabular-nums text-slate-900">{activity.factorKgCo2eOfCh4.toFixed(4)} kg/unit</span>
                             </div>
                         </div>
                     </section>
@@ -411,10 +411,10 @@ export function FuelActivityDetailModal({
                     <section className="rounded-xl border border-slate-200 p-5 bg-white space-y-4">
                         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                             <div>
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 font-display">
                                     Attached Evidence Documents ({attachedDocs.length})
                                 </h3>
-                                <p className="text-[11px] text-slate-400 mt-0.5">Verification documents and invoices attached to this activity</p>
+                                <p className="text-[11px] text-slate-400 mt-0.5 font-sans">Verification documents and invoices attached to this activity</p>
                             </div>
                         </div>
 
@@ -431,11 +431,11 @@ export function FuelActivityDetailModal({
                                             <div className="min-w-0">
                                                 <p className="text-xs font-bold text-slate-900 truncate">{doc.document_name}</p>
                                                 <div className="flex items-center gap-2 mt-0.5">
-                                                    <span className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 font-mono text-[9px] font-bold uppercase">
+                                                    <span className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 font-sans text-[9px] font-semibold uppercase">
                                                         {doc.document_type}
                                                     </span>
                                                     {doc.document_date && (
-                                                        <span className="text-[10px] text-slate-500 font-mono">{doc.document_date}</span>
+                                                        <span className="text-[10px] text-slate-500 font-sans tabular-nums">{doc.document_date}</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -456,7 +456,7 @@ export function FuelActivityDetailModal({
                                 ))}
                             </div>
                         ) : (
-                            <div className="py-6 text-center text-xs text-slate-400 italic bg-slate-50/50 rounded-lg border border-dashed border-slate-200">
+                            <div className="py-6 text-center text-xs text-slate-400 italic bg-slate-50/50 rounded-lg border border-dashed border-slate-200 font-sans">
                                 No evidence documents attached to this activity record.
                             </div>
                         )}
@@ -480,7 +480,7 @@ export function FuelActivityDetailModal({
 
                             {isDraft && onSubmit && (
                                 <button
-                                    className="bg-primary text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded-md shadow-sm font-mono text-xs font-bold uppercase"
+                                    className="bg-primary text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded-md shadow-sm font-sans text-xs font-semibold tracking-wide uppercase"
                                     onClick={() => {
                                         onSubmit(activity.id);
                                         onClose();
@@ -492,7 +492,7 @@ export function FuelActivityDetailModal({
 
                             {isSubmitted && onVerify && (
                                 <button
-                                    className="bg-emerald-600 text-white px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded-md shadow-sm font-mono text-xs font-bold uppercase"
+                                    className="bg-emerald-600 text-white px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded-md shadow-sm font-sans text-xs font-semibold tracking-wide uppercase"
                                     onClick={() => {
                                         onVerify(activity.id);
                                         onClose();
@@ -504,7 +504,7 @@ export function FuelActivityDetailModal({
 
                             {isSubmitted && onReject && (
                                 <button
-                                    className="bg-rose-600 text-white px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded-md shadow-sm font-mono text-xs font-bold uppercase"
+                                    className="bg-rose-600 text-white px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded-md shadow-sm font-sans text-xs font-semibold tracking-wide uppercase"
                                     onClick={() => {
                                         onReject(activity.id);
                                         onClose();

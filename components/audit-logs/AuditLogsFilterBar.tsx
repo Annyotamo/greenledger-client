@@ -149,7 +149,7 @@ export function AuditLogsFilterBar({
                         <MaterialIcon name="tune" size="xs" />
                         <span>Filters</span>
                         {activeFilterCount > 0 && (
-                            <span className="ml-0.5 rounded-full bg-emerald-600 text-white px-1.5 py-0.2 text-[10px] font-mono">
+                            <span className="ml-0.5 rounded-full bg-emerald-600 text-white px-1.5 py-0.2 text-[10px] font-sans font-semibold">
                                 {activeFilterCount}
                             </span>
                         )}
@@ -203,7 +203,7 @@ export function AuditLogsFilterBar({
                                     page: 1,
                                 })
                             }
-                            className="w-full h-8.5 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-700 focus:outline-none focus:border-emerald-500"
+                            className="w-full h-8.5 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-sans text-slate-700 focus:outline-none focus:border-emerald-500"
                         />
                     </div>
 
@@ -220,7 +220,7 @@ export function AuditLogsFilterBar({
                                     page: 1,
                                 })
                             }
-                            className="w-full h-8.5 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-700 focus:outline-none focus:border-emerald-500"
+                            className="w-full h-8.5 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-sans text-slate-700 focus:outline-none focus:border-emerald-500"
                         />
                     </div>
                 </div>

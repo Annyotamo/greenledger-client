@@ -12,8 +12,8 @@ export function AiAssistantFAB() {
                     <MaterialIcon name="smart_toy" className="text-on-secondary-container" />
                 </span>
                 <span className="flex flex-col items-start leading-tight">
-                    <span className="font-mono text-[12px] font-bold">Ask Assistant</span>
-                    <span className="font-mono text-[9px] uppercase tracking-widest opacity-70">AI Insights Ready</span>
+                    <span className="font-sans text-[12px] font-semibold tracking-[-0.01em]">Ask Assistant</span>
+                    <span className="font-sans text-[9px] uppercase tracking-wider opacity-80 font-medium">AI Insights Ready</span>
                 </span>
             </button>
         </div>

@@ -27,13 +27,13 @@ export function Scope2Donut({ segments }: Scope2DonutProps) {
             <CardHeader tone="flat">
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="pie_chart" size="sm" className="text-primary" />
-                    <h3 className="text-headline-sm font-semibold uppercase tracking-tight text-primary">
+                    <h3 className="font-display text-headline-sm font-semibold uppercase tracking-tight text-primary">
                         Gas Breakdown (% CO2e)
                     </h3>
                 </div>
                 <Badge
                     variant="active"
-                    className="border-0 bg-secondary-container/20 text-on-secondary-container text-[9px]">
+                    className="border-0 bg-secondary-container/20 text-on-secondary-container text-[11px] font-sans">
                     GHG Composition
                 </Badge>
             </CardHeader>
@@ -41,16 +41,16 @@ export function Scope2Donut({ segments }: Scope2DonutProps) {
             <CardBody className="flex flex-1 flex-col justify-center gap-8">
                 <div className="flex items-center justify-between rounded-lg border border-outline-variant/30 bg-surface-container-low p-4">
                     <div className="space-y-0.5">
-                        <p className="font-mono text-[10px] uppercase tracking-wider text-on-surface-variant">
+                        <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                             GHG Protocol Accounting
                         </p>
-                        <p className="font-mono text-[18px] font-bold text-primary">
-                            100% <span className="text-[12px] font-normal opacity-70">Audited Factors</span>
+                        <p className="font-display text-[18px] font-bold text-primary tabular-nums">
+                            100% <span className="font-sans text-[12px] font-medium opacity-70">Audited Factors</span>
                         </p>
                     </div>
                     <div className="flex items-center gap-1.5 rounded-full bg-secondary-container/30 px-2.5 py-1 text-secondary">
                         <MaterialIcon name="verified" size="xs" className="font-bold" />
-                        <span className="font-mono text-[10px] font-bold uppercase">IPCC / DEFRA</span>
+                        <span className="font-sans text-[11px] font-bold uppercase tracking-wider">IPCC / DEFRA</span>
                     </div>
                 </div>
 
@@ -73,10 +73,10 @@ export function Scope2Donut({ segments }: Scope2DonutProps) {
                             ))}
                         </svg>
                         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-                            <span className="font-mono text-[28px] font-bold leading-none text-primary">
+                            <span className="font-display text-[30px] font-bold leading-none text-primary tabular-nums tracking-tight">
                                 {totalPercent}%
                             </span>
-                            <span className="mt-1.5 font-mono text-[10px] uppercase tracking-wider text-on-surface-variant font-medium">
+                            <span className="mt-1.5 font-sans text-[11px] uppercase tracking-wider text-on-surface-variant font-semibold">
                                 Accounted
                             </span>
                         </div>
@@ -90,9 +90,9 @@ export function Scope2Donut({ segments }: Scope2DonutProps) {
                                         className="h-3.5 w-3.5 shrink-0 rounded-sm shadow-sm"
                                         style={{ backgroundColor: segment.color }}
                                     />
-                                    <span className="text-[14px] font-medium text-on-surface truncate">{segment.label}</span>
+                                    <span className="font-sans text-[14px] font-medium text-on-surface truncate">{segment.label}</span>
                                 </div>
-                                <span className="shrink-0 font-mono text-[14px] font-bold text-primary">
+                                <span className="shrink-0 font-display text-[14px] font-bold text-primary tabular-nums">
                                     {segment.percent.toFixed(1)}%
                                 </span>
                             </div>
@@ -104,12 +104,12 @@ export function Scope2Donut({ segments }: Scope2DonutProps) {
             <div className="flex h-16 items-center justify-between border-t border-outline-variant px-card-padding bg-surface-container-lowest">
                 <div className="flex items-center gap-1.5 text-on-surface-variant/70">
                     <MaterialIcon name="history" size="xs" />
-                    <p className="font-mono text-[10px] uppercase tracking-wide">Last sync: 08:45 AM</p>
+                    <p className="font-sans text-[11px] uppercase tracking-wide font-medium">Last sync: 08:45 AM</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <button
                         type="button"
-                        className="group inline-flex p-2 items-center gap-2 rounded border border-outline-variant/30 bg-surface-container-low px-4 font-mono text-[11px] text-primary transition-all hover:bg-surface-container-high active:scale-95">
+                        className="group inline-flex p-2 items-center gap-2 rounded border border-outline-variant/30 bg-surface-container-low px-4 font-sans text-xs font-semibold text-primary transition-all hover:bg-surface-container-high active:scale-95">
                         <MaterialIcon
                             name="sync"
                             size="xs"
@@ -119,7 +119,7 @@ export function Scope2Donut({ segments }: Scope2DonutProps) {
                     </button>
                     <button
                         type="button"
-                        className="inline-flex p-2 items-center justify-center rounded bg-primary px-4 font-mono text-[11px] text-on-primary transition-opacity hover:opacity-90">
+                        className="inline-flex p-2 items-center justify-center rounded bg-primary px-4 font-sans text-xs font-semibold text-on-primary transition-opacity hover:opacity-90">
                         Analysis
                     </button>
                 </div>

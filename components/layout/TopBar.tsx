@@ -26,16 +26,16 @@ export function TopBar({ activeTab, onTabChange }: TopBarProps) {
             className="fixed top-0 z-40 flex h-16 w-full items-center justify-between border-b border-outline-variant bg-surface pr-gutter transition-[padding-left] duration-300">
             <div className="flex w-full max-w-5xl items-center gap-8">
                 {isDashboardRoute ? (
-                    <div className="flex rounded-xl border border-outline-variant/30 bg-surface-container-low p-1">
+                    <div className="flex rounded-lg border border-outline-variant/50 bg-surface-container-low p-1">
                         {DASHBOARD_TABS.map((tab) => (
                             <button
                                 key={tab.id}
                                 type="button"
                                 onClick={() => onTabChange(tab.id)}
                                 className={cn(
-                                    "rounded-xl px-4 py-1.5 text-xs font-mono text-label-md transition-all",
+                                    "rounded-md px-3.5 py-1 text-xs font-sans font-medium transition-all select-none cursor-pointer",
                                     activeTab === tab.id
-                                        ? "bg-white text-primary shadow-sm font-medium"
+                                        ? "bg-white text-primary shadow-2xs font-semibold"
                                         : "text-on-surface-variant hover:text-on-surface",
                                 )}>
                                 {tab.label}
@@ -43,10 +43,10 @@ export function TopBar({ activeTab, onTabChange }: TopBarProps) {
                         ))}
                     </div>
                 ) : (
-                    <div className="flex items-center gap-2 font-mono text-xs font-semibold text-primary">
-                        <span className="text-secondary uppercase tracking-wider text-[11px]">GreenLedger ESG</span>
-                        <span className="text-on-surface-variant">/</span>
-                        <span className="capitalize">{pathname?.replace(/^\//, "").replace(/-/g, " ") || "Dashboard"}</span>
+                    <div className="flex items-center gap-2 font-sans text-xs font-medium text-primary">
+                        <span className="text-secondary font-semibold uppercase tracking-wider text-[11px]">GreenLedger ESG</span>
+                        <span className="text-on-surface-variant/60">/</span>
+                        <span className="capitalize text-on-surface font-semibold">{pathname?.replace(/^\//, "").replace(/-/g, " ") || "Dashboard"}</span>
                     </div>
                 )}
             </div>

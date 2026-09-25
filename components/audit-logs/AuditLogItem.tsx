@@ -26,28 +26,28 @@ export function AuditLogItem({ log, onInspect }: AuditLogItemProps) {
             className={cn("hover:bg-slate-50 transition-colors cursor-pointer")}
             onClick={() => onInspect?.(log)}>
             {/* Timestamp */}
-            <TableCell className="font-mono text-[11px] whitespace-nowrap">
+            <TableCell className="font-sans text-xs whitespace-nowrap tabular-nums">
                 <div className="flex flex-col gap-0.5">
-                    <span className="font-medium text-slate-800">{formatDateTime(log.created_at)}</span>
-                    <span className="text-[10px] text-slate-400">{log.id.slice(0, 8)}</span>
+                    <span className="font-semibold text-slate-800">{formatDateTime(log.created_at)}</span>
+                    <span className="text-[10px] text-slate-400 font-mono">{log.id.slice(0, 8)}</span>
                 </div>
             </TableCell>
 
             {/* Event Type & Description */}
             <TableCell>
                 <div className="flex flex-col gap-1 max-w-sm">
-                    <span className="font-semibold text-slate-900 text-xs">{formatEventType(log.event_type)}</span>
-                    <span className="text-[11px] text-slate-600 line-clamp-2">{log.description}</span>
+                    <span className="font-semibold text-slate-900 text-xs font-sans">{formatEventType(log.event_type)}</span>
+                    <span className="text-xs text-slate-600 line-clamp-2 font-sans">{log.description}</span>
                 </div>
             </TableCell>
 
             {/* Module */}
-            <TableCell className="text-[11px]">
+            <TableCell className="text-xs">
                 <Badge variant="tag">{moduleInfo.label}</Badge>
             </TableCell>
 
             {/* Actor */}
-            <TableCell className="font-mono text-[11px]">
+            <TableCell className="font-sans text-xs">
                 <div className="flex flex-col gap-0.5">
                     <span className="font-medium text-slate-800">{log.actor_email}</span>
                     <span className="text-[10px] text-slate-400 capitalize">{log.actor_type}</span>
@@ -55,12 +55,12 @@ export function AuditLogItem({ log, onInspect }: AuditLogItemProps) {
             </TableCell>
 
             {/* Resource */}
-            <TableCell className="text-[11px] text-slate-600 font-mono">
+            <TableCell className="text-xs text-slate-600">
                 {log.resource_identifier || log.resource_id ? (
                     <div className="flex flex-col gap-0.5">
-                        <span className="text-slate-800">{log.resource_identifier || log.resource_id}</span>
+                        <span className="text-slate-800 font-mono text-[11px] font-semibold">{log.resource_identifier || log.resource_id}</span>
                         {log.resource_type && (
-                            <span className="text-[10px] text-slate-400">{log.resource_type}</span>
+                            <span className="text-[10px] text-slate-400 font-sans">{log.resource_type}</span>
                         )}
                     </div>
                 ) : (
@@ -84,7 +84,7 @@ export function AuditLogItem({ log, onInspect }: AuditLogItemProps) {
             </TableCell>
 
             {/* Error Message (if failure) */}
-            <TableCell className="text-[10px] text-slate-500 font-mono">
+            <TableCell className="text-xs text-slate-500 font-sans">
                 {log.status === "failure" && (log.error_message || log.reason) ? (
                     <span className="text-rose-600 line-clamp-1">{log.error_message || log.reason}</span>
                 ) : (

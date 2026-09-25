@@ -33,21 +33,21 @@ export function ScopeKpiCardsGrid({ scopeCards }: ScopeKpiCardsGridProps) {
                         <div className="bg-white p-4 sm:p-5 rounded-xl border border-outline-variant hover:border-primary transition-all duration-200 cursor-default flex flex-col justify-between h-full shadow-2xs">
                             {/* Card Top Row: Icon + Label on Left, Badge on Right */}
                             <div className="flex items-center justify-between gap-2 mb-3">
-                                <div className="flex items-center gap-2 min-w-0">
-                                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${card.iconBgClassName}`}>
-                                        <MaterialIcon name={card.icon} size="sm" className="text-[16px]" />
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${card.iconBgClassName}`}>
+                                        <MaterialIcon name={card.icon} size="sm" className="text-[17px]" />
                                     </div>
-                                    <span className="text-on-surface-variant font-mono text-xs font-bold uppercase tracking-tight truncate">
+                                    <span className="text-on-surface-variant font-sans text-[11px] font-semibold uppercase tracking-wider truncate">
                                         {card.label}
                                     </span>
                                 </div>
 
                                 {card.changePct !== undefined && (
                                     <span
-                                        className={`font-mono text-xs font-bold px-2 py-0.5 rounded shrink-0 ${
+                                        className={`font-sans text-xs font-medium px-2 py-0.5 rounded-md shrink-0 border ${
                                             isDown
-                                                ? "bg-secondary-container/40 text-on-secondary-container"
-                                                : "bg-error-container/40 text-on-error-container"
+                                                ? "bg-secondary-container/40 text-on-secondary-container border-secondary-container/60"
+                                                : "bg-error-container/40 text-on-error-container border-error-container/60"
                                         }`}>
                                         {card.changePct >= 0 ? "+" : ""}
                                         {card.changePct.toFixed(1)}%
@@ -57,17 +57,17 @@ export function ScopeKpiCardsGrid({ scopeCards }: ScopeKpiCardsGridProps) {
 
                             {/* Middle Metric Value */}
                             <div className="space-y-1 my-1">
-                                <div className="flex items-baseline gap-1.5 font-mono">
-                                    <span className="text-2xl lg:text-[26px] text-primary font-extrabold tracking-tight">
+                                <div className="flex items-baseline gap-1.5 font-sans">
+                                    <span className="text-2xl lg:text-[26px] text-primary font-bold tracking-tight font-display tabular-nums">
                                         {card.value}
                                     </span>
-                                    <span className="text-on-surface-variant font-mono text-xs font-medium">
+                                    <span className="text-on-surface-variant font-sans text-xs font-medium">
                                         {card.unit}
                                     </span>
                                 </div>
 
                                 {card.subtitle && (
-                                    <div className="text-xs font-mono text-on-surface-variant font-medium">
+                                    <div className="text-xs font-sans text-on-surface-variant font-medium">
                                         {card.subtitle}
                                     </div>
                                 )}

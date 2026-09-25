@@ -97,10 +97,10 @@ export function BrsrDocumentUploadSection({
     };
 
     return (
-        <div className="border-t border-outline-variant/60 pt-4 space-y-3">
+        <div className="border-t border-outline-variant/60 pt-4 space-y-3 font-sans">
             <div className="flex items-center gap-2">
                 <MaterialIcon name="verified_user" size="sm" className="text-primary" />
-                <span className="text-xs font-bold text-primary uppercase tracking-wider block">
+                <span className="text-xs font-bold text-primary uppercase tracking-wider block font-display">
                     {title}
                 </span>
             </div>

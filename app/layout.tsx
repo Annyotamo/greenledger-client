@@ -1,21 +1,30 @@
 import type { Metadata } from "next";
-import { Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/providers/QueryProvider";
 import "@material-symbols/font-400/outlined.css";
 
 import CookieConsentOverlay from "@/components/ui/CookieConsentOverlay";
 
-const hanken = Hanken_Grotesk({
+const inter = Inter({
     subsets: ["latin"],
-    variable: "--font-hanken",
+    variable: "--font-inter",
     display: "swap",
+    weight: ["300", "400", "500", "600", "700", "800"],
+});
+
+const displayFont = Plus_Jakarta_Sans({
+    subsets: ["latin"],
+    variable: "--font-display",
+    display: "swap",
+    weight: ["500", "600", "700", "800"],
 });
 
 const jetbrains = JetBrains_Mono({
     subsets: ["latin"],
     variable: "--font-jetbrains",
     display: "swap",
+    weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -38,9 +47,9 @@ export default function RootLayout({
         <html
             lang="en"
             data-scroll-behavior="smooth"
-            className={`${hanken.variable} ${jetbrains.variable} h-full antialiased`}
+            className={`${inter.variable} ${displayFont.variable} ${jetbrains.variable} h-full antialiased`}
             suppressHydrationWarning>
-            <body className="flex min-h-screen flex-col overflow-x-hidden font-[var(--font-hanken),Inter,system-ui,sans-serif]">
+            <body className="flex min-h-screen flex-col overflow-x-hidden font-sans text-on-surface">
                 <QueryProvider>
                     {children}
                     <CookieConsentOverlay />

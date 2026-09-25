@@ -267,7 +267,7 @@ export function Category5FormModal({
     const busy = isSubmitting || submitting;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto font-sans">
             <div
                 className="fixed inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity"
                 onClick={onClose}
@@ -276,18 +276,18 @@ export function Category5FormModal({
             <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-2xl z-10 max-h-[85vh] flex flex-col my-auto">
                 <div className="flex items-center justify-between border-b border-outline-variant/60 px-6 py-4 bg-surface-container-low/80">
                     <div className="flex items-center gap-2">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary text-on-secondary font-mono text-xs font-bold">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary text-on-secondary font-sans text-xs font-bold">
                             5
                         </span>
                         <div>
-                            <h3 className="font-mono text-headline-sm font-bold text-primary">
+                            <h3 className="font-display text-lg font-bold text-primary tracking-tight">
                                 {mode === "create"
                                     ? "Log Category 5 Waste Activity"
                                     : mode === "edit"
                                       ? "Edit Category 5 Waste Activity"
                                       : "Amend Verified Operational Waste Entry"}
                             </h3>
-                            <p className="font-mono text-[11px] text-on-surface-variant">
+                            <p className="font-sans text-xs text-slate-500 font-medium">
                                 Scope 3: Waste Generated in Operations (Disposal & Treatment Model)
                             </p>
                         </div>
@@ -306,13 +306,13 @@ export function Category5FormModal({
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                                 Reporting Period <span className="text-error">*</span>
                             </label>
                             <select
                                 value={reportingPeriodId || (periods[0]?.id ?? "")}
                                 onChange={(e) => setReportingPeriodId(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-primary">
                                 {periods.length === 0 && <option value="">Loading reporting periods...</option>}
                                 {periods.map((p) => (
                                     <option key={p.id} value={p.id}>
@@ -323,13 +323,13 @@ export function Category5FormModal({
                         </div>
 
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                                 Facility (Optional)
                             </label>
                             <select
                                 value={facilityId}
                                 onChange={(e) => setFacilityId(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-primary">
                                 <option value="">No specific facility (Corporate level)</option>
                                 {facilities.map((fac) => (
                                     <option key={fac.id} value={fac.id}>
@@ -342,7 +342,7 @@ export function Category5FormModal({
 
                     {/* Waste Category Filter Dropdown */}
                     <div>
-                        <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                        <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                             Waste Category Filter
                         </label>
                         <CustomSelect
@@ -353,7 +353,7 @@ export function Category5FormModal({
                                 setWasteTypeId("");
                             }}
                             placeholder="All Waste Categories..."
-                            className="font-mono text-xs"
+                            className="font-sans text-xs"
                             variant="form"
                             isSearchable={true}
                         />
@@ -361,7 +361,7 @@ export function Category5FormModal({
 
                     {/* Waste Material Dropdown */}
                     <div>
-                        <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                        <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                             Waste Material Type <span className="text-error">*</span>
                         </label>
                         <CustomSelect
@@ -369,7 +369,7 @@ export function Category5FormModal({
                             value={activeWasteTypeId}
                             onChange={(val) => setWasteTypeId(val)}
                             placeholder="Select waste material..."
-                            className="font-mono text-xs"
+                            className="font-sans text-xs"
                             variant="form"
                             isSearchable={true}
                         />
@@ -377,7 +377,7 @@ export function Category5FormModal({
 
                     {/* Supported Treatment Method Dropdown */}
                     <div>
-                        <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                        <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                             Treatment & Disposal Method <span className="text-error">*</span>
                         </label>
                         <CustomSelect
@@ -385,7 +385,7 @@ export function Category5FormModal({
                             value={activeTreatmentMethod}
                             onChange={(val) => setTreatmentMethod(val as WasteTreatmentMethodEnum)}
                             placeholder="Select treatment method..."
-                            className="font-mono text-xs"
+                            className="font-sans text-xs"
                             variant="form"
                             isSearchable={false}
                         />
@@ -394,18 +394,18 @@ export function Category5FormModal({
                     {/* Activity Date & Tonnes Quantity */}
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                                 Activity Date <span className="text-error">*</span>
                             </label>
                             <DatePicker
                                 value={activityDate}
                                 onChange={setActivityDate}
-                                className="font-mono text-xs"
+                                className="font-sans text-xs"
                             />
                         </div>
 
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                                 Waste Generated (Tonnes) <span className="text-error">*</span>
                             </label>
                             <Input
@@ -415,31 +415,31 @@ export function Category5FormModal({
                                 value={wasteTonnes}
                                 onChange={(e) => setWasteTonnes(e.target.value)}
                                 placeholder="e.g. 10.5"
-                                className="font-mono text-xs font-bold"
+                                className="font-sans text-xs font-semibold tabular-nums"
                             />
                         </div>
                     </div>
 
                     {/* Live Preview Box */}
-                    <div className="rounded-lg bg-surface-container-low p-3 border border-outline-variant/40 space-y-1">
-                        <span className="font-mono text-[10px] uppercase font-bold text-on-surface-variant">
+                    <div className="rounded-lg bg-surface-container-low p-3.5 border border-outline-variant/40 space-y-1">
+                        <span className="font-sans text-[11px] uppercase tracking-wider font-semibold text-slate-500">
                             Treatment & Disposal Emissions Preview
                         </span>
                         <div className="flex items-baseline justify-between">
-                            <span className="font-mono text-xs font-bold text-primary">
+                            <span className="font-sans text-xs font-semibold text-slate-900 tabular-nums">
                                 {numTonnes.toLocaleString(undefined, { minimumFractionDigits: 2 })} tonnes ({selectedMethodDetail?.method_label || "Treatment"})
                             </span>
-                            <span className="font-mono text-xs font-bold text-secondary">
+                            <span className="font-sans text-xs font-bold text-secondary tabular-nums">
                                 {estimatedTCo2e.toFixed(4)} tCO₂e
                             </span>
                         </div>
-                        <p className="font-mono text-[10px] text-on-surface-variant">
+                        <p className="font-sans text-[11px] text-slate-500 tabular-nums">
                             Factor: {validKgPerTonne.toFixed(2)} kgCO₂e / tonne (Ref: {selectedMethodDetail?.source_reference_code || "DEFRA Waste Model"})
                         </p>
                     </div>
 
                     <div>
-                        <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                        <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                             Notes / Disposal Manifest Remarks
                         </label>
                         <textarea
@@ -447,15 +447,15 @@ export function Category5FormModal({
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Enter waste disposal manifest numbers, contractor names, landfill tickets, or recycling receipts..."
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary leading-relaxed"
                         />
                     </div>
 
                     <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/40">
-                        <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={busy}>
+                        <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={busy} className="font-sans text-xs font-semibold">
                             Cancel
                         </Button>
-                        <Button type="submit" variant="primary" size="md" disabled={busy}>
+                        <Button type="submit" variant="primary" size="md" disabled={busy} className="font-sans text-xs font-semibold">
                             {busy
                                 ? "Saving..."
                                 : mode === "create"

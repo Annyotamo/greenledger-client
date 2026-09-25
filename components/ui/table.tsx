@@ -10,13 +10,13 @@ export function TableHeader({ className, ...props }: HTMLAttributes<HTMLTableSec
 }
 
 export function TableBody({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
-    return <tbody className={cn("font-mono text-[12px] text-on-surface", className)} {...props} />;
+    return <tbody className={cn("font-sans text-[13px] text-on-surface divide-y divide-outline-variant/40", className)} {...props} />;
 }
 
 export function TableRow({ className, ...props }: HTMLAttributes<HTMLTableRowElement>) {
     return (
         <tr
-            className={cn("border-b border-outline-variant transition-colors hover:bg-surface-container", className)}
+            className={cn("border-b border-outline-variant/60 transition-colors hover:bg-surface-container-low/60", className)}
             {...props}
         />
     );
@@ -26,7 +26,7 @@ export function TableHead({ className, ...props }: ThHTMLAttributes<HTMLTableCel
     return (
         <th
             className={cn(
-                "px-4 py-3 font-mono text-[10px] font-medium uppercase tracking-wide text-on-surface-variant",
+                "px-4 py-3 font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant select-none",
                 className
             )}
             {...props}
@@ -35,5 +35,5 @@ export function TableHead({ className, ...props }: ThHTMLAttributes<HTMLTableCel
 }
 
 export function TableCell({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
-    return <td className={cn("px-4 py-4", className)} {...props} />;
+    return <td className={cn("px-4 py-3.5 font-sans text-[13px] align-middle", className)} {...props} />;
 }

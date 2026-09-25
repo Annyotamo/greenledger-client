@@ -23,49 +23,49 @@ export function Category3FuelSummary({ entries }: Category3FuelSummaryProps) {
     return (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+                <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                     Total WTT Fuel Consumption
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
+                <p className="mt-2 font-display text-2xl font-bold tracking-tight text-primary tabular-nums">
                     {formatNumber(totalQuantity, 1)}
                 </p>
-                <p className="mt-2 font-mono text-[11px] font-medium text-secondary">
+                <p className="mt-2 font-sans text-xs font-medium text-secondary tabular-nums">
                     Across {entries.length} Upstream Fuel Activity Records
                 </p>
             </Card>
 
             <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+                <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                     Upstream WTT Emissions
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {formatNumber(totalEmissionsTco2e, 4)} <span className="text-body-md font-normal text-on-surface-variant">tCO₂e</span>
+                <p className="mt-2 font-display text-2xl font-bold tracking-tight text-primary tabular-nums">
+                    {formatNumber(totalEmissionsTco2e, 4)} <span className="font-sans text-sm font-normal text-on-surface-variant">tCO₂e</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-on-surface-variant">
+                <p className="mt-2 font-sans text-xs font-medium text-on-surface-variant">
                     Extraction, Refining & Fuel Distribution (DEFRA WTT Model)
                 </p>
             </Card>
 
             <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+                <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                     Verification Breakdown
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {verifiedCount} <span className="text-body-md font-normal text-on-surface-variant">Verified</span>
+                <p className="mt-2 font-display text-2xl font-bold tracking-tight text-primary tabular-nums">
+                    {verifiedCount} <span className="font-sans text-sm font-normal text-on-surface-variant">Verified</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-secondary font-medium">
+                <p className="mt-2 font-sans text-xs font-medium text-secondary tabular-nums">
                     {submittedCount} Submitted • {draftCount} Draft
                 </p>
             </Card>
 
             <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+                <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                     Average WTT Intensity
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {entries.length > 0 ? formatNumber(totalEmissionsTco2e / entries.length, 3) : "0.000"} <span className="text-body-md font-normal text-on-surface-variant">tCO₂e/record</span>
+                <p className="mt-2 font-display text-2xl font-bold tracking-tight text-primary tabular-nums">
+                    {entries.length > 0 ? formatNumber(totalEmissionsTco2e / entries.length, 3) : "0.000"} <span className="font-sans text-sm font-normal text-on-surface-variant">tCO₂e/record</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-on-surface-variant">
+                <p className="mt-2 font-sans text-xs font-medium text-on-surface-variant">
                     Scope 3 Cat 3 Upstream Well-To-Tank Model
                 </p>
             </Card>

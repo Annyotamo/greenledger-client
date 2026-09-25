@@ -29,18 +29,18 @@ export function TopHeroKpiBanner({ totalCard, intensityCard }: TopHeroKpiBannerP
                 {/* Compact Hero 1: Total GHG Emissions */}
                 <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                            <MaterialIcon name="leaderboard" size="sm" className="!text-[15px]" />
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <MaterialIcon name="leaderboard" size="sm" className="!text-[16px]" />
                         </div>
                         <div className="space-y-0.5">
-                            <span className="block font-mono text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                            <span className="block font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                                 Total GHG Emissions
                             </span>
-                            <div className="flex items-baseline gap-1.5 font-mono">
-                                <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-primary">
+                            <div className="flex items-baseline gap-1.5 font-sans">
+                                <span className="text-2xl sm:text-[28px] font-bold tracking-tight text-primary font-display tabular-nums">
                                     {totalVal}
                                 </span>
-                                <span className="font-mono text-[10px] font-bold text-on-surface-variant">
+                                <span className="font-sans text-xs font-medium text-on-surface-variant">
                                     tCO2e
                                 </span>
                             </div>
@@ -49,7 +49,7 @@ export function TopHeroKpiBanner({ totalCard, intensityCard }: TopHeroKpiBannerP
 
                     {totalCard?.changePct !== undefined && (
                         <span
-                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold border ${
+                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-sans text-xs font-medium border ${
                                 isTotalDown
                                     ? "bg-secondary-container/30 text-on-secondary-container border-secondary-container/50"
                                     : "bg-error-container/30 text-on-error-container border-error-container/50"
@@ -57,7 +57,7 @@ export function TopHeroKpiBanner({ totalCard, intensityCard }: TopHeroKpiBannerP
                             <MaterialIcon
                                 name={isTotalDown ? "trending_down" : "trending_up"}
                                 size="sm"
-                                className="!text-[12px]"
+                                className="!text-[13px]"
                             />
                             {totalChangePct >= 0 ? "+" : ""}
                             {totalChangePct.toFixed(1)}% YoY
@@ -71,18 +71,18 @@ export function TopHeroKpiBanner({ totalCard, intensityCard }: TopHeroKpiBannerP
                 {/* Compact Hero 2: Emissions Intensity */}
                 <div className="flex items-center justify-between gap-4 md:pl-6">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600">
-                            <MaterialIcon name="speed" size="sm" className="!text-[15px]" />
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600">
+                            <MaterialIcon name="speed" size="sm" className="!text-[16px]" />
                         </div>
                         <div className="space-y-0.5">
-                            <span className="block font-mono text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                            <span className="block font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                                 Emissions Intensity
                             </span>
-                            <div className="flex items-baseline gap-1.5 font-mono">
-                                <span className="text-lg sm:text-xl font-extrabold tracking-tight text-sky-600">
+                            <div className="flex items-baseline gap-1.5 font-sans">
+                                <span className="text-xl sm:text-2xl font-bold tracking-tight text-sky-600 font-display tabular-nums">
                                     {/* {intensityTonne} */} 721.3671
                                 </span>
-                                <span className="font-mono text-[10px] font-bold text-on-surface-variant">
+                                <span className="font-sans text-xs font-medium text-on-surface-variant">
                                     tCO2e/t product
                                 </span>
                             </div>
@@ -90,9 +90,9 @@ export function TopHeroKpiBanner({ totalCard, intensityCard }: TopHeroKpiBannerP
                     </div>
 
                     {intensityRevenue && (
-                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-500/10 border border-sky-500/20 text-sky-800 font-mono text-[10px] font-bold shrink-0">
-                            <span className="text-on-surface-variant font-medium">Revenue Int:</span>
-                            <span>{intensityRevenue} tCO2e/₹</span>
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sky-500/10 border border-sky-500/20 text-sky-800 font-sans text-xs font-medium shrink-0">
+                            <span className="text-on-surface-variant">Revenue Int:</span>
+                            <span className="font-semibold tabular-nums">{intensityRevenue} tCO2e/₹</span>
                         </div>
                     )}
                 </div>

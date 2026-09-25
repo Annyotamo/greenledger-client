@@ -90,23 +90,23 @@ export function CustomSelect({
         input: (provided) => ({
             ...provided,
             color: "var(--gl-on-surface, #191c1d)",
-            fontFamily: "var(--font-mono), monospace",
-            fontSize: variant === "compact" ? "0.875rem" : "0.75rem",
+            fontFamily: "var(--font-sans), sans-serif",
+            fontSize: variant === "compact" ? "0.8125rem" : "0.875rem",
             margin: 0,
             padding: 0,
         }),
         placeholder: (provided) => ({
             ...provided,
             color: "var(--gl-on-surface-variant, #45464c)",
-            fontFamily: "var(--font-mono), monospace",
-            fontSize: variant === "compact" ? "0.875rem" : "0.75rem",
+            fontFamily: "var(--font-sans), sans-serif",
+            fontSize: variant === "compact" ? "0.8125rem" : "0.875rem",
             opacity: 0.6,
         }),
         singleValue: (provided) => ({
             ...provided,
             color: "var(--gl-on-surface, #191c1d)",
-            fontFamily: "var(--font-mono), monospace",
-            fontSize: variant === "compact" ? "0.875rem" : "0.75rem",
+            fontFamily: "var(--font-sans), sans-serif",
+            fontSize: variant === "compact" ? "0.8125rem" : "0.875rem",
             fontWeight: 500,
             display: "flex",
             alignItems: "center",
@@ -158,9 +158,10 @@ export function CustomSelect({
             color: state.isSelected
                 ? "var(--gl-on-secondary-container, #00714d)"
                 : "var(--gl-on-surface, #191c1d)",
-            padding: "6px 10px",
-            fontSize: "0.75rem",
-            fontFamily: "var(--font-mono), monospace",
+            padding: "8px 12px",
+            fontSize: "0.8125rem",
+            fontFamily: "var(--font-sans), sans-serif",
+            fontWeight: 500,
             cursor: "pointer",
             transition: "all 150ms ease",
             "&:active": {
@@ -172,13 +173,13 @@ export function CustomSelect({
     if (!isMounted) {
         if (variant === "compact") {
             return (
-                <div className="inline-flex items-center gap-1 px-1 py-0.5 text-sm font-semibold text-on-surface opacity-60">
+                <div className="inline-flex items-center gap-1 px-1 py-0.5 text-xs font-semibold text-on-surface opacity-60 font-sans">
                     {placeholder}
                 </div>
             );
         }
         return (
-            <div className={`relative w-full rounded-lg border ${error ? "border-error" : "border-outline-variant"} bg-white min-h-[38px] px-3 py-2 text-xs font-mono text-on-surface`}>
+            <div className={`relative w-full rounded-lg border ${error ? "border-error" : "border-outline-variant"} bg-white min-h-[38px] px-3 py-2 text-xs font-sans text-on-surface`}>
                 <span className="opacity-60">{placeholder}</span>
             </div>
         );

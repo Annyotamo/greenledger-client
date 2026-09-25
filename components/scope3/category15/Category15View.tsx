@@ -147,12 +147,12 @@ export function Category15View() {
     }
 
     return (
-        <div className="relative mx-auto max-w-[1400px] space-y-6 pb-12">
+        <div className="relative mx-auto max-w-[1400px] space-y-6 pb-12 font-sans">
             <Scope3Navbar />
 
             {notification && (
                 <div
-                    className={`flex items-center justify-between rounded-xl px-4 py-3 font-mono text-xs shadow-md border ${
+                    className={`flex items-center justify-between rounded-xl px-4 py-3 font-sans text-xs font-medium shadow-md border ${
                         notification.type === "success"
                             ? "bg-secondary-container/90 text-on-secondary-container border-secondary/30"
                             : "bg-error-container/90 text-on-error-container border-error/30"
@@ -170,17 +170,17 @@ export function Category15View() {
             {/* Page Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-outline-variant/40 pb-4">
                 <div className="space-y-1">
-                    <div className="flex items-center gap-2 font-mono text-xs text-on-surface-variant">
+                    <div className="flex items-center gap-2 font-sans text-xs text-slate-500 font-medium">
                         <Link href="/scope-3" className="hover:text-primary transition-colors">
                             Scope 3 Value Chain
                         </Link>
                         <span>/</span>
-                        <span className="text-secondary font-bold">Cat 15: Investments (Financed Emissions)</span>
+                        <span className="text-secondary font-semibold">Cat 15: Investments (Financed Emissions)</span>
                     </div>
-                    <h1 className="text-headline-md font-bold text-primary tracking-tight">
+                    <h1 className="font-display text-2xl sm:text-3xl font-bold text-primary tracking-tight">
                         Investments & Financed Emissions (Category 15)
                     </h1>
-                    <p className="font-mono text-xs text-on-surface-variant max-w-3xl">
+                    <p className="font-sans text-xs text-slate-500 max-w-3xl leading-relaxed">
                         Quantify Scope 3 Category 15 financed emissions across 7 PCAF asset classes (listed shares, business loans, project finance, property loans, mortgages, vehicle loans, and sovereign debt).
                     </p>
                 </div>
@@ -190,12 +190,12 @@ export function Category15View() {
                         variant="secondary"
                         size="md"
                         onClick={() => investmentsQuery.refetch()}
-                        className="gap-1.5 font-mono text-xs">
+                        className="gap-1.5 font-sans text-xs font-semibold">
                         <MaterialIcon name="refresh" size="sm" />
                         <span>Refresh</span>
                     </Button>
 
-                    <Button variant="primary" size="md" onClick={handleOpenCreate} className="gap-1.5 font-mono text-xs">
+                    <Button variant="primary" size="md" onClick={handleOpenCreate} className="gap-1.5 font-sans text-xs font-semibold">
                         <MaterialIcon name="add" size="sm" />
                         <span>Log Investment Activity</span>
                     </Button>
@@ -204,24 +204,24 @@ export function Category15View() {
 
             {/* Filter Control Toolbar */}
             <Card className="p-4 border-outline-variant/60">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-5 font-mono text-xs">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-5 font-sans text-xs">
                     <div>
-                        <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Search Financed Asset</label>
+                        <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Search Financed Asset</label>
                         <input
                             type="text"
                             value={searchFilter}
                             onChange={(e) => setSearchFilter(e.target.value)}
                             placeholder="Search asset title..."
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">PCAF Asset Class</label>
+                        <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">PCAF Asset Class</label>
                         <select
                             value={assetClassFilter}
                             onChange={(e) => setAssetClassFilter(e.target.value)}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-primary">
                             <option value="">All PCAF Classes</option>
                             <option value="listed_shares_or_corporate_bonds">#1 Listed shares or corporate bonds</option>
                             <option value="business_loan_or_unlisted_equity">#2 Business loan or unlisted equity</option>
@@ -234,11 +234,11 @@ export function Category15View() {
                     </div>
 
                     <div>
-                        <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Status Filter</label>
+                        <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Status Filter</label>
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-primary">
                             <option value="">All Statuses</option>
                             <option value="verified">Verified (Locked)</option>
                             <option value="submitted">Submitted (Pending Review)</option>
@@ -248,11 +248,11 @@ export function Category15View() {
                     </div>
 
                     <div>
-                        <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Facility / Portfolio</label>
+                        <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Facility / Portfolio</label>
                         <select
                             value={facilityFilter}
                             onChange={(e) => setFacilityFilter(e.target.value)}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-primary">
                             <option value="">All Facilities</option>
                             {(facilitiesQuery.data ?? []).map((fac) => (
                                 <option key={fac.id} value={fac.id}>
@@ -263,11 +263,11 @@ export function Category15View() {
                     </div>
 
                     <div>
-                        <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Reporting Period</label>
+                        <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Reporting Period</label>
                         <select
                             value={periodIdFilter}
                             onChange={(e) => setPeriodIdFilter(e.target.value)}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-primary">
                             <option value="">All Reporting Periods</option>
                             {(reportingPeriodsQuery.data ?? []).map((p) => (
                                 <option key={p.id} value={p.id}>

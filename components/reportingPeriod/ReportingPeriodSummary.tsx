@@ -21,14 +21,14 @@ function StatCard({ label, value, unit, icon }: StatCardProps) {
     return (
         <Card className="p-card-padding flex flex-col gap-2">
             <div className="flex items-start justify-between">
-                <p className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface-variant">
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                     {label}
                 </p>
                 <MaterialIcon name={icon} className="text-on-secondary-container" size="sm" />
             </div>
-            <div className="text-headline-md font-headline-md font-semibold text-primary">
+            <div className="font-display text-headline-md font-bold text-primary tabular-nums tracking-tight">
                 {value}
-                {unit && <span className="text-body-md font-normal text-on-surface-variant"> {unit}</span>}
+                {unit && <span className="font-sans text-body-md font-normal text-on-surface-variant"> {unit}</span>}
             </div>
         </Card>
     );
@@ -66,13 +66,13 @@ export function ReportingPeriodSummary({ periods }: ReportingPeriodSummaryProps)
             {/* Year Coverage Card */}
             <Card className="p-card-padding flex flex-col gap-2">
                 <div className="flex items-start justify-between">
-                    <p className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface-variant">
+                    <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                         Year Coverage
                     </p>
                     <MaterialIcon name="date_range" className="text-on-secondary-container" size="sm" />
                 </div>
-                <div className="text-headline-md font-headline-md font-semibold text-primary">{yearRange}</div>
-                <div className="text-[10px] text-on-surface-variant mt-1 font-label-md">
+                <div className="font-display text-headline-md font-bold text-primary tabular-nums tracking-tight">{yearRange}</div>
+                <div className="text-[11px] text-on-surface-variant mt-1 font-sans">
                     {lockedPeriods > 0 && `${lockedPeriods} locked`}
                 </div>
             </Card>

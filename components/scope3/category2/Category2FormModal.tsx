@@ -222,18 +222,18 @@ export function Category2FormModal({
             <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-2xl z-10 max-h-[85vh] flex flex-col my-auto">
                 <div className="flex items-center justify-between border-b border-outline-variant/60 px-6 py-4 bg-surface-container-low/80">
                     <div className="flex items-center gap-2">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary text-on-secondary font-mono text-xs font-bold">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary text-on-secondary font-sans text-xs font-bold">
                             2
                         </span>
                         <div>
-                            <h3 className="font-mono text-headline-sm font-bold text-primary">
+                            <h3 className="font-display text-xl font-bold tracking-tight text-primary">
                                 {mode === "create"
                                     ? "Log Category 2 Capital Goods Spend"
                                     : mode === "edit"
                                       ? "Edit Category 2 Spend Entry"
                                       : "Amend Verified Capital Goods Entry"}
                             </h3>
-                            <p className="font-mono text-[11px] text-on-surface-variant">
+                            <p className="font-sans text-xs font-medium text-on-surface-variant">
                                 Scope 3: Capital Goods (Equipment, Machinery, Buildings, Vehicles)
                             </p>
                         </div>
@@ -252,13 +252,13 @@ export function Category2FormModal({
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 Reporting Period <span className="text-error">*</span>
                             </label>
                             <select
                                 value={reportingPeriodId || (periods[0]?.id ?? "")}
                                 onChange={(e) => setReportingPeriodId(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary">
                                 {periods.length === 0 && <option value="">Loading reporting periods...</option>}
                                 {periods.map((p) => (
                                     <option key={p.id} value={p.id}>
@@ -269,13 +269,13 @@ export function Category2FormModal({
                         </div>
 
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 Facility (Optional)
                             </label>
                             <select
                                 value={facilityId}
                                 onChange={(e) => setFacilityId(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary">
                                 <option value="">No specific facility (Corporate level)</option>
                                 {facilities.map((fac) => (
                                     <option key={fac.id} value={fac.id}>
@@ -288,7 +288,7 @@ export function Category2FormModal({
 
                     {/* Source Standard Select */}
                     <div>
-                        <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                        <label className="block font-sans text-xs font-semibold text-primary mb-1">
                             Emission Factor Source Standard <span className="text-error">*</span>
                         </label>
                         <select
@@ -297,7 +297,7 @@ export function Category2FormModal({
                                 setSourceId(e.target.value);
                                 setSectorCategory("");
                             }}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary">
                             {sources.map((s) => (
                                 <option key={s.id} value={s.id}>
                                     {s.standard} v{s.version} ({s.data_year}) - {s.region} ({s.emission_unit}/$)
@@ -308,7 +308,7 @@ export function Category2FormModal({
 
                     {/* CustomSelect NAICS Sector / Category Filter Dropdown */}
                     <div>
-                        <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                        <label className="block font-sans text-xs font-semibold text-primary mb-1">
                             NAICS Sector / Category Filter
                         </label>
                         <CustomSelect
@@ -319,7 +319,7 @@ export function Category2FormModal({
                                 setFactorId("");
                             }}
                             placeholder="All NAICS Sectors & Categories..."
-                            className="font-mono text-xs"
+                            className="font-sans text-sm"
                             variant="form"
                             isSearchable={true}
                         />
@@ -327,7 +327,7 @@ export function Category2FormModal({
 
                     {/* Searchable Factor Select */}
                     <div>
-                        <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                        <label className="block font-sans text-xs font-semibold text-primary mb-1">
                             Capital Equipment USEEIO Factor (NAICS Code Search) <span className="text-error">*</span>
                         </label>
                         <CustomSelect
@@ -335,7 +335,7 @@ export function Category2FormModal({
                             value={selectedFactorId}
                             onChange={(val) => setFactorId(val)}
                             placeholder="Type to search NAICS machinery, equipment..."
-                            className="font-mono text-xs"
+                            className="font-sans text-sm"
                             variant="form"
                             isSearchable={true}
                         />
@@ -343,24 +343,24 @@ export function Category2FormModal({
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 Spend Date <span className="text-error">*</span>
                             </label>
                             <DatePicker
                                 value={spendDate}
                                 onChange={handleSpendDateChange}
-                                className="font-mono text-xs"
+                                className="font-sans text-sm"
                             />
                         </div>
 
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 Spend Year (2020–2025) <span className="text-error">*</span>
                             </label>
                             <select
                                 value={spendYear}
                                 onChange={(e) => setSpendYear(Number(e.target.value))}
-                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary">
                                 <option value={2020}>2020 (Ex. Rate: ₹74.13/USD)</option>
                                 <option value={2021}>2021 (Ex. Rate: ₹73.92/USD)</option>
                                 <option value={2022}>2022 (Ex. Rate: ₹78.60/USD)</option>
@@ -373,7 +373,7 @@ export function Category2FormModal({
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 Capital Expenditure in INR (₹) <span className="text-error">*</span>
                             </label>
                             <Input
@@ -383,30 +383,30 @@ export function Category2FormModal({
                                 value={spendInInr}
                                 onChange={(e) => setSpendInInr(e.target.value)}
                                 placeholder="e.g. 2490000"
-                                className="font-mono text-xs font-bold"
+                                className="font-sans text-sm font-semibold tabular-nums"
                             />
                         </div>
 
                         <div className="rounded-lg bg-surface-container-low p-3 border border-outline-variant/40 space-y-1">
-                            <span className="font-mono text-[10px] uppercase font-bold text-on-surface-variant">
+                            <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                                 Calculated Live Preview
                             </span>
                             <div className="flex items-baseline justify-between">
-                                <span className="font-mono text-xs font-bold text-primary">
+                                <span className="font-display text-base font-bold text-primary tabular-nums">
                                     ${numSpendUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
                                 </span>
-                                <span className="font-mono text-xs font-bold text-secondary">
+                                <span className="font-display text-base font-bold text-secondary tabular-nums">
                                     {estimatedTCo2e.toFixed(4)} tCO₂e
                                 </span>
                             </div>
-                            <p className="font-mono text-[10px] text-on-surface-variant">
+                            <p className="font-sans text-xs text-on-surface-variant tabular-nums">
                                 Ex. Rate: ₹{exchangeRate}/USD • Factor: {selectedFactor?.kgCo2ePerUsdWithMargins ?? 0} kg/USD
                             </p>
                         </div>
                     </div>
 
                     <div>
-                        <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                        <label className="block font-sans text-xs font-semibold text-primary mb-1">
                             Notes / Capital Asset Description
                         </label>
                         <textarea
@@ -414,7 +414,7 @@ export function Category2FormModal({
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Enter machinery specification, equipment serial number, asset tag, or PO reference..."
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         />
                     </div>
 

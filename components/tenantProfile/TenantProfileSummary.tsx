@@ -73,7 +73,7 @@ export function TenantProfileSummary({ profile }: TenantProfileSummaryProps) {
                     </div>
 
                     <div className="mt-3">
-                        <div className="text-lg font-bold tracking-tight text-slate-900 line-clamp-1">
+                        <div className="font-display text-lg font-bold tracking-tight text-slate-900 line-clamp-1 tabular-nums">
                             {stat.value}
                         </div>
                         <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">

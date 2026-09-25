@@ -24,51 +24,51 @@ export function Category7Summary({ entries, summary }: Category7SummaryProps) {
     const landTco2e = summary?.mode_breakdown.LAND ?? entries.reduce((s, e) => s + e.landTCo2e, 0);
 
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 font-sans">
+            <Card className="p-5 border-outline-variant/60">
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     Employee Commute Logs
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {entries.length} <span className="text-body-md font-normal text-on-surface-variant font-mono">logs</span>
+                <p className="mt-2 font-display text-2xl lg:text-3xl font-bold tracking-tight text-primary tabular-nums">
+                    {entries.length} <span className="font-sans text-sm font-normal text-slate-500">logs</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] font-medium text-secondary">
+                <p className="mt-2 font-sans text-xs font-semibold text-secondary tabular-nums">
                     {formatNumber(totalDistance, 1)} km Total Commute Distance
                 </p>
             </Card>
 
-            <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+            <Card className="p-5 border-outline-variant/60">
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     Commute Emissions
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {formatNumber(totalEmissionsTco2e, 4)} <span className="text-body-md font-normal text-on-surface-variant font-mono">tCO₂e</span>
+                <p className="mt-2 font-display text-2xl lg:text-3xl font-bold tracking-tight text-primary tabular-nums">
+                    {formatNumber(totalEmissionsTco2e, 4)} <span className="font-sans text-sm font-normal text-slate-500">tCO₂e</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-on-surface-variant">
+                <p className="mt-2 font-sans text-xs text-slate-500">
                     Scope 3 Cat 7 Employee Commute Model
                 </p>
             </Card>
 
-            <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+            <Card className="p-5 border-outline-variant/60">
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     Transit & Vehicle Share
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {formatNumber(landTco2e, 4)} <span className="text-body-md font-normal text-on-surface-variant font-mono">tCO₂e</span>
+                <p className="mt-2 font-display text-2xl lg:text-3xl font-bold tracking-tight text-primary tabular-nums">
+                    {formatNumber(landTco2e, 4)} <span className="font-sans text-sm font-normal text-slate-500">tCO₂e</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-secondary font-medium">
+                <p className="mt-2 font-sans text-xs font-semibold text-secondary">
                     Suburban Rail, Bus, Carpool & Private Vehicles
                 </p>
             </Card>
 
-            <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+            <Card className="p-5 border-outline-variant/60">
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     Audit Verification Status
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {verifiedCount} <span className="text-body-md font-normal text-on-surface-variant font-mono">Verified</span>
+                <p className="mt-2 font-display text-2xl lg:text-3xl font-bold tracking-tight text-primary tabular-nums">
+                    {verifiedCount} <span className="font-sans text-sm font-normal text-slate-500">Verified</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-on-surface-variant">
+                <p className="mt-2 font-sans text-xs text-slate-500">
                     {submittedCount} Submitted • {draftCount} Draft
                 </p>
             </Card>

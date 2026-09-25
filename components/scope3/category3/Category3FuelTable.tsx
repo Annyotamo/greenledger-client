@@ -39,7 +39,7 @@ export function Category3FuelTable({
             <div className="overflow-x-auto bg-white">
                 <Table className="w-full table-auto">
                     <TableHeader>
-                        <TableRow className="bg-surface-container-low border-b border-outline-variant/60 font-mono text-xs text-on-surface-variant">
+                        <TableRow className="bg-surface-container-low border-b border-outline-variant/60 font-sans text-xs font-semibold uppercase tracking-wider text-slate-500">
                             <TableHead className="py-3 px-4">Period & Date</TableHead>
                             <TableHead className="py-3 px-4">WTT Fuel & Unit</TableHead>
                             <TableHead className="py-3 px-4">Fuel Quantity</TableHead>
@@ -51,13 +51,13 @@ export function Category3FuelTable({
                     <TableBody>
                         {isLoading ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="py-12 text-center font-mono text-xs text-on-surface-variant">
+                                <TableCell colSpan={6} className="py-12 text-center font-sans text-sm text-on-surface-variant">
                                     Loading WTT Fuel activity records...
                                 </TableCell>
                             </TableRow>
                         ) : entries.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="py-12 text-center font-mono text-xs text-on-surface-variant">
+                                <TableCell colSpan={6} className="py-12 text-center font-sans text-sm text-on-surface-variant">
                                     No Upstream WTT Fuel activities recorded yet. Click &quot;Log WTT Fuel Activity&quot; to begin.
                                 </TableCell>
                             </TableRow>
@@ -68,37 +68,37 @@ export function Category3FuelTable({
                                 return (
                                     <TableRow
                                         key={entry.id}
-                                        className="hover:bg-surface-container-high/50 transition-colors font-mono text-xs border-b border-outline-variant/30">
+                                        className="hover:bg-surface-container-high/50 transition-colors font-sans text-sm border-b border-outline-variant/30">
                                         <TableCell className="py-3 px-4">
-                                            <div className="font-bold text-primary">{entry.reportingPeriod}</div>
-                                            <div className="text-[11px] text-on-surface-variant">
+                                            <div className="font-semibold text-slate-900">{entry.reportingPeriod}</div>
+                                            <div className="text-xs text-on-surface-variant font-medium">
                                                 {entry.activityDate ? format(new Date(entry.activityDate), "MMM d, yyyy") : "N/A"}
                                             </div>
                                             {entry.facilityName && (
-                                                <span className="inline-block mt-1 rounded bg-surface-container-high px-1.5 py-0.2 text-[10px] text-on-surface-variant">
+                                                <span className="inline-block mt-1 rounded bg-surface-container-high px-1.5 py-0.5 font-sans text-[11px] font-semibold text-on-surface-variant">
                                                     {entry.facilityName}
                                                 </span>
                                             )}
                                         </TableCell>
 
                                         <TableCell className="py-3 px-4">
-                                            <div className="font-bold text-primary">{entry.fuelName}</div>
-                                            <div className="text-[10px] text-secondary font-medium">
+                                            <div className="font-semibold text-slate-900">{entry.fuelName}</div>
+                                            <div className="text-xs text-secondary font-medium">
                                                 Unit: {entry.unitSymbol}
                                             </div>
                                         </TableCell>
 
                                         <TableCell className="py-3 px-4">
-                                            <div className="font-bold text-primary">
+                                            <div className="font-semibold text-slate-900 tabular-nums">
                                                 {entry.fuelQuantity.toLocaleString()} {entry.unitSymbol}
                                             </div>
                                         </TableCell>
 
                                         <TableCell className="py-3 px-4">
-                                            <div className="font-bold text-secondary">
+                                            <div className="font-semibold text-secondary tabular-nums">
                                                 {entry.calculatedTCo2e.toFixed(4)} tCO₂e
                                             </div>
-                                            <div className="text-[10px] text-on-surface-variant">
+                                            <div className="text-xs text-slate-500 font-medium tabular-nums">
                                                 {entry.calculatedKgCo2e.toLocaleString()} kgCO₂e
                                             </div>
                                         </TableCell>
@@ -106,7 +106,7 @@ export function Category3FuelTable({
                                         <TableCell className="py-3 px-4">
                                             <span
                                                 className={cn(
-                                                    "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                                                    "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider",
                                                     entry.status === "verified"
                                                         ? "bg-secondary-container text-on-secondary-container"
                                                         : entry.status === "submitted"
@@ -137,7 +137,7 @@ export function Category3FuelTable({
                                                     variant="secondary"
                                                     size="sm"
                                                     onClick={() => onViewDetail(entry)}
-                                                    className="h-7 px-2 text-[11px]">
+                                                    className="h-7 px-2 text-xs font-medium">
                                                     <MaterialIcon name="visibility" size="xs" />
                                                     <span>Details</span>
                                                 </Button>
@@ -153,7 +153,7 @@ export function Category3FuelTable({
                                             {isMenuOpen && (
                                                 <div
                                                     onMouseLeave={() => setOpenActionId(null)}
-                                                    className="absolute right-4 top-10 z-30 w-44 rounded-xl border border-outline-variant/80 bg-surface-container-lowest p-1.5 shadow-xl text-left font-mono text-xs">
+                                                    className="absolute right-4 top-10 z-30 w-44 rounded-xl border border-outline-variant/80 bg-surface-container-lowest p-1.5 shadow-xl text-left font-sans text-xs font-medium">
                                                     {entry.status === "draft" && (
                                                         <>
                                                             <button
@@ -227,9 +227,9 @@ export function Category3FuelTable({
                                                                 onEdit(entry);
                                                             }}
                                                             className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-primary hover:bg-surface-container-high">
-                                                            <MaterialIcon name="edit" size="xs" />
-                                                            <span>Edit & Resubmit</span>
-                                                        </button>
+                                                                <MaterialIcon name="edit" size="xs" />
+                                                                <span>Edit & Resubmit</span>
+                                                            </button>
                                                     )}
 
                                                     {(entry.status === "draft" || entry.status === "rejected") && (
@@ -240,8 +240,8 @@ export function Category3FuelTable({
                                                                 onDeleteEntry(entry.id);
                                                             }}
                                                             className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-error hover:bg-error-container/20 border-t border-outline-variant/30 mt-1 pt-1.5">
-                                                            <MaterialIcon name="delete" size="xs" />
-                                                            <span>Delete Entry</span>
+                                                                <MaterialIcon name="delete" size="xs" />
+                                                                <span>Delete Entry</span>
                                                         </button>
                                                     )}
                                                 </div>

@@ -97,12 +97,12 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
             {/* Modal Body */}
             <div className="relative w-full max-w-3xl max-h-[85vh] my-auto flex flex-col rounded-3xl border border-outline-variant bg-surface-container-lowest shadow-2xl animate-fade-up overflow-hidden">
                 {/* Header */}
-                <div className="flex flex-col gap-3 border-b border-outline-variant px-6 py-4 sm:flex-row sm:items-center sm:justify-between shrink-0 bg-white">
+                <div className="flex flex-col gap-3 border-b border-outline-variant px-6 py-4 sm:flex-row sm:items-center sm:justify-between shrink-0 bg-white font-sans">
                     <div>
-                        <h2 className="text-headline-sm font-semibold text-primary">
+                        <h2 className="font-display text-lg font-bold tracking-tight text-primary">
                             Download BRSR Energy Report
                         </h2>
-                        <p className="text-body-sm text-on-surface-variant">
+                        <p className="text-body-sm text-on-surface-variant font-sans">
                             Choose a date range and specify the parameters to download the XLSX report.
                         </p>
                     </div>
@@ -117,7 +117,7 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
                 </div>
 
                 {/* Scrollable Modal Content */}
-                <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-white">
+                <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-white font-sans">
                     {/* Date Selectors (Calendars Side-by-Side, Centered) */}
                     <div className="grid gap-6 md:grid-cols-2 justify-items-center">
                         {/* Start Date */}
@@ -125,7 +125,7 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
                             <div className="flex items-center justify-between w-full">
                                 <label className="text-sm font-semibold text-on-surface">Start Date</label>
                                 {startDate ? (
-                                    <time className="text-xs text-on-surface-variant font-mono">
+                                    <time className="text-xs text-on-surface-variant font-sans tabular-nums">
                                         {format(startDate, "PPP")}
                                     </time>
                                 ) : (
@@ -147,7 +147,7 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
                             <div className="flex items-center justify-between w-full">
                                 <label className="text-sm font-semibold text-on-surface">End Date</label>
                                 {endDate ? (
-                                    <time className="text-xs text-on-surface-variant font-mono">
+                                    <time className="text-xs text-on-surface-variant font-sans tabular-nums">
                                         {format(endDate, "PPP")}
                                     </time>
                                 ) : (

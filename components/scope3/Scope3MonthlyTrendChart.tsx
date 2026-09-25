@@ -12,16 +12,16 @@ export function Scope3MonthlyTrendChart() {
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="show_chart" size="sm" className="text-primary text-[20px]" />
                     <div>
-                        <h3 className="font-headline-sm text-headline-sm font-bold text-primary">
+                        <h3 className="font-display text-headline-sm font-bold text-primary tracking-tight">
                             Monthly Value Chain Trajectory
                         </h3>
-                        <p className="font-mono text-[10px] uppercase tracking-tight text-on-surface-variant">
+                        <p className="font-sans text-[11px] font-medium tracking-tight text-on-surface-variant">
                             Upstream supply chain vs downstream distribution trajectory (tCO2e/month)
                         </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-1.5">
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-surface-container-high text-primary px-2.5 py-1 rounded">
+                    <span className="font-sans text-[11px] font-semibold uppercase tracking-wider bg-surface-container-high text-primary px-2.5 py-1 rounded">
                         12 Months (FY 2025-26)
                     </span>
                 </div>
@@ -34,11 +34,11 @@ export function Scope3MonthlyTrendChart() {
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                             <XAxis
                                 dataKey="month"
-                                tick={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace" }}
+                                tick={{ fontSize: 11, fontFamily: "var(--font-inter), sans-serif" }}
                                 stroke="#76777d"
                             />
                             <YAxis
-                                tick={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace" }}
+                                tick={{ fontSize: 11, fontFamily: "var(--font-inter), sans-serif" }}
                                 stroke="#76777d"
                                 unit=" t"
                             />
@@ -53,11 +53,11 @@ export function Scope3MonthlyTrendChart() {
                                     borderRadius: "6px",
                                     boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                                     fontSize: "12px",
-                                    fontFamily: "JetBrains Mono, monospace",
+                                    fontFamily: "var(--font-inter), sans-serif",
                                 }}
                             />
                             <Legend
-                                wrapperStyle={{ fontSize: "11px", fontFamily: "JetBrains Mono, monospace", paddingTop: "8px" }}
+                                wrapperStyle={{ fontSize: "11px", fontFamily: "var(--font-inter), sans-serif", paddingTop: "8px" }}
                                 formatter={(val) => (val === "upstream" ? "Upstream Supply Chain (Cat 1–7)" : "Downstream Logistics & Finance (Cat 9, 15)")}
                             />
                             <Bar dataKey="upstream" stackId="month" fill="#10b981" radius={[0, 0, 0, 0]} />
@@ -68,12 +68,12 @@ export function Scope3MonthlyTrendChart() {
 
                 <div className="grid grid-cols-2 gap-3 border-t border-outline-variant pt-3 text-center">
                     <div className="p-2 rounded bg-surface-container-low/60 border border-outline-variant/30">
-                        <span className="block font-mono text-[10px] text-on-surface-variant font-bold uppercase">Upstream Monthly Avg</span>
-                        <span className="font-mono text-sm font-bold text-emerald-800">2,603.5 tCO2e / mo</span>
+                        <span className="block font-sans text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">Upstream Monthly Avg</span>
+                        <span className="font-display text-sm font-bold text-emerald-800 tabular-nums">2,603.5 tCO2e / mo</span>
                     </div>
                     <div className="p-2 rounded bg-surface-container-low/60 border border-outline-variant/30">
-                        <span className="block font-mono text-[10px] text-on-surface-variant font-bold uppercase">Downstream Monthly Avg</span>
-                        <span className="font-mono text-sm font-bold text-blue-800">241.6 tCO2e / mo</span>
+                        <span className="block font-sans text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">Downstream Monthly Avg</span>
+                        <span className="font-display text-sm font-bold text-blue-800 tabular-nums">241.6 tCO2e / mo</span>
                     </div>
                 </div>
             </div>

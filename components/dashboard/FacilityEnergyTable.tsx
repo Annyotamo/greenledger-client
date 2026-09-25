@@ -20,17 +20,17 @@ export function FacilityEnergyTable({ facilities }: FacilityEnergyTableProps) {
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="apartment" size="sm" className="text-primary" />
                     <div>
-                        <h3 className="text-headline-sm font-semibold uppercase tracking-tight text-primary">
+                        <h3 className="text-headline-sm font-semibold text-primary">
                             Facility Energy Summaries
                         </h3>
-                        <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
+                        <p className="font-sans text-xs text-on-surface-variant">
                             Facility-level consumed, captive produced, & grid dependency
                         </p>
                     </div>
                 </div>
                 <Link
                     href="/facilities"
-                    className="font-mono text-[11px] font-bold text-on-tertiary-container hover:underline flex items-center gap-1">
+                    className="font-sans text-xs font-semibold text-primary hover:underline flex items-center gap-1">
                     <span>Manage Facilities</span>
                     <MaterialIcon name="arrow_forward" size="sm" />
                 </Link>
@@ -51,7 +51,7 @@ export function FacilityEnergyTable({ facilities }: FacilityEnergyTableProps) {
                     <TableBody>
                         {facilities.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center text-on-surface-variant py-8 font-mono">
+                                <TableCell colSpan={6} className="text-center text-on-surface-variant py-8 font-sans text-xs">
                                     No facility summaries recorded yet.
                                 </TableCell>
                             </TableRow>
@@ -60,12 +60,12 @@ export function FacilityEnergyTable({ facilities }: FacilityEnergyTableProps) {
                                 const isHighDependency = fac.gridDependencyPercent > 50;
                                 return (
                                     <TableRow key={fac.facilityId}>
-                                        <TableCell className="font-bold">
+                                        <TableCell className="font-semibold">
                                             <div className="flex flex-col">
                                                 <span className="text-sm font-semibold text-primary">
                                                     {fac.facilityName}
                                                 </span>
-                                                <span className="font-mono text-[11px] text-on-surface-variant">
+                                                <span className="font-sans text-xs text-on-surface-variant">
                                                     {fac.facilityCode}
                                                 </span>
                                             </div>
@@ -77,21 +77,21 @@ export function FacilityEnergyTable({ facilities }: FacilityEnergyTableProps) {
                                             </Badge>
                                         </TableCell>
 
-                                        <TableCell className="font-mono text-right font-bold text-primary">
+                                        <TableCell className="font-sans text-right font-semibold text-primary tabular-nums">
                                             {fac.consumedMwh.toLocaleString("en-US", {
                                                 minimumFractionDigits: 2,
                                                 maximumFractionDigits: 2,
                                             })}
                                         </TableCell>
 
-                                        <TableCell className="font-mono text-right text-secondary font-semibold">
+                                        <TableCell className="font-sans text-right text-secondary font-semibold tabular-nums">
                                             {fac.producedMwh.toLocaleString("en-US", {
                                                 minimumFractionDigits: 2,
                                                 maximumFractionDigits: 2,
                                             })}
                                         </TableCell>
 
-                                        <TableCell className="font-mono text-right text-orange-500 font-semibold">
+                                        <TableCell className="font-sans text-right text-orange-500 font-semibold tabular-nums">
                                             {fac.importedMwh.toLocaleString("en-US", {
                                                 minimumFractionDigits: 2,
                                                 maximumFractionDigits: 2,
@@ -100,15 +100,15 @@ export function FacilityEnergyTable({ facilities }: FacilityEnergyTableProps) {
 
                                         <TableCell>
                                             <div className="flex flex-col gap-1">
-                                                <div className="flex items-center justify-between text-[11px]">
+                                                <div className="flex items-center justify-between text-xs font-sans">
                                                     <span
                                                         className={cn(
-                                                            "font-mono font-bold",
+                                                            "font-bold tabular-nums",
                                                             isHighDependency ? "text-orange-600" : "text-secondary",
                                                         )}>
                                                         {fac.gridDependencyPercent.toFixed(1)}%
                                                     </span>
-                                                    <span className="font-mono text-[9px] text-on-surface-variant">
+                                                    <span className="text-[11px] text-on-surface-variant font-medium">
                                                         {isHighDependency ? "High Grid" : "Self Reliant"}
                                                     </span>
                                                 </div>

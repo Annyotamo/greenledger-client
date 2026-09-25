@@ -231,10 +231,10 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
     };
 
     return (
-        <div className="space-y-6 max-w-7xl mx-auto pb-16">
+        <div className="space-y-6 max-w-7xl mx-auto pb-16 font-sans">
             {/* Top Breadcrumb & Action Row */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-outline-variant pb-4">
-                <div className="flex items-center gap-2 text-sm text-on-surface-variant font-mono">
+                <div className="flex items-center gap-2 text-sm text-on-surface-variant">
                     <Link
                         href="/activities/fuel"
                         className="inline-flex items-center gap-1 hover:text-primary transition-colors text-on-surface-variant font-medium">
@@ -251,7 +251,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                         variant="secondary"
                         size="sm"
                         onClick={handleCopyId}
-                        className="font-mono text-xs">
+                        className="text-xs font-medium">
                         <MaterialIcon name={copied ? "check" : "content_copy"} size="xs" />
                         <span>{copied ? "Copied ID" : "Copy ID"}</span>
                     </Button>
@@ -266,7 +266,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                     {activity.workflowStatus.toLowerCase() === "draft" && (
                         <button
                             onClick={() => setConfirmState({ open: true, action: "submit" })}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 font-mono text-xs font-bold uppercase text-white shadow-sm hover:opacity-90 transition-opacity">
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 font-sans text-xs font-semibold uppercase tracking-wider text-white shadow-sm hover:opacity-90 transition-opacity">
                             <MaterialIcon name="send" size="xs" />
                             <span>Submit for Review</span>
                         </button>
@@ -276,7 +276,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                         <>
                             <button
                                 onClick={() => setConfirmState({ open: true, action: "verify" })}
-                                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 font-mono text-xs font-bold uppercase text-white shadow-sm hover:opacity-90 transition-opacity">
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 font-sans text-xs font-semibold uppercase tracking-wider text-white shadow-sm hover:opacity-90 transition-opacity">
                                 <MaterialIcon name="verified" size="xs" />
                                 <span>Verify</span>
                             </button>
@@ -306,37 +306,37 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="inline-flex items-center gap-1 rounded bg-primary-container px-2 py-0.5 font-mono text-[10px] font-bold text-white uppercase tracking-wider">
+                            <span className="inline-flex items-center gap-1 rounded bg-primary-container px-2 py-0.5 font-sans text-[10px] font-semibold text-white uppercase tracking-wider">
                                 <MaterialIcon name="factory" size="xs" className="text-secondary" />
                                 {activity.scopeType || "SCOPE 1"}
                             </span>
 
-                            <span className={`inline-flex items-center rounded px-2 py-0.5 font-mono text-[10px] font-bold uppercase ${statusInfo.bg}`}>
+                            <span className={`inline-flex items-center rounded px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wider ${statusInfo.bg}`}>
                                 {statusInfo.label}
                             </span>
 
-                            <span className={`inline-flex items-center rounded px-2 py-0.5 font-mono text-[10px] font-bold uppercase ${emissionTypeClass}`}>
+                            <span className={`inline-flex items-center rounded px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wider ${emissionTypeClass}`}>
                                 {activity.emissionType} Combustion
                             </span>
 
                             {activity.fuelIsRenewable && (
-                                <span className="inline-flex items-center gap-1 rounded bg-secondary-container/40 text-on-secondary-container px-2 py-0.5 font-mono text-[10px] font-bold uppercase border border-secondary/20">
+                                <span className="inline-flex items-center gap-1 rounded bg-secondary-container/40 text-on-secondary-container px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wider border border-secondary/20">
                                     <MaterialIcon name="eco" size="xs" />
                                     Renewable
                                 </span>
                             )}
 
-                            <span className="inline-flex items-center gap-1 rounded bg-surface-container px-2 py-0.5 font-mono text-[10px] text-on-surface-variant font-medium">
+                            <span className="inline-flex items-center gap-1 rounded bg-surface-container px-2 py-0.5 font-sans text-[10px] text-on-surface-variant font-medium">
                                 <MaterialIcon name="verified_user" size="xs" />
                                 Tier 1 Measured
                             </span>
                         </div>
 
                         <div>
-                            <h1 className="text-xl sm:text-2xl font-bold text-primary tracking-tight">
+                            <h1 className="font-display text-xl sm:text-2xl font-bold text-primary tracking-tight">
                                 {activity.fuelName} Activity Record
                             </h1>
-                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-on-surface-variant font-mono">
+                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-on-surface-variant font-sans">
                                 <span>UUID: {activity.id}</span>
                                 <span>•</span>
                                 <span>Recorded {formatShortDate(activity.createdAt)}</span>
@@ -352,19 +352,19 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
 
                     {/* Facility & Period Context Badge - Refined & Transparent */}
                     <div className="flex flex-col gap-1.5 rounded-lg border border-outline-variant/50 bg-surface-container-lowest/40 backdrop-blur-xs p-3 min-w-[260px]">
-                        <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase text-on-surface-variant font-semibold tracking-wider">
+                        <div className="flex items-center gap-1.5 text-[10px] font-sans uppercase text-on-surface-variant font-semibold tracking-wider">
                             <MaterialIcon name="domain" size="xs" />
                             <span>Facility Location</span>
                         </div>
-                        <div className="font-bold text-xs text-primary">
+                        <div className="font-sans font-semibold text-xs text-primary">
                             {activity.facilityName || "Primary Operational Center"}
                         </div>
-                        <div className="text-[11px] text-on-surface-variant flex items-center gap-1.5 font-mono">
+                        <div className="text-[11px] text-on-surface-variant flex items-center gap-1.5 font-sans">
                             <span>Code: {activity.facilityCode || "FAC-GEN"}</span>
                             <span>•</span>
                             <span>{[activity.facilityCity, activity.facilityCountry].filter(Boolean).join(", ") || "Global"}</span>
                         </div>
-                        <div className="pt-1.5 border-t border-outline-variant/40 flex items-center justify-between text-[11px] font-mono">
+                        <div className="pt-1.5 border-t border-outline-variant/40 flex items-center justify-between text-[11px] font-sans">
                             <span className="text-on-surface-variant">Reporting Period:</span>
                             <span className="font-semibold text-primary">{activity.reportingPeriodName || "FY2025"}</span>
                         </div>
@@ -378,17 +378,17 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                 <Card className="p-card-padding flex flex-col justify-between border-l-4 border-l-primary bg-surface-container-lowest">
                     <div>
                         <div className="flex items-center justify-between">
-                            <p className="font-mono text-[11px] uppercase tracking-wider text-on-surface-variant font-medium">
+                            <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                                 Total Emissions
                             </p>
                             <MaterialIcon name="co2" size="sm" className="text-primary" />
                         </div>
-                        <div className="mt-2 text-2xl font-bold font-mono text-primary">
+                        <div className="mt-2 font-display text-2xl font-bold tracking-tight text-primary tabular-nums">
                             {formatNumber(totalTCo2e)}
-                            <span className="text-xs font-normal text-on-surface-variant ml-1">tCO₂e</span>
+                            <span className="font-sans text-xs font-medium text-on-surface-variant ml-1">tCO₂e</span>
                         </div>
                     </div>
-                    <div className="mt-3 pt-2 border-t border-outline-variant/40 font-mono text-[11px] text-on-surface-variant">
+                    <div className="mt-3 pt-2 border-t border-outline-variant/40 font-sans text-xs text-on-surface-variant tabular-nums">
                         {formatNumber(activity.calculatedKgCo2e, 1)} kg CO₂e direct
                     </div>
                 </Card>
@@ -397,17 +397,17 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                 <Card className="p-card-padding flex flex-col justify-between bg-surface-container-lowest">
                     <div>
                         <div className="flex items-center justify-between">
-                            <p className="font-mono text-[11px] uppercase tracking-wider text-on-surface-variant font-medium">
+                            <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                                 Fuel Consumed
                             </p>
                             <MaterialIcon name="local_gas_station" size="sm" className="text-secondary" />
                         </div>
-                        <div className="mt-2 text-2xl font-bold font-mono text-primary">
+                        <div className="mt-2 font-display text-2xl font-bold tracking-tight text-primary tabular-nums">
                             {formatNumber(activity.quantity)}
-                            <span className="text-xs font-normal text-on-surface-variant ml-1 uppercase">{activity.unitSymbol || "Units"}</span>
+                            <span className="font-sans text-xs font-medium text-on-surface-variant ml-1 uppercase">{activity.unitSymbol || "Units"}</span>
                         </div>
                     </div>
-                    <div className="mt-3 pt-2 border-t border-outline-variant/40 font-mono text-[11px] text-on-surface-variant">
+                    <div className="mt-3 pt-2 border-t border-outline-variant/40 font-sans text-xs text-on-surface-variant">
                         Unit Type: <span className="font-semibold text-primary uppercase">{activity.unitType || "Mass"}</span>
                     </div>
                 </Card>
@@ -416,17 +416,17 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                 <Card className="p-card-padding flex flex-col justify-between bg-surface-container-lowest">
                     <div>
                         <div className="flex items-center justify-between">
-                            <p className="font-mono text-[11px] uppercase tracking-wider text-on-surface-variant font-medium">
+                            <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                                 Emission Intensity
                             </p>
                             <MaterialIcon name="balance" size="sm" className="text-tertiary" />
                         </div>
-                        <div className="mt-2 text-2xl font-bold font-mono text-primary">
+                        <div className="mt-2 font-display text-2xl font-bold tracking-tight text-primary tabular-nums">
                             {formatNumber(emissionIntensity, 4)}
-                            <span className="text-xs font-normal text-on-surface-variant ml-1">tCO₂e / {activity.unitSymbol || "tonne"}</span>
+                            <span className="font-sans text-xs font-medium text-on-surface-variant ml-1">tCO₂e / {activity.unitSymbol || "tonne"}</span>
                         </div>
                     </div>
-                    <div className="mt-3 pt-2 border-t border-outline-variant/40 font-mono text-[11px] text-on-surface-variant">
+                    <div className="mt-3 pt-2 border-t border-outline-variant/40 font-sans text-xs text-on-surface-variant tabular-nums">
                         Baseline: {formatNumber(activity.factorKgCo2e, 2)} kg CO₂e / {activity.unitSymbol || "tonne"}
                     </div>
                 </Card>
@@ -435,16 +435,16 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                 <Card className="p-card-padding flex flex-col justify-between bg-surface-container-lowest">
                     <div>
                         <div className="flex items-center justify-between">
-                            <p className="font-mono text-[11px] uppercase tracking-wider text-on-surface-variant font-medium">
+                            <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                                 Fuel Cost
                             </p>
                             <MaterialIcon name="payments" size="sm" className="text-emerald-700" />
                         </div>
-                        <div className="mt-2 text-2xl font-bold font-mono text-primary">
+                        <div className="mt-2 font-display text-2xl font-bold tracking-tight text-primary tabular-nums">
                             {recordedCost != null ? `₹${formatNumber(recordedCost, 2)}` : "Unrecorded"}
                         </div>
                     </div>
-                    <div className="mt-3 pt-2 border-t border-outline-variant/40 font-mono text-[11px] text-on-surface-variant">
+                    <div className="mt-3 pt-2 border-t border-outline-variant/40 font-sans text-xs text-on-surface-variant tabular-nums">
                         {costPerTCo2e != null ? `₹${formatNumber(costPerTCo2e, 2)} / tCO₂e` : "No carbon cost data"}
                     </div>
                 </Card>
@@ -458,10 +458,10 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                         <div className="flex items-center gap-2">
                             <MaterialIcon name="pie_chart" size="sm" className="text-primary" />
                             <div>
-                                <h3 className="font-headline-sm text-headline-sm font-semibold text-primary">
+                                <h3 className="font-display text-base font-semibold text-primary">
                                     Greenhouse Gas Mass Composition
                                 </h3>
-                                <p className="font-mono text-[11px] text-on-surface-variant">
+                                <p className="font-sans text-xs text-on-surface-variant">
                                     Mass breakdown of CO₂, CH₄, and N₂O converted via IPCC GWP coefficients
                                 </p>
                             </div>
@@ -470,15 +470,15 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                         <div className="flex items-center gap-1 bg-surface-container p-1 rounded-lg border border-outline-variant/40">
                             <button
                                 onClick={() => setChartView("pie")}
-                                className={`px-2.5 py-1 rounded font-mono text-[11px] font-medium transition-colors ${
-                                    chartView === "pie" ? "bg-white text-primary shadow-xs font-bold" : "text-on-surface-variant hover:text-primary"
+                                className={`px-2.5 py-1 rounded font-sans text-xs font-medium transition-colors ${
+                                    chartView === "pie" ? "bg-white text-primary shadow-xs font-semibold" : "text-on-surface-variant hover:text-primary"
                                 }`}>
                                 Donut
                             </button>
                             <button
                                 onClick={() => setChartView("bar")}
-                                className={`px-2.5 py-1 rounded font-mono text-[11px] font-medium transition-colors ${
-                                    chartView === "bar" ? "bg-white text-primary shadow-xs font-bold" : "text-on-surface-variant hover:text-primary"
+                                className={`px-2.5 py-1 rounded font-sans text-xs font-medium transition-colors ${
+                                    chartView === "bar" ? "bg-white text-primary shadow-xs font-semibold" : "text-on-surface-variant hover:text-primary"
                                 }`}>
                                 Factors
                             </button>
@@ -514,17 +514,17 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                                                     borderRadius: "8px",
                                                     boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
                                                     fontSize: "12px",
-                                                    fontFamily: "JetBrains Mono, monospace",
+                                                    fontFamily: "var(--font-inter), sans-serif",
                                                 }}
                                             />
                                         </PieChart>
                                     </ResponsiveContainer>
                                     {/* Donut Center Total Label */}
                                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                        <span className="font-mono text-xl font-bold text-primary">
+                                        <span className="font-display text-xl font-bold text-primary tabular-nums">
                                             {formatNumber(totalTCo2e, 1)}
                                         </span>
-                                        <span className="font-mono text-[10px] uppercase text-on-surface-variant">tCO₂e Total</span>
+                                        <span className="font-sans text-[10px] uppercase text-on-surface-variant font-semibold">tCO₂e Total</span>
                                     </div>
                                 </div>
 
@@ -536,11 +536,11 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                                             className="p-2.5 rounded-lg border border-outline-variant/60 bg-surface-container-low/60 flex items-center justify-between">
                                             <div className="flex items-center gap-2">
                                                 <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: gas.color }} />
-                                                <div className="font-mono text-xs font-bold text-primary">{gas.shortName}</div>
+                                                <div className="font-sans text-xs font-semibold text-primary">{gas.shortName}</div>
                                             </div>
-                                            <div className="text-right font-mono">
-                                                <div className="text-xs font-bold text-primary">{formatNumber(gas.value)} t</div>
-                                                <div className="text-[10px] text-on-surface-variant">{formatNumber(gas.percent, 1)}%</div>
+                                            <div className="text-right font-sans">
+                                                <div className="text-xs font-semibold text-primary tabular-nums">{formatNumber(gas.value)} t</div>
+                                                <div className="text-[10px] text-on-surface-variant tabular-nums">{formatNumber(gas.percent, 1)}%</div>
                                             </div>
                                         </div>
                                     ))}
@@ -551,8 +551,8 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={factorBarData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 5 }}>
                                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#cbd5e1" />
-                                        <XAxis type="number" unit=" kg" tick={{ fontFamily: "JetBrains Mono", fontSize: 11 }} />
-                                        <YAxis dataKey="gas" type="category" tick={{ fontFamily: "JetBrains Mono", fontSize: 11 }} />
+                                        <XAxis type="number" unit=" kg" tick={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 11 }} />
+                                        <YAxis dataKey="gas" type="category" tick={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 11 }} />
                                         <Tooltip
                                             formatter={(value: any) => [`${formatNumber(Number(value))} kg CO₂e / ${activity.unitSymbol || "tonne"}`, "Factor Component"]}
                                             contentStyle={{
@@ -560,7 +560,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                                                 borderColor: "#c6c6cd",
                                                 borderRadius: "8px",
                                                 fontSize: "12px",
-                                                fontFamily: "JetBrains Mono, monospace",
+                                                fontFamily: "var(--font-inter), sans-serif",
                                             }}
                                         />
                                         <Bar dataKey="factorKg" radius={[0, 4, 4, 0]}>
@@ -573,7 +573,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                             </div>
                         )}
 
-                        <div className="mt-4 pt-3 border-t border-outline-variant flex flex-wrap items-center justify-between text-[11px] font-mono text-on-surface-variant">
+                        <div className="mt-4 pt-3 border-t border-outline-variant flex flex-wrap items-center justify-between text-xs font-sans text-on-surface-variant">
                             <span>Standard Basis: {sourceData.standard} {sourceData.version}{sourceData.gwpBasis ? ` (${sourceData.gwpBasis} 100-Year)` : ""}</span>
                             <span className="text-emerald-700 font-semibold">100% Calculated Coverage</span>
                         </div>
@@ -586,10 +586,10 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                         <div className="flex items-center gap-2">
                             <MaterialIcon name="local_gas_station" size="sm" className="text-secondary" />
                             <div>
-                                <h3 className="font-headline-sm text-sm font-bold text-primary">
+                                <h3 className="font-display text-sm font-semibold text-primary">
                                     Fuel Information & Specification
                                 </h3>
-                                <p className="font-mono text-[10px] text-on-surface-variant">
+                                <p className="font-sans text-xs text-on-surface-variant">
                                     Classification, physical properties & accounting specifications
                                 </p>
                             </div>
@@ -600,41 +600,41 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                         {/* Fuel Quick Info Tiles */}
                         <div className="grid grid-cols-2 gap-2.5">
                             <div className="p-2.5 rounded-lg bg-surface-container-lowest/70 border border-outline-variant/60">
-                                <span className="font-mono text-[10px] text-on-surface-variant uppercase font-semibold">Fuel Name</span>
-                                <div className="text-sm font-bold font-mono text-primary mt-0.5 truncate">
+                                <span className="font-sans text-xs text-on-surface-variant uppercase font-semibold">Fuel Name</span>
+                                <div className="text-sm font-semibold font-sans text-primary mt-0.5 truncate">
                                     {activity.fuelName}
                                 </div>
-                                <span className="text-[10px] text-on-surface-variant font-mono truncate block">Slug: {activity.fuelSlug || "standard"}</span>
+                                <span className="text-xs text-on-surface-variant font-sans truncate block">Slug: {activity.fuelSlug || "standard"}</span>
                             </div>
 
                             <div className="p-2.5 rounded-lg bg-surface-container-lowest/70 border border-outline-variant/60">
-                                <span className="font-mono text-[10px] text-on-surface-variant uppercase font-semibold">Measurement Unit</span>
-                                <div className="text-sm font-bold font-mono text-primary mt-0.5 uppercase">
+                                <span className="font-sans text-xs text-on-surface-variant uppercase font-semibold">Measurement Unit</span>
+                                <div className="text-sm font-semibold font-sans text-primary mt-0.5 uppercase">
                                     {activity.unitSymbol || activity.unitName || "Tonnes"}
                                 </div>
-                                <span className="text-[10px] text-on-surface-variant font-mono capitalize">Type: {activity.unitType || "Mass"}</span>
+                                <span className="text-xs text-on-surface-variant font-sans capitalize">Type: {activity.unitType || "Mass"}</span>
                             </div>
                         </div>
 
                         {/* Fuel Characterization Spec Rows */}
-                        <div className="rounded-lg border border-outline-variant/60 overflow-hidden text-xs font-mono">
-                            <div className="grid grid-cols-2 p-2 border-b border-outline-variant/40 bg-surface-container-low/30">
+                        <div className="rounded-lg border border-outline-variant/60 overflow-hidden text-xs font-sans">
+                            <div className="grid grid-cols-2 p-2.5 border-b border-outline-variant/40 bg-surface-container-low/30">
                                 <span className="text-on-surface-variant">Renewable Origin:</span>
-                                <span className={`font-bold ${activity.fuelIsRenewable ? "text-emerald-700" : "text-primary"}`}>
+                                <span className={`font-semibold ${activity.fuelIsRenewable ? "text-emerald-700" : "text-primary"}`}>
                                     {activity.fuelIsRenewable ? "Yes (Biogenic Feedstock)" : "No (Conventional Fossil)"}
                                 </span>
                             </div>
-                            <div className="grid grid-cols-2 p-2 border-b border-outline-variant/40">
+                            <div className="grid grid-cols-2 p-2.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">Emission / Factor Type:</span>
                                 <span className="font-semibold text-primary">{activity.fuelFactorType || "COMBUSTION"} ({activity.emissionType})</span>
                             </div>
-                            <div className="grid grid-cols-2 p-2 border-b border-outline-variant/40 bg-surface-container-low/30">
+                            <div className="grid grid-cols-2 p-2.5 border-b border-outline-variant/40 bg-surface-container-low/30">
                                 <span className="text-on-surface-variant">Data Quality Tier:</span>
                                 <span className="font-semibold text-primary capitalize">{activity.dataQualityTier || "Measured (Tier 1)"}</span>
                             </div>
-                            <div className="grid grid-cols-2 p-2">
+                            <div className="grid grid-cols-2 p-2.5">
                                 <span className="text-on-surface-variant">Standard Factor:</span>
-                                <span className="font-bold text-primary">
+                                <span className="font-semibold text-primary tabular-nums">
                                     {formatNumber(activity.factorKgCo2e, 2)} kg CO₂e / {activity.unitSymbol || "tonne"}
                                 </span>
                             </div>
@@ -643,12 +643,12 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
 
                     <div className="p-card-padding pt-0 pb-3.5">
                         {activity.fuelIsRenewable ? (
-                            <div className="rounded-lg bg-emerald-500/10 p-2.5 border border-emerald-500/20 text-xs font-mono text-emerald-800 flex items-center gap-2">
+                            <div className="rounded-lg bg-emerald-500/10 p-2.5 border border-emerald-500/20 text-xs font-sans text-emerald-800 flex items-center gap-2">
                                 <MaterialIcon name="eco" size="xs" className="text-emerald-700 shrink-0" />
                                 <span>Renewable biogenic fuel subject to biogenic emission reporting guidelines.</span>
                             </div>
                         ) : (
-                            <div className="rounded-lg bg-surface-container-low p-2.5 border border-outline-variant/50 text-xs font-mono text-on-surface-variant flex items-center gap-2">
+                            <div className="rounded-lg bg-surface-container-low p-2.5 border border-outline-variant/50 text-xs font-sans text-on-surface-variant flex items-center gap-2">
                                 <MaterialIcon name="info" size="xs" className="text-on-surface-variant shrink-0" />
                                 <span>Direct combustion fossil source contributing to gross Scope 1 emissions.</span>
                             </div>
@@ -661,7 +661,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
             <div className="border-b border-outline-variant flex gap-6">
                 <button
                     onClick={() => setActiveTab("overview")}
-                    className={`pb-3 font-mono text-xs font-bold tracking-wider uppercase transition-colors relative ${
+                    className={`pb-3 font-sans text-xs font-semibold tracking-wider uppercase transition-colors relative ${
                         activeTab === "overview" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant hover:text-primary"
                     }`}>
                     <span className="flex items-center gap-1.5">
@@ -672,7 +672,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
 
                 <button
                     onClick={() => setActiveTab("factors")}
-                    className={`pb-3 font-mono text-xs font-bold tracking-wider uppercase transition-colors relative ${
+                    className={`pb-3 font-sans text-xs font-semibold tracking-wider uppercase transition-colors relative ${
                         activeTab === "factors" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant hover:text-primary"
                     }`}>
                     <span className="flex items-center gap-1.5">
@@ -683,7 +683,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
 
                 <button
                     onClick={() => setActiveTab("forensic")}
-                    className={`pb-3 font-mono text-xs font-bold tracking-wider uppercase transition-colors relative ${
+                    className={`pb-3 font-sans text-xs font-semibold tracking-wider uppercase transition-colors relative ${
                         activeTab === "forensic" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant hover:text-primary"
                     }`}>
                     <span className="flex items-center gap-1.5">
@@ -694,7 +694,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
 
                 <button
                     onClick={() => setActiveTab("documents")}
-                    className={`pb-3 font-mono text-xs font-bold tracking-wider uppercase transition-colors relative ${
+                    className={`pb-3 font-sans text-xs font-semibold tracking-wider uppercase transition-colors relative ${
                         activeTab === "documents" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant hover:text-primary"
                     }`}>
                     <span className="flex items-center gap-1.5">
@@ -712,13 +712,13 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                         <CardHeader tone="strip" className="border-b border-outline-variant">
                             <div className="flex items-center gap-2">
                                 <MaterialIcon name="domain" size="sm" className="text-primary" />
-                                <h4 className="font-headline-sm text-sm font-bold text-primary">Facility & Site Context</h4>
+                                <h4 className="font-display text-sm font-semibold text-primary">Facility & Site Context</h4>
                             </div>
                         </CardHeader>
-                        <CardBody className="space-y-3 font-mono text-xs">
+                        <CardBody className="space-y-3 font-sans text-xs">
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">Facility Name</span>
-                                <span className="font-bold text-primary">{activity.facilityName || "N/A"}</span>
+                                <span className="font-semibold text-primary">{activity.facilityName || "N/A"}</span>
                             </div>
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">Facility Code</span>
@@ -746,21 +746,21 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                         <CardHeader tone="strip" className="border-b border-outline-variant">
                             <div className="flex items-center gap-2">
                                 <MaterialIcon name="date_range" size="sm" className="text-primary" />
-                                <h4 className="font-headline-sm text-sm font-bold text-primary">Operational Period & Timeline</h4>
+                                <h4 className="font-display text-sm font-semibold text-primary">Operational Period & Timeline</h4>
                             </div>
                         </CardHeader>
-                        <CardBody className="space-y-3 font-mono text-xs">
+                        <CardBody className="space-y-3 font-sans text-xs">
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">Activity Start Date</span>
-                                <span className="font-bold text-primary">{formatShortDate(activity.activityStartDate)}</span>
+                                <span className="font-semibold text-primary">{formatShortDate(activity.activityStartDate)}</span>
                             </div>
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">Activity End Date</span>
-                                <span className="font-bold text-primary">{formatShortDate(activity.activityEndDate)}</span>
+                                <span className="font-semibold text-primary">{formatShortDate(activity.activityEndDate)}</span>
                             </div>
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">Total Duration</span>
-                                <span className="font-bold text-secondary">{durationDays ? `${durationDays} Days` : "Single Event"}</span>
+                                <span className="font-semibold text-secondary">{durationDays ? `${durationDays} Days` : "Single Event"}</span>
                             </div>
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">Reporting Cycle</span>
@@ -785,13 +785,13 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                         <CardHeader tone="strip" className="border-b border-outline-variant">
                             <div className="flex items-center gap-2">
                                 <MaterialIcon name="verified" size="sm" className="text-primary" />
-                                <h4 className="font-headline-sm text-sm font-bold text-primary">IPCC Scientific Authority & Registry</h4>
+                                <h4 className="font-display text-sm font-semibold text-primary">IPCC Scientific Authority & Registry</h4>
                             </div>
                         </CardHeader>
-                        <CardBody className="space-y-3 font-mono text-xs">
+                        <CardBody className="space-y-3 font-sans text-xs">
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">Standard Body</span>
-                                <span className="font-bold text-primary">{sourceData.standard} Guidelines</span>
+                                <span className="font-semibold text-primary">{sourceData.standard} Guidelines</span>
                             </div>
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">Version & Data Year</span>
@@ -799,7 +799,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                             </div>
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">GWP Metric Standard</span>
-                                <span className="font-bold text-primary">{sourceData.gwpBasis ? `${sourceData.gwpBasis}` : "IPCC Guidelines"}</span>
+                                <span className="font-semibold text-primary">{sourceData.gwpBasis ? `${sourceData.gwpBasis}` : "IPCC Guidelines"}</span>
                             </div>
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">Geographical Region</span>
@@ -820,7 +820,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                                         href={sourceData.sourceUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1.5 text-primary hover:underline font-bold">
+                                        className="inline-flex items-center gap-1.5 text-primary hover:underline font-semibold">
                                         <span>View Official IPCC Technical Documentation</span>
                                         <MaterialIcon name="open_in_new" size="xs" />
                                     </a>
@@ -834,29 +834,29 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                         <CardHeader tone="strip" className="border-b border-outline-variant">
                             <div className="flex items-center gap-2">
                                 <MaterialIcon name="calculate" size="sm" className="text-primary" />
-                                <h4 className="font-headline-sm text-sm font-bold text-primary">Factor Rates per Fuel Unit</h4>
+                                <h4 className="font-display text-sm font-semibold text-primary">Factor Rates per Fuel Unit</h4>
                             </div>
                         </CardHeader>
-                        <CardBody className="space-y-3 font-mono text-xs">
+                        <CardBody className="space-y-3 font-sans text-xs">
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">Total Factor (kg CO₂e / {activity.unitSymbol || "tonne"})</span>
-                                <span className="font-bold text-primary">{formatNumber(activity.factorKgCo2e, 4)} kg</span>
+                                <span className="font-semibold text-primary tabular-nums">{formatNumber(activity.factorKgCo2e, 4)} kg</span>
                             </div>
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">CO₂ Gas Factor</span>
-                                <span className="font-semibold text-primary">{formatNumber(activity.factorKgCo2eOfCo2, 4)} kg</span>
+                                <span className="font-semibold text-primary tabular-nums">{formatNumber(activity.factorKgCo2eOfCo2, 4)} kg</span>
                             </div>
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">CH₄ Methane Factor</span>
-                                <span className="font-semibold text-primary">{formatNumber(activity.factorKgCo2eOfCh4, 4)} kg</span>
+                                <span className="font-semibold text-primary tabular-nums">{formatNumber(activity.factorKgCo2eOfCh4, 4)} kg</span>
                             </div>
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">N₂O Nitrous Oxide Factor</span>
-                                <span className="font-semibold text-primary">{formatNumber(activity.factorKgCo2eOfN2o, 4)} kg</span>
+                                <span className="font-semibold text-primary tabular-nums">{formatNumber(activity.factorKgCo2eOfN2o, 4)} kg</span>
                             </div>
                             <div className="flex justify-between py-1.5 border-b border-outline-variant/40">
                                 <span className="text-on-surface-variant">Total Factor (tonnes CO₂e / {activity.unitSymbol || "tonne"})</span>
-                                <span className="font-bold text-primary">{formatNumber(activity.factorTCo2e, 6)} t</span>
+                                <span className="font-semibold text-primary tabular-nums">{formatNumber(activity.factorTCo2e, 6)} t</span>
                             </div>
                             <div className="flex justify-between py-1.5">
                                 <span className="text-on-surface-variant">Emission Factor Unit</span>
@@ -873,73 +873,73 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                     <CardHeader tone="strip" className="border-b border-outline-variant">
                         <div className="flex items-center gap-2">
                             <MaterialIcon name="table_rows" size="sm" className="text-primary" />
-                            <h4 className="font-headline-sm text-sm font-bold text-primary">Greenhouse Gas Mass Ledger (kg & tonnes)</h4>
+                            <h4 className="font-display text-sm font-semibold text-primary">Greenhouse Gas Mass Ledger (kg & tonnes)</h4>
                         </div>
                     </CardHeader>
                     <div className="overflow-x-auto">
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Greenhouse Gas Constituent</TableHead>
-                                    <TableHead>Formula / Symbol</TableHead>
-                                    <TableHead>GWP Multiplier{sourceData.gwpBasis ? ` (${sourceData.gwpBasis})` : ""}</TableHead>
-                                    <TableHead className="text-right">Calculated Mass (kg)</TableHead>
-                                    <TableHead className="text-right">Calculated Mass (tonnes)</TableHead>
-                                    <TableHead className="text-right">% of Total CO₂e</TableHead>
+                                    <TableHead className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Greenhouse Gas Constituent</TableHead>
+                                    <TableHead className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Formula / Symbol</TableHead>
+                                    <TableHead className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">GWP Multiplier{sourceData.gwpBasis ? ` (${sourceData.gwpBasis})` : ""}</TableHead>
+                                    <TableHead className="text-right font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Calculated Mass (kg)</TableHead>
+                                    <TableHead className="text-right font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Calculated Mass (tonnes)</TableHead>
+                                    <TableHead className="text-right font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">% of Total CO₂e</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 <TableRow>
-                                    <TableCell className="font-bold text-primary">Carbon Dioxide (Pure)</TableCell>
-                                    <TableCell className="font-mono">CO₂</TableCell>
-                                    <TableCell className="font-mono">1.0</TableCell>
-                                    <TableCell className="text-right font-mono">{formatNumber(activity.calculatedKgCo2)} kg</TableCell>
-                                    <TableCell className="text-right font-mono font-bold text-primary">{formatNumber(activity.calculatedTCo2, 4)} t</TableCell>
-                                    <TableCell className="text-right font-mono">
+                                    <TableCell className="font-semibold text-primary font-sans text-xs">Carbon Dioxide (Pure)</TableCell>
+                                    <TableCell className="font-sans text-xs text-on-surface-variant">CO₂</TableCell>
+                                    <TableCell className="font-sans text-xs text-on-surface-variant tabular-nums">1.0</TableCell>
+                                    <TableCell className="text-right font-sans text-xs tabular-nums">{formatNumber(activity.calculatedKgCo2)} kg</TableCell>
+                                    <TableCell className="text-right font-sans text-xs font-semibold text-primary tabular-nums">{formatNumber(activity.calculatedTCo2, 4)} t</TableCell>
+                                    <TableCell className="text-right font-sans text-xs tabular-nums">
                                         {totalTCo2e > 0 ? formatNumber((co2Tons / totalTCo2e) * 100, 2) : "0.00"}%
                                     </TableCell>
                                 </TableRow>
 
                                 <TableRow>
-                                    <TableCell className="font-bold text-primary">Methane</TableCell>
-                                    <TableCell className="font-mono">CH₄</TableCell>
-                                    <TableCell className="font-mono">27.9</TableCell>
-                                    <TableCell className="text-right font-mono">{formatNumber(activity.calculatedKgCh4)} kg</TableCell>
-                                    <TableCell className="text-right font-mono font-bold text-primary">{formatNumber(activity.calculatedTCh4, 4)} t</TableCell>
-                                    <TableCell className="text-right font-mono">
+                                    <TableCell className="font-semibold text-primary font-sans text-xs">Methane</TableCell>
+                                    <TableCell className="font-sans text-xs text-on-surface-variant">CH₄</TableCell>
+                                    <TableCell className="font-sans text-xs text-on-surface-variant tabular-nums">27.9</TableCell>
+                                    <TableCell className="text-right font-sans text-xs tabular-nums">{formatNumber(activity.calculatedKgCh4)} kg</TableCell>
+                                    <TableCell className="text-right font-sans text-xs font-semibold text-primary tabular-nums">{formatNumber(activity.calculatedTCh4, 4)} t</TableCell>
+                                    <TableCell className="text-right font-sans text-xs tabular-nums">
                                         {totalTCo2e > 0 ? formatNumber((ch4Tons / totalTCo2e) * 100, 2) : "0.00"}%
                                     </TableCell>
                                 </TableRow>
 
                                 <TableRow>
-                                    <TableCell className="font-bold text-primary">Nitrous Oxide</TableCell>
-                                    <TableCell className="font-mono">N₂O</TableCell>
-                                    <TableCell className="font-mono">273.0</TableCell>
-                                    <TableCell className="text-right font-mono">{formatNumber(activity.calculatedKgN2o)} kg</TableCell>
-                                    <TableCell className="text-right font-mono font-bold text-primary">{formatNumber(activity.calculatedTN2o, 4)} t</TableCell>
-                                    <TableCell className="text-right font-mono">
+                                    <TableCell className="font-semibold text-primary font-sans text-xs">Nitrous Oxide</TableCell>
+                                    <TableCell className="font-sans text-xs text-on-surface-variant">N₂O</TableCell>
+                                    <TableCell className="font-sans text-xs text-on-surface-variant tabular-nums">273.0</TableCell>
+                                    <TableCell className="text-right font-sans text-xs tabular-nums">{formatNumber(activity.calculatedKgN2o)} kg</TableCell>
+                                    <TableCell className="text-right font-sans text-xs font-semibold text-primary tabular-nums">{formatNumber(activity.calculatedTN2o, 4)} t</TableCell>
+                                    <TableCell className="text-right font-sans text-xs tabular-nums">
                                         {totalTCo2e > 0 ? formatNumber((n2oTons / totalTCo2e) * 100, 2) : "0.00"}%
                                     </TableCell>
                                 </TableRow>
 
                                 {activity.biogenicKgCo2 != null && (
                                     <TableRow>
-                                        <TableCell className="font-bold text-emerald-700">Biogenic Carbon Dioxide</TableCell>
-                                        <TableCell className="font-mono">Bio-CO₂</TableCell>
-                                        <TableCell className="font-mono">Reported Separately</TableCell>
-                                        <TableCell className="text-right font-mono">{formatNumber(activity.biogenicKgCo2)} kg</TableCell>
-                                        <TableCell className="text-right font-mono font-bold text-emerald-700">{formatNumber(activity.biogenicTCo2, 4)} t</TableCell>
-                                        <TableCell className="text-right font-mono text-on-surface-variant">Biogenic Memo</TableCell>
+                                        <TableCell className="font-semibold text-emerald-700 font-sans text-xs">Biogenic Carbon Dioxide</TableCell>
+                                        <TableCell className="font-sans text-xs text-on-surface-variant">Bio-CO₂</TableCell>
+                                        <TableCell className="font-sans text-xs text-on-surface-variant">Reported Separately</TableCell>
+                                        <TableCell className="text-right font-sans text-xs tabular-nums">{formatNumber(activity.biogenicKgCo2)} kg</TableCell>
+                                        <TableCell className="text-right font-sans text-xs font-semibold text-emerald-700 tabular-nums">{formatNumber(activity.biogenicTCo2, 4)} t</TableCell>
+                                        <TableCell className="text-right font-sans text-xs text-on-surface-variant">Biogenic Memo</TableCell>
                                     </TableRow>
                                 )}
 
-                                <TableRow className="bg-surface-container-high/40 font-bold">
+                                <TableRow className="bg-surface-container-high/40 font-semibold font-sans text-xs">
                                     <TableCell className="text-primary">Total Gross Scope 1 Impact</TableCell>
-                                    <TableCell className="font-mono">CO₂e</TableCell>
-                                    <TableCell className="font-mono">Composite</TableCell>
-                                    <TableCell className="text-right font-mono text-primary">{formatNumber(activity.calculatedKgCo2e)} kg</TableCell>
-                                    <TableCell className="text-right font-mono text-primary text-sm">{formatNumber(activity.calculatedTCo2e, 4)} tCO₂e</TableCell>
-                                    <TableCell className="text-right font-mono">100.00%</TableCell>
+                                    <TableCell className="text-on-surface-variant">CO₂e</TableCell>
+                                    <TableCell className="text-on-surface-variant">Composite</TableCell>
+                                    <TableCell className="text-right text-primary tabular-nums">{formatNumber(activity.calculatedKgCo2e)} kg</TableCell>
+                                    <TableCell className="text-right text-primary text-sm tabular-nums font-bold">{formatNumber(activity.calculatedTCo2e, 4)} tCO₂e</TableCell>
+                                    <TableCell className="text-right tabular-nums">100.00%</TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>
@@ -953,8 +953,8 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                     {attachedDocs.length === 0 ? (
                         <Card className="p-8 text-center bg-white">
                             <MaterialIcon name="description" size="lg" className="text-on-surface-variant/40 mx-auto" />
-                            <h4 className="font-headline-sm text-sm font-semibold text-primary mt-2">No Verification Documents Attached</h4>
-                            <p className="text-xs text-on-surface-variant font-mono mt-1">
+                            <h4 className="font-display text-sm font-semibold text-primary mt-2">No Verification Documents Attached</h4>
+                            <p className="text-xs text-on-surface-variant font-sans mt-1">
                                 Weighbridge tickets, supplier invoices, or meter calibration logs can be attached for third-party auditing.
                             </p>
                         </Card>
@@ -966,21 +966,21 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                                     className="rounded-lg border border-outline-variant bg-white p-4 shadow-sm flex flex-col justify-between space-y-3">
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary font-mono font-bold text-xs">
+                                            <div className="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary font-sans font-semibold text-xs uppercase">
                                                 {doc.fileExtension?.replace(".", "").toUpperCase() || "DOC"}
                                             </div>
                                             <div>
-                                                <h5 className="font-bold text-sm text-primary truncate max-w-[240px]">
+                                                <h5 className="font-semibold text-sm text-primary truncate max-w-[240px]">
                                                     {doc.documentName || doc.fileName || "Audit Evidence Document"}
                                                 </h5>
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-high font-mono text-[10px] uppercase font-semibold text-on-surface-variant mt-1">
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-high font-sans text-[10px] uppercase font-semibold text-on-surface-variant mt-1">
                                                     {doc.documentType.replace(/_/g, " ")}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="text-xs font-mono text-on-surface-variant space-y-1 pt-2 border-t border-outline-variant/40">
+                                    <div className="text-xs font-sans text-on-surface-variant space-y-1 pt-2 border-t border-outline-variant/40">
                                         {doc.documentDate && <div>Dated: {formatShortDate(doc.documentDate)}</div>}
                                         {doc.uploadedBy && <div className="truncate text-[10px]">Uploader: {doc.uploadedBy}</div>}
                                     </div>
@@ -992,7 +992,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="flex-1">
-                                                <Button variant="secondary" size="sm" className="w-full font-mono text-xs">
+                                                <Button variant="secondary" size="sm" className="w-full text-xs font-medium">
                                                     <MaterialIcon name="visibility" size="xs" />
                                                     <span>View</span>
                                                 </Button>
@@ -1004,7 +1004,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                                                 href={doc.downloadUrl || doc.s3PresignedUrl || doc.sourceUrl}
                                                 download
                                                 className="flex-1">
-                                                <Button variant="primary" size="sm" className="w-full font-mono text-xs">
+                                                <Button variant="primary" size="sm" className="w-full text-xs font-medium">
                                                     <MaterialIcon name="download" size="xs" />
                                                     <span>Download</span>
                                                 </Button>
@@ -1019,7 +1019,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
             )}
 
             {/* Governance & Metadata Footer Card */}
-            <div className="rounded-xl border border-outline-variant bg-surface-container-low p-4 text-xs font-mono text-on-surface-variant flex flex-wrap items-center justify-between gap-4">
+            <div className="rounded-xl border border-outline-variant bg-surface-container-low p-4 text-xs font-sans text-on-surface-variant flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4 flex-wrap">
                     <span>Created: {formatFullDateTime(activity.createdAt)}</span>
                     <span>•</span>
@@ -1044,13 +1044,13 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                     <div className="relative w-full max-w-lg overflow-hidden rounded-xl border border-outline-variant bg-white shadow-2xl">
                         <div className="flex items-start justify-between gap-4 px-6 py-5">
                             <div>
-                                <h3 className="font-headline-sm text-headline-sm font-semibold text-primary">
+                                <h3 className="font-display text-base font-semibold text-primary">
                                     {confirmState.action === "verify" && "Verify Fuel Activity"}
                                     {confirmState.action === "reject" && "Reject Fuel Activity"}
                                     {confirmState.action === "submit" && "Submit Fuel Activity"}
                                     {confirmState.action === "delete" && "Delete Fuel Activity"}
                                 </h3>
-                                <p className="text-body-sm text-on-surface-variant mt-1 text-xs font-mono">
+                                <p className="font-sans text-xs text-on-surface-variant mt-1">
                                     {confirmState.action === "verify" && "This action locks the activity into the verified ESG audit registry."}
                                     {confirmState.action === "reject" && "Please provide a reason for rejecting this activity for the data submitter."}
                                     {confirmState.action === "submit" && "This will submit the activity for reviewer verification."}
@@ -1071,7 +1071,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                                     value={rejectReason}
                                     onChange={(e) => setRejectReason(e.target.value)}
                                     placeholder="Enter reason for rejection (required)..."
-                                    className="w-full rounded-lg border border-outline-variant p-3 text-xs font-mono focus:border-primary focus:ring-1 focus:ring-primary"
+                                    className="w-full rounded-lg border border-outline-variant p-3 text-xs font-sans focus:border-primary focus:ring-1 focus:ring-primary"
                                     rows={4}
                                     maxLength={2000}
                                 />
@@ -1090,7 +1090,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                                 <button
                                     onClick={() => verifyMutation.mutate()}
                                     disabled={isSubmitting}
-                                    className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-mono text-xs font-bold uppercase hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm">
+                                    className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-sans text-xs font-semibold uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm">
                                     <MaterialIcon name="verified" size="xs" />
                                     <span>{verifyMutation.isPending ? "Verifying..." : "Confirm Verify"}</span>
                                 </button>
@@ -1100,7 +1100,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                                 <button
                                     onClick={() => submitMutation.mutate()}
                                     disabled={isSubmitting}
-                                    className="bg-primary text-white px-4 py-2 rounded-lg font-mono text-xs font-bold uppercase hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm">
+                                    className="bg-primary text-white px-4 py-2 rounded-lg font-sans text-xs font-semibold uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm">
                                     <MaterialIcon name="send" size="xs" />
                                     <span>{submitMutation.isPending ? "Submitting..." : "Confirm Submit"}</span>
                                 </button>

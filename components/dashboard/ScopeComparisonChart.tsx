@@ -20,8 +20,8 @@ export function ScopeComparisonChart({ data }: ScopeComparisonChartProps) {
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="equalizer" size="lg" className="text-primary" />
                     <div>
-                        <h3 className="text-headline-sm font-semibold text-primary">Scope 1 vs. Scope 2 Comparison</h3>
-                        <p className="font-mono text-[10px] uppercase text-on-surface-variant">
+                        <h3 className="font-display text-headline-sm font-semibold tracking-tight text-primary">Scope 1 vs. Scope 2 Comparison</h3>
+                        <p className="font-sans text-[11px] font-medium tracking-tight text-on-surface-variant">
                             Monthly tCO2e Distribution
                         </p>
                     </div>
@@ -57,7 +57,7 @@ export function ScopeComparisonChart({ data }: ScopeComparisonChartProps) {
                         );
                     })}
                 </div>
-                <div className="flex justify-between px-4 pt-3 font-mono text-[10px] uppercase tracking-widest text-on-surface-variant overflow-x-auto scrollbar-thin">
+                <div className="flex justify-between px-4 pt-3 font-sans text-[11px] font-medium text-on-surface-variant overflow-x-auto scrollbar-thin">
                     {data.map((d) => (
                         <span key={d.month} className="min-w-[40px] flex-1 text-center">
                             {d.month}
@@ -73,7 +73,7 @@ function LegendDot({ className, label, style }: { className?: string; label: str
     return (
         <div className="flex items-center gap-2">
             <span className={`h-3 w-3 shrink-0 rounded-full ${className ?? ""}`} style={style} />
-            <span className="font-mono text-[11px] text-on-surface">{label}</span>
+            <span className="font-sans text-[12px] font-medium text-on-surface">{label}</span>
         </div>
     );
 }

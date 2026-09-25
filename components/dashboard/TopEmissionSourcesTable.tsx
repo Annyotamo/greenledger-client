@@ -30,15 +30,15 @@ export function TopEmissionSourcesTable({ sources }: TopEmissionSourcesTableProp
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="military_tech" size="sm" className="text-primary text-[20px]" />
                     <div>
-                        <h3 className="font-headline-sm text-headline-sm font-bold text-primary uppercase tracking-tight">
+                        <h3 className="font-headline-sm text-headline-sm font-semibold text-primary">
                             Top Emission Sources Across All Scopes
                         </h3>
-                        <p className="font-mono text-[10px] uppercase tracking-tight text-on-surface-variant">
+                        <p className="font-sans text-xs text-on-surface-variant">
                             Ranked drivers by contribution
                         </p>
                     </div>
                 </div>
-                <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-surface-container-high text-primary px-2.5 py-1 rounded">
+                <span className="font-sans text-[11px] font-semibold uppercase tracking-wider bg-surface-container-high text-primary px-2.5 py-1 rounded-md">
                     Top {sources.length} Drivers
                 </span>
             </div>
@@ -47,33 +47,33 @@ export function TopEmissionSourcesTable({ sources }: TopEmissionSourcesTableProp
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-surface-container-low border-b border-outline-variant">
-                            <TableHead className="w-14 text-center font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">Rank</TableHead>
-                            <TableHead className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">Emission Source</TableHead>
-                            <TableHead className="text-center font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">Scope</TableHead>
-                            <TableHead className="text-right font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">Emissions (tCO2e)</TableHead>
-                            <TableHead className="text-right font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">Share (%)</TableHead>
+                            <TableHead className="w-14 text-center font-sans text-[11px] text-on-surface-variant uppercase tracking-wider">Rank</TableHead>
+                            <TableHead className="font-sans text-[11px] text-on-surface-variant uppercase tracking-wider">Emission Source</TableHead>
+                            <TableHead className="text-center font-sans text-[11px] text-on-surface-variant uppercase tracking-wider">Scope</TableHead>
+                            <TableHead className="text-right font-sans text-[11px] text-on-surface-variant uppercase tracking-wider">Emissions (tCO2e)</TableHead>
+                            <TableHead className="text-right font-sans text-[11px] text-on-surface-variant uppercase tracking-wider">Share (%)</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {sources.map((item) => (
                             <TableRow key={item.rank} className="hover:bg-surface-container-low/50 transition-colors border-b border-outline-variant/30">
-                                <TableCell className="text-center font-mono font-bold text-xs">
-                                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-surface-container text-primary font-bold text-[11px]">
+                                <TableCell className="text-center font-sans font-bold text-xs">
+                                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-surface-container text-primary font-semibold text-xs">
                                         {item.rank}
                                     </span>
                                 </TableCell>
-                                <TableCell className="font-sans font-bold text-primary text-xs">
+                                <TableCell className="font-sans font-semibold text-primary text-xs sm:text-sm">
                                     {item.sourceName}
                                 </TableCell>
                                 <TableCell className="text-center">
-                                    <span className={`inline-block font-mono text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${getScopeBadgeStyle(item.scopeName)}`}>
+                                    <span className={`inline-block font-sans text-[11px] font-semibold px-2 py-0.5 rounded-md border ${getScopeBadgeStyle(item.scopeName)}`}>
                                         {item.scopeName}
                                     </span>
                                 </TableCell>
-                                <TableCell className="text-right font-mono font-bold text-xs text-primary">
+                                <TableCell className="text-right font-sans font-semibold text-xs sm:text-sm text-primary tabular-nums">
                                     {item.tco2e.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} tCO2e
                                 </TableCell>
-                                <TableCell className="text-right font-mono text-xs font-semibold text-on-surface-variant">
+                                <TableCell className="text-right font-sans text-xs font-medium text-on-surface-variant">
                                     <div className="flex items-center justify-end gap-2">
                                         <div className="w-16 bg-surface-container h-1.5 rounded-full overflow-hidden hidden sm:block">
                                             <div
@@ -81,7 +81,7 @@ export function TopEmissionSourcesTable({ sources }: TopEmissionSourcesTableProp
                                                 style={{ width: `${Math.min(100, Math.max(0, item.sharePct))}%` }}
                                             />
                                         </div>
-                                        <span>{item.sharePct.toFixed(1)}%</span>
+                                        <span className="tabular-nums">{item.sharePct.toFixed(1)}%</span>
                                     </div>
                                 </TableCell>
                             </TableRow>

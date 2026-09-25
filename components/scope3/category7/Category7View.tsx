@@ -145,12 +145,12 @@ export function Category7View() {
     }
 
     return (
-        <div className="relative mx-auto max-w-[1400px] space-y-6 pb-12">
+        <div className="relative mx-auto max-w-[1400px] space-y-6 pb-12 font-sans">
             <Scope3Navbar />
 
             {notification && (
                 <div
-                    className={`flex items-center justify-between rounded-xl px-4 py-3 font-mono text-xs shadow-md border ${
+                    className={`flex items-center justify-between rounded-xl px-4 py-3 font-sans text-xs font-medium shadow-md border ${
                         notification.type === "success"
                             ? "bg-secondary-container/90 text-on-secondary-container border-secondary/30"
                             : "bg-error-container/90 text-on-error-container border-error/30"
@@ -168,17 +168,17 @@ export function Category7View() {
             {/* Page Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-outline-variant/40 pb-4">
                 <div className="space-y-1">
-                    <div className="flex items-center gap-2 font-mono text-xs text-on-surface-variant">
+                    <div className="flex items-center gap-2 font-sans text-xs text-slate-500 font-medium">
                         <Link href="/scope-3" className="hover:text-primary transition-colors">
                             Scope 3 Value Chain
                         </Link>
                         <span>/</span>
-                        <span className="text-secondary font-bold">Cat 7: Employee Commuting</span>
+                        <span className="text-secondary font-semibold">Cat 7: Employee Commuting</span>
                     </div>
-                    <h1 className="text-headline-md font-bold text-primary tracking-tight">
+                    <h1 className="font-display text-2xl sm:text-3xl font-bold text-primary tracking-tight">
                         Employee Commuting (Category 7)
                     </h1>
-                    <p className="font-mono text-xs text-on-surface-variant max-w-3xl">
+                    <p className="font-sans text-xs text-slate-500 max-w-3xl leading-relaxed">
                         Quantify Scope 3 Category 7 emissions from workforce commuting to and from tenant facilities across rail, bus, carpooling, and personal vehicle modes.
                     </p>
                 </div>
@@ -191,12 +191,12 @@ export function Category7View() {
                             travelQuery.refetch();
                             summaryQuery.refetch();
                         }}
-                        className="gap-1.5 font-mono text-xs">
+                        className="gap-1.5 font-sans text-xs font-semibold">
                         <MaterialIcon name="refresh" size="sm" />
                         <span>Refresh</span>
                     </Button>
 
-                    <Button variant="primary" size="md" onClick={handleOpenCreate} className="gap-1.5 font-mono text-xs">
+                    <Button variant="primary" size="md" onClick={handleOpenCreate} className="gap-1.5 font-sans text-xs font-semibold">
                         <MaterialIcon name="commute" size="sm" />
                         <span>Log Employee Commute Activity</span>
                     </Button>
@@ -205,13 +205,13 @@ export function Category7View() {
 
             {/* Filter Control Toolbar */}
             <Card className="p-4 border-outline-variant/60">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 font-mono text-xs">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 font-sans text-xs">
                     <div>
-                        <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Status Filter</label>
+                        <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Status Filter</label>
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-primary">
                             <option value="">All Statuses</option>
                             <option value="verified">Verified (Locked)</option>
                             <option value="submitted">Submitted (Pending Review)</option>
@@ -221,11 +221,11 @@ export function Category7View() {
                     </div>
 
                     <div>
-                        <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Office Facility / Work Site</label>
+                        <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Office Facility / Work Site</label>
                         <select
                             value={facilityFilter}
                             onChange={(e) => setFacilityFilter(e.target.value)}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-primary">
                             <option value="">All Facilities</option>
                             {(facilitiesQuery.data ?? []).map((fac) => (
                                 <option key={fac.id} value={fac.id}>
@@ -236,11 +236,11 @@ export function Category7View() {
                     </div>
 
                     <div>
-                        <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Reporting Period</label>
+                        <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Reporting Period</label>
                         <select
                             value={periodIdFilter}
                             onChange={(e) => setPeriodIdFilter(e.target.value)}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-primary">
                             <option value="">All Reporting Periods</option>
                             {(reportingPeriodsQuery.data ?? []).map((p) => (
                                 <option key={p.id} value={p.id}>

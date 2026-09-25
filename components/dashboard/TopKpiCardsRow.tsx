@@ -38,13 +38,13 @@ export function TopKpiCardsRow({ cards }: TopKpiCardsRowProps) {
                             <div className="flex items-start justify-between gap-2 mb-3">
                                 <div className="flex items-center gap-1.5 min-w-0">
                                     <MaterialIcon name={card.icon} size="sm" className="text-on-surface-variant text-[16px] shrink-0" />
-                                    <span className="text-on-surface-variant font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-tight truncate">
+                                    <span className="text-on-surface-variant font-sans text-[11px] font-semibold uppercase tracking-tight truncate">
                                         {card.label}
                                     </span>
                                 </div>
                                 {card.changePct !== undefined && !isIntensity && (
                                     <span
-                                        className={`font-mono text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
+                                        className={`font-sans text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 tabular-nums ${
                                             isDown
                                                 ? "bg-secondary-container/40 text-on-secondary-container"
                                                 : "bg-error-container/40 text-on-error-container"
@@ -57,24 +57,24 @@ export function TopKpiCardsRow({ cards }: TopKpiCardsRowProps) {
 
                             {/* Middle Metric Value */}
                             <div className="space-y-1 my-1">
-                                <div className="flex items-baseline gap-1.5 font-mono">
-                                    <span className="text-[22px] xl:text-[24px] text-primary font-extrabold tracking-tight">
+                                <div className="flex items-baseline gap-1.5">
+                                    <span className="font-display text-[22px] xl:text-[24px] text-primary font-bold tracking-tight tabular-nums">
                                         {card.value}
                                     </span>
-                                    <span className="text-on-surface-variant font-mono text-[10px] font-medium">
+                                    <span className="text-on-surface-variant font-sans text-[11px] font-medium">
                                         {isIntensity ? "tCO2e/t" : card.unit}
                                     </span>
                                 </div>
 
                                 {isIntensity && card.secondaryValue && (
-                                    <div className="flex items-center justify-between text-[10px] font-mono text-on-surface-variant pt-0.5">
+                                    <div className="flex items-center justify-between text-[11px] font-sans text-on-surface-variant pt-0.5">
                                         <span>Revenue Int:</span>
-                                        <span className="font-bold text-primary">{card.secondaryValue} tCO2e/M₹</span>
+                                        <span className="font-display font-bold text-primary tabular-nums">{card.secondaryValue} tCO2e/M₹</span>
                                     </div>
                                 )}
 
                                 {!isIntensity && card.subtitle && (
-                                    <div className="text-[10px] font-mono text-on-surface-variant">
+                                    <div className="text-[11px] font-sans text-on-surface-variant">
                                         {card.subtitle}
                                     </div>
                                 )}

@@ -176,7 +176,7 @@ export function Category15FormModal({
     const busy = isSubmitting || submitting;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto font-sans">
             <div
                 className="fixed inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity"
                 onClick={onClose}
@@ -185,18 +185,18 @@ export function Category15FormModal({
             <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-2xl z-10 max-h-[90vh] flex flex-col my-auto">
                 <div className="flex items-center justify-between border-b border-outline-variant/60 px-6 py-4 bg-surface-container-low/80">
                     <div className="flex items-center gap-2">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary text-on-secondary font-mono text-xs font-bold">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary text-on-secondary font-sans text-xs font-bold">
                             15
                         </span>
                         <div>
-                            <h3 className="font-mono text-headline-sm font-bold text-primary">
+                            <h3 className="font-display text-lg font-bold text-primary tracking-tight">
                                 {mode === "create"
                                     ? "Log Investment Activity (PCAF Standard)"
                                     : mode === "edit"
                                       ? "Edit Investment Activity"
                                       : "Amend Verified Investment Activity"}
                             </h3>
-                            <p className="font-mono text-[11px] text-on-surface-variant">
+                            <p className="font-sans text-xs text-slate-500 font-medium">
                                 Scope 3: Category 15 Investments & Financed Emissions (PCAF Attribution Standard)
                             </p>
                         </div>
@@ -215,13 +215,13 @@ export function Category15FormModal({
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                                 Reporting Period <span className="text-error">*</span>
                             </label>
                             <select
                                 value={reportingPeriodId || (periods[0]?.id ?? "")}
                                 onChange={(e) => setReportingPeriodId(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-primary">
                                 {periods.length === 0 && <option value="">Loading reporting periods...</option>}
                                 {periods.map((p) => (
                                     <option key={p.id} value={p.id}>
@@ -232,21 +232,21 @@ export function Category15FormModal({
                         </div>
 
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                                 Financed Asset Description <span className="text-error">*</span>
                             </label>
                             <Input
                                 value={whatYouFinanced}
                                 onChange={(e) => setWhatYouFinanced(e.target.value)}
                                 placeholder="e.g. Listed cement company shares"
-                                className="font-mono text-xs font-bold"
+                                className="font-sans text-xs font-semibold"
                             />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div className="sm:col-span-2">
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                                 PCAF Asset Class <span className="text-error">*</span>
                             </label>
                             <CustomSelect
@@ -254,27 +254,27 @@ export function Category15FormModal({
                                 value={assetClass}
                                 onChange={(val) => setAssetClass(val as AssetClassEnum)}
                                 placeholder="Select PCAF asset class..."
-                                className="font-mono text-xs"
+                                className="font-sans text-xs"
                                 variant="form"
                                 isSearchable={true}
                             />
                         </div>
 
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                                 Valuation Date <span className="text-error">*</span>
                             </label>
                             <DatePicker
                                 value={activityDate}
                                 onChange={setActivityDate}
-                                className="font-mono text-xs"
+                                className="font-sans text-xs"
                             />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                                 Outstanding (₹ Crores) <span className="text-error">*</span>
                             </label>
                             <Input
@@ -284,12 +284,12 @@ export function Category15FormModal({
                                 value={outstandingAmount}
                                 onChange={(e) => setOutstandingAmount(e.target.value)}
                                 placeholder="e.g. 250"
-                                className="font-mono text-xs font-bold"
+                                className="font-sans text-xs font-semibold tabular-nums"
                             />
                         </div>
 
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                                 Company Worth (₹ Cr) <span className="text-error">*</span>
                             </label>
                             <Input
@@ -299,20 +299,20 @@ export function Category15FormModal({
                                 value={totalCompanyWorth}
                                 onChange={(e) => setTotalCompanyWorth(e.target.value)}
                                 placeholder="e.g. 2500"
-                                className="font-mono text-xs font-bold"
+                                className="font-sans text-xs font-semibold tabular-nums"
                             />
                         </div>
                     </div>
 
                     {/* Company Total Emissions Inputs (tCO2e) */}
-                    <div className="rounded-xl bg-surface-container-low p-4 border border-outline-variant/60 space-y-3">
-                        <span className="font-mono text-xs font-bold text-primary uppercase tracking-wider block">
+                    <div className="rounded-xl bg-surface-container-low p-4 border border-outline-variant/60 space-y-3 font-sans">
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block">
                             Investee Company Total GHG Emissions (tCO₂e)
                         </span>
 
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                             <div>
-                                <label className="block font-mono text-[10px] font-bold text-on-surface-variant mb-1">
+                                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
                                     Company Scope 1 (tCO₂e)
                                 </label>
                                 <Input
@@ -322,12 +322,12 @@ export function Category15FormModal({
                                     value={companyScope1}
                                     onChange={(e) => setCompanyScope1(e.target.value)}
                                     placeholder="e.g. 1000"
-                                    className="font-mono text-xs h-8"
+                                    className="font-sans text-xs tabular-nums h-8 font-medium"
                                 />
                             </div>
 
                             <div>
-                                <label className="block font-mono text-[10px] font-bold text-on-surface-variant mb-1">
+                                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
                                     Company Scope 2 (tCO₂e)
                                 </label>
                                 <Input
@@ -337,12 +337,12 @@ export function Category15FormModal({
                                     value={companyScope2}
                                     onChange={(e) => setCompanyScope2(e.target.value)}
                                     placeholder="e.g. 100"
-                                    className="font-mono text-xs h-8"
+                                    className="font-sans text-xs tabular-nums h-8 font-medium"
                                 />
                             </div>
 
                             <div>
-                                <label className="block font-mono text-[10px] font-bold text-on-surface-variant mb-1">
+                                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
                                     Company Scope 3 (tCO₂e)
                                 </label>
                                 <Input
@@ -352,45 +352,45 @@ export function Category15FormModal({
                                     value={companyScope3}
                                     onChange={(e) => setCompanyScope3(e.target.value)}
                                     placeholder="e.g. 2000"
-                                    className="font-mono text-xs h-8"
+                                    className="font-sans text-xs tabular-nums h-8 font-medium"
                                 />
                             </div>
                         </div>
                     </div>
 
                     {/* PCAF Calculation Live Preview Box */}
-                    <div className="rounded-lg bg-surface-container-low p-3.5 border border-outline-variant/40 space-y-2">
+                    <div className="rounded-lg bg-surface-container-low p-3.5 border border-outline-variant/40 space-y-2 font-sans">
                         <div className="flex items-center justify-between">
-                            <span className="font-mono text-[10px] uppercase font-bold text-on-surface-variant">
+                            <span className="text-[11px] uppercase tracking-wider font-semibold text-slate-500">
                                 Live PCAF Financed Emissions Preview
                             </span>
-                            <span className="font-mono text-xs font-bold text-secondary">
+                            <span className="text-xs font-bold text-secondary tabular-nums">
                                 Attribution: {attributionPct.toFixed(2)}% ({attributionFactor.toFixed(4)})
                             </span>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 font-mono text-xs border-t border-outline-variant/30 pt-2">
+                        <div className="grid grid-cols-2 gap-2 text-xs border-t border-outline-variant/30 pt-2 font-sans">
                             <div>
-                                <span className="text-on-surface-variant">Financed Scope 1:</span>{" "}
-                                <span className="font-bold text-primary">{financedScope1.toFixed(2)} t</span>
+                                <span className="text-slate-500">Financed Scope 1:</span>{" "}
+                                <span className="font-semibold text-slate-900 tabular-nums">{financedScope1.toFixed(2)} t</span>
                             </div>
                             <div>
-                                <span className="text-on-surface-variant">Financed Scope 2:</span>{" "}
-                                <span className="font-bold text-primary">{financedScope2.toFixed(2)} t</span>
+                                <span className="text-slate-500">Financed Scope 2:</span>{" "}
+                                <span className="font-semibold text-slate-900 tabular-nums">{financedScope2.toFixed(2)} t</span>
                             </div>
                             <div>
-                                <span className="text-on-surface-variant">Financed Scope 3:</span>{" "}
-                                <span className="font-bold text-primary">{financedScope3.toFixed(2)} t</span>
+                                <span className="text-slate-500">Financed Scope 3:</span>{" "}
+                                <span className="font-semibold text-slate-900 tabular-nums">{financedScope3.toFixed(2)} t</span>
                             </div>
                             <div>
-                                <span className="text-on-surface-variant font-bold">Total Financed:</span>{" "}
-                                <span className="font-bold text-secondary">{totalFinancedEmissionsTco2e.toFixed(4)} tCO₂e</span>
+                                <span className="text-slate-700 font-semibold">Total Financed:</span>{" "}
+                                <span className="font-bold text-secondary tabular-nums">{totalFinancedEmissionsTco2e.toFixed(4)} tCO₂e</span>
                             </div>
                         </div>
                     </div>
 
                     <div>
-                        <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                        <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                             Notes / Audited Valuation Remarks
                         </label>
                         <textarea
@@ -398,15 +398,15 @@ export function Category15FormModal({
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Enter portfolio valuation report reference, equity share details, or PCAF data quality scores..."
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary leading-relaxed"
                         />
                     </div>
 
                     <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/40">
-                        <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={busy}>
+                        <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={busy} className="font-sans text-xs font-semibold">
                             Cancel
                         </Button>
-                        <Button type="submit" variant="primary" size="md" disabled={busy}>
+                        <Button type="submit" variant="primary" size="md" disabled={busy} className="font-sans text-xs font-semibold">
                             {busy
                                 ? "Saving..."
                                 : mode === "create"

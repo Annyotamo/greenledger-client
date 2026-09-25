@@ -188,8 +188,8 @@ export function ExportReportModal({
                             <MaterialIcon name="file_download" size="sm" />
                         </div>
                         <div>
-                            <h3 className="font-headline-sm text-sm font-bold text-primary">{title}</h3>
-                            <p className="text-[11px] font-mono text-on-surface-variant mt-0.5">{description}</p>
+                            <h3 className="font-display text-base font-semibold tracking-tight text-primary">{title}</h3>
+                            <p className="text-xs font-sans text-on-surface-variant mt-0.5">{description}</p>
                         </div>
                     </div>
                     <button
@@ -207,25 +207,25 @@ export function ExportReportModal({
                         <button
                             type="button"
                             onClick={() => handleSelectPreset("current_fy")}
-                            className="px-2.5 py-1 rounded-md text-[10px] font-mono font-semibold bg-surface-container border border-outline-variant/50 text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors">
+                            className="px-2.5 py-1 rounded-md text-xs font-sans font-medium bg-surface-container border border-outline-variant/50 text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors">
                             Current FY
                         </button>
                         <button
                             type="button"
                             onClick={() => handleSelectPreset("prev_fy")}
-                            className="px-2.5 py-1 rounded-md text-[10px] font-mono font-semibold bg-surface-container border border-outline-variant/50 text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors">
+                            className="px-2.5 py-1 rounded-md text-xs font-sans font-medium bg-surface-container border border-outline-variant/50 text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors">
                             Prev FY
                         </button>
                         <button
                             type="button"
                             onClick={() => handleSelectPreset("last_90")}
-                            className="px-2.5 py-1 rounded-md text-[10px] font-mono font-semibold bg-surface-container border border-outline-variant/50 text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors">
+                            className="px-2.5 py-1 rounded-md text-xs font-sans font-medium bg-surface-container border border-outline-variant/50 text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors">
                             Last 90 Days
                         </button>
                         <button
                             type="button"
                             onClick={() => handleSelectPreset("last_30")}
-                            className="px-2.5 py-1 rounded-md text-[10px] font-mono font-semibold bg-surface-container border border-outline-variant/50 text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors">
+                            className="px-2.5 py-1 rounded-md text-xs font-sans font-medium bg-surface-container border border-outline-variant/50 text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors">
                             Last 30 Days
                         </button>
                     </div>
@@ -244,8 +244,8 @@ export function ExportReportModal({
                                     ? "border-primary bg-primary/5 ring-1 ring-primary/20"
                                     : "border-outline-variant/70 bg-surface-container-lowest hover:bg-surface-container-low"
                             }`}>
-                            <span className="font-mono text-[9.5px] uppercase font-bold text-on-surface-variant block">Start Date</span>
-                            <span className="font-mono text-xs font-bold text-primary mt-0.5 block truncate">
+                            <span className="font-sans text-[10px] uppercase font-semibold text-on-surface-variant block">Start Date</span>
+                            <span className="font-display text-xs font-semibold text-primary mt-0.5 block truncate">
                                 {startDate ? format(startDate, "MMM d, yyyy") : "Select date"}
                             </span>
                         </button>
@@ -262,8 +262,8 @@ export function ExportReportModal({
                                     ? "border-primary bg-primary/5 ring-1 ring-primary/20"
                                     : "border-outline-variant/70 bg-surface-container-lowest hover:bg-surface-container-low"
                             }`}>
-                            <span className="font-mono text-[9.5px] uppercase font-bold text-on-surface-variant block">End Date</span>
-                            <span className="font-mono text-xs font-bold text-primary mt-0.5 block truncate">
+                            <span className="font-sans text-[10px] uppercase font-semibold text-on-surface-variant block">End Date</span>
+                            <span className="font-display text-xs font-semibold text-primary mt-0.5 block truncate">
                                 {endDate ? format(endDate, "MMM d, yyyy") : "Select date"}
                             </span>
                         </button>
@@ -281,7 +281,7 @@ export function ExportReportModal({
                                 <MaterialIcon name="chevron_left" size="xs" />
                             </button>
 
-                            <div className="flex items-center gap-1 font-mono">
+                            <div className="flex items-center gap-1 font-sans">
                                 <CustomSelect
                                     variant="compact"
                                     options={months}
@@ -317,14 +317,14 @@ export function ExportReportModal({
                         </div>
 
                         {/* Day Names Header */}
-                        <div className="grid grid-cols-7 gap-1 text-center font-mono text-[10px] text-on-surface-variant font-semibold py-1">
+                        <div className="grid grid-cols-7 gap-1 text-center font-sans text-[10px] text-on-surface-variant font-semibold py-1">
                             {weekdays.map((day) => (
                                 <div key={day}>{day}</div>
                             ))}
                         </div>
 
                         {/* Day Grid */}
-                        <div className="grid grid-cols-7 gap-1 text-center font-mono text-xs mt-1">
+                        <div className="grid grid-cols-7 gap-1 text-center font-sans text-xs mt-1">
                             {calendarDays.slice(0, 35).map((day, idx) => {
                                 const isCurrentMonth = isSameMonth(day, currentMonth);
                                 const isStart = startDate && isSameDay(day, startDate);
@@ -351,7 +351,7 @@ export function ExportReportModal({
                                         key={idx}
                                         type="button"
                                         onClick={() => handleDayClick(day)}
-                                        className={`h-7 w-full flex items-center justify-center rounded text-[11px] transition-colors ${cellStyles}`}>
+                                        className={`h-7 w-full flex items-center justify-center rounded text-[11px] font-sans tabular-nums transition-colors ${cellStyles}`}>
                                         {format(day, "d")}
                                     </button>
                                 );
@@ -361,22 +361,22 @@ export function ExportReportModal({
 
                     {/* Summary Info Banner */}
                     {isRangeValid ? (
-                        <div className="rounded-lg bg-emerald-500/10 p-2.5 border border-emerald-500/20 text-xs font-mono text-emerald-800 flex items-center justify-between">
+                        <div className="rounded-lg bg-emerald-500/10 p-2.5 border border-emerald-500/20 text-xs font-sans text-emerald-800 flex items-center justify-between">
                             <div className="flex items-center gap-1.5">
                                 <MaterialIcon name="date_range" size="xs" className="text-emerald-700" />
                                 <span>Duration:</span>
                             </div>
-                            <span className="font-bold">{totalDays} Days Selected</span>
+                            <span className="font-bold tabular-nums">{totalDays} Days Selected</span>
                         </div>
                     ) : (
-                        <div className="rounded-lg bg-slate-50 p-2.5 border border-slate-200 text-xs font-mono text-slate-500 flex items-center gap-1.5">
+                        <div className="rounded-lg bg-slate-50 p-2.5 border border-slate-200 text-xs font-sans text-slate-500 flex items-center gap-1.5">
                             <MaterialIcon name="info" size="xs" />
                             <span>Select both start and end dates to proceed.</span>
                         </div>
                     )}
 
                     {errorMessage && (
-                        <div className="rounded-lg bg-rose-50 p-2.5 border border-rose-200 text-xs font-mono text-rose-700">
+                        <div className="rounded-lg bg-rose-50 p-2.5 border border-rose-200 text-xs font-sans text-rose-700">
                             {errorMessage}
                         </div>
                     )}
@@ -391,7 +391,7 @@ export function ExportReportModal({
                         type="button"
                         onClick={handleDownloadClick}
                         disabled={!isRangeValid || isDownloading}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 font-mono text-xs font-bold uppercase text-white shadow-sm hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 font-sans text-xs font-semibold tracking-wide uppercase text-white shadow-sm hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                         <MaterialIcon name={isDownloading ? "hourglass_empty" : "download"} size="xs" />
                         <span>{isDownloading ? "Generating Excel..." : "Download Report"}</span>
                     </button>

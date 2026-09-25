@@ -142,12 +142,12 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
             {/* Modal Body */}
             <div className="relative w-full max-w-3xl max-h-[85vh] my-auto flex flex-col rounded-3xl border border-outline-variant bg-surface-container-lowest shadow-2xl animate-fade-up overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-outline-variant px-6 py-4 shrink-0 bg-white">
+                <div className="flex items-center justify-between border-b border-outline-variant px-6 py-4 shrink-0 bg-white font-sans">
                     <div>
-                        <h2 className="text-headline-sm font-semibold text-primary">
+                        <h2 className="font-display text-lg font-bold tracking-tight text-primary">
                             Download BRSR Waste Report
                         </h2>
-                        <p className="text-body-sm text-on-surface-variant">
+                        <p className="text-body-sm text-on-surface-variant font-sans">
                             Manually enter all waste metrics to export the XLSX report.
                         </p>
                     </div>
@@ -166,7 +166,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
                     
                     {/* General Information */}
                     <div className="space-y-3">
-                        <span className="text-xs font-bold text-primary uppercase tracking-wider block">
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block font-display">
                             General Parameters
                         </span>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -235,7 +235,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
 
                     {/* Waste Generation */}
                     <div className="border-t border-outline-variant/60 pt-4 space-y-3">
-                        <span className="text-xs font-bold text-primary uppercase tracking-wider block">
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block font-display">
                             Waste Generation Tonnage (Tonnes)
                         </span>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -387,7 +387,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
 
                     {/* Waste Recovery / Treatment */}
                     <div className="border-t border-outline-variant/60 pt-4 space-y-3">
-                        <span className="text-xs font-bold text-primary uppercase tracking-wider block">
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block font-display">
                             Waste Recovery & Treatment Tonnage (Tonnes)
                         </span>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

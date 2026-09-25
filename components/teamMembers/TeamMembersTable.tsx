@@ -88,7 +88,7 @@ export function TeamMembersTable({
             <CardHeader tone="flat">
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="group" size="sm" className="text-primary" />
-                    <h3 className="text-headline-sm font-semibold uppercase tracking-tight text-primary">
+                    <h3 className="font-display text-headline-sm font-semibold uppercase tracking-tight text-primary">
                         Team Members
                     </h3>
                 </div>
@@ -111,11 +111,11 @@ export function TeamMembersTable({
                             <TableRow key={m.id}>
                                 <TableCell>
                                     <div className="space-y-1">
-                                        <p className="font-bold">{m.fullName}</p>
-                                        <p className="text-[12px] text-on-surface-variant">{m.email}</p>
+                                        <p className="font-sans font-semibold text-primary">{m.fullName}</p>
+                                        <p className="font-sans text-[12px] text-on-surface-variant">{m.email}</p>
                                     </div>
                                 </TableCell>
-                                <TableCell className="text-sm text-on-surface-variant">{m.role}</TableCell>
+                                <TableCell className="font-sans text-sm text-on-surface-variant">{m.role}</TableCell>
                                 <TableCell>
                                     <Badge variant={getStatusVariant(m.userStatus)} size="md">
                                         {m.userStatus.replaceAll("_", " ")}
@@ -126,16 +126,16 @@ export function TeamMembersTable({
                                         {m.isVerified ? "Verified" : "Unverified"}
                                     </Badge>
                                 </TableCell>
-                                <TableCell className="text-sm text-on-surface-variant">
+                                <TableCell className="font-sans text-sm text-on-surface-variant tabular-nums">
                                     {formatDate(m.lastLoginAt)}
                                 </TableCell>
-                                <TableCell className="text-sm text-on-surface-variant">
+                                <TableCell className="font-sans text-sm text-on-surface-variant tabular-nums">
                                     {formatDate(m.createdAt)}
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <Link
                                         href={`mailto:${m.email}`}
-                                        className="text-on-tertiary-container hover:underline font-mono text-[11px] font-bold">
+                                        className="text-on-tertiary-container hover:underline font-sans text-xs font-semibold">
                                         Email
                                     </Link>
                                 </TableCell>

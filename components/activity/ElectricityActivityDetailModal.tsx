@@ -101,13 +101,13 @@ export function ElectricityActivityDetailModal({
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
-                                <h3 className="text-headline-sm font-semibold text-primary">Electricity Activity Details</h3>
+                                <h3 className="font-display text-lg font-semibold tracking-tight text-primary">Electricity Activity Details</h3>
                                 <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] uppercase font-bold tracking-tight border ${statusStyles[statusLower] || statusStyles.default}`}>
                                     {activity.workflowStatus}
                                 </span>
                             </div>
-                            <p className="text-xs text-on-surface-variant font-mono mt-0.5">
-                                ID: {activity.id}
+                            <p className="text-xs text-on-surface-variant font-sans mt-0.5">
+                                ID: <span className="font-mono text-[11px] text-slate-600">{activity.id}</span>
                             </p>
                         </div>
                     </div>
@@ -173,12 +173,12 @@ export function ElectricityActivityDetailModal({
                                 Electricity Volume
                             </span>
                             <div className="mt-1 flex items-baseline gap-1">
-                                <span className="text-xl font-bold font-mono text-primary">
+                                <span className="text-xl font-bold font-display tabular-nums text-slate-900">
                                     {formatNumber(activity.electricityMwh, 2)}
                                 </span>
                                 <span className="text-xs text-on-surface-variant font-semibold">MWh</span>
                             </div>
-                            <span className="text-[10px] text-on-surface-variant font-mono">
+                            <span className="text-[10px] text-on-surface-variant font-sans tabular-nums">
                                 ({formatNumber(activity.electricityKwh, 0)} kWh)
                             </span>
                         </div>
@@ -193,12 +193,12 @@ export function ElectricityActivityDetailModal({
                                 </span>
                             </div>
                             <div className="mt-1 flex items-baseline gap-1">
-                                <span className="text-xl font-bold font-mono text-sky-950">
+                                <span className="text-xl font-bold font-display tabular-nums text-sky-950">
                                     {locationEmissions != null ? formatNumber(locationEmissions, 2) : "—"}
                                 </span>
                                 <span className="text-xs text-sky-700 font-semibold">tCO₂e</span>
                             </div>
-                            <span className="text-[10px] text-sky-700 font-mono">
+                            <span className="text-[10px] text-sky-700 font-sans tabular-nums">
                                 {activity.locationCalculatedKgCo2e != null ? `${formatNumber(activity.locationCalculatedKgCo2e, 0)} kg` : "Non-Grid (null)"}
                             </span>
                         </div>
@@ -213,12 +213,12 @@ export function ElectricityActivityDetailModal({
                                 </span>
                             </div>
                             <div className="mt-1 flex items-baseline gap-1">
-                                <span className="text-xl font-bold font-mono text-purple-950">
+                                <span className="text-xl font-bold font-display tabular-nums text-purple-950">
                                     {marketEmissions != null ? formatNumber(marketEmissions, 2) : "—"}
                                 </span>
                                 <span className="text-xs text-purple-700 font-semibold">tCO₂e</span>
                             </div>
-                            <span className="text-[10px] text-purple-700 font-mono">
+                            <span className="text-[10px] text-purple-700 font-sans tabular-nums">
                                 {activity.marketCalculatedKgCo2e != null ? `${formatNumber(activity.marketCalculatedKgCo2e, 0)} kg` : "Non-Grid (null)"}
                             </span>
                         </div>
@@ -228,7 +228,7 @@ export function ElectricityActivityDetailModal({
                                 Carbon Reduction
                             </span>
                             <div className="mt-1 flex items-baseline gap-1">
-                                <span className="text-xl font-bold font-mono text-secondary">
+                                <span className="text-xl font-bold font-display tabular-nums text-secondary">
                                     {netSavings > 0 ? `-${formatNumber(netSavings, 2)}` : "0.00"}
                                 </span>
                                 <span className="text-xs text-secondary font-semibold">tCO₂e</span>
@@ -247,15 +247,15 @@ export function ElectricityActivityDetailModal({
                                     {/* Location Breakdown Card */}
                                     <div className="rounded-xl border border-sky-200 bg-sky-50/50 p-4 space-y-3">
                                         <div className="flex items-center justify-between">
-                                            <h4 className="font-semibold text-sky-950 text-sm flex items-center gap-2">
+                                            <h4 className="font-display font-semibold text-sky-950 text-sm flex items-center gap-2">
                                                 <MaterialIcon name="grid_view" size="xs" className="text-sky-700" />
                                                 Location-Based Accounting
                                             </h4>
-                                            <span className="font-mono text-xs font-bold text-sky-900">
+                                            <span className="font-sans text-xs font-semibold tabular-nums text-sky-900">
                                                 {formatNumber(activity.locationCalculatedTCo2e, 2)} tCO₂e
                                             </span>
                                         </div>
-                                        <p className="text-xs text-sky-800 leading-relaxed">
+                                        <p className="text-xs text-sky-800 leading-relaxed font-sans">
                                             Reflects average GHG emissions intensity of the regional grid where energy was consumed.
                                         </p>
                                         <div className="pt-2 border-t border-sky-200/80 space-y-1.5 text-xs">
@@ -265,15 +265,15 @@ export function ElectricityActivityDetailModal({
                                             </div>
                                             <div className="flex justify-between text-sky-900">
                                                 <span>CO₂ Breakdown:</span>
-                                                <span className="font-mono font-medium">{formatNumber(activity.locationKgCo2, 1)} kg CO₂</span>
+                                                <span className="font-sans font-semibold tabular-nums">{formatNumber(activity.locationKgCo2, 1)} kg CO₂</span>
                                             </div>
                                             <div className="flex justify-between text-sky-900">
                                                 <span>CH₄ Breakdown:</span>
-                                                <span className="font-mono font-medium">{formatNumber(activity.locationKgCh4, 2)} kg CH₄</span>
+                                                <span className="font-sans font-semibold tabular-nums">{formatNumber(activity.locationKgCh4, 2)} kg CH₄</span>
                                             </div>
                                             <div className="flex justify-between text-sky-900">
                                                 <span>N₂O Breakdown:</span>
-                                                <span className="font-mono font-medium">{formatNumber(activity.locationKgN2o, 2)} kg N₂O</span>
+                                                <span className="font-sans font-semibold tabular-nums">{formatNumber(activity.locationKgN2o, 2)} kg N₂O</span>
                                             </div>
                                         </div>
                                     </div>
@@ -281,15 +281,15 @@ export function ElectricityActivityDetailModal({
                                     {/* Market Breakdown Card */}
                                     <div className="rounded-xl border border-purple-200 bg-purple-50/50 p-4 space-y-3">
                                         <div className="flex items-center justify-between">
-                                            <h4 className="font-semibold text-purple-950 text-sm flex items-center gap-2">
+                                            <h4 className="font-display font-semibold text-purple-950 text-sm flex items-center gap-2">
                                                 <MaterialIcon name="verified" size="xs" className="text-purple-700" />
                                                 Market-Based Accounting
                                             </h4>
-                                            <span className="font-mono text-xs font-bold text-purple-900">
+                                            <span className="font-sans text-xs font-semibold tabular-nums text-purple-900">
                                                 {formatNumber(activity.marketCalculatedTCo2e, 2)} tCO₂e
                                             </span>
                                         </div>
-                                        <p className="text-xs text-purple-800 leading-relaxed">
+                                        <p className="text-xs text-purple-800 leading-relaxed font-sans">
                                             Reflects emissions from contractual instruments and supplier-specific green power agreements.
                                         </p>
                                         <div className="pt-2 border-t border-purple-200/80 space-y-1.5 text-xs">
@@ -301,19 +301,19 @@ export function ElectricityActivityDetailModal({
                                             </div>
                                             <div className="flex justify-between text-purple-900">
                                                 <span>Contracted MWh:</span>
-                                                <span className="font-mono font-medium">
+                                                <span className="font-sans font-semibold tabular-nums">
                                                     {activity.marketAllocation ? formatNumber(activity.marketAllocation.contractedElectricityMwh, 2) : "0.00"} MWh
                                                 </span>
                                             </div>
                                             <div className="flex justify-between text-purple-900">
                                                 <span>Contract Emission Factor:</span>
-                                                <span className="font-mono font-medium">
+                                                <span className="font-sans font-semibold tabular-nums">
                                                     {activity.marketAllocation ? `${activity.marketAllocation.contractedEmissionFactor} ${activity.marketAllocation.contractedEmissionFactorUnit}` : "—"}
                                                 </span>
                                             </div>
                                             <div className="flex justify-between text-purple-900">
                                                 <span>Uncovered Residual MWh:</span>
-                                                <span className="font-mono font-medium">
+                                                <span className="font-sans font-semibold tabular-nums">
                                                     {activity.marketAllocation?.uncoveredElectricityMwh != null ? `${formatNumber(activity.marketAllocation.uncoveredElectricityMwh, 2)} MWh` : "—"}
                                                 </span>
                                             </div>
@@ -322,19 +322,19 @@ export function ElectricityActivityDetailModal({
                                 </div>
                             ) : (
                                 <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 space-y-2">
-                                    <h4 className="font-semibold text-amber-950 text-sm flex items-center gap-2">
+                                    <h4 className="font-display font-semibold text-amber-950 text-sm flex items-center gap-2">
                                         <MaterialIcon name="info" size="xs" className="text-amber-700" />
                                         On-site Energy Generation ({activityTypeLabels[activity.electricityActivityType] || activity.electricityActivityType})
                                     </h4>
-                                    <p className="text-xs text-amber-900 leading-relaxed">
-                                        Non-grid imports (captive, onsite renewable, and waste energy) generate on-site power without direct Scope 2 emissions. All Scope 2 fields return <span className="font-mono font-bold">null</span> in accordance with GHG Protocol single-record dual reporting.
+                                    <p className="text-xs text-amber-900 leading-relaxed font-sans">
+                                        Non-grid imports (captive, onsite renewable, and waste energy) generate on-site power without direct Scope 2 emissions. All Scope 2 fields return <span className="font-semibold">null</span> in accordance with GHG Protocol single-record dual reporting.
                                     </p>
                                 </div>
                             )}
 
                             {/* Additional Activity Details */}
                             <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-4 space-y-3">
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-primary">Activity Profile</h4>
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 font-display">Activity Profile</h4>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                                     <div>
                                         <span className="text-on-surface-variant block">Activity Type</span>
@@ -376,35 +376,35 @@ export function ElectricityActivityDetailModal({
                         <div className="space-y-4">
                             {activity.marketAllocation && (
                                 <div className="rounded-xl border border-outline-variant p-4 bg-surface-container-lowest space-y-3">
-                                    <h4 className="text-xs font-bold uppercase tracking-wider text-primary">Contract Allocation Metrics</h4>
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 font-display">Contract Allocation Metrics</h4>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                                         <div>
                                             <span className="text-on-surface-variant block">Contracted Electricity</span>
-                                            <span className="font-mono font-bold text-primary">
+                                            <span className="font-sans font-semibold tabular-nums text-slate-900">
                                                 {formatNumber(activity.marketAllocation.contractedElectricityMwh, 2)} MWh ({formatNumber(activity.marketAllocation.contractedElectricityKwh, 0)} kWh)
                                             </span>
                                         </div>
                                         <div>
                                             <span className="text-on-surface-variant block">Contract Emission Factor</span>
-                                            <span className="font-mono font-bold text-primary">
+                                            <span className="font-sans font-semibold tabular-nums text-slate-900">
                                                 {activity.marketAllocation.contractedEmissionFactor} {activity.marketAllocation.contractedEmissionFactorUnit}
                                             </span>
                                         </div>
                                         <div>
                                             <span className="text-on-surface-variant block">Contracted Emissions</span>
-                                            <span className="font-mono font-bold text-secondary">
+                                            <span className="font-sans font-semibold tabular-nums text-secondary">
                                                 {formatNumber(activity.marketAllocation.contractedElectricityTco2e, 2)} tCO₂e
                                             </span>
                                         </div>
                                         <div>
                                             <span className="text-on-surface-variant block">Uncovered Grid Volume</span>
-                                            <span className="font-mono font-bold text-primary">
+                                            <span className="font-sans font-semibold tabular-nums text-slate-900">
                                                 {activity.marketAllocation.uncoveredElectricityMwh != null ? `${formatNumber(activity.marketAllocation.uncoveredElectricityMwh, 2)} MWh` : "—"}
                                             </span>
                                         </div>
                                         <div>
                                             <span className="text-on-surface-variant block">Uncovered Emissions</span>
-                                            <span className="font-mono font-bold text-primary">
+                                            <span className="font-sans font-semibold tabular-nums text-slate-900">
                                                 {activity.marketAllocation.uncoveredElectricityTco2e != null ? `${formatNumber(activity.marketAllocation.uncoveredElectricityTco2e, 2)} tCO₂e` : "—"}
                                             </span>
                                         </div>
@@ -414,11 +414,11 @@ export function ElectricityActivityDetailModal({
 
                             {activity.marketCertificate && (
                                 <div className="rounded-xl border border-outline-variant p-4 bg-surface-container-lowest space-y-3">
-                                    <h4 className="text-xs font-bold uppercase tracking-wider text-primary">Market Certificate Compliance Audit Trail</h4>
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 font-display">Market Certificate Compliance Audit Trail</h4>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                                         <div>
                                             <span className="text-on-surface-variant block">Serial Number</span>
-                                            <span className="font-mono font-semibold text-primary">{formatValue(activity.marketCertificate.serialNumber)}</span>
+                                            <span className="font-mono text-xs font-semibold text-primary">{formatValue(activity.marketCertificate.serialNumber)}</span>
                                         </div>
                                         <div>
                                             <span className="text-on-surface-variant block">Registry Reference</span>
@@ -426,7 +426,7 @@ export function ElectricityActivityDetailModal({
                                         </div>
                                         <div>
                                             <span className="text-on-surface-variant block">Certificate Volume</span>
-                                            <span className="font-mono font-semibold text-primary">{formatValue(activity.marketCertificate.quantity)} MWh</span>
+                                            <span className="font-sans font-semibold tabular-nums text-primary">{formatValue(activity.marketCertificate.quantity)} MWh</span>
                                         </div>
                                         <div>
                                             <span className="text-on-surface-variant block">Date Acquired</span>
@@ -446,23 +446,23 @@ export function ElectricityActivityDetailModal({
 
                             {activity.includePurchasedEnergy && activity.purchasedEnergy && (
                                 <div className="rounded-xl border border-outline-variant p-4 bg-surface-container-lowest space-y-3">
-                                    <h4 className="text-xs font-bold uppercase tracking-wider text-primary">Purchased Thermal Energy</h4>
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 font-display">Purchased Thermal Energy</h4>
                                     <div className="grid grid-cols-3 gap-3 text-xs">
                                         <div>
                                             <span className="text-on-surface-variant block">Steam Consumption</span>
-                                            <span className="font-mono font-semibold text-primary">
+                                            <span className="font-sans font-semibold tabular-nums text-primary">
                                                 {formatNumber(activity.purchasedEnergy.steam, 2)} {activity.purchasedEnergy.unit.toUpperCase()}
                                             </span>
                                         </div>
                                         <div>
                                             <span className="text-on-surface-variant block">Heating Consumption</span>
-                                            <span className="font-mono font-semibold text-primary">
+                                            <span className="font-sans font-semibold tabular-nums text-primary">
                                                 {formatNumber(activity.purchasedEnergy.heating, 2)} {activity.purchasedEnergy.unit.toUpperCase()}
                                             </span>
                                         </div>
                                         <div>
                                             <span className="text-on-surface-variant block">Cooling Consumption</span>
-                                            <span className="font-mono font-semibold text-primary">
+                                            <span className="font-sans font-semibold tabular-nums text-primary">
                                                 {formatNumber(activity.purchasedEnergy.cooling, 2)} {activity.purchasedEnergy.unit.toUpperCase()}
                                             </span>
                                         </div>
@@ -476,7 +476,7 @@ export function ElectricityActivityDetailModal({
                     {activeTab === "context" && (
                         <div className="space-y-4">
                             <div className="rounded-xl border border-outline-variant p-4 bg-surface-container-lowest space-y-3">
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-primary">Facility & Reporting Period</h4>
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 font-display">Facility & Reporting Period</h4>
                                 <div className="grid grid-cols-2 gap-3 text-xs">
                                     <div>
                                         <span className="text-on-surface-variant block">Facility Name</span>
@@ -493,14 +493,14 @@ export function ElectricityActivityDetailModal({
                                     <div>
                                         <span className="text-on-surface-variant block">Period Dates</span>
                                         <span className="font-semibold text-primary">
-                                            {activity.periodStartDate ? `${activity.periodStartDate} to ${activity.periodEndDate}` : "—"}
+                                             {activity.periodStartDate ? `${activity.periodStartDate} to ${activity.periodEndDate}` : "—"}
                                         </span>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="rounded-xl border border-outline-variant p-4 bg-surface-container-lowest space-y-3">
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-primary">Workflow Audit Trail</h4>
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 font-display">Workflow Audit Trail</h4>
                                 <div className="grid grid-cols-2 gap-3 text-xs">
                                     <div>
                                         <span className="text-on-surface-variant block">Workflow Status</span>
@@ -547,7 +547,7 @@ export function ElectricityActivityDetailModal({
                                             </div>
                                             <div>
                                                 <p className="text-sm font-semibold text-primary">{doc.documentName}</p>
-                                                <p className="text-xs text-on-surface-variant font-mono">
+                                                <p className="text-xs text-on-surface-variant font-sans">
                                                     Type: {doc.documentType} {doc.documentDate ? `• Date: ${doc.documentDate}` : ""}
                                                 </p>
                                             </div>
@@ -577,7 +577,7 @@ export function ElectricityActivityDetailModal({
                             <textarea
                                 value={rejectReason}
                                 onChange={(e) => setRejectReason(e.target.value)}
-                                className="w-full rounded-lg border border-rose-300 bg-white p-2.5 text-xs text-rose-950 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                                className="w-full rounded-lg border border-rose-300 bg-white p-2.5 text-xs text-rose-950 focus:outline-none focus:ring-1 focus:ring-rose-500 font-sans"
                                 placeholder="State reason for rejecting this record..."
                             />
                             <div className="flex justify-end gap-2">

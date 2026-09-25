@@ -16,7 +16,7 @@ export function EnergyHierarchyChart({ items }: EnergyHierarchyChartProps) {
                     <MaterialIcon name="equalizer" size="sm" className="text-primary" />
                     <div>
                         <h3 className="text-headline-sm font-semibold text-primary">Energy Hierarchy</h3>
-                        <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
+                        <p className="font-sans text-xs text-on-surface-variant">
                             Value chain breakdown (MWh)
                         </p>
                     </div>
@@ -26,7 +26,7 @@ export function EnergyHierarchyChart({ items }: EnergyHierarchyChartProps) {
             <CardBody className="flex flex-1 flex-col justify-between gap-4 p-card-padding">
                 <div className="relative overflow-hidden flex-1 min-h-[220px]">
                     {items.length === 0 ? (
-                        <div className="flex h-full items-center justify-center font-mono text-sm text-on-surface-variant">
+                        <div className="flex h-full items-center justify-center font-sans text-sm text-on-surface-variant">
                             No energy hierarchy data available.
                         </div>
                     ) : (
@@ -49,8 +49,9 @@ export function EnergyHierarchyChart({ items }: EnergyHierarchyChartProps) {
                                             x={36}
                                             y={y + 4}
                                             fill="var(--gl-on-surface-variant)"
-                                            fontFamily="var(--font-mono)"
-                                            fontSize="11">
+                                            fontFamily="var(--font-sans)"
+                                            fontSize="11"
+                                            fontWeight={500}>
                                             {labelValue}
                                         </text>
                                     </g>

@@ -176,7 +176,7 @@ export function Category2View() {
 
             {notification && (
                 <div
-                    className={`flex items-center justify-between rounded-xl px-4 py-3 font-mono text-xs shadow-md border ${
+                    className={`flex items-center justify-between rounded-xl px-4 py-3 font-sans text-sm font-medium shadow-md border ${
                         notification.type === "success"
                             ? "bg-secondary-container/90 text-on-secondary-container border-secondary/30"
                             : "bg-error-container/90 text-on-error-container border-error/30"
@@ -193,27 +193,27 @@ export function Category2View() {
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-outline-variant/40 pb-4">
                 <div className="space-y-1">
-                    <div className="flex items-center gap-2 font-mono text-xs text-on-surface-variant">
+                    <div className="flex items-center gap-2 font-sans text-xs text-on-surface-variant font-medium">
                         <Link href="/scope-3" className="hover:text-primary transition-colors">
                             Scope 3 Value Chain
                         </Link>
                         <span>/</span>
-                        <span className="text-secondary font-bold">Cat 2: Capital Goods</span>
+                        <span className="text-secondary font-semibold">Cat 2: Capital Goods</span>
                     </div>
-                    <h1 className="text-headline-md font-bold text-primary tracking-tight">
+                    <h1 className="font-display text-2xl font-bold tracking-tight text-primary">
                         Capital Goods (Spend-Based)
                     </h1>
-                    <p className="font-mono text-xs text-on-surface-variant max-w-3xl">
+                    <p className="font-sans text-sm text-on-surface-variant max-w-3xl">
                         Quantify upstream Scope 3 Category 2 emissions from capital expenditures (machinery, equipment, vehicles, buildings) using US EPA USEEIO factors and annual average USD/INR exchange rates.
                     </p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                    <Button variant="secondary" size="md" onClick={() => refetch()} className="gap-1.5 font-mono text-xs">
+                    <Button variant="secondary" size="md" onClick={() => refetch()} className="gap-1.5 font-medium">
                         <MaterialIcon name="refresh" size="sm" />
                         <span>Refresh</span>
                     </Button>
-                    <Button variant="primary" size="md" onClick={handleOpenCreate} className="gap-1.5 font-mono text-xs">
+                    <Button variant="primary" size="md" onClick={handleOpenCreate} className="gap-1.5 font-medium">
                         <MaterialIcon name="add" size="sm" />
                         <span>Log Capital Goods Spend</span>
                     </Button>
@@ -221,13 +221,13 @@ export function Category2View() {
             </div>
 
             <Card className="p-4 border-outline-variant/60">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 font-mono text-xs">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 font-sans text-sm">
                     <div>
-                        <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Status Filter</label>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">Status Filter</label>
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-sm font-medium text-primary focus:outline-none focus:ring-1 focus:ring-primary">
                             <option value="">All Statuses</option>
                             <option value="verified">Verified (Locked)</option>
                             <option value="submitted">Submitted (Pending Review)</option>
@@ -237,11 +237,11 @@ export function Category2View() {
                     </div>
 
                     <div>
-                        <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Spend Year</label>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">Spend Year</label>
                         <select
                             value={yearFilter}
                             onChange={(e) => setYearFilter(e.target.value)}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-sm font-medium text-primary focus:outline-none focus:ring-1 focus:ring-primary">
                             <option value="">All Years (2020–2025)</option>
                             <option value="2020">2020</option>
                             <option value="2021">2021</option>
@@ -253,11 +253,11 @@ export function Category2View() {
                     </div>
 
                     <div>
-                        <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Facility</label>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">Facility</label>
                         <select
                             value={facilityFilter}
                             onChange={(e) => setFacilityFilter(e.target.value)}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-sm font-medium text-primary focus:outline-none focus:ring-1 focus:ring-primary">
                             <option value="">All Facilities</option>
                             {(facilitiesQuery.data ?? []).map((fac) => (
                                 <option key={fac.id} value={fac.id}>
@@ -268,11 +268,11 @@ export function Category2View() {
                     </div>
 
                     <div>
-                        <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Reporting Period</label>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">Reporting Period</label>
                         <select
                             value={periodIdFilter}
                             onChange={(e) => setPeriodIdFilter(e.target.value)}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-sm font-medium text-primary focus:outline-none focus:ring-1 focus:ring-primary">
                             <option value="">All Reporting Periods</option>
                             {(reportingPeriodsQuery.data ?? []).map((p) => (
                                 <option key={p.id} value={p.id}>

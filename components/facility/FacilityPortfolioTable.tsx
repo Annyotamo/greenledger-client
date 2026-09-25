@@ -27,7 +27,7 @@ export function FacilityPortfolioTable({ facilities, isLoading, isError }: Facil
             {/* Table Header */}
             <div className="flex items-center justify-between gap-4 border-b border-outline-variant bg-surface p-4">
                 <div>
-                    <h3 className="text-headline-sm font-semibold text-primary">Portfolio Inventory</h3>
+                    <h3 className="font-display text-headline-sm font-semibold tracking-tight text-primary">Portfolio Inventory</h3>
                 </div>
                 <div className="flex items-center gap-2">
                     <button className="p-1.5 rounded hover:bg-surface-container-high transition-colors text-on-surface-variant">
@@ -44,22 +44,22 @@ export function FacilityPortfolioTable({ facilities, isLoading, isError }: Facil
                 <Table className="min-w-[900px]">
                     <TableHeader>
                         <TableRow className="bg-surface-container-low border-b border-outline-variant">
-                            <TableHead className="py-3 px-4 text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">
+                            <TableHead className="py-3 px-4 font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                 Facility Name/ID
                             </TableHead>
-                            <TableHead className="py-3 px-4 text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">
+                            <TableHead className="py-3 px-4 font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                 Type
                             </TableHead>
-                            <TableHead className="py-3 px-4 text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">
+                            <TableHead className="py-3 px-4 font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                 Location
                             </TableHead>
-                            <TableHead className="py-3 px-4 text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">
+                            <TableHead className="py-3 px-4 font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                 Ownership
                             </TableHead>
-                            <TableHead className="py-3 px-4 text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">
+                            <TableHead className="py-3 px-4 font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                 Status
                             </TableHead>
-                            <TableHead className="py-3 px-4 text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">
+                            <TableHead className="py-3 px-4 font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                 Data Quality
                             </TableHead>
                             <TableHead />
@@ -148,7 +148,7 @@ export function FacilityPortfolioTable({ facilities, isLoading, isError }: Facil
                                                         style={{ width: `${quality}%` }}
                                                     />
                                                 </div>
-                                                <span className="text-[10px] font-label-md text-secondary">
+                                                <span className="text-[11px] font-sans font-semibold text-secondary tabular-nums">
                                                     {quality}%{" "}
                                                     {quality >= 90
                                                         ? "(Verified)"
@@ -175,7 +175,7 @@ export function FacilityPortfolioTable({ facilities, isLoading, isError }: Facil
 
             {/* Pagination Footer */}
             <div className="flex flex-col gap-4 border-t border-outline-variant bg-surface p-4 md:flex-row md:items-center md:justify-between">
-                <p className="text-label-md text-on-surface-variant">
+                <p className="font-sans text-xs text-on-surface-variant">
                     Showing 1-{Math.min(10, facilities.length)} of {facilities.length} facilities
                 </p>
                 <div className="flex items-center gap-2">

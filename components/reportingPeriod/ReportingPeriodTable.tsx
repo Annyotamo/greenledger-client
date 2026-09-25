@@ -84,7 +84,7 @@ export function ReportingPeriodTable({ periods, isLoading = false, isError = fal
             <CardHeader tone="flat">
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="calendar_month" size="sm" className="text-primary" />
-                    <h3 className="text-headline-sm font-semibold uppercase tracking-tight text-primary">
+                    <h3 className="font-display text-headline-sm font-semibold uppercase tracking-tight text-primary">
                         Reporting Periods
                     </h3>
                 </div>
@@ -105,9 +105,9 @@ export function ReportingPeriodTable({ periods, isLoading = false, isError = fal
                     <TableBody>
                         {periods.map((period) => (
                             <TableRow key={period.id}>
-                                <TableCell className="font-bold">{period.name}</TableCell>
-                                <TableCell>{period.reportingYear}</TableCell>
-                                <TableCell className="text-sm">
+                                <TableCell className="font-sans font-semibold text-primary">{period.name}</TableCell>
+                                <TableCell className="font-sans text-sm tabular-nums">{period.reportingYear}</TableCell>
+                                <TableCell className="font-sans text-sm text-on-surface-variant">
                                     {formatDate(period.periodStart)} to {formatDate(period.periodEnd)}
                                 </TableCell>
                                 <TableCell>
@@ -115,18 +115,18 @@ export function ReportingPeriodTable({ periods, isLoading = false, isError = fal
                                         {period.periodStatus.toUpperCase()}
                                     </Badge>
                                 </TableCell>
-                                <TableCell className="font-mono">
+                                <TableCell className="font-display font-bold text-primary tabular-nums">
                                     {period.scope1TotalTCo2e !== null
                                         ? `${period.scope1TotalTCo2e.toLocaleString("en-US", { maximumFractionDigits: 1 })} MT`
                                         : "—"}
                                 </TableCell>
-                                <TableCell className="text-sm text-on-surface-variant">
+                                <TableCell className="font-sans text-sm text-on-surface-variant tabular-nums">
                                     {formatDate(period.createdAt)}
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <Link
                                         href={`/reporting-period/${period.id}`}
-                                        className="text-on-tertiary-container hover:underline font-mono text-[11px] font-bold">
+                                        className="text-on-tertiary-container hover:underline font-sans text-xs font-semibold">
                                         View
                                     </Link>
                                 </TableCell>

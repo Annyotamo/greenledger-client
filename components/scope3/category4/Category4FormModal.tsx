@@ -265,16 +265,13 @@ export function Category4FormModal({
             newErrors.reportingPeriodId = "Reporting period is required.";
         }
         if (!activeFactorId) {
-            newErrors.freightingGoodsFactorId = "Please select a valid freighting goods emission factor.";
-        }
-        if (!activeFactorGroup) {
-            newErrors.factorGroup = "Please select a vehicle factor group / powertrain / lading.";
+            newErrors.factorId = "Please select a DEFRA Freighting Goods factor.";
         }
         if (!activityDate) {
             newErrors.activityDate = "Activity date is required.";
         }
         if (!numValue || numValue <= 0) {
-            newErrors.activityValue = `Activity quantity in ${activeUnitSymbol} must be greater than 0.`;
+            newErrors.activityValue = `Activity quantity (${activeUnitSymbol}) must be greater than 0.`;
         }
 
         setErrors(newErrors);
@@ -291,18 +288,16 @@ export function Category4FormModal({
         setSubmitting(true);
 
         try {
-            const activePeriodId = reportingPeriodId || periods[0]?.id || "";
-
             const basePayload: CreateCategory4TransportPayload = {
-                reporting_period_id: activePeriodId,
+                reporting_period_id: reportingPeriodId || periods[0]?.id || "",
                 facility_id: null,
                 freighting_goods_emission_factor_id: activeFactorId,
                 factor_group: activeFactorGroup,
                 activity_date: activityDate,
                 activity_value: numValue,
                 description: description.trim() || null,
-                status: "draft",
                 notes: notes.trim() || null,
+                status: "draft",
             };
 
             if (mode === "amend" && initialEntry) {
@@ -331,18 +326,18 @@ export function Category4FormModal({
             <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-2xl z-10 max-h-[90vh] flex flex-col my-auto">
                 <div className="flex items-center justify-between border-b border-outline-variant/60 px-6 py-4 bg-surface-container-low/80">
                     <div className="flex items-center gap-2">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary text-on-secondary font-mono text-xs font-bold">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary text-on-secondary font-sans text-xs font-bold">
                             4
                         </span>
                         <div>
-                            <h3 className="font-mono text-headline-sm font-bold text-primary">
+                            <h3 className="font-display text-xl font-bold tracking-tight text-primary">
                                 {mode === "create"
                                     ? "Log Category 4 Upstream Transport Activity"
                                     : mode === "edit"
                                       ? "Edit Category 4 Transport Activity"
                                       : "Amend Verified Upstream Transport Entry"}
                             </h3>
-                            <p className="font-mono text-[11px] text-on-surface-variant">
+                            <p className="font-sans text-xs font-medium text-on-surface-variant">
                                 DEFRA Freighting Goods Distance / Weight-Distance Protocol
                             </p>
                         </div>
@@ -361,13 +356,13 @@ export function Category4FormModal({
 
                     {/* Reporting Period */}
                     <div>
-                        <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                        <label className="block font-sans text-xs font-semibold text-primary mb-1">
                             Reporting Period <span className="text-error">*</span>
                         </label>
                         <select
                             value={reportingPeriodId || (periods[0]?.id ?? "")}
                             onChange={(e) => setReportingPeriodId(e.target.value)}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary">
                             {periods.length === 0 && <option value="">Loading reporting periods...</option>}
                             {periods.map((p) => (
                                 <option key={p.id} value={p.id}>
@@ -379,14 +374,14 @@ export function Category4FormModal({
 
                     {/* 4-Step Cascade Selector */}
                     <div className="rounded-xl border border-outline-variant/60 bg-surface-container-low p-4 space-y-4">
-                        <div className="flex items-center gap-2 font-mono text-xs font-bold text-primary uppercase tracking-wider">
+                        <div className="flex items-center gap-2 font-sans text-xs font-semibold uppercase tracking-wider text-primary">
                             <MaterialIcon name="filter_alt" size="sm" className="text-secondary" />
                             <span>DEFRA Freighting Goods 4-Step Factor Cascade</span>
                         </div>
 
                         {/* Step 1: Category */}
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 Step 1: Select Transportation Mode Category <span className="text-error">*</span>
                             </label>
                             <CustomSelect
@@ -398,7 +393,7 @@ export function Category4FormModal({
                                     setSelectedFactorId("");
                                 }}
                                 placeholder="Select category (Vans, HGV, Air, Rail, Sea)..."
-                                className="font-mono text-xs"
+                                className="font-sans text-sm"
                                 variant="form"
                                 isSearchable={true}
                             />
@@ -406,7 +401,7 @@ export function Category4FormModal({
 
                         {/* Step 2: Vehicle Type */}
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 Step 2: Select Vehicle / Vessel Classification <span className="text-error">*</span>
                             </label>
                             <CustomSelect
@@ -417,7 +412,7 @@ export function Category4FormModal({
                                     setSelectedFactorId("");
                                 }}
                                 placeholder="Select vehicle / vessel classification..."
-                                className="font-mono text-xs"
+                                className="font-sans text-sm"
                                 variant="form"
                                 isSearchable={true}
                             />
@@ -425,7 +420,7 @@ export function Category4FormModal({
 
                         {/* Step 3: Measurement Unit */}
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 Step 3: Select Measurement Unit <span className="text-error">*</span>
                             </label>
                             <CustomSelect
@@ -433,7 +428,7 @@ export function Category4FormModal({
                                 value={activeFactorId}
                                 onChange={(val) => setSelectedFactorId(val)}
                                 placeholder="Select measurement unit..."
-                                className="font-mono text-xs"
+                                className="font-sans text-sm"
                                 variant="form"
                                 isSearchable={false}
                             />
@@ -441,7 +436,7 @@ export function Category4FormModal({
 
                         {/* Step 4: Factor Group / Powertrain / Lading */}
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 Step 4: Select Factor Group / Powertrain / Lading <span className="text-error">*</span>
                             </label>
                             <CustomSelect
@@ -449,7 +444,7 @@ export function Category4FormModal({
                                 value={activeFactorGroup}
                                 onChange={(val) => setSelectedFactorGroup(val)}
                                 placeholder="Select factor group..."
-                                className="font-mono text-xs"
+                                className="font-sans text-sm"
                                 variant="form"
                                 isSearchable={false}
                             />
@@ -458,7 +453,7 @@ export function Category4FormModal({
 
                     {/* Transport Route Description */}
                     <div>
-                        <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                        <label className="block font-sans text-xs font-semibold text-primary mb-1">
                             Cargo & Route Description (Optional)
                         </label>
                         <Input
@@ -466,21 +461,21 @@ export function Category4FormModal({
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="e.g. Inbound logistics from Pune supplier to Mumbai warehouse"
-                            className="font-mono text-xs"
+                            className="font-sans text-sm"
                         />
                     </div>
 
                     {/* Activity Date & Quantity */}
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 Activity Date <span className="text-error">*</span>
                             </label>
-                            <DatePicker value={activityDate} onChange={setActivityDate} className="font-mono text-xs" />
+                            <DatePicker value={activityDate} onChange={setActivityDate} className="font-sans text-sm" />
                         </div>
 
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 Activity Quantity ({activeUnitSymbol}) <span className="text-error">*</span>
                             </label>
                             <Input
@@ -490,32 +485,32 @@ export function Category4FormModal({
                                 value={activityValue}
                                 onChange={(e) => setActivityValue(e.target.value)}
                                 placeholder={`e.g. 1500 ${activeUnitSymbol}`}
-                                className="font-mono text-xs font-bold"
+                                className="font-sans text-sm font-semibold tabular-nums"
                             />
                         </div>
                     </div>
 
                     {/* Live Preview Box */}
                     <div className="rounded-lg bg-surface-container-low p-3 border border-outline-variant/40 space-y-1">
-                        <span className="font-mono text-[10px] uppercase font-bold text-on-surface-variant">
+                        <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                             Transport Emission Calculation Preview
                         </span>
                         <div className="flex items-baseline justify-between">
-                            <span className="font-mono text-xs font-bold text-primary">
+                            <span className="font-display text-base font-bold text-primary tabular-nums">
                                 {numValue.toLocaleString(undefined, { minimumFractionDigits: 2 })} {activeUnitSymbol} ({activeCategory} - {FACTOR_GROUP_LABELS[activeFactorGroup] || activeFactorGroup})
                             </span>
-                            <span className="font-mono text-xs font-bold text-secondary">
+                            <span className="font-display text-base font-bold text-secondary tabular-nums">
                                 {estimatedTCo2e.toFixed(4)} tCO₂e ({estimatedKgCo2e.toFixed(2)} kgCO₂e)
                             </span>
                         </div>
-                        <p className="font-mono text-[10px] text-on-surface-variant">
+                        <p className="font-sans text-xs text-on-surface-variant tabular-nums">
                             Applied Factor Rate: {kgFactorRate.toFixed(5)} kgCO₂e / {activeUnitSymbol} [DEFRA Standard]
                         </p>
                     </div>
 
                     {/* Internal Notes */}
                     <div>
-                        <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                        <label className="block font-sans text-xs font-semibold text-primary mb-1">
                             Notes & Delivery Receipt Remarks
                         </label>
                         <textarea
@@ -523,7 +518,7 @@ export function Category4FormModal({
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Enter delivery challan numbers, bill of lading, 3PL carrier receipts, or audit notes..."
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         />
                     </div>
 

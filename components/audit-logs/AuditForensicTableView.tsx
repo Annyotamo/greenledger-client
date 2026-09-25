@@ -103,7 +103,7 @@ export function AuditForensicTableView({
                                             <span className="font-sans font-semibold text-xs text-slate-800">
                                                 {formatDate(log.created_at)}
                                             </span>
-                                            <span className="font-mono text-[10.5px] text-slate-400">
+                                            <span className="font-sans text-[11px] text-slate-500 tabular-nums">
                                                 {formatTime(log.created_at)}
                                             </span>
                                         </div>
@@ -118,7 +118,7 @@ export function AuditForensicTableView({
                                                     {moduleInfo.label}
                                                 </span>
                                             </div>
-                                            <div className="font-bold text-xs text-slate-900">
+                                            <div className="font-bold text-xs text-slate-900 font-sans">
                                                 {formatEventType(log.event_type)}
                                             </div>
                                         </div>
@@ -127,9 +127,9 @@ export function AuditForensicTableView({
                                     {/* Description & Resource */}
                                     <TableCell className="py-3.5 max-w-xs">
                                         <div className="space-y-1">
-                                            <p className="text-xs text-slate-800 line-clamp-1">{log.description}</p>
+                                            <p className="text-xs text-slate-800 line-clamp-1 font-sans">{log.description}</p>
                                             {log.resource_type && (
-                                                <div className="font-mono text-[11px] text-slate-400 truncate">
+                                                 <div className="font-mono text-[11px] text-slate-400 truncate">
                                                     ID: {log.resource_identifier || log.resource_id}
                                                 </div>
                                             )}
@@ -138,7 +138,7 @@ export function AuditForensicTableView({
 
                                     {/* Actor */}
                                     <TableCell className="py-3.5 whitespace-nowrap">
-                                        <div className="space-y-0.5 font-mono text-xs">
+                                        <div className="space-y-0.5 font-sans text-xs">
                                             <div className="font-medium text-slate-900">{log.actor_email || "System"}</div>
                                             <div className="text-[10px] text-slate-400 uppercase font-sans">
                                                 Type: {log.actor_type || "USER"}
@@ -149,12 +149,12 @@ export function AuditForensicTableView({
                                     {/* Diff State */}
                                     <TableCell className="py-3.5 whitespace-nowrap">
                                         {hasChanges ? (
-                                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-semibold">
+                                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-semibold font-sans">
                                                 <MaterialIcon name="compare_arrows" size="xs" />
                                                 {changeKeys.length} {changeKeys.length === 1 ? "Field Changed" : "Fields Changed"}
                                             </span>
                                         ) : (
-                                            <span className="text-slate-400 text-xs font-mono">—</span>
+                                            <span className="text-slate-400 text-xs font-sans">—</span>
                                         )}
                                     </TableCell>
 
@@ -221,11 +221,11 @@ export function AuditForensicTableView({
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs text-slate-600">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs text-slate-600 font-sans">
                     <div>
-                        Showing <span className="font-semibold text-slate-900">{(page - 1) * pageSize + 1}</span> to{" "}
-                        <span className="font-semibold text-slate-900">{Math.min(page * pageSize, total)}</span> of{" "}
-                        <span className="font-semibold text-slate-900">{total}</span> forensic logs
+                        Showing <span className="font-semibold text-slate-900 tabular-nums">{(page - 1) * pageSize + 1}</span> to{" "}
+                        <span className="font-semibold text-slate-900 tabular-nums">{Math.min(page * pageSize, total)}</span> of{" "}
+                        <span className="font-semibold text-slate-900 tabular-nums">{total}</span> forensic logs
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -238,7 +238,7 @@ export function AuditForensicTableView({
                             <MaterialIcon name="chevron_left" size="xs" />
                             Previous
                         </Button>
-                        <span className="px-3 py-1 font-mono text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg">
+                        <span className="px-3 py-1 font-sans text-xs font-semibold tabular-nums text-slate-700 bg-white border border-slate-200 rounded-lg">
                             {page} / {totalPages}
                         </span>
                         <Button

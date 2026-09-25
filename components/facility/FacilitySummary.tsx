@@ -27,18 +27,18 @@ function StatCard({ label, value, unit, icon, trend, subtext }: StatCardProps) {
     return (
         <Card className="p-card-padding flex flex-col gap-2">
             <div className="flex items-start justify-between">
-                <p className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface-variant">
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                     {label}
                 </p>
                 <MaterialIcon name={icon} className="text-on-secondary-container" size="sm" />
             </div>
-            <div className="text-headline-md font-headline-md font-semibold text-primary">
+            <div className="font-display text-headline-md font-bold text-primary tabular-nums tracking-tight">
                 {value}
-                {unit && <span className="text-body-md font-normal text-on-surface-variant"> {unit}</span>}
+                {unit && <span className="font-sans text-body-md font-normal text-on-surface-variant"> {unit}</span>}
             </div>
             {trend && (
                 <div
-                    className={`flex items-center gap-1 text-xs font-semibold ${trend.isPositive ? "text-secondary" : "text-error"}`}>
+                    className={`flex items-center gap-1 font-sans text-xs font-semibold ${trend.isPositive ? "text-secondary" : "text-error"}`}>
                     <MaterialIcon
                         name={trend.direction === "up" ? "trending_up" : "trending_down"}
                         className="text-xs"
@@ -47,7 +47,7 @@ function StatCard({ label, value, unit, icon, trend, subtext }: StatCardProps) {
                     <span>{trend.value}</span>
                 </div>
             )}
-            {subtext && <p className="text-xs text-on-surface-variant">{subtext}</p>}
+            {subtext && <p className="font-sans text-xs text-on-surface-variant">{subtext}</p>}
         </Card>
     );
 }
@@ -100,21 +100,23 @@ export function FacilitySummary({ facilities }: FacilitySummaryProps) {
             />
 
             {/* Active Scopes Card */}
-            <Card className="p-card-padding flex flex-col">
-                <p className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface-variant mb-1">
-                    Active Scopes
-                </p>
-                <div className="flex flex-wrap gap-2">
-                    {scopesList.slice(0, 3).map(({ label }) => (
-                        <span
-                            key={label}
-                            className="px-2 py-0.5 text-[10px] font-bold rounded bg-secondary-container/30 text-on-secondary-container">
-                            {label}
-                        </span>
-                    ))}
+            <Card className="p-card-padding flex flex-col justify-between">
+                <div>
+                    <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant mb-2">
+                        Active Scopes
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                        {scopesList.slice(0, 3).map(({ label }) => (
+                            <span
+                                key={label}
+                                className="px-2 py-0.5 text-[11px] font-bold rounded bg-secondary-container/30 text-on-secondary-container font-sans">
+                                {label}
+                            </span>
+                        ))}
+                    </div>
                 </div>
-                <div className="text-[10px] text-on-surface-variant mt-2 font-label-md">
-                    REPORTING COMPLIANCE: {reportingCompliance}%
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant mt-2 font-sans">
+                    REPORTING COMPLIANCE: <span className="font-display font-bold text-primary tabular-nums">{reportingCompliance}%</span>
                 </div>
             </Card>
         </div>

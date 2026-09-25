@@ -10,12 +10,12 @@ function InfoCard({ label, value, icon }: { label: string; value: string | numbe
     return (
         <Card className="p-card-padding flex flex-col gap-2">
             <div className="flex items-center justify-between">
-                <p className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface-variant">
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                     {label}
                 </p>
                 <MaterialIcon name={icon} className="text-on-secondary-container" size="sm" />
             </div>
-            <div className="text-headline-md font-headline-md font-semibold text-primary">{value}</div>
+            <div className="font-display text-headline-md font-bold text-primary tabular-nums tracking-tight">{value}</div>
         </Card>
     );
 }

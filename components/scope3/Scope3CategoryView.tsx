@@ -23,8 +23,8 @@ export function Scope3CategoryView({ slug }: Scope3CategoryViewProps) {
             <Scope3Navbar />
 
             {/* Breadcrumb & Navigation */}
-            <div className="flex items-center gap-2 font-mono text-xs text-on-surface-variant">
-                <Link href="/scope-3" className="hover:text-primary transition-colors">
+            <div className="flex items-center gap-2 font-sans text-xs text-on-surface-variant">
+                <Link href="/scope-3" className="hover:text-primary transition-colors font-medium">
                     Scope 3 Overview
                 </Link>
                 <span>/</span>
@@ -36,15 +36,15 @@ export function Scope3CategoryView({ slug }: Scope3CategoryViewProps) {
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                     <div className="space-y-3">
                         <div className="flex items-center gap-2">
-                            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary text-on-secondary font-mono text-xs font-bold">
+                            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary text-on-secondary font-sans text-xs font-bold">
                                 {category.id}
                             </span>
-                            <span className="rounded bg-surface-container-high px-2.5 py-1 font-mono text-xs font-bold text-secondary uppercase tracking-wider">
+                            <span className="rounded bg-surface-container-high px-2.5 py-1 font-sans text-xs font-bold text-secondary uppercase tracking-wider">
                                 {category.code} • {category.type.toUpperCase()}
                             </span>
                             <span
                                 className={cn(
-                                    "rounded px-2.5 py-1 font-mono text-xs font-bold uppercase",
+                                    "rounded px-2.5 py-1 font-sans text-xs font-semibold uppercase",
                                     category.status === "Verified" || category.status === "Audited"
                                         ? "bg-secondary-container text-on-secondary-container"
                                         : "bg-surface-container-high text-on-surface-variant",
@@ -53,11 +53,11 @@ export function Scope3CategoryView({ slug }: Scope3CategoryViewProps) {
                             </span>
                         </div>
 
-                        <h1 className="text-headline-md font-bold text-primary tracking-tight">
+                        <h1 className="font-display text-headline-md font-bold text-primary tracking-tight">
                             {category.name}
                         </h1>
 
-                        <p className="font-mono text-xs text-on-surface-variant max-w-3xl leading-relaxed">
+                        <p className="font-sans text-xs text-on-surface-variant max-w-3xl leading-relaxed">
                             {category.description}
                         </p>
                     </div>
@@ -78,41 +78,41 @@ export function Scope3CategoryView({ slug }: Scope3CategoryViewProps) {
             {/* Metrics Breakdown Grid */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <Card className="p-5 border-outline-variant/60">
-                    <span className="font-mono text-xs font-semibold uppercase text-on-surface-variant">Category Emissions</span>
-                    <p className="font-mono text-headline-md font-bold text-primary mt-1">
-                        {category.emissionsTco2e.toLocaleString()} <span className="text-xs font-normal">tCO2e</span>
+                    <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Category Emissions</span>
+                    <p className="font-display text-headline-md font-bold text-primary mt-1 tabular-nums">
+                        {category.emissionsTco2e.toLocaleString()} <span className="font-sans text-xs font-normal">tCO2e</span>
                     </p>
-                    <p className="font-mono text-[11px] text-on-surface-variant mt-1">
+                    <p className="font-sans text-[11px] text-on-surface-variant mt-1">
                         {category.sharePercent}% of total Scope 3
                     </p>
                 </Card>
 
                 <Card className="p-5 border-outline-variant/60">
-                    <span className="font-mono text-xs font-semibold uppercase text-on-surface-variant">Mapped Activity Spend</span>
-                    <p className="font-mono text-headline-md font-bold text-primary mt-1">
+                    <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Mapped Activity Spend</span>
+                    <p className="font-display text-headline-md font-bold text-primary mt-1 tabular-nums">
                         {formatInrSpend(category.spendInr)}
                     </p>
-                    <p className="font-mono text-[11px] text-on-surface-variant mt-1">
+                    <p className="font-sans text-[11px] text-on-surface-variant mt-1">
                         INR Procurement / Activity
                     </p>
                 </Card>
 
                 <Card className="p-5 border-outline-variant/60">
-                    <span className="font-mono text-xs font-semibold uppercase text-on-surface-variant">Calculation Methodology</span>
-                    <p className="font-mono text-headline-sm font-bold text-secondary mt-1">
+                    <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Calculation Methodology</span>
+                    <p className="font-display text-headline-sm font-bold text-secondary mt-1">
                         {category.methodology}
                     </p>
-                    <p className="font-mono text-[11px] text-on-surface-variant mt-1">
+                    <p className="font-sans text-[11px] text-on-surface-variant mt-1">
                         GHG Protocol Compliant
                     </p>
                 </Card>
 
                 <Card className="p-5 border-outline-variant/60">
-                    <span className="font-mono text-xs font-semibold uppercase text-on-surface-variant">Data Quality & Completeness</span>
-                    <p className="font-mono text-headline-md font-bold text-primary mt-1">
+                    <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Data Quality & Completeness</span>
+                    <p className="font-display text-headline-md font-bold text-primary mt-1 tabular-nums">
                         {category.dataCoveragePercent}%
                     </p>
-                    <p className="font-mono text-[11px] text-on-surface-variant mt-1">
+                    <p className="font-sans text-[11px] text-on-surface-variant mt-1">
                         Verified Data Coverage
                     </p>
                 </Card>
@@ -121,17 +121,17 @@ export function Scope3CategoryView({ slug }: Scope3CategoryViewProps) {
             {/* Detailed Activity Table */}
             <Card className="p-6 border-outline-variant/60">
                 <CardHeader className="px-0 pt-0 pb-4 border-b border-outline-variant/40 flex flex-row items-center justify-between">
-                    <h3 className="text-headline-sm font-bold text-primary flex items-center gap-2">
+                    <h3 className="font-display text-headline-sm font-bold text-primary flex items-center gap-2">
                         <MaterialIcon name="table_chart" className="text-secondary" />
                         Activity Logs for {category.name}
                     </h3>
-                    <span className="font-mono text-xs text-on-surface-variant">Recent Records</span>
+                    <span className="font-sans text-xs font-medium text-on-surface-variant">Recent Records</span>
                 </CardHeader>
                 <CardBody className="px-0 pt-4 pb-0">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left font-mono text-xs">
+                        <table className="w-full text-left font-sans text-xs">
                             <thead>
-                                <tr className="border-b border-outline-variant/60 text-on-surface-variant uppercase text-[11px]">
+                                <tr className="border-b border-outline-variant/60 text-on-surface-variant uppercase text-[11px] font-semibold tracking-wider">
                                     <th className="py-2.5 px-3">Date</th>
                                     <th className="py-2.5 px-3">Activity / Vendor Source</th>
                                     <th className="py-2.5 px-3">Quantity / Spend</th>
@@ -141,25 +141,25 @@ export function Scope3CategoryView({ slug }: Scope3CategoryViewProps) {
                             </thead>
                             <tbody className="divide-y divide-outline-variant/30">
                                 <tr>
-                                    <td className="py-3 px-3">2026-08-12</td>
-                                    <td className="py-3 px-3 font-bold text-primary">Primary Logistics Hub A</td>
-                                    <td className="py-3 px-3">₹3.48 Cr</td>
-                                    <td className="py-3 px-3">0.054 kgCO2e/₹</td>
-                                    <td className="py-3 px-3 text-right font-bold text-secondary">189.0 tCO2e</td>
+                                    <td className="py-3 px-3 text-on-surface-variant">2026-08-12</td>
+                                    <td className="py-3 px-3 font-semibold text-primary">Primary Logistics Hub A</td>
+                                    <td className="py-3 px-3 tabular-nums">₹3.48 Cr</td>
+                                    <td className="py-3 px-3 tabular-nums">0.054 kgCO2e/₹</td>
+                                    <td className="py-3 px-3 text-right font-bold text-secondary tabular-nums">189.0 tCO2e</td>
                                 </tr>
                                 <tr>
-                                    <td className="py-3 px-3">2026-08-04</td>
-                                    <td className="py-3 px-3 font-bold text-primary">Consolidated Freight Operations</td>
-                                    <td className="py-3 px-3">₹7.05 Cr</td>
-                                    <td className="py-3 px-3">0.075 kgCO2e/₹</td>
-                                    <td className="py-3 px-3 text-right font-bold text-secondary">527.0 tCO2e</td>
+                                    <td className="py-3 px-3 text-on-surface-variant">2026-08-04</td>
+                                    <td className="py-3 px-3 font-semibold text-primary">Consolidated Freight Operations</td>
+                                    <td className="py-3 px-3 tabular-nums">₹7.05 Cr</td>
+                                    <td className="py-3 px-3 tabular-nums">0.075 kgCO2e/₹</td>
+                                    <td className="py-3 px-3 text-right font-bold text-secondary tabular-nums">527.0 tCO2e</td>
                                 </tr>
                                 <tr>
-                                    <td className="py-3 px-3">2026-07-28</td>
-                                    <td className="py-3 px-3 font-bold text-primary">Tier-1 Material Processing</td>
-                                    <td className="py-3 px-3">1,400 Metric Tons</td>
-                                    <td className="py-3 px-3">1.25 tCO2e/Ton</td>
-                                    <td className="py-3 px-3 text-right font-bold text-secondary">1,750.0 tCO2e</td>
+                                    <td className="py-3 px-3 text-on-surface-variant">2026-07-28</td>
+                                    <td className="py-3 px-3 font-semibold text-primary">Tier-1 Material Processing</td>
+                                    <td className="py-3 px-3 tabular-nums">1,400 Metric Tons</td>
+                                    <td className="py-3 px-3 tabular-nums">1.25 tCO2e/Ton</td>
+                                    <td className="py-3 px-3 text-right font-bold text-secondary tabular-nums">1,750.0 tCO2e</td>
                                 </tr>
                             </tbody>
                         </table>

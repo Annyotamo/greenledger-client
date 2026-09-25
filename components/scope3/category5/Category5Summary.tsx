@@ -25,51 +25,51 @@ export function Category5Summary({ entries }: Category5SummaryProps) {
         .reduce((sum, e) => sum + e.wasteGeneratedTonnes, 0);
 
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 font-sans">
+            <Card className="p-5 border-outline-variant/60">
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     Total Operational Waste
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {formatNumber(totalTonnes, 2)} <span className="text-body-md font-normal text-on-surface-variant">tonnes</span>
+                <p className="mt-2 font-display text-2xl lg:text-3xl font-bold tracking-tight text-primary tabular-nums">
+                    {formatNumber(totalTonnes, 2)} <span className="font-sans text-sm font-normal text-slate-500">tonnes</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] font-medium text-secondary">
+                <p className="mt-2 font-sans text-xs font-semibold text-secondary">
                     Across {entries.length} Operational Disposal Records
                 </p>
             </Card>
 
-            <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+            <Card className="p-5 border-outline-variant/60">
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     Waste Treatment Emissions
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {formatNumber(totalEmissionsTco2e, 4)} <span className="text-body-md font-normal text-on-surface-variant">tCO₂e</span>
+                <p className="mt-2 font-display text-2xl lg:text-3xl font-bold tracking-tight text-primary tabular-nums">
+                    {formatNumber(totalEmissionsTco2e, 4)} <span className="font-sans text-sm font-normal text-slate-500">tCO₂e</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-on-surface-variant">
+                <p className="mt-2 font-sans text-xs text-slate-500">
                     Scope 3 Cat 5 Treatment & Disposal Model
                 </p>
             </Card>
 
-            <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+            <Card className="p-5 border-outline-variant/60">
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     Recycled / Circular Volume
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {formatNumber(recycledTonnes, 2)} <span className="text-body-md font-normal text-on-surface-variant">tonnes</span>
+                <p className="mt-2 font-display text-2xl lg:text-3xl font-bold tracking-tight text-primary tabular-nums">
+                    {formatNumber(recycledTonnes, 2)} <span className="font-sans text-sm font-normal text-slate-500">tonnes</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-secondary font-medium">
+                <p className="mt-2 font-sans text-xs font-semibold text-secondary tabular-nums">
                     {totalTonnes > 0 ? ((recycledTonnes / totalTonnes) * 100).toFixed(1) : "0.0"}% Circular Diversion Rate
                 </p>
             </Card>
 
-            <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+            <Card className="p-5 border-outline-variant/60">
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     Audit Verification Status
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {verifiedCount} <span className="text-body-md font-normal text-on-surface-variant">Verified</span>
+                <p className="mt-2 font-display text-2xl lg:text-3xl font-bold tracking-tight text-primary tabular-nums">
+                    {verifiedCount} <span className="font-sans text-sm font-normal text-slate-500">Verified</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-on-surface-variant">
+                <p className="mt-2 font-sans text-xs text-slate-500">
                     {submittedCount} Submitted • {draftCount} Draft
                 </p>
             </Card>

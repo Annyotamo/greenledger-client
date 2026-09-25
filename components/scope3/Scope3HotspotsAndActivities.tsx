@@ -27,15 +27,15 @@ export function Scope3HotspotsAndActivities() {
                         <div className="flex items-center gap-2.5">
                             <MaterialIcon name="warning" size="sm" className="text-amber-600 text-[20px]" />
                             <div>
-                                <h3 className="font-headline-sm text-headline-sm font-bold text-primary">
+                                <h3 className="font-display text-headline-sm font-bold text-primary tracking-tight">
                                     Value Chain Emission Hotspots
                                 </h3>
-                                <p className="font-mono text-[10px] uppercase tracking-tight text-on-surface-variant">
+                                <p className="font-sans text-[11px] font-medium tracking-tight text-on-surface-variant">
                                     High-impact Tier-1 suppliers and key logistics vectors
                                 </p>
                             </div>
                         </div>
-                        <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-surface-container-high text-primary px-2.5 py-1 rounded">
+                        <span className="font-sans text-[11px] font-semibold uppercase tracking-wider bg-surface-container-high text-primary px-2.5 py-1 rounded">
                             Top 5 Drivers
                         </span>
                     </div>
@@ -44,19 +44,19 @@ export function Scope3HotspotsAndActivities() {
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-surface-container-low border-b border-outline-variant">
-                                    <TableHead className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+                                    <TableHead className="font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                         Supplier / Entity
                                     </TableHead>
-                                    <TableHead className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+                                    <TableHead className="font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                         Category Scope
                                     </TableHead>
-                                    <TableHead className="text-right font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+                                    <TableHead className="text-right font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                         Annual Spend
                                     </TableHead>
-                                    <TableHead className="text-right font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+                                    <TableHead className="text-right font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                         Emissions
                                     </TableHead>
-                                    <TableHead className="text-center font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+                                    <TableHead className="text-center font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                         Audit Status
                                     </TableHead>
                                 </TableRow>
@@ -65,31 +65,31 @@ export function Scope3HotspotsAndActivities() {
                                 {VENDOR_HOTSPOTS.map((vendor) => (
                                     <TableRow key={vendor.id} className="hover:bg-surface-container-low/40 transition-colors border-b border-outline-variant/30">
                                         <TableCell>
-                                            <div className="font-sans font-bold text-primary text-xs">
+                                            <div className="font-sans font-semibold text-primary text-xs">
                                                 {vendor.vendorName}
                                             </div>
-                                            <div className="font-mono text-[10px] text-on-surface-variant">
-                                                Intensity: {vendor.intensity}
+                                            <div className="font-sans text-[11px] text-on-surface-variant">
+                                                Intensity: <span className="tabular-nums font-medium">{vendor.intensity}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <span className="font-mono text-[11px] font-semibold text-primary">
+                                            <span className="font-sans text-[12px] font-semibold text-primary">
                                                 {vendor.category}
                                             </span>
-                                            <div className="font-mono text-[9px] text-on-surface-variant">
+                                            <div className="font-sans text-[11px] text-on-surface-variant">
                                                 {vendor.dataQuality}
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-right font-mono text-xs font-bold text-primary">
+                                        <TableCell className="text-right font-display text-xs font-bold text-primary tabular-nums">
                                             {vendor.spend}
                                         </TableCell>
-                                        <TableCell className="text-right font-mono text-xs font-bold text-emerald-800">
+                                        <TableCell className="text-right font-display text-xs font-bold text-emerald-800 tabular-nums">
                                             {vendor.emissions}
                                         </TableCell>
                                         <TableCell className="text-center">
                                             <span
                                                 className={cn(
-                                                    "inline-block rounded px-2 py-0.5 font-mono text-[9px] font-bold uppercase border",
+                                                    "inline-block rounded px-2 py-0.5 font-sans text-[10px] font-semibold uppercase border tracking-tight",
                                                     vendor.status === "High Impact"
                                                         ? "bg-error-container/40 text-on-error-container border-error-container"
                                                         : vendor.status === "Action Required"
@@ -115,15 +115,15 @@ export function Scope3HotspotsAndActivities() {
                         <div className="flex items-center gap-2.5">
                             <MaterialIcon name="history" size="sm" className="text-primary text-[20px]" />
                             <div>
-                                <h3 className="font-headline-sm text-headline-sm font-bold text-primary uppercase tracking-tight">
+                                <h3 className="font-display text-headline-sm font-bold text-primary uppercase tracking-tight">
                                     Recent Scope 3 Activities
                                 </h3>
-                                <p className="font-mono text-[10px] uppercase tracking-tight text-on-surface-variant">
+                                <p className="font-sans text-[11px] font-medium tracking-tight text-on-surface-variant">
                                     Live audit ledger & data entry feed
                                 </p>
                             </div>
                         </div>
-                        <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-surface-container-high text-primary px-2.5 py-1 rounded">
+                        <span className="font-sans text-[11px] font-semibold uppercase tracking-wider bg-surface-container-high text-primary px-2.5 py-1 rounded">
                             {SCOPE3_RECENT_ACTIVITIES.length} Logs
                         </span>
                     </div>
@@ -146,17 +146,17 @@ export function Scope3HotspotsAndActivities() {
                                     </div>
                                     <div className="min-w-0 flex-1 space-y-0.5">
                                         <div className="flex items-center justify-between gap-1">
-                                            <span className="font-mono text-[9px] font-bold uppercase bg-surface-container-high text-primary px-1.5 py-0.2 rounded">
+                                            <span className="font-sans text-[10px] font-bold uppercase bg-surface-container-high text-primary px-1.5 py-0.5 rounded tracking-tight">
                                                 {item.categoryCode}
                                             </span>
-                                            <span className="font-mono text-[10px] text-on-surface-variant">{item.timeAgo}</span>
+                                            <span className="font-sans text-[11px] text-on-surface-variant">{item.timeAgo}</span>
                                         </div>
-                                        <p className="font-sans text-[12px] font-bold text-on-surface truncate leading-snug">
+                                        <p className="font-sans text-[12px] font-semibold text-on-surface truncate leading-snug">
                                             {item.title}
                                         </p>
-                                        <div className="flex items-center justify-between text-[10px] font-mono text-on-surface-variant">
+                                        <div className="flex items-center justify-between text-[11px] font-sans text-on-surface-variant">
                                             <span className="truncate pr-2">{item.subtitle}</span>
-                                            <span className="font-bold text-emerald-800 shrink-0">{item.tco2e}</span>
+                                            <span className="font-display font-bold text-emerald-800 shrink-0 tabular-nums">{item.tco2e}</span>
                                         </div>
                                     </div>
                                 </motion.div>

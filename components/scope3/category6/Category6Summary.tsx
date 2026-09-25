@@ -26,61 +26,61 @@ export function Category6Summary({ entries, summary }: Category6SummaryProps) {
     const seaTco2e = summary?.mode_breakdown.SEA ?? entries.reduce((s, e) => s + e.seaTCo2e, 0);
 
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 font-sans">
+            <Card className="p-5 border-outline-variant/60">
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     Total Travel Journeys
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {entries.length} <span className="text-body-md font-normal text-on-surface-variant">journeys</span>
+                <p className="mt-2 font-display text-2xl lg:text-3xl font-bold tracking-tight text-primary tabular-nums">
+                    {entries.length} <span className="font-sans text-sm font-normal text-slate-500">journeys</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] font-medium text-secondary">
+                <p className="mt-2 font-sans text-xs font-semibold text-secondary tabular-nums">
                     {formatNumber(totalDistance, 1)} km Total Distance Travelled
                 </p>
             </Card>
 
-            <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+            <Card className="p-5 border-outline-variant/60">
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     Business Travel Emissions
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {formatNumber(totalEmissionsTco2e, 4)} <span className="text-body-md font-normal text-on-surface-variant">tCO₂e</span>
+                <p className="mt-2 font-display text-2xl lg:text-3xl font-bold tracking-tight text-primary tabular-nums">
+                    {formatNumber(totalEmissionsTco2e, 4)} <span className="font-sans text-sm font-normal text-slate-500">tCO₂e</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-on-surface-variant">
+                <p className="mt-2 font-sans text-xs text-slate-500">
                     Scope 3 Cat 6 Multi-Modal Travel Model
                 </p>
             </Card>
 
-            <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+            <Card className="p-5 border-outline-variant/60">
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     Transport Mode Split (tCO₂e)
                 </p>
-                <div className="mt-2 space-y-1 font-mono text-xs">
+                <div className="mt-2 space-y-1 font-sans text-xs">
                     <div className="flex justify-between">
-                        <span className="text-on-surface-variant">Air Flights:</span>
-                        <span className="font-bold text-primary">{formatNumber(airTco2e, 4)} t</span>
+                        <span className="text-slate-500">Air Flights:</span>
+                        <span className="font-semibold text-slate-900 tabular-nums">{formatNumber(airTco2e, 4)} t</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-on-surface-variant">Land Transit:</span>
-                        <span className="font-bold text-secondary">{formatNumber(landTco2e, 4)} t</span>
+                        <span className="text-slate-500">Land Transit:</span>
+                        <span className="font-semibold text-secondary tabular-nums">{formatNumber(landTco2e, 4)} t</span>
                     </div>
                     {seaTco2e > 0 && (
                         <div className="flex justify-between">
-                            <span className="text-on-surface-variant">Sea Ferries:</span>
-                            <span className="font-bold text-primary">{formatNumber(seaTco2e, 4)} t</span>
+                            <span className="text-slate-500">Sea Ferries:</span>
+                            <span className="font-semibold text-slate-900 tabular-nums">{formatNumber(seaTco2e, 4)} t</span>
                         </div>
                     )}
                 </div>
             </Card>
 
-            <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+            <Card className="p-5 border-outline-variant/60">
+                <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     Audit Verification Status
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {verifiedCount} <span className="text-body-md font-normal text-on-surface-variant">Verified</span>
+                <p className="mt-2 font-display text-2xl lg:text-3xl font-bold tracking-tight text-primary tabular-nums">
+                    {verifiedCount} <span className="font-sans text-sm font-normal text-slate-500">Verified</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-on-surface-variant">
+                <p className="mt-2 font-sans text-xs text-slate-500">
                     {submittedCount} Submitted • {draftCount} Draft
                 </p>
             </Card>

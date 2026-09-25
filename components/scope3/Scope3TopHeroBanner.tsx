@@ -19,22 +19,22 @@ export function Scope3TopHeroBanner() {
                             <MaterialIcon name="hub" size="sm" className="!text-[18px]" />
                         </div>
                         <div className="space-y-0.5">
-                            <span className="block font-mono text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                            <span className="block font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                                 Scope 3 Total Emissions Footprint
                             </span>
-                            <div className="flex items-baseline gap-1.5 font-mono">
-                                <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-primary">
+                            <div className="flex items-baseline gap-1.5 font-sans">
+                                <span className="text-2xl sm:text-[28px] font-bold tracking-tight text-primary font-display tabular-nums">
                                     {SCOPE3_SUMMARY.totalEmissionsTco2e.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                                 </span>
-                                <span className="font-mono text-[10px] font-bold text-on-surface-variant">
+                                <span className="font-sans text-xs font-medium text-on-surface-variant">
                                     tCO2e
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold border bg-error-container/30 text-on-error-container border-error-container/50 shrink-0">
-                        <MaterialIcon name="trending_up" size="sm" className="!text-[12px]" />
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-sans text-xs font-medium border bg-error-container/30 text-on-error-container border-error-container/50 shrink-0">
+                        <MaterialIcon name="trending_up" size="sm" className="!text-[13px]" />
                         +{SCOPE3_SUMMARY.yoyChangePercent}% YoY
                     </span>
                 </div>
@@ -51,14 +51,14 @@ export function Scope3TopHeroBanner() {
                             <MaterialIcon name="speed" size="sm" className="!text-[18px]" />
                         </div>
                         <div className="space-y-0.5">
-                            <span className="block font-mono text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                            <span className="block font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                                 Supply Chain Carbon Intensity
                             </span>
-                            <div className="flex items-baseline gap-1.5 font-mono">
-                                <span className="text-lg sm:text-xl font-extrabold tracking-tight text-sky-700">
+                            <div className="flex items-baseline gap-1.5 font-sans">
+                                <span className="text-xl sm:text-2xl font-bold tracking-tight text-sky-700 font-display tabular-nums">
                                     {SCOPE3_SUMMARY.carbonIntensityPerSpend.toFixed(3)}
                                 </span>
-                                <span className="font-mono text-[10px] font-bold text-on-surface-variant">
+                                <span className="font-sans text-xs font-medium text-on-surface-variant">
                                     kgCO2e / ₹ spend
                                 </span>
                             </div>
@@ -66,13 +66,13 @@ export function Scope3TopHeroBanner() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container-high border border-outline-variant/50 text-primary font-mono text-[10px] font-bold">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container-high border border-outline-variant/50 text-primary font-sans text-xs font-semibold">
                             <MaterialIcon name="payments" size="xs" className="text-on-surface-variant" />
-                            <span>{formatInrSpend(SCOPE3_SUMMARY.verifiedSpendInr)} Mapped Spend</span>
+                            <span className="tabular-nums">{formatInrSpend(SCOPE3_SUMMARY.verifiedSpendInr)} Mapped Spend</span>
                         </div>
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 font-mono text-[10px] font-bold">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 font-sans text-xs font-semibold">
                             <MaterialIcon name="verified" size="xs" className="text-emerald-600" />
-                            <span>{SCOPE3_SUMMARY.overallCoveragePercent}% Coverage</span>
+                            <span className="tabular-nums">{SCOPE3_SUMMARY.overallCoveragePercent}% Coverage</span>
                         </div>
                     </div>
                 </div>

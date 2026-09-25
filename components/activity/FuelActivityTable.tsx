@@ -243,8 +243,8 @@ export function FuelActivityTable({
         <Card className="overflow-hidden">
             <div className="flex flex-col gap-4 border-b border-outline-variant bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="space-y-1">
-                    <h3 className="text-headline-sm font-semibold text-primary">Fuel Activity Details</h3>
-                    <p className="text-body-md text-on-surface-variant">
+                    <h3 className="font-display text-base font-semibold text-primary">Fuel Activity Details</h3>
+                    <p className="font-sans text-xs text-on-surface-variant">
                         Monitor activity records, emissions and quality tiers across all fuel sources.
                     </p>
                 </div>
@@ -262,7 +262,7 @@ export function FuelActivityTable({
                         value={searchTerm}
                         onChange={(e) => onSearchChange(e.target.value)}
                         placeholder="Search activities"
-                        className="w-full rounded border border-outline-variant bg-surface-container-high px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        className="w-full rounded border border-outline-variant bg-surface-container-high px-3 py-2 font-sans text-sm text-slate-950 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                     />
                 </div>
             ) : null}
@@ -290,32 +290,32 @@ export function FuelActivityTable({
                 <Table className="w-full table-auto">
                     <TableHeader>
                         <TableRow className="bg-slate-50/80 border-b border-outline-variant/60">
-                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Period</TableHead>
-                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Type</TableHead>
-                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Fuel Source</TableHead>
-                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Quantity</TableHead>
-                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Emissions</TableHead>
-                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Docs</TableHead>
-                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Status</TableHead>
+                            <TableHead className="py-2.5 px-4 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Period</TableHead>
+                            <TableHead className="py-2.5 px-4 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Type</TableHead>
+                            <TableHead className="py-2.5 px-4 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Fuel Source</TableHead>
+                            <TableHead className="py-2.5 px-4 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Quantity</TableHead>
+                            <TableHead className="py-2.5 px-4 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Emissions</TableHead>
+                            <TableHead className="py-2.5 px-4 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Docs</TableHead>
+                            <TableHead className="py-2.5 px-4 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</TableHead>
                             <TableHead className="py-2.5 px-4" />
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {isLoading ? (
                             <TableRow className="border-none">
-                                <TableCell className="py-12 text-center text-xs text-on-surface-variant" colSpan={8}>
+                                <TableCell className="py-12 text-center font-sans text-xs text-on-surface-variant" colSpan={8}>
                                     Loading fuel activities...
                                 </TableCell>
                             </TableRow>
                         ) : isError ? (
                             <TableRow className="border-none">
-                                <TableCell className="py-12 text-center text-xs text-error font-medium" colSpan={8}>
+                                <TableCell className="py-12 text-center font-sans text-xs text-error font-medium" colSpan={8}>
                                     Unable to load fuel activities. Refresh to try again.
                                 </TableCell>
                             </TableRow>
                         ) : activities.length === 0 ? (
                             <TableRow className="border-none">
-                                <TableCell className="py-12 text-center text-xs text-on-surface-variant" colSpan={8}>
+                                <TableCell className="py-12 text-center font-sans text-xs text-on-surface-variant" colSpan={8}>
                                     No fuel activity records available.
                                 </TableCell>
                             </TableRow>
@@ -339,55 +339,55 @@ export function FuelActivityTable({
                                         className="hover:bg-slate-50/90 transition-colors cursor-pointer border-b border-slate-100 last:border-none">
                                         <TableCell className="py-2.5 px-4 text-nowrap">
                                             <div className="flex items-center gap-2">
-                                                <span className="font-semibold text-xs text-slate-900">
+                                                <span className="font-sans font-semibold text-xs text-slate-900">
                                                     {formatShortPeriod(activity.activityStartDate, activity.activityEndDate)}
                                                 </span>
-                                                <span className="px-1.5 py-0.5 rounded bg-slate-100 font-mono text-[10px] font-bold text-slate-600">
+                                                <span className="px-1.5 py-0.5 rounded bg-slate-100 font-sans text-[10px] font-medium text-slate-600">
                                                     {activeDays}d
                                                 </span>
                                             </div>
                                         </TableCell>
                                         <TableCell className="py-2.5 px-4">
                                             <span
-                                                className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold tracking-tight uppercase ${getEmissionTypeClass(
+                                                className={`inline-flex items-center rounded-md px-2 py-0.5 font-sans text-[10px] font-semibold tracking-wide uppercase ${getEmissionTypeClass(
                                                     activity.emissionType,
                                                 )}`}>
                                                 {getEmissionTypeLabel(activity.emissionType)}
                                             </span>
                                         </TableCell>
                                         <TableCell className="py-2.5 px-4">
-                                            <div className="font-bold text-xs text-slate-900">{activity.fuelName}</div>
-                                            <div className="text-[10px] text-slate-500 font-medium truncate max-w-[150px]">
+                                            <div className="font-sans font-semibold text-xs text-slate-900">{activity.fuelName}</div>
+                                            <div className="font-sans text-[10px] text-slate-500 font-medium truncate max-w-[150px]">
                                                 {activity.fuelFactorStandard} {activity.fuelFactorGwpBasis ? `(GWP: ${activity.fuelFactorGwpBasis})` : activity.source?.gwpBasis ? `(GWP: ${activity.source.gwpBasis})` : ""}
                                             </div>
                                         </TableCell>
-                                        <TableCell className="py-2.5 px-4 font-mono text-xs">
-                                            <span className="font-bold text-slate-900">
+                                        <TableCell className="py-2.5 px-4 font-sans text-xs">
+                                            <span className="font-semibold text-slate-900 tabular-nums">
                                                 {activity.quantity.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                                             </span>
-                                            <span className="ml-1 text-[10px] text-slate-500 uppercase font-semibold">
+                                            <span className="ml-1 text-[10px] text-slate-500 uppercase font-medium">
                                                 {activity.unitSymbol}
                                             </span>
                                         </TableCell>
-                                        <TableCell className="py-2.5 px-4 font-mono text-xs">
-                                            <div className="font-bold text-slate-900">
+                                        <TableCell className="py-2.5 px-4 font-sans text-xs">
+                                            <div className="font-semibold text-slate-900 tabular-nums">
                                                 {activity.calculatedTCo2e.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} tCO₂e
                                             </div>
                                             {activity.energyContentGJ > 0 ? (
-                                                <div className="text-[10px] text-slate-500 font-medium">
+                                                <div className="text-[10px] text-slate-500 font-medium tabular-nums">
                                                     {activity.energyContentGJ.toFixed(1)} GJ
                                                 </div>
                                             ) : null}
                                         </TableCell>
                                         <TableCell className="py-2.5 px-4 text-xs">
-                                            <div className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+                                            <div className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 font-sans text-[10px] font-medium text-slate-700">
                                                 <MaterialIcon name="insert_drive_file" size="xs" className="text-slate-500" />
                                                 {activity.documentsCount} docs
                                             </div>
                                         </TableCell>
                                         <TableCell className="py-2.5 px-4">
                                             <span
-                                                className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] uppercase tracking-wide ${statusClass}`}>
+                                                className={`inline-flex items-center rounded-md px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wider ${statusClass}`}>
                                                 {status}
                                             </span>
                                         </TableCell>
@@ -408,7 +408,7 @@ export function FuelActivityTable({
                                             {openMenuId === activity.id ? (
                                                 <div
                                                     data-action-menu
-                                                    className="absolute right-0 top-8 z-50 w-44 rounded-md border border-outline-variant bg-white shadow-lg">
+                                                    className="absolute right-0 top-8 z-50 w-44 rounded-md border border-outline-variant bg-white shadow-lg font-sans text-xs">
                                                     <button
                                                         onClick={() => {
                                                             setOpenMenuId(null);
@@ -509,7 +509,7 @@ export function FuelActivityTable({
             </div>
 
             <div className="flex flex-col gap-4 border-t border-outline-variant bg-surface p-4 md:flex-row md:items-center md:justify-between">
-                <span className="text-label-md text-on-surface-variant">
+                <span className="font-sans text-xs text-on-surface-variant">
                     Showing 1-{Math.min(activities.length, 15)} of {activities.length} activities
                 </span>
                 <div className="flex items-center gap-2">
@@ -559,13 +559,13 @@ export function FuelActivityTable({
                     <div className="relative w-full max-w-lg overflow-hidden rounded-md border border-outline-variant bg-white shadow-2xl">
                         <div className="flex items-start justify-between gap-4 px-6 py-5">
                             <div>
-                                <h3 className="text-headline-sm font-semibold text-primary">
+                                <h3 className="font-display text-base font-semibold text-primary">
                                     {confirmState.action === "verify" && "Verify activity"}
                                     {confirmState.action === "reject" && "Reject activity"}
                                     {confirmState.action === "submit" && "Submit activity"}
                                     {confirmState.action === "delete" && "Delete activity"}
                                 </h3>
-                                <p className="text-body-sm text-on-surface-variant mt-1">
+                                <p className="font-sans text-xs text-on-surface-variant mt-1">
                                     {confirmState.action === "verify" && "This will mark the activity as verified."}
                                     {confirmState.action === "reject" && "Please provide a reason for rejecting this activity (1-2000 characters)."}
                                     {confirmState.action === "submit" && "This will submit the activity for reviewer verification."}
@@ -586,7 +586,7 @@ export function FuelActivityTable({
                                     value={rejectReason}
                                     onChange={(e) => setRejectReason(e.target.value)}
                                     placeholder="Enter rejection reason..."
-                                    className="w-full rounded border border-outline-variant p-3 text-sm"
+                                    className="w-full rounded border border-outline-variant p-3 font-sans text-xs"
                                     rows={5}
                                     maxLength={2000}
                                 />
@@ -601,7 +601,7 @@ export function FuelActivityTable({
                             </Button>
                             {confirmState.action === "verify" && (
                                 <button
-                                    className="bg-emerald-600 text-white px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm disabled:opacity-70 font-mono text-xs font-bold uppercase"
+                                    className="bg-emerald-600 text-white px-5 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm disabled:opacity-70 font-sans text-xs font-semibold uppercase tracking-wider"
                                     onClick={() => performVerify(confirmState.activityId)}
                                     disabled={isSubmitting}>
                                     <MaterialIcon name="check_circle" size="sm" />
@@ -610,7 +610,7 @@ export function FuelActivityTable({
                             )}
                             {confirmState.action === "submit" && (
                                 <button
-                                    className="bg-primary text-white px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm disabled:opacity-70 font-mono text-xs font-bold uppercase"
+                                    className="bg-primary text-white px-5 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm disabled:opacity-70 font-sans text-xs font-semibold uppercase tracking-wider"
                                     onClick={() => performSubmit(confirmState.activityId)}
                                     disabled={isSubmitting}>
                                     <MaterialIcon name="send" size="sm" />

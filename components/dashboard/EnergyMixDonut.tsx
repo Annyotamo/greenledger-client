@@ -63,8 +63,8 @@ export function EnergyMixDonut({ segments, totalMwh }: EnergyMixDonutProps) {
                         />
                     </svg>
                     <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-0.5 text-center">
-                        <span className="font-mono text-[24px] font-bold text-primary">{primary.percent.toFixed(1)}%</span>
-                        <span className="font-mono text-[9px] uppercase tracking-wider text-on-surface-variant">
+                        <span className="font-display text-2xl font-bold text-primary tabular-nums">{primary.percent.toFixed(1)}%</span>
+                        <span className="font-sans text-[10px] uppercase tracking-wider text-on-surface-variant font-semibold">
                             Captive Share
                         </span>
                     </div>
@@ -76,12 +76,12 @@ export function EnergyMixDonut({ segments, totalMwh }: EnergyMixDonutProps) {
                             <span className="h-3 w-3 rounded-sm bg-secondary" />
                             <div>
                                 <div className="text-xs font-semibold text-on-surface">{primary.label}</div>
-                                <div className="font-mono text-[10px] text-on-surface-variant">
+                                <div className="font-sans text-[11px] text-on-surface-variant tabular-nums">
                                     {primary.percent.toFixed(1)}% of total
                                 </div>
                             </div>
                         </div>
-                        <div className="font-label-md text-[12px] font-bold text-primary">
+                        <div className="font-sans text-xs font-bold text-primary tabular-nums">
                             {primaryValue.toLocaleString("en-US")} MWh
                         </div>
                     </div>
@@ -91,12 +91,12 @@ export function EnergyMixDonut({ segments, totalMwh }: EnergyMixDonutProps) {
                             <span className="h-3 w-3 rounded-sm bg-[#fb923c]" />
                             <div>
                                 <div className="text-xs font-semibold text-on-surface">{secondary.label}</div>
-                                <div className="font-mono text-[10px] text-on-surface-variant">
+                                <div className="font-sans text-[11px] text-on-surface-variant tabular-nums">
                                     {secondary.percent.toFixed(1)}% of total
                                 </div>
                             </div>
                         </div>
-                        <div className="font-label-md text-[12px] font-bold text-primary">
+                        <div className="font-sans text-xs font-bold text-primary tabular-nums">
                             {secondaryValue.toLocaleString("en-US")} MWh
                         </div>
                     </div>
@@ -105,10 +105,10 @@ export function EnergyMixDonut({ segments, totalMwh }: EnergyMixDonutProps) {
 
             <div className="border-t border-outline-variant px-card-padding py-3 bg-surface-container-lowest">
                 <div className="flex items-center justify-between">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-on-surface-variant">
+                    <span className="font-sans text-xs font-medium text-on-surface-variant">
                         Total Energy Consumed
                     </span>
-                    <span className="font-mono text-[12px] font-bold text-primary">
+                    <span className="font-sans text-xs font-bold text-primary tabular-nums">
                         {total.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MWh
                     </span>
                 </div>

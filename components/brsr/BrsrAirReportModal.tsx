@@ -57,7 +57,7 @@ export function BrsrAirReportModal({ isOpen, onClose, payload, onDownload }: Brs
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600">
                             <MaterialIcon name="air" size="sm" />
                         </div>
-                        <h3 className="font-sans text-body-lg font-bold text-on-surface">
+                        <h3 className="font-display text-base font-bold text-on-surface">
                             Download Air Emissions Report
                         </h3>
                     </div>
@@ -69,22 +69,22 @@ export function BrsrAirReportModal({ isOpen, onClose, payload, onDownload }: Brs
                     </button>
                 </div>
 
-                <div className="space-y-3 text-xs text-on-surface-variant">
+                <div className="space-y-3 text-xs text-on-surface-variant font-sans">
                     <p>
                         Export official SEBI BRSR Principle 6 Air Emissions report (.xlsx) containing stack pollutant emission rates (kg/hr), annual totals (tonnes/year), and plant average concentrations (mg/Nm³).
                     </p>
-                    <div className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-3 space-y-1.5 font-mono text-[11px]">
+                    <div className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-3 space-y-1.5 text-xs font-sans tabular-nums">
                         <div className="flex justify-between">
                             <span className="text-on-surface-variant">FY Period:</span>
-                            <span className="font-bold text-on-surface">{payload.financial_year_label || "FY 2024-25"}</span>
+                            <span className="font-semibold text-on-surface">{payload.financial_year_label || "FY 2024-25"}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-on-surface-variant">Active Stacks Count:</span>
-                            <span className="font-bold text-on-surface">{payload.stacks?.length || 0} stack(s)</span>
+                            <span className="font-semibold text-on-surface">{payload.stacks?.length || 0} stack(s)</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-on-surface-variant">Total Readings Logged:</span>
-                            <span className="font-bold text-on-surface">
+                            <span className="font-semibold text-on-surface">
                                 {payload.stacks?.reduce((acc, s) => acc + (s.readings?.length || 0), 0) || 0} reading(s)
                             </span>
                         </div>

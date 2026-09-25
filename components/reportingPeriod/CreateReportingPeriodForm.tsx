@@ -90,8 +90,8 @@ export function CreateReportingPeriodForm({ onSuccess }: CreateReportingPeriodFo
                 <div className="flex items-start gap-3 rounded-lg border border-error/20 bg-error/5 p-4">
                     <MaterialIcon name="error" size="sm" className="text-error mt-0.5 flex-shrink-0" />
                     <div>
-                        <p className="font-label-md text-label-md text-error font-semibold uppercase">Error</p>
-                        <p className="text-body-md text-error mt-1">
+                        <p className="font-sans text-xs font-semibold text-error uppercase tracking-wider">Error</p>
+                        <p className="font-sans text-sm text-error mt-1">
                             {validationError || error?.message || "Failed to create reporting period."}
                         </p>
                     </div>
@@ -103,7 +103,7 @@ export function CreateReportingPeriodForm({ onSuccess }: CreateReportingPeriodFo
                 <CardHeader bordered tone="strip">
                     <div className="flex items-center gap-3">
                         <MaterialIcon name="info" size="sm" className="text-on-secondary-container" />
-                        <h3 className="text-headline-sm font-semibold text-primary">Basic Information</h3>
+                        <h3 className="font-display text-base font-semibold text-primary">Basic Information</h3>
                     </div>
                 </CardHeader>
                 <CardBody className="space-y-6">
@@ -111,7 +111,7 @@ export function CreateReportingPeriodForm({ onSuccess }: CreateReportingPeriodFo
                     <div className="grid gap-2">
                         <label
                             htmlFor="name"
-                            className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface">
+                            className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface">
                             Period Name
                         </label>
                         <div className="relative">
@@ -127,7 +127,7 @@ export function CreateReportingPeriodForm({ onSuccess }: CreateReportingPeriodFo
                                 disabled={isPending}
                             />
                         </div>
-                        <p className="text-body-md text-on-surface-variant">
+                        <p className="font-sans text-xs text-on-surface-variant">
                             A descriptive name for this reporting period.
                         </p>
                     </div>
@@ -136,7 +136,7 @@ export function CreateReportingPeriodForm({ onSuccess }: CreateReportingPeriodFo
                     <div className="grid gap-2">
                         <label
                             htmlFor="reporting_year"
-                            className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface">
+                            className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface">
                             Reporting Year
                         </label>
                         <div className="relative">
@@ -153,7 +153,7 @@ export function CreateReportingPeriodForm({ onSuccess }: CreateReportingPeriodFo
                                 disabled={isPending}
                             />
                         </div>
-                        <p className="text-body-md text-on-surface-variant">
+                        <p className="font-sans text-xs text-on-surface-variant">
                             The fiscal or calendar year for this period.
                         </p>
                     </div>
@@ -165,7 +165,7 @@ export function CreateReportingPeriodForm({ onSuccess }: CreateReportingPeriodFo
                 <CardHeader bordered tone="strip">
                     <div className="flex items-center gap-3">
                         <MaterialIcon name="date_range" size="sm" className="text-on-secondary-container" />
-                        <h3 className="text-headline-sm font-semibold text-primary">Period Duration</h3>
+                        <h3 className="font-display text-base font-semibold text-primary">Period Duration</h3>
                     </div>
                 </CardHeader>
                 <CardBody className="space-y-6">
@@ -174,7 +174,7 @@ export function CreateReportingPeriodForm({ onSuccess }: CreateReportingPeriodFo
                         <div className="grid gap-2">
                             <label
                                 htmlFor="period_start"
-                                className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface">
+                                className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface">
                                 Period Start
                             </label>
                             <div className="relative">
@@ -195,7 +195,7 @@ export function CreateReportingPeriodForm({ onSuccess }: CreateReportingPeriodFo
                         <div className="grid gap-2">
                             <label
                                 htmlFor="period_end"
-                                className="text-label-md font-label-md uppercase tracking-[0.05em] text-on-surface">
+                                className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface">
                                 Period End
                             </label>
                             <div className="relative">
@@ -212,7 +212,7 @@ export function CreateReportingPeriodForm({ onSuccess }: CreateReportingPeriodFo
                             </div>
                         </div>
                     </div>
-                    <p className="text-body-md text-on-surface-variant">
+                    <p className="font-sans text-xs text-on-surface-variant">
                         Define the start and end dates for this reporting period. The end date must be after the start
                         date.
                     </p>

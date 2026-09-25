@@ -23,50 +23,50 @@ export function Category4Summary({ entries }: Category4SummaryProps) {
 
     return (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="p-5 border-outline-variant/60">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+            <Card className="p-card-padding border-outline-variant/60">
+                <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                     Total Transport Activity Quantity
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
+                <p className="mt-2 font-display text-2xl font-bold tracking-tight text-primary tabular-nums">
                     {formatNumber(totalActivityValue, 0)}
                 </p>
-                <p className="mt-2 font-mono text-[11px] font-medium text-secondary">
+                <p className="mt-2 font-sans text-xs font-medium text-secondary tabular-nums">
                     Across {entries.length} Upstream Freight Logs (tonne.km / km)
                 </p>
             </Card>
 
-            <Card className="p-5 border-outline-variant/60">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+            <Card className="p-card-padding border-outline-variant/60">
+                <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                     Headline Upstream Freight Emissions
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {formatNumber(totalEmissionsTco2e, 4)} <span className="text-xs font-normal text-on-surface-variant">tCO₂e</span>
+                <p className="mt-2 font-display text-2xl font-bold tracking-tight text-primary tabular-nums">
+                    {formatNumber(totalEmissionsTco2e, 4)} <span className="font-sans text-sm font-normal text-on-surface-variant">tCO₂e</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-on-surface-variant">
+                <p className="mt-2 font-sans text-xs font-medium text-on-surface-variant tabular-nums">
                     {formatNumber(totalEmissionsKgCo2e, 2)} kgCO₂e Total Impact
                 </p>
             </Card>
 
-            <Card className="p-5 border-outline-variant/60">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+            <Card className="p-card-padding border-outline-variant/60">
+                <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                     DEFRA Method Standard
                 </p>
-                <p className="mt-2 font-mono text-headline-sm font-bold text-secondary">
+                <p className="mt-2 font-display text-2xl font-bold tracking-tight text-secondary">
                     Weight-Distance
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-on-surface-variant">
+                <p className="mt-2 font-sans text-xs font-medium text-on-surface-variant">
                     Freighting Goods Factor Catalog
                 </p>
             </Card>
 
-            <Card className="p-5 border-outline-variant/60">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+            <Card className="p-card-padding border-outline-variant/60">
+                <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                     Audit Verification Status
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {verifiedCount} <span className="text-xs font-normal text-on-surface-variant">Verified</span>
+                <p className="mt-2 font-display text-2xl font-bold tracking-tight text-primary tabular-nums">
+                    {verifiedCount} <span className="font-sans text-sm font-normal text-on-surface-variant">Verified</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-on-surface-variant">
+                <p className="mt-2 font-sans text-xs font-medium text-on-surface-variant tabular-nums">
                     {submittedCount} Submitted • {draftCount} Draft
                 </p>
             </Card>

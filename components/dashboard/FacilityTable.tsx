@@ -17,11 +17,11 @@ export function FacilityTable({ rows }: FacilityTableProps) {
             <CardHeader tone="flat">
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="apartment" size="sm" className="text-primary" />
-                    <h3 className="text-headline-sm font-semibold uppercase tracking-tight text-primary">
+                    <h3 className="text-headline-sm font-semibold text-primary">
                         Top Facility Emissions (MT)
                     </h3>
                 </div>
-                <Link href="#" className="font-mono text-[11px] font-bold text-on-tertiary-container hover:underline">
+                <Link href="/facilities" className="font-sans text-xs font-semibold text-primary hover:underline">
                     View All Facilities
                 </Link>
             </CardHeader>
@@ -40,18 +40,18 @@ export function FacilityTable({ rows }: FacilityTableProps) {
                     <TableBody>
                         {rows.map((row) => (
                             <TableRow key={row.id}>
-                                <TableCell className="font-bold">{row.id}</TableCell>
+                                <TableCell className="font-semibold text-primary">{row.id}</TableCell>
                                 <TableCell>{row.region}</TableCell>
                                 <TableCell>
                                     <Badge variant="active" size="md">
                                         {row.status}
                                     </Badge>
                                 </TableCell>
-                                <TableCell className="font-mono">
+                                <TableCell className="font-sans font-semibold text-primary tabular-nums">
                                     {row.emissions.toLocaleString("en-US", { minimumFractionDigits: 1 })}
                                 </TableCell>
                                 <TableCell
-                                    className={cn(row.yoyDirection === "down" ? "text-secondary" : "text-error")}>
+                                    className={cn("font-medium tabular-nums", row.yoyDirection === "down" ? "text-secondary" : "text-error")}>
                                     {row.yoyChange}
                                 </TableCell>
                                 <TableCell>

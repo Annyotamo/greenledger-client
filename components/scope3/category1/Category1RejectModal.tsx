@@ -43,14 +43,14 @@ export function Category1RejectModal({
                         <MaterialIcon name="warning" size="md" />
                     </div>
                     <div>
-                        <h3 className="font-mono text-headline-sm font-bold text-primary">Reject Spend Entry</h3>
-                        <p className="font-mono text-[11px] text-on-surface-variant">Reviewer Rejection Action</p>
+                        <h3 className="font-display text-lg font-bold tracking-tight text-primary">Reject Spend Entry</h3>
+                        <p className="font-sans text-xs text-on-surface-variant font-medium">Reviewer Rejection Action</p>
                     </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                        <label className="block font-sans text-xs font-semibold text-primary mb-1">
                             Rejection Reason <span className="text-error">*</span>
                         </label>
                         <textarea
@@ -58,9 +58,9 @@ export function Category1RejectModal({
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
                             placeholder="e.g. Invoice document is missing or NAICS commodity factor is mismatched..."
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-error"
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-primary focus:outline-none focus:ring-1 focus:ring-error"
                         />
-                        {error && <p className="font-mono text-xs text-error mt-1">{error}</p>}
+                        {error && <p className="font-sans text-xs text-error font-medium mt-1">{error}</p>}
                     </div>
 
                     <div className="flex items-center justify-end gap-3 pt-2">

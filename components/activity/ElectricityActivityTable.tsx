@@ -145,9 +145,9 @@ export function ElectricityActivityTable({
     return (
         <Card className="overflow-hidden">
             <div className="flex flex-col gap-6 border-b border-outline-variant bg-surface p-4 lg:flex-row lg:items-center lg:justify-between">
-                <div className="space-y-2">
-                    <h3 className="text-headline-sm font-semibold text-primary">Electricity Activity Details</h3>
-                    <p className="text-body-md text-on-surface-variant">
+                <div className="space-y-1">
+                    <h3 className="font-display text-base font-semibold text-primary">Electricity Activity Details</h3>
+                    <p className="font-sans text-xs text-on-surface-variant">
                         Monitor on-site and grid electricity activity across tenant facilities.
                     </p>
                 </div>
@@ -182,30 +182,30 @@ export function ElectricityActivityTable({
                 <Table className="w-full table-auto">
                     <TableHeader>
                         <TableRow className="bg-slate-50/80 border-b border-outline-variant/60">
-                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Period & Method</TableHead>
-                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Activity Type</TableHead>
-                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Source</TableHead>
-                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Electricity</TableHead>
-                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Emissions</TableHead>
-                            <TableHead className="py-2.5 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500">Status</TableHead>
+                            <TableHead className="py-2.5 px-4 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Period & Method</TableHead>
+                            <TableHead className="py-2.5 px-4 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Activity Type</TableHead>
+                            <TableHead className="py-2.5 px-4 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Source</TableHead>
+                            <TableHead className="py-2.5 px-4 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Electricity</TableHead>
+                            <TableHead className="py-2.5 px-4 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Emissions</TableHead>
+                            <TableHead className="py-2.5 px-4 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {isLoading ? (
                             <TableRow className="border-none">
-                                <TableCell className="py-12 text-center text-xs text-on-surface-variant" colSpan={6}>
+                                <TableCell className="py-12 text-center font-sans text-xs text-on-surface-variant" colSpan={6}>
                                     Loading activities...
                                 </TableCell>
                             </TableRow>
                         ) : isError ? (
                             <TableRow className="border-none">
-                                <TableCell className="py-12 text-center text-xs text-error font-medium" colSpan={6}>
+                                <TableCell className="py-12 text-center font-sans text-xs text-error font-medium" colSpan={6}>
                                     Unable to load activities. Refresh to try again.
                                 </TableCell>
                             </TableRow>
                         ) : activities.length === 0 ? (
                             <TableRow className="border-none">
-                                <TableCell className="py-12 text-center text-xs text-on-surface-variant" colSpan={6}>
+                                <TableCell className="py-12 text-center font-sans text-xs text-on-surface-variant" colSpan={6}>
                                     No activity records available.
                                 </TableCell>
                             </TableRow>
@@ -229,17 +229,17 @@ export function ElectricityActivityTable({
                                         className="hover:bg-slate-50/90 transition-colors cursor-pointer border-b border-slate-100 last:border-none">
                                         <TableCell className="py-2.5 px-4 text-nowrap">
                                             <div className="flex items-center gap-2">
-                                                <span className="font-semibold text-xs text-slate-900">
+                                                <span className="font-sans font-semibold text-xs text-slate-900">
                                                     {formatShortPeriod(activity.activityStartDate, activity.activityEndDate)}
                                                 </span>
-                                                <span className="px-1.5 py-0.5 rounded bg-slate-100 font-mono text-[10px] font-bold text-slate-600">
+                                                <span className="px-1.5 py-0.5 rounded bg-slate-100 font-sans text-[10px] font-medium text-slate-600">
                                                     {activeDays}d
                                                 </span>
                                             </div>
                                             {activity.accountingMethod && (
                                                 <div className="mt-1">
                                                     <span
-                                                        className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-bold tracking-tight uppercase ${
+                                                        className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-sans text-[9px] font-semibold tracking-wide uppercase ${
                                                             isMarketBased
                                                                 ? "bg-purple-500/10 text-purple-800 border border-purple-500/20"
                                                                 : "bg-slate-100 text-slate-700 border border-slate-200"
@@ -252,32 +252,32 @@ export function ElectricityActivityTable({
                                         </TableCell>
                                         <TableCell className="py-2.5 px-4">
                                             <span
-                                                className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold tracking-tight uppercase ${getActivityTypeClass(
+                                                className={`inline-flex items-center rounded-md px-2 py-0.5 font-sans text-[10px] font-semibold tracking-wide uppercase ${getActivityTypeClass(
                                                     activity.electricityActivityType,
                                                 )}`}>
                                                 {formatActivityType(activity.electricityActivityType)}
                                             </span>
                                         </TableCell>
                                         <TableCell className="py-2.5 px-4">
-                                            <div className="font-bold text-xs text-slate-900">
+                                            <div className="font-sans font-semibold text-xs text-slate-900">
                                                 {formatSourceType(activity.sourceType)}
                                             </div>
                                             {activity.supplierName ? (
-                                                <div className="text-[10px] text-slate-500 font-medium truncate max-w-[140px]">
+                                                <div className="font-sans text-[10px] text-slate-500 font-medium truncate max-w-[140px]">
                                                     {activity.supplierName}
                                                 </div>
                                             ) : null}
                                         </TableCell>
-                                        <TableCell className="py-2.5 px-4 font-mono text-xs">
-                                            <div className="font-bold text-slate-900">
+                                        <TableCell className="py-2.5 px-4 font-sans text-xs">
+                                            <div className="font-semibold text-slate-900 tabular-nums">
                                                 {formatNumber(activity.electricityMwh, 2)} MWh
                                             </div>
-                                            <div className="text-[10px] text-slate-500 font-medium">
+                                            <div className="text-[10px] text-slate-500 font-medium tabular-nums">
                                                 {formatNumber(activity.electricityKwh, 0)} kWh
                                             </div>
                                         </TableCell>
-                                        <TableCell className="py-2.5 px-4 font-mono text-xs">
-                                            <div className="font-bold text-slate-900">
+                                        <TableCell className="py-2.5 px-4 font-sans text-xs">
+                                            <div className="font-semibold text-slate-900 tabular-nums">
                                                 {formatNumber(activity.calculatedTCo2e, 2)} tCO₂e
                                             </div>
                                             <div className="text-[10px] text-slate-500 uppercase font-semibold">
@@ -286,7 +286,7 @@ export function ElectricityActivityTable({
                                         </TableCell>
                                         <TableCell className="py-2.5 px-4">
                                             <span
-                                                className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] uppercase tracking-wide ${statusClass}`}>
+                                                className={`inline-flex items-center rounded-md px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wider ${statusClass}`}>
                                                 {status}
                                             </span>
                                         </TableCell>
@@ -299,7 +299,7 @@ export function ElectricityActivityTable({
             </div>
 
             <div className="flex flex-col gap-4 border-t border-outline-variant bg-surface p-4 md:flex-row md:items-center md:justify-between">
-                <span className="text-label-md text-on-surface-variant">
+                <span className="font-sans text-xs text-on-surface-variant">
                     Showing 1-{Math.min(10, activities.length)} of {activities.length} activities
                 </span>
                 <div className="flex items-center gap-2">

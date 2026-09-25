@@ -43,10 +43,10 @@ export function Scope3TrackedCategoriesTable() {
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="format_list_numbered" size="sm" className="text-primary text-[20px]" />
                     <div>
-                        <h3 className="font-headline-sm text-headline-sm font-bold text-primary">
+                        <h3 className="font-display text-headline-sm font-bold text-primary tracking-tight">
                             Tracked Value Chain Categories & Contribution
                         </h3>
-                        <p className="font-mono text-[10px] uppercase tracking-tight text-on-surface-variant">
+                        <p className="font-sans text-[11px] font-medium tracking-tight text-on-surface-variant">
                             Ranked contribution across all 9 active Scope 3 protocol categories
                         </p>
                     </div>
@@ -58,8 +58,8 @@ export function Scope3TrackedCategoriesTable() {
                         type="button"
                         onClick={() => setFilterTab("all")}
                         className={cn(
-                            "rounded-md px-2.5 py-1 font-mono text-[11px] font-semibold transition-colors",
-                            filterTab === "all" ? "bg-white text-primary shadow-xs font-bold" : "text-on-surface-variant hover:text-on-surface",
+                            "rounded-md px-2.5 py-1 font-sans text-xs font-medium transition-colors",
+                            filterTab === "all" ? "bg-white text-primary shadow-xs font-semibold" : "text-on-surface-variant hover:text-on-surface",
                         )}>
                         All Tracked ({activeCategories.length})
                     </button>
@@ -67,8 +67,8 @@ export function Scope3TrackedCategoriesTable() {
                         type="button"
                         onClick={() => setFilterTab("upstream")}
                         className={cn(
-                            "rounded-md px-2.5 py-1 font-mono text-[11px] font-semibold transition-colors",
-                            filterTab === "upstream" ? "bg-white text-primary shadow-xs font-bold" : "text-on-surface-variant hover:text-on-surface",
+                            "rounded-md px-2.5 py-1 font-sans text-xs font-medium transition-colors",
+                            filterTab === "upstream" ? "bg-white text-primary shadow-xs font-semibold" : "text-on-surface-variant hover:text-on-surface",
                         )}>
                         Upstream (7)
                     </button>
@@ -76,8 +76,8 @@ export function Scope3TrackedCategoriesTable() {
                         type="button"
                         onClick={() => setFilterTab("downstream")}
                         className={cn(
-                            "rounded-md px-2.5 py-1 font-mono text-[11px] font-semibold transition-colors",
-                            filterTab === "downstream" ? "bg-white text-primary shadow-xs font-bold" : "text-on-surface-variant hover:text-on-surface",
+                            "rounded-md px-2.5 py-1 font-sans text-xs font-medium transition-colors",
+                            filterTab === "downstream" ? "bg-white text-primary shadow-xs font-semibold" : "text-on-surface-variant hover:text-on-surface",
                         )}>
                         Downstream (2)
                     </button>
@@ -85,8 +85,8 @@ export function Scope3TrackedCategoriesTable() {
                         type="button"
                         onClick={() => setFilterTab("high_impact")}
                         className={cn(
-                            "rounded-md px-2.5 py-1 font-mono text-[11px] font-semibold transition-colors",
-                            filterTab === "high_impact" ? "bg-white text-primary shadow-xs font-bold" : "text-on-surface-variant hover:text-on-surface",
+                            "rounded-md px-2.5 py-1 font-sans text-xs font-medium transition-colors",
+                            filterTab === "high_impact" ? "bg-white text-primary shadow-xs font-semibold" : "text-on-surface-variant hover:text-on-surface",
                         )}>
                         High Impact (&gt;5%)
                     </button>
@@ -98,25 +98,25 @@ export function Scope3TrackedCategoriesTable() {
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-surface-container-low border-b border-outline-variant">
-                            <TableHead className="w-14 text-center font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+                            <TableHead className="w-14 text-center font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                 Rank
                             </TableHead>
-                            <TableHead className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+                            <TableHead className="font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                 Category & Protocol Code
                             </TableHead>
-                            <TableHead className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+                            <TableHead className="font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                 Scope 3 Contribution
                             </TableHead>
-                            <TableHead className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+                            <TableHead className="font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                 Methodology
                             </TableHead>
-                            <TableHead className="text-center font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+                            <TableHead className="text-center font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                 Data Assurance
                             </TableHead>
-                            <TableHead className="text-right font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+                            <TableHead className="text-right font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                 Mapped Spend (INR)
                             </TableHead>
-                            <TableHead className="text-right font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+                            <TableHead className="text-right font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                 Action
                             </TableHead>
                         </TableRow>
@@ -125,8 +125,8 @@ export function Scope3TrackedCategoriesTable() {
                         {filteredList.map((item, idx) => (
                             <TableRow key={item.id} className="hover:bg-surface-container-low/40 transition-colors border-b border-outline-variant/30">
                                 {/* Rank */}
-                                <TableCell className="text-center font-mono font-bold text-xs">
-                                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-surface-container text-primary font-bold text-[11px]">
+                                <TableCell className="text-center font-sans font-bold text-xs">
+                                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-surface-container text-primary font-bold text-[11px] tabular-nums">
                                         #{idx + 1}
                                     </span>
                                 </TableCell>
@@ -141,17 +141,17 @@ export function Scope3TrackedCategoriesTable() {
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-1.5">
-                                                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-primary">
+                                                <span className="font-sans text-[10px] font-bold uppercase tracking-wider text-primary">
                                                     {item.code}
                                                 </span>
                                                 <span className="text-[10px] text-on-surface-variant">•</span>
-                                                <span className="font-mono text-[9px] uppercase font-bold text-on-surface-variant">
+                                                <span className="font-sans text-[10px] uppercase font-semibold text-on-surface-variant">
                                                     {item.type}
                                                 </span>
                                             </div>
                                             <Link
                                                 href={`/scope-3/${item.slug}`}
-                                                className="font-sans font-bold text-primary text-xs hover:text-emerald-700 transition-colors">
+                                                className="font-sans font-semibold text-primary text-xs hover:text-emerald-700 transition-colors">
                                                 {item.name}
                                             </Link>
                                         </div>
@@ -161,11 +161,11 @@ export function Scope3TrackedCategoriesTable() {
                                 {/* Scope 3 Contribution (Progress Bar + tCO2e + %) */}
                                 <TableCell className="min-w-[180px]">
                                     <div className="space-y-1">
-                                        <div className="flex items-baseline justify-between font-mono text-xs">
-                                            <span className="font-bold text-primary">
-                                                {item.emissionsTco2e.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} tCO2e
+                                        <div className="flex items-baseline justify-between font-sans text-xs">
+                                            <span className="font-display font-bold text-primary tabular-nums">
+                                                {item.emissionsTco2e.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} <span className="font-sans text-[11px] font-normal text-on-surface-variant">tCO2e</span>
                                             </span>
-                                            <span className="font-bold text-emerald-800 text-[11px]">
+                                            <span className="font-display font-bold text-emerald-800 text-[11px] tabular-nums">
                                                 {item.sharePercent.toFixed(1)}%
                                             </span>
                                         </div>
@@ -183,7 +183,7 @@ export function Scope3TrackedCategoriesTable() {
 
                                 {/* Methodology */}
                                 <TableCell>
-                                    <span className="rounded bg-surface-container-high px-2 py-0.5 font-mono text-[10px] font-semibold text-primary">
+                                    <span className="rounded bg-surface-container-high px-2 py-0.5 font-sans text-[11px] font-semibold text-primary">
                                         {item.methodology}
                                     </span>
                                 </TableCell>
@@ -191,7 +191,7 @@ export function Scope3TrackedCategoriesTable() {
                                 {/* Data Assurance */}
                                 <TableCell className="text-center">
                                     <span
-                                        className={`inline-block font-mono text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${getStatusBadge(
+                                        className={`inline-block font-sans text-[10px] font-semibold uppercase px-2 py-0.5 rounded border tracking-tight ${getStatusBadge(
                                             item.status,
                                         )}`}>
                                         {item.status}
@@ -199,7 +199,7 @@ export function Scope3TrackedCategoriesTable() {
                                 </TableCell>
 
                                 {/* Mapped Spend */}
-                                <TableCell className="text-right font-mono text-xs text-primary font-bold">
+                                <TableCell className="text-right font-display text-xs text-primary font-bold tabular-nums">
                                     {formatInrSpend(item.spendInr)}
                                 </TableCell>
 
@@ -207,7 +207,7 @@ export function Scope3TrackedCategoriesTable() {
                                 <TableCell className="text-right">
                                     <Link
                                         href={`/scope-3/${item.slug}`}
-                                        className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-emerald-700 hover:text-emerald-900 hover:underline">
+                                        className="inline-flex items-center gap-1 font-sans text-xs font-semibold text-emerald-700 hover:text-emerald-900 hover:underline">
                                         <span>Ledger</span>
                                         <MaterialIcon name="arrow_forward" size="xs" className="!text-[13px]" />
                                     </Link>

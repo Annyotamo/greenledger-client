@@ -41,10 +41,10 @@ export function EmissionsTrendChart({ data = EMISSIONS_TREND }: EmissionsTrendCh
                     <div className="flex items-center gap-2.5">
                         <MaterialIcon name="analytics" size="sm" className="text-primary" />
                         <div>
-                            <h3 className="text-headline-sm font-semibold text-primary">
+                            <h3 className="font-display text-headline-sm font-semibold tracking-tight text-primary">
                                 Emissions Trends
                             </h3>
-                            <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
+                            <p className="font-sans text-[11px] font-medium tracking-tight text-on-surface-variant">
                                 Metric: Tonnes of CO2 equivalent (tCO2e)
                             </p>
                         </div>
@@ -80,7 +80,7 @@ export function EmissionsTrendChart({ data = EMISSIONS_TREND }: EmissionsTrendCh
                             className="drop-shadow-[0_0_4px_rgba(96,165,250,0.8)]"
                         />
                     </svg>
-                    <div className="pointer-events-none absolute bottom-1 left-0 right-0 flex justify-between px-4 font-mono text-[10px] text-on-surface-variant">
+                    <div className="pointer-events-none absolute bottom-1 left-0 right-0 flex justify-between px-4 font-sans text-[11px] font-medium text-on-surface-variant">
                         {chartPoints.map((point) => (
                             <span key={point.month}>{point.month}</span>
                         ))}
@@ -95,7 +95,7 @@ function LegendDot({ className, label }: { className: string; label: string }) {
     return (
         <div className="flex items-center gap-2">
             <span className={`h-3 w-3 rounded-full ${className}`} />
-            <span className="font-mono text-[11px] text-on-surface">{label}</span>
+            <span className="font-sans text-[12px] font-medium text-on-surface">{label}</span>
         </div>
     );
 }

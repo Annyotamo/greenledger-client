@@ -107,20 +107,20 @@ export function ActivityDocumentsManager({
             {documents.map((doc, index) => (
                 <div
                     key={doc.id}
-                    className="border border-outline-variant rounded-xl p-5 bg-surface-container-lowest relative space-y-4 shadow-sm"
+                    className="border border-outline-variant rounded-xl p-5 bg-surface-container-lowest relative space-y-4 shadow-sm font-sans"
                 >
                     <div className="flex items-center justify-between border-b border-outline-variant pb-3">
                         <div className="flex items-center gap-2">
                             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold">
                                 {index + 1}
                             </span>
-                            <span className="text-sm font-semibold text-primary">Supporting Evidence Document</span>
+                            <span className="text-sm font-semibold text-primary font-sans">Supporting Evidence Document</span>
                         </div>
                         {documents.length > 1 && (
                             <button
                                 type="button"
                                 onClick={() => handleRemoveDocument(doc.id)}
-                                className="flex items-center gap-1 text-xs text-on-surface-variant hover:text-error transition cursor-pointer font-medium"
+                                className="flex items-center gap-1 text-xs text-on-surface-variant hover:text-error transition cursor-pointer font-medium font-sans"
                             >
                                 <MaterialIcon name="delete" size="sm" className="text-error" />
                                 Remove
@@ -130,7 +130,7 @@ export function ActivityDocumentsManager({
 
                     <div className="grid gap-4 lg:grid-cols-2">
                         <div id={`form-field-doc-${doc.id}-type`}>
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                            <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                 Document Type
                             </label>
                             <CustomSelect
@@ -141,28 +141,28 @@ export function ActivityDocumentsManager({
                                 placeholder="Select type..."
                             />
                             {errors[`doc-${doc.id}-type`] && (
-                                <p className="mt-1.5 text-xs text-error">{errors[`doc-${doc.id}-type`]}</p>
+                                <p className="mt-1.5 text-xs text-error font-sans">{errors[`doc-${doc.id}-type`]}</p>
                             )}
                         </div>
 
                         <div id={`form-field-doc-${doc.id}-name`}>
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                            <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                 Document Name
                             </label>
                             <Input
                                 type="text"
                                 value={doc.documentName}
                                 onChange={(e) => handleUpdateDoc(doc.id, "documentName", e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
                                 placeholder="e.g. Q1_Invoice"
                             />
                             {errors[`doc-${doc.id}-name`] && (
-                                <p className="mt-1.5 text-xs text-error">{errors[`doc-${doc.id}-name`]}</p>
+                                <p className="mt-1.5 text-xs text-error font-sans">{errors[`doc-${doc.id}-name`]}</p>
                             )}
                         </div>
 
                         <div id={`form-field-doc-${doc.id}-date`}>
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                            <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                 Document Date
                             </label>
                             <DatePicker
@@ -171,12 +171,12 @@ export function ActivityDocumentsManager({
                                 error={Boolean(errors[`doc-${doc.id}-date`])}
                             />
                             {errors[`doc-${doc.id}-date`] && (
-                                <p className="mt-1.5 text-xs text-error">{errors[`doc-${doc.id}-date`]}</p>
+                                <p className="mt-1.5 text-xs text-error font-sans">{errors[`doc-${doc.id}-date`]}</p>
                             )}
                         </div>
 
                         <div className="flex flex-col justify-end">
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                            <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                 Evidence Mode
                             </label>
                             <div className="flex rounded-lg border border-outline-variant bg-surface-container-low p-1 w-fit">
@@ -184,9 +184,9 @@ export function ActivityDocumentsManager({
                                     type="button"
                                     onClick={() => handleUpdateDoc(doc.id, "sourceMode", "upload")}
                                     className={cn(
-                                        "px-4 py-1.5 text-xs! block font-label-md text-label-md text-on-surface-variant rounded-md transition cursor-pointer",
+                                        "px-4 py-1.5 text-xs font-sans font-medium rounded-md transition cursor-pointer",
                                         doc.sourceMode === "upload"
-                                            ? "bg-secondary text-on-secondary shadow-sm"
+                                            ? "bg-secondary text-on-secondary shadow-sm font-semibold"
                                             : "text-on-surface-variant hover:text-on-surface"
                                     )}
                                 >
@@ -196,9 +196,9 @@ export function ActivityDocumentsManager({
                                     type="button"
                                     onClick={() => handleUpdateDoc(doc.id, "sourceMode", "link")}
                                     className={cn(
-                                        "px-4 py-1.5 text-xs! block font-label-md text-label-md text-on-surface-variant font-semibold rounded-md transition cursor-pointer",
+                                        "px-4 py-1.5 text-xs font-sans font-medium rounded-md transition cursor-pointer",
                                         doc.sourceMode === "link"
-                                            ? "bg-secondary text-on-secondary shadow-sm"
+                                            ? "bg-secondary text-on-secondary shadow-sm font-semibold"
                                             : "text-on-surface-variant hover:text-on-surface"
                                     )}
                                 >
@@ -210,12 +210,12 @@ export function ActivityDocumentsManager({
                         <div id={`form-field-doc-${doc.id}-source`} className="lg:col-span-2">
                             {doc.sourceMode === "upload" ? (
                                 <div className="space-y-2">
-                                    <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                    <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                         Upload File
                                     </label>
                                     {doc.attachmentName ? (
                                         <div className="flex items-center justify-between rounded-lg border border-outline-variant bg-surface-container p-3">
-                                            <div className="flex items-center gap-2 text-sm text-on-surface font-medium truncate">
+                                            <div className="flex items-center gap-2 text-sm text-on-surface font-medium truncate font-sans">
                                                 <MaterialIcon name="description" size="sm" className="text-primary" />
                                                 <span className="truncate">{doc.attachmentName}</span>
                                             </div>
@@ -238,8 +238,8 @@ export function ActivityDocumentsManager({
                                                 <MaterialIcon name="cloud_upload" size="sm" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-semibold text-primary">Click to upload files</p>
-                                                <p className="text-xs text-on-surface-variant">Excel, PDF, Word, PNG, JPG or CSV (max 10MB)</p>
+                                                <p className="text-sm font-semibold text-primary font-sans">Click to upload files</p>
+                                                <p className="text-xs text-on-surface-variant font-sans">Excel, PDF, Word, PNG, JPG or CSV (max 10MB)</p>
                                             </div>
                                             <input
                                                 type="file"
@@ -264,36 +264,36 @@ export function ActivityDocumentsManager({
                                         </label>
                                     )}
                                     {errors[`doc-${doc.id}-source`] && (
-                                        <p className="mt-1 text-xs text-error">{errors[`doc-${doc.id}-source`]}</p>
+                                        <p className="mt-1 text-xs text-error font-sans">{errors[`doc-${doc.id}-source`]}</p>
                                     )}
                                 </div>
                             ) : (
                                 <div className="space-y-2">
-                                    <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                    <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                         Documentation Link
                                     </label>
                                     <Input
                                         type="text"
                                         value={doc.documentLink}
                                         onChange={(e) => handleUpdateDoc(doc.id, "documentLink", e.target.value)}
-                                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
                                         placeholder="https://sharepoint.com/doc..."
                                     />
                                     {errors[`doc-${doc.id}-source`] && (
-                                        <p className="mt-1 text-xs text-error">{errors[`doc-${doc.id}-source`]}</p>
+                                        <p className="mt-1 text-xs text-error font-sans">{errors[`doc-${doc.id}-source`]}</p>
                                     )}
                                 </div>
                             )}
                         </div>
 
                         <div className="lg:col-span-2">
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                            <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                 Notes / Remarks (Optional)
                             </label>
                             <textarea
                                 value={doc.notes}
                                 onChange={(e) => handleUpdateDoc(doc.id, "notes", e.target.value)}
-                                className="min-h-[80px] w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                                className="min-h-[80px] w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
                                 placeholder="Add clarifying notes..."
                             />
                         </div>
@@ -304,7 +304,7 @@ export function ActivityDocumentsManager({
             <button
                 type="button"
                 onClick={handleAddDocument}
-                className="flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-outline-variant hover:border-primary rounded-xl block font-label-md text-label-md text-on-surface-variant mb-2 text-sm transition duration-150  bg-surface-container-low cursor-pointer"
+                className="flex items-center justify-center gap-2 w-full py-3.5 border-2 border-dashed border-outline-variant hover:border-primary rounded-xl font-sans text-xs font-semibold text-on-surface-variant transition duration-150 bg-surface-container-low cursor-pointer"
             >
                 <MaterialIcon name="add" size="sm" />
                 Add Another Document

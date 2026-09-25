@@ -19,13 +19,13 @@ export function EnergyHeader({ reportingPeriod, facilitiesCount }: EnergyHeaderP
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div className="space-y-4">
                     <div className="space-y-1">
-                        <div className="text-[11px] font-bold tracking-widest text-secondary uppercase">
+                        <div className="font-sans text-[11px] font-semibold tracking-wider text-secondary uppercase">
                             GreenLedger • Energy Module {facilitiesCount ? `• ${facilitiesCount} Facilities` : ""}
                         </div>
-                        <h1 className="text-headline-lg font-bold tracking-tight text-primary">
+                        <h1 className="text-headline-lg font-bold tracking-tight text-primary font-display">
                             Energy Consumption Dashboard
                         </h1>
-                        <p className="text-body-md text-on-surface-variant">
+                        <p className="text-body-md text-on-surface-variant font-sans">
                             Comprehensive Tenant Energy Accounting • Captive Generation vs. Grid Sourced Bifurcation
                         </p>
                     </div>

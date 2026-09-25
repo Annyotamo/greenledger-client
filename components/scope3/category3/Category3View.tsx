@@ -248,7 +248,7 @@ export function Category3View() {
 
             {notification && (
                 <div
-                    className={`flex items-center justify-between rounded-xl px-4 py-3 font-mono text-xs shadow-md border ${
+                    className={`flex items-center justify-between rounded-xl px-4 py-3 font-sans text-sm font-medium shadow-md border ${
                         notification.type === "success"
                             ? "bg-secondary-container/90 text-on-secondary-container border-secondary/30"
                             : "bg-error-container/90 text-on-error-container border-error/30"
@@ -266,17 +266,17 @@ export function Category3View() {
             {/* Page Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-outline-variant/40 pb-4">
                 <div className="space-y-1">
-                    <div className="flex items-center gap-2 font-mono text-xs text-on-surface-variant">
+                    <div className="flex items-center gap-2 font-sans text-xs text-on-surface-variant font-medium">
                         <Link href="/scope-3" className="hover:text-primary transition-colors">
                             Scope 3 Value Chain
                         </Link>
                         <span>/</span>
-                        <span className="text-secondary font-bold">Cat 3: Fuel & Energy Activities</span>
+                        <span className="text-secondary font-semibold">Cat 3: Fuel & Energy Activities</span>
                     </div>
-                    <h1 className="text-headline-md font-bold text-primary tracking-tight">
+                    <h1 className="font-display text-2xl font-bold tracking-tight text-primary">
                         Fuel & Energy-Related Activities (WTT & Grid T&D Losses)
                     </h1>
-                    <p className="font-mono text-xs text-on-surface-variant max-w-3xl">
+                    <p className="font-sans text-sm text-on-surface-variant max-w-3xl">
                         Quantify upstream Scope 3 Category 3 emissions from Well-To-Tank (WTT) fuel extraction & refining and electricity Transmission & Distribution (T&D) grid losses.
                     </p>
                 </div>
@@ -289,18 +289,18 @@ export function Category3View() {
                             fuelQuery.refetch();
                             elecQuery.refetch();
                         }}
-                        className="gap-1.5 font-mono text-xs">
+                        className="gap-1.5 font-medium">
                         <MaterialIcon name="refresh" size="sm" />
                         <span>Refresh</span>
                     </Button>
 
                     {subTab === "fuel" ? (
-                        <Button variant="primary" size="md" onClick={handleOpenFuelCreate} className="gap-1.5 font-mono text-xs">
+                        <Button variant="primary" size="md" onClick={handleOpenFuelCreate} className="gap-1.5 font-medium">
                             <MaterialIcon name="add" size="sm" />
                             <span>Log WTT Fuel Activity</span>
                         </Button>
                     ) : (
-                        <Button variant="primary" size="md" onClick={handleOpenElecCreate} className="gap-1.5 font-mono text-xs">
+                        <Button variant="primary" size="md" onClick={handleOpenElecCreate} className="gap-1.5 font-medium">
                             <MaterialIcon name="add" size="sm" />
                             <span>Log T&D Losses Activity</span>
                         </Button>
@@ -313,14 +313,14 @@ export function Category3View() {
                 <button
                     type="button"
                     onClick={() => setSubTab("fuel")}
-                    className={`flex items-center gap-2 rounded-xl px-4 py-2 font-mono text-xs font-bold transition-all ${
+                    className={`flex items-center gap-2 rounded-xl px-4 py-2 font-sans text-sm font-semibold transition-all ${
                         subTab === "fuel"
                             ? "bg-secondary text-on-secondary shadow-md"
                             : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high"
                     }`}>
                     <MaterialIcon name="local_gas_station" size="sm" />
                     <span>Upstream WTT Fuels</span>
-                    <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px]">
+                    <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold tabular-nums">
                         {(fuelQuery.data ?? []).length}
                     </span>
                 </button>
@@ -328,14 +328,14 @@ export function Category3View() {
                 <button
                     type="button"
                     onClick={() => setSubTab("electricity")}
-                    className={`flex items-center gap-2 rounded-xl px-4 py-2 font-mono text-xs font-bold transition-all ${
+                    className={`flex items-center gap-2 rounded-xl px-4 py-2 font-sans text-sm font-semibold transition-all ${
                         subTab === "electricity"
                             ? "bg-secondary text-on-secondary shadow-md"
                             : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high"
                     }`}>
                     <MaterialIcon name="bolt" size="sm" />
                     <span>Electricity Grid T&D Losses</span>
-                    <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px]">
+                    <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold tabular-nums">
                         {(elecQuery.data ?? []).length}
                     </span>
                 </button>
@@ -343,13 +343,13 @@ export function Category3View() {
 
             {/* Filter Control Toolbar */}
             <Card className="p-4 border-outline-variant/60">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 font-mono text-xs">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 font-sans text-sm">
                     <div>
-                        <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Status Filter</label>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">Status Filter</label>
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-sm font-medium text-primary focus:outline-none focus:ring-1 focus:ring-primary">
                             <option value="">All Statuses</option>
                             <option value="verified">Verified (Locked)</option>
                             <option value="submitted">Submitted (Pending Review)</option>
@@ -359,11 +359,11 @@ export function Category3View() {
                     </div>
 
                     <div>
-                        <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Facility</label>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">Facility</label>
                         <select
                             value={facilityFilter}
                             onChange={(e) => setFacilityFilter(e.target.value)}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-sm font-medium text-primary focus:outline-none focus:ring-1 focus:ring-primary">
                             <option value="">All Facilities</option>
                             {(facilitiesQuery.data ?? []).map((fac) => (
                                 <option key={fac.id} value={fac.id}>
@@ -374,11 +374,11 @@ export function Category3View() {
                     </div>
 
                     <div>
-                        <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Reporting Period</label>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">Reporting Period</label>
                         <select
                             value={periodIdFilter}
                             onChange={(e) => setPeriodIdFilter(e.target.value)}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-sm font-medium text-primary focus:outline-none focus:ring-1 focus:ring-primary">
                             <option value="">All Reporting Periods</option>
                             {(reportingPeriodsQuery.data ?? []).map((p) => (
                                 <option key={p.id} value={p.id}>

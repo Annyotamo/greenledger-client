@@ -35,15 +35,15 @@ export function RecentActivity({ items, maxItems, className }: RecentActivityPro
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="history" size="sm" className="text-primary text-[20px]" />
                     <div>
-                        <h3 className="font-headline-sm text-headline-sm font-bold text-primary uppercase tracking-tight">
+                        <h3 className="font-headline-sm text-headline-sm font-semibold text-primary">
                             Recent Activities
                         </h3>
-                        <p className="font-mono text-[10px] uppercase tracking-tight text-on-surface-variant">
+                        <p className="font-sans text-xs text-on-surface-variant">
                             Live audit & data entry log
                         </p>
                     </div>
                 </div>
-                <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-surface-container-high text-primary px-2.5 py-1 rounded">
+                <span className="font-sans text-[11px] font-semibold uppercase tracking-wider bg-surface-container-high text-primary px-2.5 py-1 rounded-md">
                     {displayItems.length} Logs
                 </span>
             </div>
@@ -66,8 +66,8 @@ export function RecentActivity({ items, maxItems, className }: RecentActivityPro
                                 />
                             </div>
                             <div className="min-w-0 flex-1">
-                                <p className="font-mono text-[12px] font-bold text-on-surface truncate">{item.title}</p>
-                                <p className="font-mono text-[10px] text-on-surface-variant truncate">{item.subtitle}</p>
+                                <p className="font-sans text-xs font-semibold text-on-surface truncate">{item.title}</p>
+                                <p className="font-sans text-[11px] text-on-surface-variant truncate">{item.subtitle}</p>
                             </div>
                         </motion.div>
                     ))}

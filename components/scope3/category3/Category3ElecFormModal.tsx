@@ -144,18 +144,18 @@ export function Category3ElecFormModal({
             <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-2xl z-10 max-h-[85vh] flex flex-col my-auto">
                 <div className="flex items-center justify-between border-b border-outline-variant/60 px-6 py-4 bg-surface-container-low/80">
                     <div className="flex items-center gap-2">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary text-on-secondary font-mono text-xs font-bold">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary text-on-secondary font-sans text-xs font-bold">
                             3.2
                         </span>
                         <div>
-                            <h3 className="font-mono text-headline-sm font-bold text-primary">
+                            <h3 className="font-display text-xl font-bold tracking-tight text-primary">
                                 {mode === "create"
                                     ? "Log Electricity T&D Losses Activity"
                                     : mode === "edit"
                                       ? "Edit T&D Losses Activity"
                                       : "Amend Verified T&D Losses Entry"}
                             </h3>
-                            <p className="font-mono text-[11px] text-on-surface-variant">
+                            <p className="font-sans text-xs font-medium text-on-surface-variant">
                                 Scope 3 Cat 3: Transmission & Distribution Grid Losses
                             </p>
                         </div>
@@ -174,13 +174,13 @@ export function Category3ElecFormModal({
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 Reporting Period <span className="text-error">*</span>
                             </label>
                             <select
                                 value={reportingPeriodId || (periods[0]?.id ?? "")}
                                 onChange={(e) => setReportingPeriodId(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary">
                                 {periods.length === 0 && <option value="">Loading reporting periods...</option>}
                                 {periods.map((p) => (
                                     <option key={p.id} value={p.id}>
@@ -191,13 +191,13 @@ export function Category3ElecFormModal({
                         </div>
 
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 Facility (Optional)
                             </label>
                             <select
                                 value={facilityId}
                                 onChange={(e) => setFacilityId(e.target.value)}
-                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary">
                                 <option value="">No specific facility (Corporate level)</option>
                                 {facilities.map((fac) => (
                                     <option key={fac.id} value={fac.id}>
@@ -210,18 +210,18 @@ export function Category3ElecFormModal({
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 Activity Date <span className="text-error">*</span>
                             </label>
                             <DatePicker
                                 value={activityDate}
                                 onChange={setActivityDate}
-                                className="font-mono text-xs"
+                                className="font-sans text-sm"
                             />
                         </div>
 
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 Electricity Consumed (kWh) <span className="text-error">*</span>
                             </label>
                             <Input
@@ -231,14 +231,14 @@ export function Category3ElecFormModal({
                                 value={electricityKwh}
                                 onChange={(e) => setElectricityKwh(e.target.value)}
                                 placeholder="e.g. 50000"
-                                className="font-mono text-xs font-bold"
+                                className="font-sans text-sm font-semibold tabular-nums"
                             />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 T&D Loss Rate (%) <span className="text-error">*</span>
                             </label>
                             <Input
@@ -250,15 +250,15 @@ export function Category3ElecFormModal({
                                 onChange={(e) => setTdLossRatePercent(e.target.value)}
                                 disabled={true}
                                 placeholder="Default: 17.0%"
-                                className="font-mono text-xs font-bold bg-surface-container-low text-on-surface-variant cursor-not-allowed border-outline-variant/60"
+                                className="font-sans text-sm font-semibold tabular-nums bg-surface-container-low text-on-surface-variant cursor-not-allowed border-outline-variant/60"
                             />
-                            <p className="font-mono text-[10px] text-on-surface-variant mt-1">
+                            <p className="font-sans text-xs text-on-surface-variant mt-1">
                                 Benchmark: 17.0% (India CEA Grid Loss Rate)
                             </p>
                         </div>
 
                         <div>
-                            <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
                                 Grid Factor (kgCO₂e/kWh)
                             </label>
                             <Input
@@ -268,33 +268,33 @@ export function Category3ElecFormModal({
                                 onChange={(e) => setCustomGridFactor(e.target.value)}
                                 disabled={true}
                                 placeholder="0.7160"
-                                className="font-mono text-xs font-bold bg-surface-container-low text-on-surface-variant cursor-not-allowed border-outline-variant/60"
+                                className="font-sans text-sm font-semibold tabular-nums bg-surface-container-low text-on-surface-variant cursor-not-allowed border-outline-variant/60"
                             />
-                            <p className="font-mono text-[10px] text-on-surface-variant mt-1">
+                            <p className="font-sans text-xs text-on-surface-variant mt-1">
                                 CEA National Grid Average: 0.7160 kgCO₂e/kWh
                             </p>
                         </div>
                     </div>
 
                     <div className="rounded-lg bg-surface-container-low p-3 border border-outline-variant/40 space-y-1">
-                        <span className="font-mono text-[10px] uppercase font-bold text-on-surface-variant">
+                        <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                             T&D Loss Upstream Calculation Preview
                         </span>
                         <div className="flex items-baseline justify-between">
-                            <span className="font-mono text-xs font-bold text-primary">
+                            <span className="font-display text-base font-bold text-primary tabular-nums">
                                 {numKwh.toLocaleString()} kWh × {tdLossRatePercent}% Loss
                             </span>
-                            <span className="font-mono text-xs font-bold text-secondary">
+                            <span className="font-display text-base font-bold text-secondary tabular-nums">
                                 {estimatedTCo2e.toFixed(4)} tCO₂e
                             </span>
                         </div>
-                        <p className="font-mono text-[10px] text-on-surface-variant">
+                        <p className="font-sans text-xs text-on-surface-variant tabular-nums">
                             Formula: {numKwh.toLocaleString()} kWh × {numGridFactor} kg/kWh × {numLossRate.toFixed(4)} = {estimatedKgCo2e.toFixed(2)} kgCO₂e
                         </p>
                     </div>
 
                     <div>
-                        <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                        <label className="block font-sans text-xs font-semibold text-primary mb-1">
                             Notes / Activity Remarks
                         </label>
                         <textarea
@@ -302,7 +302,7 @@ export function Category3ElecFormModal({
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Enter grid meter ID, utility bill period, or T&D loss calculation reference..."
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         />
                     </div>
 

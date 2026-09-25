@@ -369,8 +369,8 @@ export function CustomFuelSection({
                         <MaterialIcon name="local_gas_station" size="sm" />
                     </div>
                     <div>
-                        <h2 className="text-headline-sm font-semibold text-primary">Fuel Details</h2>
-                        <p className="text-xs text-on-surface-variant">
+                        <h2 className="font-display text-base font-semibold text-primary">Fuel Details</h2>
+                        <p className="font-sans text-xs text-on-surface-variant">
                             Choose standard fuel type or configure a custom fuel blend.
                         </p>
                     </div>
@@ -381,7 +381,7 @@ export function CustomFuelSection({
                     <button
                         type="button"
                         onClick={() => handleToggleCustomFuelMode(false)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                        className={`px-3 py-1.5 rounded-lg font-sans text-xs font-semibold transition-all ${
                             !useCustomFuel
                                 ? "bg-primary text-on-primary shadow-sm"
                                 : "bg-white border border-outline-variant text-on-surface hover:bg-surface-container-low"
@@ -392,7 +392,7 @@ export function CustomFuelSection({
                     <button
                         type="button"
                         onClick={() => handleToggleCustomFuelMode(true)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
+                        className={`px-3 py-1.5 rounded-lg font-sans text-xs font-semibold flex items-center gap-1 transition-all ${
                             useCustomFuel
                                 ? "bg-primary text-on-primary shadow-sm"
                                 : "bg-white border border-outline-variant text-primary hover:bg-surface-container-low"
@@ -405,17 +405,17 @@ export function CustomFuelSection({
             </div>
 
             {/* Card Content Body */}
-            <div className="p-card-padding space-y-6 relative">
+            <div className="p-card-padding space-y-6 relative font-sans">
                 {/* Subtle success animation overlay */}
                 {showSuccessOverlay && (
                     <div className="absolute inset-0 bg-surface-container-lowest/80 backdrop-blur-[2px] z-20 flex flex-col items-center justify-center gap-2 rounded-b-xl animate-in fade-in duration-300">
                         <div className="h-14 w-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-lg animate-bounce">
                             <MaterialIcon name="check_circle" size="lg" />
                         </div>
-                        <p className="text-sm font-semibold text-emerald-800">
+                        <p className="font-sans text-sm font-semibold text-emerald-800">
                             Custom fuel saved successfully!
                         </p>
-                        <p className="text-xs text-on-surface-variant">
+                        <p className="font-sans text-xs text-on-surface-variant">
                             It has been selected for this activity.
                         </p>
                     </div>
@@ -425,7 +425,7 @@ export function CustomFuelSection({
                     /* Standard Fuel Selection Mode */
                     <div className="grid gap-4 lg:grid-cols-2">
                         <div id="form-field-fuelCategory">
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                            <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                 {fuelCategoryLabel} <span className="text-error">*</span>
                             </label>
                             <CustomSelect
@@ -446,14 +446,14 @@ export function CustomFuelSection({
                             {!fuelCategoriesQuery.isLoading &&
                                 Array.isArray(fuelCategoriesQuery.data) &&
                                 fuelCategoriesQuery.data.length === 0 && (
-                                    <p className="mt-2 text-xs text-on-surface-variant">
+                                    <p className="mt-1.5 font-sans text-xs text-on-surface-variant">
                                         No {fuelCategoryLabel.toLowerCase()}s found for selected source.
                                     </p>
                                 )}
                         </div>
 
                         <div id="form-field-fuelType">
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                            <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                 {fuelLabel} <span className="text-error">*</span>
                             </label>
                             <CustomSelect
@@ -480,11 +480,11 @@ export function CustomFuelSection({
                                 }
                                 isLoading={fuelsQuery.isLoading}
                             />
-                            {errors.fuelType && <p className="mt-2 text-xs text-error">{errors.fuelType}</p>}
+                            {errors.fuelType && <p className="mt-1.5 font-sans text-xs text-error">{errors.fuelType}</p>}
                         </div>
 
                         <div id="form-field-quantity">
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                            <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                 Quantity <span className="text-error">*</span>
                             </label>
                             <Input
@@ -492,15 +492,15 @@ export function CustomFuelSection({
                                 step="0.01"
                                 value={quantity}
                                 onChange={(event) => onFieldChange("quantity", event.target.value)}
-                                className={`${formFieldClass(Boolean(errors.quantity))} border border-outline-variant`}
+                                className={`${formFieldClass(Boolean(errors.quantity))} border border-outline-variant font-sans`}
                                 placeholder="0.00"
                             />
-                            {errors.quantity && <p className="mt-2 text-xs text-error">{errors.quantity}</p>}
+                            {errors.quantity && <p className="mt-1.5 font-sans text-xs text-error">{errors.quantity}</p>}
                         </div>
 
                         {emissionType !== "fugitive" && (
                             <div id="form-field-cost">
-                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                     Price / Cost <span className="text-error">*</span>
                                 </label>
                                 <Input
@@ -508,15 +508,15 @@ export function CustomFuelSection({
                                     step="0.01"
                                     value={cost}
                                     onChange={(event) => onFieldChange("cost", event.target.value)}
-                                    className={`${formFieldClass(Boolean(errors.cost))} border border-outline-variant`}
+                                    className={`${formFieldClass(Boolean(errors.cost))} border border-outline-variant font-sans`}
                                     placeholder="12000"
                                 />
-                                {errors.cost && <p className="mt-2 text-xs text-error">{errors.cost}</p>}
+                                {errors.cost && <p className="mt-1.5 font-sans text-xs text-error">{errors.cost}</p>}
                             </div>
                         )}
 
                         <div id="form-field-unit">
-                            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                            <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                 Unit <span className="text-error">*</span>
                             </label>
                             <CustomSelect
@@ -543,7 +543,7 @@ export function CustomFuelSection({
                                 }
                                 isLoading={unitsQuery.isLoading}
                             />
-                            {errors.unit && <p className="mt-2 text-xs text-error">{errors.unit}</p>}
+                            {errors.unit && <p className="mt-1.5 font-sans text-xs text-error">{errors.unit}</p>}
                         </div>
                     </div>
                 ) : (
@@ -552,13 +552,13 @@ export function CustomFuelSection({
                         {/* Selector & Control Toolbar */}
                         <div className="p-4 rounded-xl border border-outline-variant space-y-3">
                             <div className="flex flex-wrap items-center justify-between gap-3">
-                                <label className="block text-xs font-semibold text-primary">
+                                <label className="block font-sans text-xs font-semibold text-primary">
                                     Select Existing Custom Fuel or Create New
                                 </label>
                                 <button
                                     type="button"
                                     onClick={handleStartAddNew}
-                                    className="text-xs font-medium text-primary hover:underline flex items-center gap-1"
+                                    className="font-sans text-xs font-semibold text-primary hover:underline flex items-center gap-1"
                                 >
                                     <MaterialIcon name="add_circle" size="xs" />
                                     Add Custom Fuel
@@ -591,7 +591,7 @@ export function CustomFuelSection({
                                             setIsEditing(true);
                                             setHasFormChangedSinceSave(true);
                                         }}
-                                        className="h-10 px-3 rounded-lg border border-outline-variant bg-white text-primary hover:bg-surface-container-high flex items-center gap-1.5 text-xs font-medium transition-colors shadow-sm"
+                                        className="h-10 px-3 rounded-lg border border-outline-variant bg-white text-primary hover:bg-surface-container-high flex items-center gap-1.5 font-sans text-xs font-medium transition-colors shadow-sm"
                                         title="Edit Custom Fuel"
                                     >
                                         <MaterialIcon name="edit" size="xs" />
@@ -602,14 +602,14 @@ export function CustomFuelSection({
                         </div>
 
                         {errors.fuelType && !selectedCustomFuelId && (
-                            <div id="form-field-fuelType" className="p-3 rounded-lg bg-amber-50 text-amber-900 text-xs border border-amber-300 flex items-center gap-2">
+                            <div id="form-field-fuelType" className="p-3 rounded-lg bg-amber-50 text-amber-900 font-sans text-xs border border-amber-300 flex items-center gap-2">
                                 <MaterialIcon name="info" size="xs" className="text-amber-700 shrink-0" />
                                 <span>{errors.fuelType}</span>
                             </div>
                         )}
 
                         {customFormErrors.general && (
-                            <div className="p-3 rounded-lg bg-error-container text-on-error-container text-xs border border-error/30">
+                            <div className="p-3 rounded-lg bg-error-container text-on-error-container font-sans text-xs border border-error/30">
                                 {customFormErrors.general}
                             </div>
                         )}
@@ -619,7 +619,7 @@ export function CustomFuelSection({
                             {/* Basic Details */}
                             <div className="grid gap-4 lg:grid-cols-2">
                                 <div>
-                                    <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                    <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                         Custom Fuel Name <span className="text-error">*</span>
                                     </label>
                                     <Input
@@ -631,12 +631,12 @@ export function CustomFuelSection({
                                         placeholder="e.g. Coal-[Grade G4]"
                                     />
                                     {customFormErrors.name && (
-                                        <p className="mt-1 text-xs text-error">{customFormErrors.name}</p>
+                                        <p className="mt-1.5 font-sans text-xs text-error">{customFormErrors.name}</p>
                                     )}
                                 </div>
 
                                 <div>
-                                    <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                    <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                         Fuel Category <span className="text-error">*</span>
                                     </label>
                                     <CustomSelect
@@ -649,19 +649,19 @@ export function CustomFuelSection({
                                         isLoading={ipccFuelCategoriesQuery.isLoading || fuelCategoriesQuery.isLoading}
                                     />
                                     {customFormErrors.category_id && (
-                                        <p className="mt-1 text-xs text-error">{customFormErrors.category_id}</p>
+                                        <p className="mt-1.5 font-sans text-xs text-error">{customFormErrors.category_id}</p>
                                     )}
                                 </div>
 
                                 <div className="lg:col-span-2">
-                                    <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                    <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                         Description
                                     </label>
                                     <textarea
                                         value={customForm.description}
                                         onChange={(e) => handleCustomFormChange("description", e.target.value)}
                                         disabled={!isEditing}
-                                        className={`${formFieldClass(false, !isEditing)} min-h-[70px]`}
+                                        className={`${formFieldClass(false, !isEditing)} min-h-[70px] font-sans text-sm`}
                                         placeholder="Custom biocoal blend description..."
                                     />
                                 </div>
@@ -669,13 +669,13 @@ export function CustomFuelSection({
 
                             {/* Calorific Value / Energy Content */}
                             <div className="p-4 rounded-xl border border-outline-variant bg-surface-container-lowest space-y-4">
-                                <h3 className="text-xs font-semibold text-primary flex items-center gap-1.5">
+                                <h3 className="font-display text-xs font-semibold text-primary flex items-center gap-1.5">
                                     <MaterialIcon name="local_fire_department" size="xs" />
                                     Heat Content
                                 </h3>
                                 <div className="grid gap-4 lg:grid-cols-3">
                                     <div>
-                                        <label className="block font-label-md text-xs text-on-surface-variant mb-1">
+                                        <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                                             GCV (Gross Calorific Value)
                                         </label>
                                         <Input
@@ -688,11 +688,11 @@ export function CustomFuelSection({
                                             placeholder="e.g. 6251"
                                         />
                                         {customFormErrors.gcv && (
-                                            <p className="mt-1 text-xs text-error">{customFormErrors.gcv}</p>
+                                            <p className="mt-1.5 font-sans text-xs text-error">{customFormErrors.gcv}</p>
                                         )}
                                     </div>
                                     <div>
-                                        <label className="block font-label-md text-xs text-on-surface-variant mb-1">
+                                        <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                                             NCV (Net Calorific Value)
                                         </label>
                                         <Input
@@ -705,11 +705,11 @@ export function CustomFuelSection({
                                             placeholder="e.g. 5800"
                                         />
                                         {customFormErrors.ncv && (
-                                            <p className="mt-1 text-xs text-error">{customFormErrors.ncv}</p>
+                                            <p className="mt-1.5 font-sans text-xs text-error">{customFormErrors.ncv}</p>
                                         )}
                                     </div>
                                     <div>
-                                        <label className="block font-label-md text-xs text-on-surface-variant mb-1">
+                                        <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                                             Heat Content Unit
                                         </label>
                                         <CustomSelect
@@ -725,7 +725,7 @@ export function CustomFuelSection({
                                         />
                                     </div>
                                     <div>
-                                        <label className="block font-label-md text-xs text-on-surface-variant mb-1">
+                                        <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                                             Hydrogen (%)
                                         </label>
                                         <Input
@@ -739,7 +739,7 @@ export function CustomFuelSection({
                                         />
                                     </div>
                                     <div>
-                                        <label className="block font-label-md text-xs text-on-surface-variant mb-1">
+                                        <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                                             Moisture (%)
                                         </label>
                                         <Input
@@ -759,12 +759,12 @@ export function CustomFuelSection({
                             <div className="grid gap-4 lg:grid-cols-2">
                                 {/* Total Carbon */}
                                 <div className="p-4 rounded-xl border border-outline-variant bg-surface-container-lowest space-y-3">
-                                    <h3 className="text-xs font-semibold text-primary flex items-center gap-1.5">
+                                    <h3 className="font-display text-xs font-semibold text-primary flex items-center gap-1.5">
                                         <MaterialIcon name="co2" size="xs" />
                                         Total Carbon Content
                                     </h3>
                                     <div>
-                                        <label className="block font-label-md text-xs text-on-surface-variant mb-1">
+                                        <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                                             Carbon Percentage (%)
                                         </label>
                                         <Input
@@ -780,11 +780,11 @@ export function CustomFuelSection({
                                             placeholder="e.g. 66"
                                         />
                                         {customFormErrors.carbon_percentage && (
-                                            <p className="mt-1 text-xs text-error">{customFormErrors.carbon_percentage}</p>
+                                            <p className="mt-1.5 font-sans text-xs text-error">{customFormErrors.carbon_percentage}</p>
                                         )}
                                     </div>
                                     <div>
-                                        <label className="block font-label-md text-xs text-on-surface-variant mb-1">
+                                        <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                                             Carbon Content
                                         </label>
                                         <div className="grid grid-cols-2 gap-2">
@@ -813,20 +813,20 @@ export function CustomFuelSection({
                                             />
                                         </div>
                                         {customFormErrors.carbon_content && (
-                                            <p className="mt-1 text-xs text-error">{customFormErrors.carbon_content}</p>
+                                            <p className="mt-1.5 font-sans text-xs text-error">{customFormErrors.carbon_content}</p>
                                         )}
                                     </div>
                                 </div>
 
                                 {/* Fixed Carbon */}
                                 <div className="p-4 rounded-xl border border-outline-variant bg-surface-container-lowest space-y-3">
-                                    <h3 className="text-xs font-semibold text-primary flex items-center gap-1.5">
+                                    <h3 className="font-display text-xs font-semibold text-primary flex items-center gap-1.5">
                                         <MaterialIcon name="science" size="xs" />
                                         Total Carbon / Fixed Carbon
                                     </h3>
                                     <div className="grid grid-cols-2 gap-2">
                                         <div>
-                                            <label className="block font-label-md text-xs text-on-surface-variant mb-1">
+                                            <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                                                 Dry Basis (%)
                                             </label>
                                             <Input
@@ -840,7 +840,7 @@ export function CustomFuelSection({
                                             />
                                         </div>
                                         <div>
-                                            <label className="block font-label-md text-xs text-on-surface-variant mb-1">
+                                            <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                                                 As Received Basis (%)
                                             </label>
                                             <Input
@@ -855,7 +855,7 @@ export function CustomFuelSection({
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block font-label-md text-xs text-on-surface-variant mb-1">
+                                        <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                                             Total Moisture (%)
                                         </label>
                                         <Input
@@ -874,7 +874,7 @@ export function CustomFuelSection({
                             {/* Additional Properties */}
                             <div className="grid gap-4 lg:grid-cols-3">
                                 <div>
-                                    <label className="block font-label-md text-xs text-on-surface-variant mb-1">
+                                    <label className="block font-sans text-xs font-semibold text-on-surface-variant mb-1">
                                         Oxidation Factor
                                     </label>
                                     <Input
@@ -891,12 +891,12 @@ export function CustomFuelSection({
 
                             {/* Lab Report Attachment */}
                             <div className="p-4 rounded-xl border border-outline-variant bg-surface-container-lowest space-y-2">
-                                <label className="block text-xs font-semibold text-primary flex items-center gap-1.5">
+                                <label className="block font-sans text-xs font-semibold text-primary flex items-center gap-1.5">
                                     <MaterialIcon name="picture_as_pdf" size="xs" />
                                     Lab Report Document
                                 </label>
                                 {customForm.labReportUrl && (
-                                    <div className="flex items-center gap-2 text-xs text-primary mb-2">
+                                    <div className="flex items-center gap-2 font-sans text-xs text-primary mb-2">
                                         <MaterialIcon name="link" size="xs" />
                                         <a
                                             href={customForm.labReportUrl}
@@ -913,11 +913,11 @@ export function CustomFuelSection({
                                         type="file"
                                         onChange={handleFileSelect}
                                         disabled={isUploadingFile}
-                                        className="block w-full text-xs text-on-surface file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-surface-container-high file:text-primary hover:file:bg-surface-container-highest cursor-pointer"
+                                        className="block w-full font-sans text-xs text-on-surface file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-surface-container-high file:text-primary hover:file:bg-surface-container-highest cursor-pointer"
                                     />
                                 )}
                                 {labReportFile && (
-                                    <p className="text-xs text-emerald-700 font-medium">
+                                    <p className="font-sans text-xs text-emerald-700 font-medium">
                                         Selected: {labReportFile.name} (will be uploaded on save)
                                     </p>
                                 )}
@@ -926,7 +926,7 @@ export function CustomFuelSection({
                             {/* Custom Fuel Primary Action Button */}
                             <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                                 {!selectedCustomFuelId ? (
-                                    <p className="text-xs text-on-surface-variant italic">
+                                    <p className="font-sans text-xs text-on-surface-variant italic">
                                         💡 Fill in properties above and click &apos;Add&apos; to attach this custom fuel to your activity.
                                     </p>
                                 ) : <div />}
@@ -934,7 +934,7 @@ export function CustomFuelSection({
                                     type="button"
                                     onClick={handleSaveCustomFuel}
                                     disabled={isButtonDisabled}
-                                    className={`px-6 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
+                                    className={`px-6 py-2.5 rounded-lg font-sans text-xs font-semibold flex items-center gap-2 transition-all ${
                                         isButtonDisabled
                                             ? "bg-surface-container-high text-on-surface-variant opacity-60 cursor-not-allowed border border-outline-variant"
                                             : "bg-primary text-on-primary hover:opacity-90 shadow-md active:scale-[0.98]"
@@ -960,7 +960,7 @@ export function CustomFuelSection({
                         {/* Quantity, Cost, Unit for Custom Fuel Activity */}
                         <div className="pt-4 border-t border-outline-variant grid gap-4 lg:grid-cols-3">
                             <div id="form-field-quantity">
-                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                     Quantity <span className="text-error">*</span>
                                 </label>
                                 <Input
@@ -968,15 +968,15 @@ export function CustomFuelSection({
                                     step="0.01"
                                     value={quantity}
                                     onChange={(event) => onFieldChange("quantity", event.target.value)}
-                                    className={`${formFieldClass(Boolean(errors.quantity))} border border-outline-variant`}
+                                    className={`${formFieldClass(Boolean(errors.quantity))} border border-outline-variant font-sans`}
                                     placeholder="0.00"
                                 />
-                                {errors.quantity && <p className="mt-2 text-xs text-error">{errors.quantity}</p>}
+                                {errors.quantity && <p className="mt-1.5 font-sans text-xs text-error">{errors.quantity}</p>}
                             </div>
 
                             {emissionType !== "fugitive" && (
                                 <div id="form-field-cost">
-                                    <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                    <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                         Price / Cost <span className="text-error">*</span>
                                     </label>
                                     <Input
@@ -984,15 +984,15 @@ export function CustomFuelSection({
                                         step="0.01"
                                         value={cost}
                                         onChange={(event) => onFieldChange("cost", event.target.value)}
-                                        className={`${formFieldClass(Boolean(errors.cost))} border border-outline-variant`}
+                                        className={`${formFieldClass(Boolean(errors.cost))} border border-outline-variant font-sans`}
                                         placeholder="12000"
                                     />
-                                    {errors.cost && <p className="mt-2 text-xs text-error">{errors.cost}</p>}
+                                    {errors.cost && <p className="mt-1.5 font-sans text-xs text-error">{errors.cost}</p>}
                                 </div>
                             )}
 
                             <div id="form-field-unit">
-                                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                                <label className="block font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">
                                     Unit <span className="text-error">*</span>
                                 </label>
                                 <CustomSelect
@@ -1012,7 +1012,7 @@ export function CustomFuelSection({
                                     }
                                     isLoading={unitsQuery.isLoading}
                                 />
-                                {errors.unit && <p className="mt-2 text-xs text-error">{errors.unit}</p>}
+                                {errors.unit && <p className="mt-1.5 font-sans text-xs text-error">{errors.unit}</p>}
                             </div>
                         </div>
                     </div>

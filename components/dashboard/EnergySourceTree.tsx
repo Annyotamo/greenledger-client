@@ -14,7 +14,7 @@ export function EnergySourceTree({ nodes }: EnergySourceTreeProps) {
                     <MaterialIcon name="account_tree" size="sm" className="text-primary" />
                     <div>
                         <h3 className="text-headline-sm font-semibold text-primary">Source Breakdown Tree</h3>
-                        <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
+                        <p className="font-sans text-xs text-on-surface-variant">
                             Hierarchical Energy Flow Logs
                         </p>
                     </div>
@@ -25,9 +25,9 @@ export function EnergySourceTree({ nodes }: EnergySourceTreeProps) {
                 <div className="space-y-5">
                     {nodes.map((node) => (
                         <div key={node.label} className="space-y-4">
-                            <div className="flex items-center justify-between gap-4 text-sm font-bold text-secondary">
+                            <div className="flex items-center justify-between gap-4 text-sm font-semibold text-secondary">
                                 <span>{node.label}</span>
-                                <span>
+                                <span className="font-sans font-bold tabular-nums">
                                     {node.value.toLocaleString("en-US", { maximumFractionDigits: 1 })} {node.unit}
                                 </span>
                             </div>
@@ -39,7 +39,7 @@ export function EnergySourceTree({ nodes }: EnergySourceTreeProps) {
                                 </div>
                             ) : (
                                 node.note && (
-                                    <div className="text-[10px] italic text-on-surface-variant">{node.note}</div>
+                                    <div className="text-[11px] italic text-on-surface-variant font-sans">{node.note}</div>
                                 )
                             )}
                         </div>
@@ -53,9 +53,9 @@ export function EnergySourceTree({ nodes }: EnergySourceTreeProps) {
 function SourceNode({ node, depth }: { node: EnergySourceNode; depth: number }) {
     return (
         <div className={depth > 0 ? "space-y-3" : "space-y-2"}>
-            <div className="tree-line tree-line-vertical flex items-center justify-between gap-3 text-[11px] text-on-surface-variant">
+            <div className="tree-line tree-line-vertical flex items-center justify-between gap-3 text-xs text-on-surface-variant">
                 <span>{node.label}</span>
-                <span className="font-medium text-on-surface font-mono">
+                <span className="font-medium text-on-surface font-sans tabular-nums">
                     {node.value.toLocaleString("en-US", { maximumFractionDigits: 1 })} {node.unit}
                 </span>
             </div>

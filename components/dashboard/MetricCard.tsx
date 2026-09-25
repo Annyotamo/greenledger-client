@@ -31,7 +31,7 @@ function AnimatedValue({ value, isPercent }: { value: number; isPercent: boolean
         return controls.stop;
     }, [value, isPercent]);
 
-    return <span className="font-mono text-[24px] font-bold text-primary">{display}</span>;
+    return <span className="font-display text-2xl font-bold tracking-tight text-primary tabular-nums">{display}</span>;
 }
 
 export function MetricCard({ data }: MetricCardProps) {
@@ -42,7 +42,7 @@ export function MetricCard({ data }: MetricCardProps) {
             <div className="mb-2 flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2">
                     <MaterialIcon name={data.icon} size="sm" className="text-on-surface-variant" />
-                    <span className="font-mono text-label-md uppercase tracking-tight text-on-surface-variant">
+                    <span className="font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                         {data.label}
                     </span>
                 </div>
@@ -52,14 +52,14 @@ export function MetricCard({ data }: MetricCardProps) {
                     </Badge>
                 )}
                 {data.statusLabel && (
-                    <span className="font-mono text-[10px] text-on-surface-variant">{data.statusLabel}</span>
+                    <span className="font-sans text-[11px] text-on-surface-variant font-medium">{data.statusLabel}</span>
                 )}
             </div>
 
             <div className="flex flex-col gap-4">
                 <div className="flex items-baseline gap-2">
                     <AnimatedValue value={data.value} isPercent={isPercent} />
-                    <span className="font-mono text-[10px] text-on-surface-variant">{data.unit}</span>
+                    <span className="font-sans text-xs font-medium text-on-surface-variant">{data.unit}</span>
                 </div>
                 <div className="mt-auto">
                     <ProgressBar

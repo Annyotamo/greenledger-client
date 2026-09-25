@@ -46,60 +46,60 @@ export function ElectricityActivitySummary({ activities }: ElectricityActivitySu
     return (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-4">
             <Card className="p-card-padding">
-                <p className="text-label-md font-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+                <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                     Activities Logged
                 </p>
-                <p className="mt-3 text-headline-lg font-headline-lg font-semibold text-primary">
+                <p className="mt-2 font-display text-2xl font-bold tracking-tight text-primary tabular-nums">
                     {formatNumber(activities.length, 0)}
                 </p>
-                <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-on-surface-variant">
+                <p className="mt-2 font-sans text-xs text-on-surface-variant">
                     Across {activeFacilities} facilit{activeFacilities === 1 ? "y" : "ies"} • {marketCount} Market-Based
                 </p>
             </Card>
 
             <Card className="p-card-padding">
-                <p className="text-label-md font-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+                <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                     Total Electricity
                 </p>
-                <p className="mt-3 text-headline-lg font-headline-lg font-semibold text-primary">
+                <p className="mt-2 font-display text-2xl font-bold tracking-tight text-primary tabular-nums">
                     {formatNumber(totalMwh, 2)}
-                    <span className="text-body-md font-normal text-on-surface-variant"> MWh</span>
+                    <span className="font-sans text-xs font-medium text-on-surface-variant ml-1">MWh</span>
                 </p>
-                <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-secondary font-medium">
+                <p className="mt-2 font-sans text-xs text-secondary font-medium">
                     {formatNumber(contractedMwh, 2)} MWh under PPA/REC contracts
                 </p>
             </Card>
 
             <Card className="p-card-padding">
-                <p className="text-label-md font-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+                <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                     Total Emissions
                 </p>
-                <p className="mt-3 text-headline-lg font-headline-lg font-semibold text-primary">
+                <p className="mt-2 font-display text-2xl font-bold tracking-tight text-primary tabular-nums">
                     {formatNumber(totalEmissions, 2)}
-                    <span className="text-body-md font-normal text-on-surface-variant"> tCO₂e</span>
+                    <span className="font-sans text-xs font-medium text-on-surface-variant ml-1">tCO₂e</span>
                 </p>
-                <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-on-surface-variant">
+                <p className="mt-2 font-sans text-xs text-on-surface-variant">
                     Avg. {formatNumber(averageEmissions, 2)} tCO₂e per activity
                 </p>
             </Card>
 
             <Card className="p-card-padding">
                 <div className="flex items-center justify-between gap-4">
-                    <p className="text-label-md font-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+                    <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                         Renewable Certified
                     </p>
-                    <span className="text-[10px] uppercase tracking-[0.18em] text-secondary font-bold">
+                    <span className="font-sans text-xs font-bold text-secondary tabular-nums">
                         {certifiedPercent}%
                     </span>
                 </div>
-                <div className="mt-4 space-y-3">
-                    <div className="h-2.5 rounded-full bg-surface-container-high overflow-hidden">
+                <div className="mt-3 space-y-2">
+                    <div className="h-2 rounded-full bg-surface-container-high overflow-hidden">
                         <div className="h-full rounded-full bg-secondary transition-all" style={{ width: `${certifiedPercent}%` }} />
                     </div>
-                    <p className="text-[11px] text-on-surface-variant">
+                    <p className="font-sans text-xs text-on-surface-variant">
                         {renewableCertified} of {activities.length} activities certified green/PPA
                     </p>
-                    <div className="mt-2 text-[11px] uppercase tracking-[0.16em] text-on-surface-variant">
+                    <div className="mt-1 font-sans text-xs text-on-surface-variant capitalize">
                         Top source: {mostCommonSource.replace(/_/g, " ")}
                     </div>
                 </div>

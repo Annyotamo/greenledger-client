@@ -26,51 +26,51 @@ export function Category1Summary({ entries }: Category1SummaryProps) {
     const avgIntensityKgPerUsd = totalUsd > 0 ? (totalEmissionsTco2e * 1000) / totalUsd : 0;
 
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 font-sans">
             <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 font-display">
                     Total Category 1 Spend
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
+                <p className="mt-2 font-display text-2xl font-bold tabular-nums text-slate-900">
                     ₹{formatNumber(totalInr, 0)}
                 </p>
-                <p className="mt-2 font-mono text-[11px] font-medium text-secondary">
+                <p className="mt-1 text-xs font-medium text-secondary tabular-nums">
                     ${formatNumber(totalUsd, 2)} USD (Converted at Annual Average Rate)
                 </p>
             </Card>
 
             <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 font-display">
                     Headline Emissions (USEEIO)
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {formatNumber(totalEmissionsTco2e, 4)} <span className="text-body-md font-normal text-on-surface-variant">tCO₂e</span>
+                <p className="mt-2 font-display text-2xl font-bold tabular-nums text-primary">
+                    {formatNumber(totalEmissionsTco2e, 4)} <span className="text-xs font-semibold text-on-surface-variant">tCO₂e</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-on-surface-variant">
+                <p className="mt-1 text-xs text-on-surface-variant">
                     With Producer + Trade & Transport Margins
                 </p>
             </Card>
 
             <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 font-display">
                     Margin Component Split
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
+                <p className="mt-2 font-display text-2xl font-bold tabular-nums text-slate-900">
                     {formatNumber(totalProducerTco2e, 3)} <span className="text-xs font-normal text-on-surface-variant">Producer</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-secondary font-medium">
+                <p className="mt-1 text-xs text-secondary font-medium tabular-nums">
                     + {formatNumber(totalMarginTco2e, 3)} tCO₂e Trade & Freight Margin
                 </p>
             </Card>
 
             <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-mono text-label-md uppercase tracking-[0.12em] text-on-surface-variant">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 font-display">
                     Verification & Intensity
                 </p>
-                <p className="mt-2 font-mono text-headline-md font-bold text-primary">
-                    {verifiedCount} <span className="text-body-md font-normal text-on-surface-variant">Verified</span>
+                <p className="mt-2 font-display text-2xl font-bold tabular-nums text-slate-900">
+                    {verifiedCount} <span className="text-xs font-normal text-on-surface-variant">Verified</span>
                 </p>
-                <p className="mt-2 font-mono text-[11px] text-on-surface-variant">
+                <p className="mt-1 text-xs text-on-surface-variant tabular-nums">
                     {submittedCount} Submitted • {draftCount} Draft • {formatNumber(avgIntensityKgPerUsd, 3)} kgCO₂e/$
                 </p>
             </Card>

@@ -16,11 +16,11 @@ export function Scope1Breakdown({ fuels }: Scope1BreakdownProps) {
             <CardHeader tone="flat">
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="factory" size="sm" className="text-primary" />
-                    <h3 className="text-headline-sm font-semibold uppercase tracking-tight text-primary">
+                    <h3 className="font-display text-headline-sm font-semibold uppercase tracking-tight text-primary">
                         Scope 1 Breakdown (Fuel)
                     </h3>
                 </div>
-                <Badge variant="tag" className="text-[9px]">
+                <Badge variant="tag" className="text-[11px] font-sans">
                     Fuel Consumption
                 </Badge>
             </CardHeader>
@@ -40,10 +40,10 @@ export function Scope1Breakdown({ fuels }: Scope1BreakdownProps) {
                     {fuels.map((fuel) => (
                         <div key={fuel.label} className="space-y-1.5">
                             <div className="flex items-baseline justify-between">
-                                <span className="text-body-md text-on-surface-variant">{fuel.label}</span>
-                                <span className="font-mono text-label-md font-bold text-primary">
-                                    {fuel.value.toLocaleString()}{" "}
-                                    <span className="text-[10px] font-normal opacity-70">{fuel.unit}</span>
+                                <span className="font-sans text-body-md text-on-surface-variant font-medium">{fuel.label}</span>
+                                <span className="font-sans text-label-md font-bold text-primary">
+                                    <span className="font-display font-bold tabular-nums">{fuel.value.toLocaleString()}</span>{" "}
+                                    <span className="text-[11px] font-normal opacity-70">{fuel.unit}</span>
                                 </span>
                             </div>
                             <ProgressBar
@@ -59,7 +59,7 @@ export function Scope1Breakdown({ fuels }: Scope1BreakdownProps) {
             <div className="mt-auto p-card-padding pt-0">
                 <button
                     type="button"
-                    className="flex w-full items-center justify-center gap-2 rounded border border-outline-variant py-2.5 font-mono text-[11px] text-on-surface transition-colors hover:bg-surface-container-low">
+                    className="flex w-full items-center justify-center gap-2 rounded border border-outline-variant py-2.5 font-sans text-xs font-semibold text-on-surface transition-colors hover:bg-surface-container-low">
                     Scope Dashboard
                     <MaterialIcon name="arrow_forward" size="xs" />
                 </button>

@@ -34,7 +34,7 @@ export function Category15RejectModal({
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto font-sans">
             <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md" onClick={onClose} />
 
             <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-2xl z-10 p-6 space-y-4 my-auto">
@@ -43,14 +43,14 @@ export function Category15RejectModal({
                         <MaterialIcon name="warning" size="md" />
                     </div>
                     <div>
-                        <h3 className="font-mono text-headline-sm font-bold text-primary">Reject Investment Activity</h3>
-                        <p className="font-mono text-[11px] text-on-surface-variant">Reviewer Rejection Action</p>
+                        <h3 className="font-display text-lg font-bold text-primary tracking-tight">Reject Investment Activity</h3>
+                        <p className="font-sans text-xs text-slate-500 font-medium">Reviewer Rejection Action</p>
                     </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block font-mono text-xs font-semibold text-primary mb-1">
+                        <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
                             Rejection Reason <span className="text-error">*</span>
                         </label>
                         <textarea
@@ -58,16 +58,16 @@ export function Category15RejectModal({
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
                             placeholder="e.g. Missing enterprise valuation audited report for the period..."
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-mono text-xs text-primary focus:outline-none focus:ring-1 focus:ring-error"
+                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-error leading-relaxed"
                         />
-                        {error && <p className="font-mono text-xs text-error mt-1">{error}</p>}
+                        {error && <p className="font-sans text-xs text-error mt-1">{error}</p>}
                     </div>
 
-                    <div className="flex items-center justify-end gap-3 pt-2">
-                        <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={isSubmitting}>
+                    <div className="flex items-center justify-end gap-3 pt-2 font-sans">
+                        <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={isSubmitting} className="font-semibold text-xs">
                             Cancel
                         </Button>
-                        <Button type="submit" variant="danger" size="md" disabled={isSubmitting}>
+                        <Button type="submit" variant="danger" size="md" disabled={isSubmitting} className="font-semibold text-xs">
                             {isSubmitting ? "Rejecting..." : "Confirm Rejection"}
                         </Button>
                     </div>

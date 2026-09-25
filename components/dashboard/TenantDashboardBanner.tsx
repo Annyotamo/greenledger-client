@@ -51,17 +51,17 @@ export function TenantDashboardBanner() {
                     )}
                     <div className="min-w-0 text-white">
                         <div className="flex items-center gap-2">
-                            <span className="font-mono text-[10px] uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded text-emerald-200">
+                            <span className="font-sans text-[11px] font-semibold uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-md text-emerald-200">
                                 Workspace
                             </span>
-                            <span className="font-mono text-[10px] uppercase tracking-wider bg-emerald-500/30 px-2 py-0.5 rounded text-emerald-100">
+                            <span className="font-sans text-[11px] font-semibold uppercase tracking-wider bg-emerald-500/30 px-2.5 py-0.5 rounded-md text-emerald-100">
                                 {profile.tenantCode}
                             </span>
                         </div>
-                        <h1 className="mt-1 truncate text-xl font-bold tracking-tight md:text-2xl lg:text-3xl text-white">
+                        <h1 className="mt-1 truncate text-xl font-bold tracking-tight md:text-2xl lg:text-3xl text-white font-display">
                             {profile.companyName}
                         </h1>
-                        <p className="mt-1 truncate text-xs text-emerald-100/80 md:text-sm">
+                        <p className="mt-1 truncate text-xs text-emerald-100/90 md:text-sm font-sans font-medium">
                             {profile.sector} • {profile.industryType} • {profile.city}, {profile.country}
                         </p>
                     </div>

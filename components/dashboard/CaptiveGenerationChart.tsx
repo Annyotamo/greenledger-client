@@ -19,8 +19,8 @@ export function CaptiveGenerationChart({ items }: CaptiveGenerationChartProps) {
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="factory" size="sm" className="text-secondary" />
                     <div>
-                        <h3 className="text-headline-sm font-semibold text-primary">Captive Generation Breakdown</h3>
-                        <p className="font-mono text-[10px] uppercase tracking-tighter text-on-surface-variant">
+                        <h3 className="font-display text-headline-sm font-semibold tracking-tight text-primary">Captive Generation Breakdown</h3>
+                        <p className="font-sans text-[11px] font-medium tracking-tight text-on-surface-variant">
                             Generated MWh by energy source
                         </p>
                     </div>
@@ -32,14 +32,14 @@ export function CaptiveGenerationChart({ items }: CaptiveGenerationChartProps) {
 
             <CardBody className="flex flex-1 flex-col justify-between gap-6 p-card-padding">
                 {items.length === 0 ? (
-                    <div className="flex flex-1 items-center justify-center font-mono text-sm text-on-surface-variant py-8">
+                    <div className="flex flex-1 items-center justify-center font-sans text-sm text-on-surface-variant py-8">
                         No captive generation sources logged.
                     </div>
                 ) : (
                     <>
                         {/* Visual Share Distribution Bar */}
                         <div className="space-y-2">
-                            <div className="flex items-center justify-between text-[11px] font-mono font-semibold text-on-surface-variant">
+                            <div className="flex items-center justify-between text-[11px] font-sans font-semibold text-on-surface-variant">
                                 <span>Captive Energy Proportion</span>
                                 <span>100% Self-Generated</span>
                             </div>
@@ -76,19 +76,19 @@ export function CaptiveGenerationChart({ items }: CaptiveGenerationChartProps) {
                                                     className="h-3 w-3 rounded-full"
                                                     style={{ backgroundColor: item.color }}
                                                 />
-                                                <span className="text-sm font-semibold text-primary">
+                                                <span className="font-sans text-sm font-semibold text-primary">
                                                     {item.label}
                                                 </span>
                                             </div>
-                                            <div className="flex items-baseline gap-1.5 font-mono">
-                                                <span className="text-sm font-bold text-primary">
+                                            <div className="flex items-baseline gap-1.5 font-sans">
+                                                <span className="font-display text-sm font-bold text-primary tabular-nums">
                                                     {item.value.toLocaleString("en-US", {
                                                         minimumFractionDigits: 1,
                                                         maximumFractionDigits: 1,
                                                     })}
                                                 </span>
-                                                <span className="text-[10px] text-on-surface-variant">MWh</span>
-                                                <span className="ml-2 rounded bg-surface-container-high px-1.5 py-0.5 text-[10px] font-bold text-on-surface">
+                                                <span className="text-[11px] font-medium text-on-surface-variant">MWh</span>
+                                                <span className="ml-2 rounded bg-surface-container-high px-1.5 py-0.5 text-[11px] font-semibold text-on-surface tabular-nums">
                                                     {share.toFixed(1)}%
                                                 </span>
                                             </div>

@@ -96,7 +96,7 @@ export function DashboardView() {
                     </p>
                     <button
                         onClick={() => refetch()}
-                        className="px-6 py-2 rounded-lg bg-primary text-on-primary font-mono text-label-md hover:opacity-90 transition-opacity">
+                        className="px-6 py-2 rounded-lg bg-primary text-on-primary font-sans text-sm font-medium hover:opacity-90 transition-opacity">
                         Retry Loading
                     </button>
                 </Card>

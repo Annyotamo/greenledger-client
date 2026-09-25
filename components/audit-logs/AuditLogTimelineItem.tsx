@@ -56,18 +56,18 @@ export function AuditLogTimelineItem({ log, isLast = false, onInspect }: AuditLo
                             </span>
                         </div>
 
-                        <div className="text-slate-400 text-xs font-mono">
+                        <div className="text-slate-500 text-xs font-sans tabular-nums">
                             {formatDateTime(log.created_at)}
                         </div>
                     </div>
 
-                    <p className="text-xs text-slate-700 leading-relaxed pt-2.5">{log.description}</p>
+                    <p className="text-xs text-slate-700 leading-relaxed pt-2.5 font-sans">{log.description}</p>
 
-                    <div className="flex items-center justify-between pt-3 text-xs text-slate-500 font-mono">
+                    <div className="flex items-center justify-between pt-3 text-xs text-slate-500 font-sans">
                         <div>Actor: <span className="font-semibold text-slate-800">{log.actor_email}</span></div>
                         {log.resource_type && (
                             <div className="text-[11px]">
-                                {log.resource_type}: <span className="font-semibold">{log.resource_identifier || log.resource_id}</span>
+                                {log.resource_type}: <span className="font-mono font-semibold">{log.resource_identifier || log.resource_id}</span>
                             </div>
                         )}
                     </div>

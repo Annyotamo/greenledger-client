@@ -24,16 +24,16 @@ export function MultiYearEmissionsTrendChart({ data }: MultiYearEmissionsTrendCh
                 <div className="flex items-center gap-2.5">
                     <MaterialIcon name="show_chart" size="sm" className="text-primary text-[20px]" />
                     <div>
-                        <h3 className="font-headline-sm text-headline-sm font-bold text-primary">
+                        <h3 className="font-headline-sm text-headline-sm font-semibold text-primary">
                             Multi-Year Emissions Trajectory
                         </h3>
-                        <p className="font-mono text-[10px] uppercase tracking-tight text-on-surface-variant">
+                        <p className="font-sans text-xs text-on-surface-variant">
                             Historical trend across Scope 1, 2, 3, and Total (tCO2e)
                         </p>
                     </div>
                 </div>
 
-                <div className="hidden sm:flex items-center gap-3 font-mono text-[11px]">
+                <div className="hidden sm:flex items-center gap-3 font-sans text-xs">
                     <div className="flex items-center gap-1.5">
                         <span className="w-2.5 h-2.5 rounded-full bg-[#111827]"></span>
                         <span className="text-on-surface-variant font-medium">Total</span>
@@ -60,11 +60,11 @@ export function MultiYearEmissionsTrendChart({ data }: MultiYearEmissionsTrendCh
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis
                                 dataKey="yearLabel"
-                                tick={{ fontSize: 11, fontFamily: "JetBrains Mono", fill: "#45464c" }}
+                                tick={{ fontSize: 12, fontFamily: "Inter, system-ui, sans-serif", fill: "#45464c" }}
                                 dy={5}
                             />
                             <YAxis
-                                tick={{ fontSize: 11, fontFamily: "JetBrains Mono", fill: "#45464c" }}
+                                tick={{ fontSize: 12, fontFamily: "Inter, system-ui, sans-serif", fill: "#45464c" }}
                                 unit=" t"
                             />
                             <Tooltip
@@ -78,18 +78,18 @@ export function MultiYearEmissionsTrendChart({ data }: MultiYearEmissionsTrendCh
                                         ? "Scope 2 Indirect"
                                         : "Scope 3 Value Chain",
                                 ]}
-                                labelStyle={{ fontWeight: "bold", color: "#191c1d", fontFamily: "Hanken Grotesk" }}
+                                labelStyle={{ fontWeight: "600", color: "#191c1d", fontFamily: "Inter, system-ui, sans-serif" }}
                                 contentStyle={{
                                     backgroundColor: "#ffffff",
                                     borderColor: "#c6c6cd",
-                                    borderRadius: "6px",
-                                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                                    borderRadius: "8px",
+                                    boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
                                     fontSize: "12px",
-                                    fontFamily: "JetBrains Mono, monospace",
+                                    fontFamily: "Inter, system-ui, sans-serif",
                                 }}
                             />
                             <Legend
-                                wrapperStyle={{ fontSize: "11px", fontFamily: "JetBrains Mono", paddingTop: "12px" }}
+                                wrapperStyle={{ fontSize: "12px", fontFamily: "Inter, system-ui, sans-serif", paddingTop: "12px" }}
                                 formatter={(value: string) => {
                                     if (value === "totalTco2e") return "Total";
                                     if (value === "scope1Tco2e") return "Scope 1";

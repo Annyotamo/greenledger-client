@@ -30,13 +30,6 @@ export function EnergyHeader({ reportingPeriod, facilitiesCount }: EnergyHeaderP
                         </p>
                     </div>
                 </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                    <Button variant="secondary" size="sm" onClick={() => setIsExportModalOpen(true)}>
-                        <MaterialIcon name="file_download" size="sm" />
-                        <span>Export Report</span>
-                    </Button>
-                </div>
             </div>
 
             <ExportReportModal

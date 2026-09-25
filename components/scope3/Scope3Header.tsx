@@ -22,34 +22,12 @@ export function Scope3Header() {
                     <h1 className="font-headline-lg text-headline-lg font-bold text-primary tracking-tight font-display">
                         Scope 3 Value Chain Accounting
                     </h1>
-                    <div className="flex items-center gap-1.5">
-                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 font-sans text-[11px] font-semibold text-emerald-800">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                            SEBI BRSR & GHG Protocol
-                        </span>
-                        <span className="inline-flex items-center gap-1 rounded-md bg-surface-container-high border border-outline-variant/60 px-2.5 py-0.5 font-sans text-[11px] font-semibold text-on-surface-variant">
-                            FY 2025-26 Active
-                        </span>
-                    </div>
                 </div>
                 <p className="font-sans text-xs text-on-surface-variant mt-0.5">
                     Full lifecycle greenhouse gas accounting across upstream supply chain and downstream value chain activities.
                 </p>
             </div>
 
-            {/* Quick Action Buttons */}
-            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-                <Button variant="secondary" size="md" className="gap-2 shadow-2xs">
-                    <MaterialIcon name="file_download" size="sm" />
-                    <span>Export Scope 3 Pack</span>
-                </Button>
-                <Link href="/activities">
-                    <Button variant="primary" size="md" className="gap-2 shadow-sm">
-                        <MaterialIcon name="post_add" size="sm" />
-                        <span>Log Value Chain Activity</span>
-                    </Button>
-                </Link>
-            </div>
         </div>
     );
 }

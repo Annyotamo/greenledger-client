@@ -14,15 +14,6 @@ export function DashboardHeader() {
                 <h2 className="text-headline-lg font-bold tracking-tight text-primary font-display">Dashboard Overview</h2>
                 <p className="text-body-md text-on-surface-variant font-sans">Real-time environmental performance monitoring</p>
             </div>
-            <div className="flex gap-2">
-                <button
-                    type="button"
-                    onClick={() => setIsExportModalOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-3.5 py-1.5 font-sans text-xs sm:text-sm font-medium text-on-surface transition-colors hover:bg-surface-container-high cursor-pointer shadow-2xs">
-                    <MaterialIcon name="file_download" size="sm" />
-                    <span>Export</span>
-                </button>
-            </div>
 
             <ExportReportModal
                 isOpen={isExportModalOpen}

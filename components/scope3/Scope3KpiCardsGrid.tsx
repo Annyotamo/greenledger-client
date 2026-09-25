@@ -38,9 +38,6 @@ export function Scope3KpiCardsGrid() {
                                 Upstream Supply Chain
                             </span>
                         </div>
-                        <span className="rounded bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 font-sans text-[10px] font-bold text-emerald-800 tabular-nums">
-                            {SCOPE3_SUMMARY.upstreamSharePercent}% Share
-                        </span>
                     </div>
 
                     <div className="mt-3 space-y-1">
@@ -69,9 +66,6 @@ export function Scope3KpiCardsGrid() {
                                 Downstream Logistics & Finance
                             </span>
                         </div>
-                        <span className="rounded bg-blue-50 border border-blue-200 px-1.5 py-0.5 font-sans text-[10px] font-bold text-blue-800 tabular-nums">
-                            {SCOPE3_SUMMARY.downstreamSharePercent}% Share
-                        </span>
                     </div>
 
                     <div className="mt-3 space-y-1">
@@ -100,9 +94,6 @@ export function Scope3KpiCardsGrid() {
                                 Dominant Category
                             </span>
                         </div>
-                        <span className="rounded bg-amber-50 border border-amber-200 px-1.5 py-0.5 font-sans text-[10px] font-bold text-amber-800">
-                            Cat 1 Driver
-                        </span>
                     </div>
 
                     <div className="mt-3 space-y-1">
@@ -114,37 +105,6 @@ export function Scope3KpiCardsGrid() {
                         </div>
                         <div className="flex items-center justify-between text-[11px] font-sans text-on-surface-variant pt-1 border-t border-outline-variant/30">
                             <span>Purchased Goods & Services</span>
-                        </div>
-                    </div>
-                </Card>
-            </motion.div>
-
-            {/* Card 4: Supplier Verification & Tiers */}
-            <motion.div variants={cardVariants}>
-                <Card className="p-4 border-outline-variant/60 hover:border-teal-500/50 transition-colors shadow-2xs">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-teal-500/10 text-teal-600">
-                                <MaterialIcon name="verified_user" size="sm" className="!text-[16px]" />
-                            </div>
-                            <span className="font-sans text-[11px] font-semibold text-primary uppercase tracking-tight">
-                                Supplier Engagement Tier
-                            </span>
-                        </div>
-                        <span className="rounded bg-teal-50 border border-teal-200 px-1.5 py-0.5 font-sans text-[10px] font-bold text-teal-800">
-                            Tier 1 Verified
-                        </span>
-                    </div>
-
-                    <div className="mt-3 space-y-1">
-                        <div className="flex items-baseline gap-1.5">
-                            <span className="font-display text-xl sm:text-2xl font-bold text-primary tracking-tight tabular-nums">
-                                84.6%
-                            </span>
-                            <span className="font-sans text-xs font-medium text-on-surface-variant">Tier-1 Primary</span>
-                        </div>
-                        <div className="flex items-center justify-between text-[11px] font-sans text-on-surface-variant pt-1 border-t border-outline-variant/30">
-                            <span>128 Active Supplier Returns</span>
                         </div>
                     </div>
                 </Card>

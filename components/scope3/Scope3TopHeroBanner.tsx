@@ -64,17 +64,6 @@ export function Scope3TopHeroBanner() {
                             </div>
                         </div>
                     </div>
-
-                    <div className="flex items-center gap-2">
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container-high border border-outline-variant/50 text-primary font-sans text-xs font-semibold">
-                            <MaterialIcon name="payments" size="xs" className="text-on-surface-variant" />
-                            <span className="tabular-nums">{formatInrSpend(SCOPE3_SUMMARY.verifiedSpendInr)} Mapped Spend</span>
-                        </div>
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 font-sans text-xs font-semibold">
-                            <MaterialIcon name="verified" size="xs" className="text-emerald-600" />
-                            <span className="tabular-nums">{SCOPE3_SUMMARY.overallCoveragePercent}% Coverage</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </motion.div>

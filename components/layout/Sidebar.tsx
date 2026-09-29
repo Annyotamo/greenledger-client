@@ -24,7 +24,7 @@ export function Sidebar() {
     const pathname = usePathname();
 
     const beforeActivities = MAIN_NAV.filter(
-        (i) => i.label === "Dashboard" || i.label === "Facilities",
+        (i) => i.label === "Dashboard" || i.label === "Facilities" || i.label === "EU CBAM",
     );
     const valueChainItem = MAIN_NAV.find((i) => i.label === "Value Chain");
     const afterActivities = MAIN_NAV.filter(

@@ -1,0 +1,861 @@
+====================================================================================================
+                        GREENLEDGER ESG - CBAM API INTEGRATION GUIDE
+                               (EU CBAM Communication Template)
+====================================================================================================
+
+DOCUMENT VERSION: 1.0.0
+LAST UPDATED: 2026-09-25
+TARGET AUDIENCE: Frontend Engineering Team, API Consumers
+
+----------------------------------------------------------------------------------------------------
+TABLE OF CONTENTS
+----------------------------------------------------------------------------------------------------
+1. SUMMARY OF BACKEND CHANGES (CONTEXT FOR FRONTEND)
+2. ARCHITECTURE, BASE URL & AUTHENTICATION
+3. STANDARD RESPONSE ENVELOPE FORMAT
+4. SECTION 1: MASTER CATALOG & GUIDED CASCADING DROPDOWNS
+   4.1 GET  /catalog/categories
+   4.2 GET  /catalog/categories/{category_id}
+   4.3 GET  /catalog/categories/{category_id}/routes
+   4.4 GET  /catalog/categories/{category_id}/product-names (Cascading Dropdown 2)
+   4.5 GET  /catalog/categories/{category_id}/specifications (Cascading Dropdown 3 -> CN Code)
+   4.6 GET  /catalog/cn-codes
+   4.7 GET  /catalog/cn-codes/{cn_code}
+   4.8 GET  /catalog/countries (ISO 3166-1 Alpha-2)
+   4.9 GET  /catalog/ipcc-fuels (IPCC Emission Factors Fallback)
+5. SECTION 2: INSTALLATION SETUP & MASTER DATA (Sheet A_InstData)
+   5.1 GET  /installation (Get Active Profile)
+   5.2 GET  /installation/{installation_id}
+   5.3 POST /installation (Create Installation Profile)
+   5.4 PUT  /installation/{installation_id} (Update Profile)
+   5.5 GET  /installation/{installation_id}/export-excel (Download Official .xlsx)
+6. SECTION 3: SOURCE STREAMS & EMISSION CALCULATIONS (Sheet B_EmInst Section a)
+   6.1 GET    /installation/{installation_id}/source-streams
+   6.2 POST   /installation/{installation_id}/source-streams (Create & Calculate)
+   6.3 POST   /installation/{installation_id}/source-streams/bulk (Bulk Save)
+   6.4 POST   /installation/{installation_id}/source-streams/calculate-preview (Live Preview)
+   6.5 GET    /installation/{installation_id}/source-streams/summary (Emissions Summary)
+   6.6 GET    /installation/{installation_id}/source-streams/{stream_id}
+   6.7 PUT    /installation/{installation_id}/source-streams/{stream_id} (Update & Recalculate)
+   6.8 DELETE /installation/{installation_id}/source-streams/{stream_id}
+7. MATHEMATICAL RULES & CALCULATION ENGINES
+8. FRONTEND STEP-BY-STEP USER JOURNEY
+9. EDGE CASES, ERROR CODES & VALIDATION RULES
+
+
+====================================================================================================
+1. SUMMARY OF BACKEND CHANGES (CONTEXT FOR FRONTEND)
+====================================================================================================
+The backend has implemented the complete data models, calculation engines, catalog services, 
+and Excel generation pipeline corresponding to the official EU CBAM Communication Template 
+(specifically Sheet A_InstData and Sheet B_EmInst Section a):
+
+1.1 NEW DATABASE MODELS & TABLES:
+   - `cbam_aggregated_goods_categories`: 6 official CBAM aggregated sectors/categories (Crude steel, 
+     Cement, Aluminium, Fertilizer, Chemicals, Hydrogen).
+   - `cbam_cn_codes`: Official Combined Nomenclature (CN) 8-digit codes mapped to CBAM categories.
+   - `cbam_installations`: Master profile of the industrial installation (location, UNLOCODE, verifier).
+   - `cbam_installation_goods`: Produced Goods G1..G10 declared by the installation.
+   - `cbam_production_processes`: Production processes P1..P10 defined at the site.
+   - `cbam_purchased_precursors`: Purchased precursors PP1..PP20 sourced from external suppliers.
+   - `cbam_source_streams`: Source streams (Slots 1..75) capturing Combustion and Mass Balance flows.
+
+1.2 NEW ENUMS ADDED:
+   - `CBAMSector`: 'CEMENT', 'ELECTRICITY', 'FERTILISERS', 'IRON_AND_STEEL', 'ALUMINIUM', 'CHEMICALS'
+   - `CBAMStreamMethod`: 'Combustion', 'Mass balance'
+   - `CBAMActivityUnit`: 't', '1000 Nm3'
+   - `CBAMEmissionFactorUnit`: 'tCO2/TJ', 'tCO2/t', 'tCO2/1000Nm3'
+
+1.3 DETERMINISTIC EMISSION CALCULATION ENGINE:
+   - Automatic backend calculation of fossil CO2, biomass CO2, and energy content (TJ) upon stream 
+     creation or update.
+   - Pure EU CBAM stoichiometric factor 3.664 (44.01/12.011) applied for Mass Balance carbon streams.
+   - Real-time preview calculation endpoint without saving to database (`/calculate-preview`).
+   - Transaction commit fixes applied to guarantee persistence across all CRUD operations.
+
+1.4 DEDICATED IPCC FUELS CATALOG ENDPOINT:
+   - Added `GET /api/v1/tenant/cbam/catalog/ipcc-fuels` to allow frontend to easily search and populate 
+     standard IPCC fallback emission factors for combustion fuels.
+
+1.5 ZERO-CORRUPTION EXCEL GENERATION PIPELINE:
+   - Native OpenXML exporter populates Sheet `A_InstData` and Sheet `B_EmInst` (Rows 17–91) while 
+     preserving 100% of embedded formulas, calculation chains, conditional formatting, and macros.
+
+
+====================================================================================================
+2. ARCHITECTURE, BASE URL & AUTHENTICATION
+====================================================================================================
+- BASE URL:
+  `{{SERVER_HOST}}/api/v1/tenant/cbam`
+
+- AUTHENTICATION HEADER:
+  All endpoints require a valid tenant JWT Bearer token:
+  `Authorization: Bearer <tenant_jwt_access_token>`
+  `Content-Type: application/json`
+
+
+====================================================================================================
+3. STANDARD RESPONSE ENVELOPE FORMAT
+====================================================================================================
+Every JSON response follows the unified backend wrapper:
+
+SUCCESS RESPONSE (200 / 201):
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Operation completed successfully",
+  "data": { ... } or [ ... ],
+  "error": null,
+  "method": "GET",
+  "path": "/api/v1/tenant/cbam/...",
+  "timestamp": "2026-09-25T06:30:00.000000Z"
+}
+
+ERROR RESPONSE (400 / 404 / 422 / 500):
+{
+  "success": false,
+  "status_code": 400,
+  "message": "Detailed error description",
+  "data": null,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "details": "..."
+  },
+  "method": "POST",
+  "path": "/api/v1/tenant/cbam/...",
+  "timestamp": "2026-09-25T06:30:00.000000Z"
+}
+
+
+====================================================================================================
+4. SECTION 1: MASTER CATALOG & GUIDED CASCADING DROPDOWNS
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+4.1 GET /api/v1/tenant/cbam/catalog/categories
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Fetch all official CBAM Aggregated Goods Categories. Used for Dropdown 1 when setting up Produced Goods (G1..G10), Processes (P1..P10), and Purchased Precursors (PP1..PP20).
+
+QUERY PARAMETERS:
+- sector (optional): Filter by sector enum: 'IRON_AND_STEEL', 'ALUMINIUM', 'CEMENT', 'FERTILISERS', 'CHEMICALS', 'ELECTRICITY'
+
+RESPONSE EXAMPLE:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "CBAM categories fetched successfully",
+  "data": [
+    {
+      "id": "115c02fd-4920-4981-8bfd-e9b48e9b2bd6",
+      "name": "Crude steel",
+      "slug": "crude-steel",
+      "sector": "IRON_AND_STEEL",
+      "goods_nature": "AGGREGATED",
+      "covered_gases": ["CO2"],
+      "direct_emissions_applicable": true,
+      "indirect_emissions_applicable": true,
+      "production_unit": "t",
+      "production_routes": [
+        "Basic oxygen steelmaking",
+        "Electric arc furnace"
+      ],
+      "requires_precursors": true,
+      "possible_precursor_ids": [
+        "50d0d884-6338-4e1b-b46a-73d82d9a33bb",
+        "8ca30eef-64b5-41e9-91ee-6a56b5790a3a"
+      ],
+      "description": "Crude steel in primary forms or semi-finished products",
+      "is_active": true
+    }
+  ]
+}
+
+----------------------------------------------------------------------------------------------------
+4.2 GET /api/v1/tenant/cbam/catalog/categories/{category_id}
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Get deep category details with fully resolved possible precursor category objects.
+
+RESPONSE EXAMPLE:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "CBAM category detail fetched successfully",
+  "data": {
+    "id": "115c02fd-4920-4981-8bfd-e9b48e9b2bd6",
+    "name": "Crude steel",
+    "slug": "crude-steel",
+    "sector": "IRON_AND_STEEL",
+    "goods_nature": "AGGREGATED",
+    "covered_gases": ["CO2"],
+    "direct_emissions_applicable": true,
+    "indirect_emissions_applicable": true,
+    "production_unit": "t",
+    "production_routes": [
+      "Basic oxygen steelmaking",
+      "Electric arc furnace"
+    ],
+    "requires_precursors": true,
+    "possible_precursor_ids": ["50d0d884-6338-4e1b-b46a-73d82d9a33bb"],
+    "description": "Crude steel in primary forms",
+    "is_active": true,
+    "possible_precursors": [
+      {
+        "id": "50d0d884-6338-4e1b-b46a-73d82d9a33bb",
+        "name": "Pig iron",
+        "slug": "pig-iron",
+        "sector": "IRON_AND_STEEL",
+        "goods_nature": "AGGREGATED",
+        "covered_gases": ["CO2"],
+        "direct_emissions_applicable": true,
+        "indirect_emissions_applicable": true,
+        "production_unit": "t",
+        "production_routes": ["Blast furnace route", "Smelting reduction"],
+        "requires_precursors": false,
+        "possible_precursor_ids": [],
+        "description": "Pig iron and spiegeleisen",
+        "is_active": true
+      }
+    ]
+  }
+}
+
+----------------------------------------------------------------------------------------------------
+4.3 GET /api/v1/tenant/cbam/catalog/categories/{category_id}/routes
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Get allowed production routes for multi-select dropdown when configuring a good or process.
+
+RESPONSE EXAMPLE:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Production routes fetched successfully",
+  "data": {
+    "category_id": "115c02fd-4920-4981-8bfd-e9b48e9b2bd6",
+    "category_name": "Crude steel",
+    "production_routes": [
+      "Basic oxygen steelmaking",
+      "Electric arc furnace"
+    ]
+  }
+}
+
+----------------------------------------------------------------------------------------------------
+4.4 GET /api/v1/tenant/cbam/catalog/categories/{category_id}/product-names
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+GUIDED CASCADING DROPDOWN STEP 2:
+Once the user chooses an Aggregated Category (Step 1), this API returns all distinct product names under that category.
+
+RESPONSE EXAMPLE:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Product names fetched successfully",
+  "data": {
+    "category_id": "115c02fd-4920-4981-8bfd-e9b48e9b2bd6",
+    "category_name": "Crude steel",
+    "product_names": [
+      "Flat-rolled products of iron or non-alloy steel, not further worked than hot-rolled",
+      "Semi-finished products of iron or non-alloy steel",
+      "Stainless steel in ingots or other primary forms"
+    ]
+  }
+}
+
+----------------------------------------------------------------------------------------------------
+4.5 GET /api/v1/tenant/cbam/catalog/categories/{category_id}/specifications?product_name=...
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+GUIDED CASCADING DROPDOWN STEP 3:
+Once the user selects a Product Name (Step 2), this API returns specifications and resolves the exact 8-digit CN Code.
+
+QUERY PARAMETERS:
+- product_name (required, string): Selected product name.
+
+RESPONSE EXAMPLE:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Specifications fetched successfully",
+  "data": {
+    "category_id": "115c02fd-4920-4981-8bfd-e9b48e9b2bd6",
+    "category_name": "Crude steel",
+    "product_name": "Semi-finished products of iron or non-alloy steel",
+    "specifications": [
+      {
+        "id": "78a9c221-119b-4e89-8d1a-9f5b61e22301",
+        "cn_code": "7207 11 14",
+        "product_name": "Semi-finished products of iron or non-alloy steel",
+        "specification": "Containing by weight less than 0.25% of carbon, of rectangular cross-section, of a width less than twice the thickness, rolled or obtained by continuous casting",
+        "full_description": "Semi-finished products of iron or non-alloy steel - Containing by weight less than 0.25% of carbon: Of rectangular (including square) cross-section, the width measuring less than twice the thickness: Rolled or obtained by continuous casting"
+      }
+    ]
+  }
+}
+
+----------------------------------------------------------------------------------------------------
+4.6 GET /api/v1/tenant/cbam/catalog/cn-codes
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Direct search or listing across all CN codes with pagination and text query.
+
+QUERY PARAMETERS:
+- category_id (optional, UUID): Filter by category.
+- search (optional, string): Search in CN code, product name, specification, or full description.
+- limit (optional, int, default 100, max 500)
+- offset (optional, int, default 0)
+
+----------------------------------------------------------------------------------------------------
+4.7 GET /api/v1/tenant/cbam/catalog/cn-codes/{cn_code}
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Get detail for an exact CN Code (e.g., '7207 11 14' or '72071114').
+
+----------------------------------------------------------------------------------------------------
+4.8 GET /api/v1/tenant/cbam/catalog/countries
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Fetch all 266 official ISO 3166-1 alpha-2 countries embedded in CBAM template Sheet `c_CodeLists`.
+
+QUERY PARAMETERS:
+- search (optional, string): Search country code (e.g. 'PL', 'IN', 'DE') or name (e.g. 'Poland').
+
+RESPONSE EXAMPLE:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Countries fetched successfully",
+  "data": {
+    "total": 266,
+    "countries": [
+      { "code": "PL", "name": "Poland" },
+      { "code": "DE", "name": "Germany" },
+      { "code": "IN", "name": "India" },
+      { "code": "US", "name": "United States" }
+    ]
+  }
+}
+
+----------------------------------------------------------------------------------------------------
+4.9 GET /api/v1/tenant/cbam/catalog/ipcc-fuels
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Fetch all standard IPCC Fuel Emission Factors for combustion fallback selection when the user does not possess lab-measured NCV or EF values.
+
+QUERY PARAMETERS:
+- search (optional, string): Search fuel name (e.g. 'coal', 'natural gas', 'diesel', 'fuel oil').
+
+RESPONSE EXAMPLE:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "IPCC fuels fetched successfully",
+  "data": [
+    {
+      "id": "e65e233f-ac07-40ff-9ab0-b4a41557c7fd",
+      "fuel_id": "bad736d7-3ef3-4f99-95d6-6e16d6eb6154",
+      "fuel_name": "Brown coal briquettes",
+      "unit_id": "42595b7d-277e-4014-82c3-67761036c0a9",
+      "unit_name": "Gigajoules",
+      "unit_symbol": "GJ",
+      "kg_co2e": 98.1795,
+      "kg_co2e_of_co2": 97.5,
+      "default_ef_tco2_per_unit": 0.0975
+    },
+    {
+      "id": "9227dd48-4538-4fdd-80ef-5743f1fe142c",
+      "fuel_id": "bad736d7-3ef3-4f99-95d6-6e16d6eb6154",
+      "fuel_name": "Brown coal briquettes",
+      "unit_id": "4a3c410b-3f3b-4083-98ec-720df07ac7c4",
+      "unit_name": "Tonne",
+      "unit_symbol": "tonnes",
+      "kg_co2e": 2032.11,
+      "kg_co2e_of_co2": 2018.25,
+      "default_ef_tco2_per_unit": 2.01825
+    }
+  ]
+}
+
+
+====================================================================================================
+5. SECTION 2: INSTALLATION SETUP & MASTER DATA (Sheet A_InstData)
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+5.1 GET /api/v1/tenant/cbam/installation
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Fetch the tenant's current active CBAM Installation profile with all nested Produced Goods (G1..G10), Processes (P1..P10), and Purchased Precursors (PP1..PP20).
+
+----------------------------------------------------------------------------------------------------
+5.2 GET /api/v1/tenant/cbam/installation/{installation_id}
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Fetch a specific CBAM Installation profile by UUID.
+
+----------------------------------------------------------------------------------------------------
+5.3 POST /api/v1/tenant/cbam/installation
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Create a new CBAM Installation profile.
+
+REQUEST JSON (FULL PRODUCTION EXAMPLE):
+{
+  "start_date": "2026-01-01",
+  "end_date": "2026-12-31",
+  "reporting_period_id": null,
+  "installation_name_english": "ArcelorMittal Poland Plant 1",
+  "installation_name_local": "Huta Katowice",
+  "street_number": "Al. Pilsudskiego 92",
+  "economic_activity": "24.10 - Manufacture of basic iron and steel",
+  "post_code": "41-308",
+  "po_box": "PO Box 100",
+  "city": "Dabrowa Gornicza",
+  "country": "Poland",
+  "unlocode": "PLDBG",
+  "latitude": 50.3485,
+  "longitude": 19.2741,
+  "authorized_rep_name": "Jan Kowalski",
+  "authorized_rep_email": "jan.kowalski@arcelormittal.com",
+  "authorized_rep_telephone": "+48 32 776 5000",
+  "verifier_company_name": "TUV Rheinland Polska Sp. z o.o.",
+  "verifier_street_number": "ul. 17 Stycznia 56",
+  "verifier_city": "Warszawa",
+  "verifier_post_code": "02-146",
+  "verifier_country": "Poland",
+  "verifier_rep_name": "Piotr Nowak",
+  "verifier_rep_email": "p.nowak@pl.tuv.com",
+  "verifier_rep_telephone": "+48 22 847 4500",
+  "verifier_rep_fax": "+48 22 847 4501",
+  "verifier_accreditation_member_state": "Poland",
+  "verifier_accreditation_body": "Polskie Centrum Akredytacji",
+  "verifier_accreditation_number": "PL-PCA-ENV-2024-089",
+  "goods": [
+    {
+      "slot_number": 1,
+      "category_id": "115c02fd-4920-4981-8bfd-e9b48e9b2bd6",
+      "production_routes": ["Basic oxygen steelmaking"]
+    }
+  ],
+  "processes": [
+    {
+      "process_id": "P1",
+      "name": "BOF Steelmaking & Casting Process",
+      "target_category_id": "115c02fd-4920-4981-8bfd-e9b48e9b2bd6",
+      "boundary_mode": "DIRECT",
+      "included_precursor_ids": []
+    }
+  ],
+  "purchased_precursors": []
+}
+
+RESPONSE STATUS: 201 Created
+RESPONSE EXAMPLE:
+{
+  "success": true,
+  "status_code": 201,
+  "message": "CBAM installation created successfully",
+  "data": {
+    "id": "dac30b03-980a-4671-b176-ad90cc238fc5",
+    "installation_name_english": "ArcelorMittal Poland Plant 1",
+    "country": "Poland",
+    "unlocode": "PLDBG",
+    "latitude": 50.3485,
+    "longitude": 19.2741,
+    "is_active": true,
+    "goods": [
+      {
+        "id": "402eb0ae-ea4a-4b9b-8f7a-80bb1eef671d",
+        "slot_number": 1,
+        "category_id": "115c02fd-4920-4981-8bfd-e9b48e9b2bd6",
+        "category_name": "Crude steel",
+        "category_slug": "crude-steel",
+        "production_routes": ["Basic oxygen steelmaking"]
+      }
+    ],
+    "processes": [
+      {
+        "id": "19b43d3b-3129-4ae3-9d41-3e4b78ae01c9",
+        "process_id": "P1",
+        "name": "BOF Steelmaking & Casting Process",
+        "target_category_id": "115c02fd-4920-4981-8bfd-e9b48e9b2bd6",
+        "target_category_name": "Crude steel",
+        "boundary_mode": "DIRECT",
+        "included_precursor_ids": []
+      }
+    ],
+    "purchased_precursors": []
+  }
+}
+
+----------------------------------------------------------------------------------------------------
+5.4 PUT /api/v1/tenant/cbam/installation/{installation_id}
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Update installation metadata, verifier details, or goods/processes arrays.
+
+----------------------------------------------------------------------------------------------------
+5.5 GET /api/v1/tenant/cbam/installation/{installation_id}/export-excel
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Generates and downloads the official EU CBAM Communication Template (.xlsx) populated with the installation profile, goods, processes, precursors, and all source streams.
+
+RESPONSE:
+- Headers:
+  `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+  `Content-Disposition: attachment; filename="CBAM_SEE_Communication_{slug}_{installation_id}.xlsx"`
+- Binary Stream: Raw Excel file ready for direct download.
+
+
+====================================================================================================
+6. SECTION 3: SOURCE STREAMS & EMISSION CALCULATIONS (Sheet B_EmInst Section a)
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+6.1 GET /api/v1/tenant/cbam/installation/{installation_id}/source-streams
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+List all active source streams configured for an installation (ordered by slot number 1..75).
+
+RESPONSE EXAMPLE:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "CBAM source streams fetched successfully",
+  "data": [
+    {
+      "id": "d446be35-a1b6-4f85-961f-608e8ded1c7e",
+      "installation_id": "dac30b03-980a-4671-b176-ad90cc238fc5",
+      "slot_number": 1,
+      "method": "Combustion",
+      "name": "Heavy fuel oil (Boiler 1)",
+      "activity_data": 252000.0,
+      "activity_unit": "t",
+      "biomass_fraction": 0.0,
+      "ipcc_fuel_id": null,
+      "ncv": 45.0,
+      "emission_factor": 73.0,
+      "emission_factor_unit": "tCO2/TJ",
+      "oxidation_factor": 100.0,
+      "carbon_content": null,
+      "fossil_co2_emissions": 827820.0,
+      "biomass_co2_emissions": 0.0,
+      "energy_content_fossil_tj": 11340.0,
+      "energy_content_bio_tj": 0.0,
+      "ipcc_fuel_name": null,
+      "created_at": "2026-09-24T09:35:16.536200Z",
+      "updated_at": "2026-09-24T09:35:16.536218Z"
+    }
+  ]
+}
+
+----------------------------------------------------------------------------------------------------
+6.2 POST /api/v1/tenant/cbam/installation/{installation_id}/source-streams
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Create a new source stream. Automatically executes exact CBAM emission calculations and commits to PostgreSQL.
+
+VARIATION REQUEST EXAMPLES COVERING ALL SCENARIOS:
+
+SCENARIO 1: Combustion with NCV (GJ/t) and EF in tCO2/TJ
+REQUEST:
+{
+  "method": "Combustion",
+  "name": "Heavy fuel oil (Boiler 1)",
+  "activity_data": 252000.0,
+  "activity_unit": "t",
+  "ncv": 45.0,
+  "emission_factor": 73.0,
+  "emission_factor_unit": "tCO2/TJ",
+  "oxidation_factor": 100.0,
+  "biomass_fraction": 0.0
+}
+RESPONSE:
+- `fossil_co2_emissions`: 827820.0 t CO2  (252,000 * 45/1000 * 73.0)
+- `energy_content_fossil_tj`: 11340.0 TJ  (252,000 * 45 / 1000)
+
+SCENARIO 2: Combustion with EF in tCO2/t (Direct Fuel EF)
+REQUEST:
+{
+  "method": "Combustion",
+  "name": "Natural Gas (Furnace A)",
+  "activity_data": 50000.0,
+  "activity_unit": "t",
+  "ncv": null,
+  "emission_factor": 2.75,
+  "emission_factor_unit": "tCO2/t",
+  "oxidation_factor": 100.0,
+  "biomass_fraction": 0.0
+}
+RESPONSE:
+- `fossil_co2_emissions`: 137500.0 t CO2  (50,000 * 2.75)
+
+SCENARIO 3: Combustion with Biomass Blend (e.g. 20% Biofuel)
+REQUEST:
+{
+  "method": "Combustion",
+  "name": "Bio-diesel Blend (Generator)",
+  "activity_data": 10000.0,
+  "activity_unit": "t",
+  "ncv": 40.0,
+  "emission_factor": 70.0,
+  "emission_factor_unit": "tCO2/TJ",
+  "oxidation_factor": 100.0,
+  "biomass_fraction": 20.0
+}
+RESPONSE:
+- `fossil_co2_emissions`: 22400.0 t CO2   (10,000 * 40/1000 * 70 * 0.80)
+- `biomass_co2_emissions`: 5600.0 t CO2   (10,000 * 40/1000 * 70 * 0.20)
+- `energy_content_fossil_tj`: 320.0 TJ
+- `energy_content_bio_tj`: 80.0 TJ
+
+SCENARIO 4: Combustion Fallback using IPCC Fuel ID
+REQUEST:
+{
+  "method": "Combustion",
+  "name": "Standard Anthracite Coal",
+  "activity_data": 15000.0,
+  "activity_unit": "t",
+  "ipcc_fuel_id": "9227dd48-4538-4fdd-80ef-5743f1fe142c",
+  "oxidation_factor": 100.0,
+  "biomass_fraction": 0.0
+}
+RESPONSE:
+- Backend resolves IPCC factor and calculates emissions automatically.
+
+SCENARIO 5: Mass Balance Input (e.g. Coal / Coke Input, Carbon Content)
+REQUEST:
+{
+  "method": "Mass balance",
+  "name": "Coking Coal Input",
+  "activity_data": 50000.0,
+  "activity_unit": "t",
+  "carbon_content": 0.85,
+  "biomass_fraction": 0.0
+}
+RESPONSE:
+- `fossil_co2_emissions`: 155720.0 t CO2  (50,000 * 0.85 * 3.664)
+
+SCENARIO 6: Mass Balance Output (e.g. Crude Steel Output - Carbon Bound in Good)
+NOTE: Activity data MUST be negative for mass balance outputs!
+REQUEST:
+{
+  "method": "Mass balance",
+  "name": "Crude Steel Output (C-bound)",
+  "activity_data": -1808226.0,
+  "activity_unit": "t",
+  "carbon_content": 0.00388,
+  "biomass_fraction": 0.0
+}
+RESPONSE:
+- `fossil_co2_emissions`: -25706.7 t CO2  (-1,808,226 * 0.00388 * 3.664)
+
+----------------------------------------------------------------------------------------------------
+6.3 POST /api/v1/tenant/cbam/installation/{installation_id}/source-streams/bulk
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Atomic replace and bulk save of the complete source streams table. Ideal when the user submits an entire table/grid in the UI.
+
+REQUEST EXAMPLE:
+{
+  "streams": [
+    {
+      "slot_number": 1,
+      "method": "Combustion",
+      "name": "Heavy fuel oil",
+      "activity_data": 252000.0,
+      "activity_unit": "t",
+      "ncv": 45.0,
+      "emission_factor": 73.0,
+      "emission_factor_unit": "tCO2/TJ",
+      "oxidation_factor": 100.0,
+      "biomass_fraction": 0.0
+    },
+    {
+      "slot_number": 2,
+      "method": "Mass balance",
+      "name": "Steel Output",
+      "activity_data": -1808226.0,
+      "activity_unit": "t",
+      "carbon_content": 0.00388,
+      "biomass_fraction": 0.0
+    }
+  ]
+}
+
+----------------------------------------------------------------------------------------------------
+6.4 POST /api/v1/tenant/cbam/installation/{installation_id}/source-streams/calculate-preview
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Calculate emissions on-the-fly as the user types in the UI modal/drawer, without persisting to the database.
+
+REQUEST EXAMPLE:
+{
+  "method": "Combustion",
+  "activity_data": 252000.0,
+  "activity_unit": "t",
+  "ncv": 45.0,
+  "emission_factor": 73.0,
+  "emission_factor_unit": "tCO2/TJ",
+  "oxidation_factor": 100.0,
+  "biomass_fraction": 0.0
+}
+
+RESPONSE EXAMPLE:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Emissions calculated successfully",
+  "data": {
+    "method": "Combustion",
+    "fossil_co2_emissions": 827820.0,
+    "biomass_co2_emissions": 0.0,
+    "energy_content_fossil_tj": 11340.0,
+    "energy_content_bio_tj": 0.0,
+    "ncv_applied": 45.0,
+    "emission_factor_applied": 73.0,
+    "oxidation_factor_applied": 100.0,
+    "carbon_content_applied": null
+  }
+}
+
+----------------------------------------------------------------------------------------------------
+6.5 GET /api/v1/tenant/cbam/installation/{installation_id}/source-streams/summary
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Fetch real-time aggregated direct emissions and energy totals across all source streams for KPI cards, charts, and summary banners.
+
+RESPONSE EXAMPLE:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Installation emissions summary fetched successfully",
+  "data": {
+    "installation_id": "dac30b03-980a-4671-b176-ad90cc238fc5",
+    "total_fossil_co2_emissions": 957833.3,
+    "total_biomass_co2_emissions": 0.0,
+    "total_direct_co2_emissions": 957833.3,
+    "total_fossil_energy_tj": 11340.0,
+    "total_bio_energy_tj": 0.0,
+    "stream_count": 3,
+    "combustion_stream_count": 1,
+    "mass_balance_stream_count": 2
+  }
+}
+
+----------------------------------------------------------------------------------------------------
+6.6 GET /api/v1/tenant/cbam/installation/{installation_id}/source-streams/{stream_id}
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Fetch a single source stream by UUID.
+
+----------------------------------------------------------------------------------------------------
+6.7 PUT /api/v1/tenant/cbam/installation/{installation_id}/source-streams/{stream_id}
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Update fields of an existing source stream. Automatically re-executes calculations and updates stored emission values.
+
+----------------------------------------------------------------------------------------------------
+6.8 DELETE /api/v1/tenant/cbam/installation/{installation_id}/source-streams/{stream_id}
+----------------------------------------------------------------------------------------------------
+PURPOSE:
+Delete a source stream slot.
+
+
+====================================================================================================
+7. MATHEMATICAL RULES & CALCULATION ENGINES
+====================================================================================================
+
+7.1 COMBUSTION METHODOLOGY:
+   - Base Formula:
+     Emissions = ActivityData * (NCV / 1000 if EF_Unit == 'tCO2/TJ' else 1) * EF * (OxidationFactor / 100)
+   - Split:
+     Fossil_CO2  = Emissions * (1 - BiomassFraction / 100)
+     Biomass_CO2 = Emissions * (BiomassFraction / 100)
+   - Energy Content:
+     Fossil_Energy_TJ = ActivityData * (NCV / 1000) * (1 - BiomassFraction / 100)
+     Bio_Energy_TJ    = ActivityData * (NCV / 1000) * (BiomassFraction / 100)
+
+7.2 MASS BALANCE METHODOLOGY:
+   - Stoichiometric constant = 3.664 (representing molecular ratio 44.01 / 12.011)
+   - Base Formula:
+     Emissions = ActivityData * CarbonContent * 3.664
+   - Split:
+     Fossil_CO2  = Emissions * (1 - BiomassFraction / 100)
+     Biomass_CO2 = Emissions * (BiomassFraction / 100)
+   - Rule on Direction:
+     - Carbon Input Materials (e.g. coal, scrap, coke): `activity_data` > 0
+     - Carbon Output Materials (e.g. crude steel, slag, export gas): `activity_data` < 0
+
+7.3 SLOT NUMBERS (1 to 75):
+   - The EU CBAM template Sheet `B_EmInst` provides exactly 75 rows (Rows 17 to 91).
+   - If `slot_number` is omitted in POST, the backend auto-assigns the next free integer from 1 to 75.
+
+
+====================================================================================================
+8. FRONTEND STEP-BY-STEP USER JOURNEY
+====================================================================================================
+
+STEP 1: LOAD MASTER DATA & DROPDOWNS
+   - Call `GET /catalog/categories` to populate Category options.
+   - Call `GET /catalog/countries` to populate Country dropdown (e.g. 'Poland', 'India', 'Germany').
+   - When user selects a category, call `GET /catalog/categories/{id}/routes` to populate Production Routes.
+   - For guided CN code selection:
+     1. `GET /catalog/categories/{id}/product-names` (Dropdown 2)
+     2. `GET /catalog/categories/{id}/specifications?product_name=...` (Dropdown 3 -> selects CN Code)
+
+STEP 2: CREATE / VIEW INSTALLATION PROFILE (Sheet A_InstData)
+   - Form inputs: Site Name, Address, City, Country, UNLOCODE, Lat/Long, Authorized Rep, Verifier.
+   - Goods Section: Assign Goods G1..G10 using selected category and routes.
+   - Processes Section: Define Processes P1..P10 with target category and boundary mode.
+   - Save via `POST /installation` or update via `PUT /installation/{id}`.
+
+STEP 3: MANAGE SOURCE STREAMS (Sheet B_EmInst)
+   - Call `GET /installation/{id}/source-streams` to render the source streams table.
+   - Stream Add/Edit Modal:
+     - Method radio: 'Combustion' vs 'Mass balance'
+     - If Combustion:
+       - Inputs: Stream Name, Activity Data (t or 1000 Nm3), NCV (GJ/t), Emission Factor & Unit ('tCO2/TJ' or 'tCO2/t'), Oxidation Factor % (default 100), Biomass % (default 0).
+       - Optional Fallback button: "Select from Standard IPCC Fuels" -> opens searchable modal powered by `GET /catalog/ipcc-fuels`.
+     - If Mass Balance:
+       - Inputs: Stream Name, Activity Data (+ for input, - for output), Carbon Content (tC/t), Biomass %.
+     - As user types, call `POST /installation/{id}/source-streams/calculate-preview` to display live calculated Fossil CO2 & Energy TJ in real time.
+     - Submit via `POST /installation/{id}/source-streams` or `PUT /installation/{id}/source-streams/{stream_id}`.
+
+STEP 4: SUMMARY & EXCEL DOWNLOAD
+   - Call `GET /installation/{id}/source-streams/summary` to populate total direct emissions KPI cards.
+   - Trigger Download button linking to `GET /installation/{id}/export-excel` to download the verified `.xlsx` file.
+
+
+====================================================================================================
+9. EDGE CASES, ERROR CODES & VALIDATION RULES
+====================================================================================================
+
+1. Missing NCV when EF is in tCO2/TJ:
+   - Status: `400 Bad Request` or `422 Unprocessable Entity`
+   - Message: "Net calorific value (NCV) is required when emission factor unit is tCO2/TJ."
+
+2. Mass Balance Missing Carbon Content:
+   - Status: `422 Unprocessable Entity`
+   - Message: "Carbon content is required for Mass balance methodology."
+
+3. Maximum Slot Limit Exceeded:
+   - Status: `400 Bad Request`
+   - Message: "Installation has reached the maximum capacity of 75 source stream slots in Sheet B_EmInst."
+
+4. Invalid Production Route:
+   - Status: `400 Bad Request`
+   - Message: "Production route '{route}' is not a valid route for aggregated category '{category_name}'."
+
+5. Boundary Mode DIRECT with Precursor IDs:
+   - Validation Rule: When `boundary_mode` is 'DIRECT', `included_precursor_ids` should be empty `[]`.
+
+6. Negative Activity Data for Combustion:
+   - Validation Rule: Combustion fuels must have positive `activity_data` > 0.
+
+====================================================================================================
+                              END OF CBAM API INTEGRATION GUIDE
+====================================================================================================

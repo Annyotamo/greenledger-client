@@ -1,0 +1,613 @@
+"use client";
+
+import { useState } from "react";
+import { format } from "date-fns";
+import { MaterialIcon } from "@/components/icons/MaterialIcon";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { CustomSelect } from "@/components/ui/select";
+import {
+    useCreateSubUnit,
+    useDeleteSubUnit,
+    useSubUnits,
+    useUpdateSubUnit,
+} from "@/lib/facility/hooks";
+import type {
+    Facility,
+    FacilitySubUnit,
+    SubUnitStatus,
+    SubUnitType,
+} from "@/lib/facility/types";
+import { getErrorMessage } from "@/lib/utils/error";
+
+const subUnitTypeOptions: { label: string; value: SubUnitType; icon: string; description: string }[] = [
+    { label: "Production Line", value: "production_line", icon: "precision_manufacturing", description: "Automated or manual manufacturing lines" },
+    { label: "Process Unit", value: "process_unit", icon: "tune", description: "Chemical, refining, or mechanical processing units" },
+    { label: "Boiler House", value: "boiler_house", icon: "heat_pump", description: "Steam boilers, thermal generation, combustion plants" },
+    { label: "Building Block", value: "building_block", icon: "domain", description: "Dedicated structural sections, towers or wings" },
+    { label: "Warehouse Bay", value: "warehouse_bay", icon: "warehouse", description: "Storage bays, inventory logistics, distribution wings" },
+    { label: "Office Section", value: "office_section", icon: "apartment", description: "Administrative, support or executive workspaces" },
+    { label: "Data Hall", value: "data_hall", icon: "dns", description: "Server rooms, data center halls, critical IT infrastructure" },
+    { label: "Other", value: "other", icon: "category", description: "Custom or specialized facility division" },
+];
+
+const subUnitTypeLabels: Record<string, string> = {
+    production_line: "Production Line",
+    process_unit: "Process Unit",
+    boiler_house: "Boiler House",
+    building_block: "Building Block",
+    warehouse_bay: "Warehouse Bay",
+    office_section: "Office Section",
+    data_hall: "Data Hall",
+    other: "Other",
+};
+
+const statusStyles: Record<string, { bg: string; label: string }> = {
+    active: { bg: "bg-emerald-500/10 text-emerald-800 border-emerald-500/20", label: "Active" },
+    inactive: { bg: "bg-slate-100 text-slate-700 border-slate-200", label: "Inactive" },
+    decommissioned: { bg: "bg-rose-500/10 text-rose-800 border-rose-500/20", label: "Decommissioned" },
+};
+
+type FacilitySubUnitsModalProps = {
+    facility: Facility;
+    onClose: () => void;
+};
+
+export function FacilitySubUnitsModal({ facility, onClose }: FacilitySubUnitsModalProps) {
+    const [statusFilter, setStatusFilter] = useState<string>("all");
+    const [typeFilter, setTypeFilter] = useState<string>("all");
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingSubUnit, setEditingSubUnit] = useState<FacilitySubUnit | null>(null);
+
+    const [subUnitForm, setSubUnitForm] = useState<{
+        name: string;
+        subUnitCode: string;
+        subUnitType: SubUnitType;
+        status: SubUnitStatus;
+        floorArea: string;
+        floorAreaUnit: string;
+        description: string;
+    }>({
+        name: "",
+        subUnitCode: "",
+        subUnitType: "production_line",
+        status: "active",
+        floorArea: "",
+        floorAreaUnit: "sqm",
+        description: "",
+    });
+
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    // React Query
+    const subUnitsQuery = useSubUnits(facility.id, {
+        active_only: statusFilter === "active",
+        sub_unit_type: typeFilter !== "all" ? typeFilter : undefined,
+        status: statusFilter !== "all" && statusFilter !== "active" ? statusFilter : undefined,
+    });
+
+    const createMutation = useCreateSubUnit(facility.id);
+    const updateMutation = useUpdateSubUnit(facility.id);
+    const deleteMutation = useDeleteSubUnit(facility.id);
+
+    const handleOpenCreateForm = () => {
+        setEditingSubUnit(null);
+        setSubUnitForm({
+            name: "",
+            subUnitCode: "",
+            subUnitType: "production_line",
+            status: "active",
+            floorArea: "",
+            floorAreaUnit: "sqm",
+            description: "",
+        });
+        setFormErrors({});
+        setIsFormOpen(true);
+    };
+
+    const handleOpenEditForm = (subUnit: FacilitySubUnit) => {
+        setEditingSubUnit(subUnit);
+        setSubUnitForm({
+            name: subUnit.name,
+            subUnitCode: subUnit.subUnitCode || "",
+            subUnitType: subUnit.subUnitType || "other",
+            status: subUnit.status || "active",
+            floorArea: subUnit.floorArea != null ? String(subUnit.floorArea) : "",
+            floorAreaUnit: subUnit.floorAreaUnit || "sqm",
+            description: subUnit.description || "",
+        });
+        setFormErrors({});
+        setIsFormOpen(true);
+    };
+
+    const handleFormSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const errors: Record<string, string> = {};
+
+        if (!subUnitForm.name.trim()) {
+            errors.name = "Sub-unit name is required.";
+        }
+
+        setFormErrors(errors);
+        if (Object.keys(errors).length > 0) return;
+
+        try {
+            if (editingSubUnit) {
+                await updateMutation.mutateAsync({
+                    subUnitId: editingSubUnit.id,
+                    payload: {
+                        name: subUnitForm.name.trim(),
+                        sub_unit_code: subUnitForm.subUnitCode.trim() || undefined,
+                        sub_unit_type: subUnitForm.subUnitType,
+                        status: subUnitForm.status,
+                        description: subUnitForm.description.trim() || null,
+                        floor_area: subUnitForm.floorArea ? Number(subUnitForm.floorArea) : null,
+                        floor_area_unit: subUnitForm.floorAreaUnit.trim() || null,
+                        is_active: subUnitForm.status === "active",
+                    },
+                });
+            } else {
+                await createMutation.mutateAsync({
+                    name: subUnitForm.name.trim(),
+                    sub_unit_code: subUnitForm.subUnitCode.trim() || undefined,
+                    sub_unit_type: subUnitForm.subUnitType,
+                    description: subUnitForm.description.trim() || undefined,
+                    floor_area: subUnitForm.floorArea ? Number(subUnitForm.floorArea) : undefined,
+                    floor_area_unit: subUnitForm.floorAreaUnit.trim() || "sqm",
+                });
+            }
+
+            setIsFormOpen(false);
+            setEditingSubUnit(null);
+        } catch (err: unknown) {
+            console.error(err);
+            const msg = getErrorMessage(err, "Failed to save sub-unit. Please try again.");
+            setFormErrors({ submit: msg });
+        }
+    };
+
+    const handleDeleteConfirm = async (subUnitId: string) => {
+        try {
+            await deleteMutation.mutateAsync(subUnitId);
+            setDeletingId(null);
+        } catch (err: unknown) {
+            console.error(err);
+        }
+    };
+
+    const subUnits = subUnitsQuery.data || [];
+    const filteredSubUnits = subUnits.filter((su) => {
+        if (!searchTerm.trim()) return true;
+        const q = searchTerm.toLowerCase();
+        return (
+            su.name.toLowerCase().includes(q) ||
+            su.subUnitCode.toLowerCase().includes(q) ||
+            (su.description && su.description.toLowerCase().includes(q))
+        );
+    });
+
+    const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-xs p-4 overflow-y-auto">
+            <div className="relative w-full max-w-4xl rounded-2xl bg-white shadow-2xl border border-outline-variant max-h-[90vh] flex flex-col overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-outline-variant bg-surface px-6 py-4">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-on-primary shadow-xs">
+                            <MaterialIcon name="layers" size="sm" />
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h3 className="font-display text-lg font-semibold tracking-tight text-primary">
+                                    {facility.name}
+                                </h3>
+                                <span className="px-2 py-0.5 rounded bg-surface-container-high text-[11px] font-medium text-slate-700 font-mono">
+                                    {facility.facilityCode || "FAC"}
+                                </span>
+                            </div>
+                            <p className="text-xs text-on-surface-variant font-sans mt-0.5">
+                                Operational Sub-Units & Emissions Attribution Divisions
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {!isFormOpen && (
+                            <button
+                                onClick={handleOpenCreateForm}
+                                className="bg-primary text-on-primary px-3.5 py-1.5 rounded-lg font-sans text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 hover:opacity-90 shadow-sm transition-opacity">
+                                <MaterialIcon name="add" size="xs" />
+                                <span>Add Sub-Unit</span>
+                            </button>
+                        )}
+                        <button
+                            onClick={onClose}
+                            className="rounded-lg p-2 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors">
+                            <MaterialIcon name="close" size="sm" />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Sub-Unit Create/Edit Form (Collapsible / Overlay) */}
+                {isFormOpen && (
+                    <div className="bg-surface-container-lowest border-b border-outline-variant p-6 animate-fade-in">
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <h4 className="font-display text-sm font-semibold text-primary">
+                                    {editingSubUnit ? "Edit Sub-Unit" : "Create New Operational Sub-Unit"}
+                                </h4>
+                                <p className="text-xs text-on-surface-variant font-sans">
+                                    {editingSubUnit
+                                        ? "Update properties or status for this sub-unit"
+                                        : "Define a physical or operational division under this facility"}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setIsFormOpen(false)}
+                                className="text-xs text-on-surface-variant hover:text-primary font-medium">
+                                Cancel
+                            </button>
+                        </div>
+
+                        {formErrors.submit && (
+                            <div className="mb-4 rounded-lg bg-rose-50 border border-rose-200 p-3 text-xs text-rose-800 flex items-center gap-2">
+                                <MaterialIcon name="error" size="xs" className="text-rose-600 shrink-0" />
+                                <span>{formErrors.submit}</span>
+                            </div>
+                        )}
+
+                        <form onSubmit={handleFormSubmit} className="space-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                        Sub-Unit Name <span className="text-error">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={subUnitForm.name}
+                                        onChange={(e) => {
+                                            setSubUnitForm((cur) => ({ ...cur, name: e.target.value }));
+                                            setFormErrors((cur) => ({ ...cur, name: "" }));
+                                        }}
+                                        placeholder="e.g. Boiler House 1, Assembly Line A"
+                                        className={`w-full rounded-lg border ${
+                                            formErrors.name ? "border-error" : "border-outline-variant"
+                                        } bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary`}
+                                    />
+                                    {formErrors.name && <p className="mt-1 text-[10px] text-error">{formErrors.name}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                        Sub-Unit Code <span className="text-[10px] text-slate-400 font-normal">(Auto-generated if empty)</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={subUnitForm.subUnitCode}
+                                        onChange={(e) =>
+                                            setSubUnitForm((cur) => ({ ...cur, subUnitCode: e.target.value.toUpperCase() }))
+                                        }
+                                        placeholder="e.g. BH-01, AL-01 (Auto: SU-001)"
+                                        className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-xs font-mono uppercase text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                        Sub-Unit Type <span className="text-error">*</span>
+                                    </label>
+                                    <CustomSelect
+                                        options={subUnitTypeOptions.map((opt) => ({
+                                            label: opt.label,
+                                            value: opt.value,
+                                        }))}
+                                        value={subUnitForm.subUnitType}
+                                        onChange={(val) =>
+                                            setSubUnitForm((cur) => ({ ...cur, subUnitType: val as SubUnitType }))
+                                        }
+                                    />
+                                </div>
+
+                                {editingSubUnit && (
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                            Status
+                                        </label>
+                                        <CustomSelect
+                                            options={[
+                                                { label: "Active", value: "active" },
+                                                { label: "Inactive", value: "inactive" },
+                                                { label: "Decommissioned", value: "decommissioned" },
+                                            ]}
+                                            value={subUnitForm.status}
+                                            onChange={(val) =>
+                                                setSubUnitForm((cur) => ({ ...cur, status: val as SubUnitStatus }))
+                                            }
+                                        />
+                                    </div>
+                                )}
+
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                        Floor Area
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="number"
+                                            step="any"
+                                            min="0"
+                                            value={subUnitForm.floorArea}
+                                            onChange={(e) =>
+                                                setSubUnitForm((cur) => ({ ...cur, floorArea: e.target.value }))
+                                            }
+                                            placeholder="450.0"
+                                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary tabular-nums"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={subUnitForm.floorAreaUnit}
+                                            onChange={(e) =>
+                                                setSubUnitForm((cur) => ({ ...cur, floorAreaUnit: e.target.value }))
+                                            }
+                                            placeholder="sqm"
+                                            className="w-20 rounded-lg border border-outline-variant bg-white px-2 py-2 text-xs text-center text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary font-mono"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                    Description / Operational Notes
+                                </label>
+                                <textarea
+                                    value={subUnitForm.description}
+                                    onChange={(e) =>
+                                        setSubUnitForm((cur) => ({ ...cur, description: e.target.value }))
+                                    }
+                                    rows={2}
+                                    placeholder="e.g. Primary high pressure steam boiler servicing manufacturing unit 1"
+                                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-outline-variant/60">
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => setIsFormOpen(false)}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    variant="primary"
+                                    size="sm"
+                                    disabled={isSubmitting}>
+                                    {isSubmitting
+                                        ? "Saving..."
+                                        : editingSubUnit
+                                          ? "Update Sub-Unit"
+                                          : "Create Sub-Unit"}
+                                </Button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+
+                {/* Filter / Search Bar */}
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant bg-surface-container-low px-6 py-3">
+                    <div className="flex items-center gap-2 flex-1 max-w-sm">
+                        <div className="relative w-full">
+                            <MaterialIcon
+                                name="search"
+                                size="xs"
+                                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+                            />
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Search sub-unit name or code..."
+                                className="w-full rounded-lg border border-outline-variant bg-white pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-1.5 text-xs text-slate-600 font-sans">
+                            <span>Status:</span>
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="rounded border border-outline-variant bg-white px-2 py-1 text-xs text-slate-800 focus:outline-none">
+                                <option value="all">All</option>
+                                <option value="active">Active Only</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="decommissioned">Decommissioned</option>
+                            </select>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 text-xs text-slate-600 font-sans">
+                            <span>Type:</span>
+                            <select
+                                value={typeFilter}
+                                onChange={(e) => setTypeFilter(e.target.value)}
+                                className="rounded border border-outline-variant bg-white px-2 py-1 text-xs text-slate-800 focus:outline-none">
+                                <option value="all">All Types</option>
+                                {subUnitTypeOptions.map((opt) => (
+                                    <option key={opt.value} value={opt.value}>
+                                        {opt.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Sub-Units List / Body */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-3">
+                    {subUnitsQuery.isLoading ? (
+                        <div className="p-12 text-center text-xs text-on-surface-variant font-sans">
+                            Loading sub-units...
+                        </div>
+                    ) : subUnitsQuery.isError ? (
+                        <div className="p-12 text-center text-xs text-error font-sans">
+                            Failed to load sub-units. Please try again.
+                        </div>
+                    ) : filteredSubUnits.length === 0 ? (
+                        <div className="p-12 text-center rounded-xl border border-dashed border-outline-variant bg-surface-container-lowest flex flex-col items-center">
+                            <MaterialIcon name="layers_clear" size="lg" className="text-slate-400 mb-2" />
+                            <h4 className="font-display text-sm font-semibold text-primary">No Sub-Units Found</h4>
+                            <p className="text-xs text-on-surface-variant font-sans mt-1 max-w-md">
+                                {searchTerm || statusFilter !== "all" || typeFilter !== "all"
+                                    ? "No sub-units matched the selected filter criteria."
+                                    : "No operational sub-units created under this facility yet. Sub-units allow Scope 1 & Scope 2 activities to be attributed to specific production lines, boiler houses, or warehouse bays."}
+                            </p>
+                            {!isFormOpen && (
+                                <button
+                                    onClick={handleOpenCreateForm}
+                                    className="mt-4 bg-primary text-on-primary px-4 py-2 rounded-lg font-sans text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 hover:opacity-90 shadow-sm transition-opacity">
+                                    <MaterialIcon name="add" size="xs" />
+                                    <span>Create First Sub-Unit</span>
+                                </button>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                            {filteredSubUnits.map((subUnit) => {
+                                const status = statusStyles[subUnit.status] || statusStyles.active;
+                                const typeObj = subUnitTypeOptions.find((t) => t.value === subUnit.subUnitType);
+
+                                return (
+                                    <Card
+                                        key={subUnit.id}
+                                        className="p-4 bg-white border border-outline-variant rounded-xl flex flex-col justify-between hover:shadow-md transition-shadow">
+                                        <div>
+                                            <div className="flex items-start justify-between gap-2 mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                                        <MaterialIcon name={typeObj?.icon || "category"} size="xs" />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-semibold text-sm text-primary leading-tight">
+                                                            {subUnit.name}
+                                                        </h4>
+                                                        <div className="flex items-center gap-2 mt-0.5">
+                                                            <span className="font-mono text-[10px] text-slate-500 font-semibold">
+                                                                {subUnit.subUnitCode}
+                                                            </span>
+                                                            <span className="text-[10px] text-slate-400">•</span>
+                                                            <span className="text-[10px] text-slate-600 font-medium">
+                                                                {subUnitTypeLabels[subUnit.subUnitType] || subUnit.subUnitType}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <span
+                                                    className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider border ${status.bg}`}>
+                                                    {status.label}
+                                                </span>
+                                            </div>
+
+                                            {subUnit.description && (
+                                                <p className="text-xs text-slate-600 font-sans line-clamp-2 my-2 bg-surface-container-lowest p-2 rounded-lg">
+                                                    {subUnit.description}
+                                                </p>
+                                            )}
+
+                                            <div className="grid grid-cols-2 gap-2 text-xs font-sans text-slate-600 pt-2 border-t border-outline-variant/40">
+                                                {subUnit.floorArea != null && (
+                                                    <div>
+                                                        <span className="text-slate-400 block text-[10px]">Floor Area</span>
+                                                        <span className="font-semibold text-slate-900 tabular-nums">
+                                                            {subUnit.floorArea.toLocaleString()} {subUnit.floorAreaUnit || "sqm"}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {subUnit.createdAt && (
+                                                    <div>
+                                                        <span className="text-slate-400 block text-[10px]">Created</span>
+                                                        <span className="font-medium text-slate-700 text-[11px]">
+                                                            {format(new Date(subUnit.createdAt), "MMM d, yyyy")}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center justify-between gap-2 pt-3 mt-3 border-t border-outline-variant/40">
+                                            <span className="text-[10px] text-slate-400 font-mono truncate max-w-[140px]">
+                                                {subUnit.id}
+                                            </span>
+
+                                            <div className="flex items-center gap-1.5">
+                                                <button
+                                                    onClick={() => handleOpenEditForm(subUnit)}
+                                                    className="p-1.5 rounded-lg border border-outline-variant text-slate-700 hover:bg-surface-container-high transition-colors text-xs flex items-center gap-1">
+                                                    <MaterialIcon name="edit" size="xs" />
+                                                    <span>Edit</span>
+                                                </button>
+
+                                                {subUnit.isActive && (
+                                                    <button
+                                                        onClick={() => setDeletingId(subUnit.id)}
+                                                        className="p-1.5 rounded-lg border border-outline-variant text-rose-600 hover:bg-rose-50 transition-colors text-xs flex items-center gap-1">
+                                                        <MaterialIcon name="power_settings_new" size="xs" />
+                                                        <span>Deactivate</span>
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Deactivate confirmation inside card */}
+                                        {deletingId === subUnit.id && (
+                                            <div className="mt-3 p-3 bg-rose-50 rounded-lg border border-rose-200 text-xs text-rose-900 space-y-2 animate-fade-in">
+                                                <p className="font-semibold">
+                                                    Deactivate sub-unit &quot;{subUnit.name}&quot;?
+                                                </p>
+                                                <p className="text-[11px] text-rose-700">
+                                                    This soft-deactivates the sub-unit. Past activity records and historical linkages will remain intact for audit logs.
+                                                </p>
+                                                <div className="flex items-center gap-2 justify-end">
+                                                    <button
+                                                        onClick={() => setDeletingId(null)}
+                                                        className="px-2.5 py-1 rounded bg-white text-slate-700 border border-slate-200 text-xs font-medium">
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteConfirm(subUnit.id)}
+                                                        disabled={deleteMutation.isPending}
+                                                        className="px-2.5 py-1 rounded bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 transition-colors">
+                                                        {deleteMutation.isPending ? "Deactivating..." : "Confirm Deactivate"}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between border-t border-outline-variant bg-surface px-6 py-3 text-xs text-on-surface-variant">
+                    <span className="font-sans">
+                        Showing {filteredSubUnits.length} of {subUnits.length} sub-units
+                    </span>
+                    <Button variant="secondary" size="sm" onClick={onClose}>
+                        Close
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
+}

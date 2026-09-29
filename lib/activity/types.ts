@@ -84,6 +84,14 @@ export type FuelActivityItemDto = {
             country?: string;
             city?: string;
         } | null;
+        sub_unit_id?: string | null;
+        sub_unit?: {
+            id: string;
+            name: string;
+            sub_unit_code?: string;
+            sub_unit_type?: string;
+            status?: string;
+        } | null;
         meter_id: string | null;
         meter?: unknown | null;
         reporting_period_id: string;
@@ -316,6 +324,18 @@ export type FuelActivity = {
     facilityCode?: string;
     facilityCity?: string;
     facilityCountry?: string;
+    subUnitId?: string | null;
+    subUnitName?: string;
+    subUnitCode?: string;
+    subUnitType?: string;
+    subUnitStatus?: string;
+    subUnit?: {
+        id: string;
+        name: string;
+        subUnitCode?: string;
+        subUnitType?: string;
+        status?: string;
+    } | null;
     reportingPeriodName?: string;
     periodStatus?: string;
     periodStartDate?: string;

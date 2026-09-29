@@ -131,6 +131,14 @@ export type ElectricityActivityItemDto = {
             country?: string;
             city?: string;
         } | null;
+        sub_unit_id?: string | null;
+        sub_unit?: {
+            id: string;
+            name: string;
+            sub_unit_code?: string;
+            sub_unit_type?: string;
+            status?: string;
+        } | null;
         meter_id?: string | null;
         reporting_period_id: string;
         reporting_period?: {
@@ -205,6 +213,14 @@ export type ElectricityActivityItemDto = {
     };
     // Flat properties for backward compatibility
     facility_id?: string;
+    sub_unit_id?: string | null;
+    sub_unit?: {
+        id: string;
+        name: string;
+        sub_unit_code?: string;
+        sub_unit_type?: string;
+        status?: string;
+    } | null;
     reporting_period_id?: string;
     activity_start_date?: string;
     activity_end_date?: string;
@@ -242,6 +258,18 @@ export type ElectricityActivity = {
     facilityCode?: string;
     facilityCity?: string;
     facilityCountry?: string;
+    subUnitId?: string | null;
+    subUnitName?: string;
+    subUnitCode?: string;
+    subUnitType?: string;
+    subUnitStatus?: string;
+    subUnit?: {
+        id: string;
+        name: string;
+        subUnitCode?: string;
+        subUnitType?: string;
+        status?: string;
+    } | null;
     reportingPeriodId: string;
     reportingPeriodName?: string;
     periodStatus?: string;

@@ -10,7 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
-import { useFacilities } from "@/lib/facility/hooks";
+import { useFacilities, useSubUnits } from "@/lib/facility/hooks";
 import { useEmissionSources } from "@/lib/emissionSource/hooks";
 import type { MarketInstrumentType } from "@/lib/activity/electricityTypes";
 import {
@@ -114,6 +114,7 @@ export default function LogElectricityActivityPage() {
     const [form, setForm] = useState({
         reportingPeriod: "",
         facility: "",
+        subUnit: "",
         source: "",
         electricityKwh: "",
         electricityUnit: "kwh",
@@ -188,6 +189,7 @@ export default function LogElectricityActivityPage() {
 
     const reportingPeriodsQuery = useReportingPeriods();
     const facilitiesQuery = useFacilities();
+    const subUnitsQuery = useSubUnits(form.facility, { active_only: true });
     const emissionSourcesQuery = useEmissionSources("electricity");
     const fuelEmissionSourcesQuery = useEmissionSources("fuel");
     const customFuelUnitsQuery = useCustomFuelUnits(Boolean(fuelForm.customFuelId));
@@ -306,7 +308,13 @@ export default function LogElectricityActivityPage() {
     }, [isCertificateDateRangeValid, form.electricityActivityType, form.hasMarketInstrument, form.marketInstrumentType, marketForm.certIsRenewable]);
 
     function handleChange(field: string, value: string | boolean) {
-        setForm((current) => ({ ...current, [field]: value }));
+        setForm((current) => {
+            const next = { ...current, [field]: value };
+            if (field === "facility") {
+                next.subUnit = "";
+            }
+            return next;
+        });
         setErrors((current) => ({ ...current, [field]: "" }));
     }
 
@@ -596,6 +604,10 @@ export default function LogElectricityActivityPage() {
                 market_instrument_type: isGridImport && form.hasMarketInstrument ? form.marketInstrumentType : null,
             };
 
+            if (form.subUnit) {
+                payload.sub_unit_id = form.subUnit;
+            }
+
             if (isGridImport && form.hasMarketInstrument) {
                 const contractedKwh = marketForm.contractedElectricityUnit === "mwh"
                     ? Number(marketForm.contractedElectricityKwh) * 1000
@@ -828,6 +840,45 @@ export default function LogElectricityActivityPage() {
                                 placeholder="Select facility..."
                             />
                             {errors.facility && <p className="mt-2 text-xs text-error">{errors.facility}</p>}
+                        </div>
+                        <div id="form-field-subUnit" className="lg:col-span-2">
+                            <div className="flex items-center justify-between mb-2">
+                                <label className="block font-label-md text-label-md text-on-surface-variant">
+                                    Facility Sub-Unit <span className="text-xs text-slate-400 font-normal">(Optional)</span>
+                                </label>
+                                {form.facility && subUnitsQuery.data && subUnitsQuery.data.length > 0 && (
+                                    <span className="text-[11px] text-slate-500 font-medium">
+                                        {subUnitsQuery.data.length} sub-unit{subUnitsQuery.data.length > 1 ? "s" : ""} available
+                                    </span>
+                                )}
+                            </div>
+                            <CustomSelect
+                                options={[
+                                    ...(subUnitsQuery.data?.map((su) => ({
+                                        label: `${su.name}${su.subUnitCode ? ` (${su.subUnitCode})` : ""} • ${su.subUnitType.replace(/_/g, " ")}`,
+                                        value: String(su.id),
+                                    })) || []),
+                                ]}
+                                value={form.subUnit}
+                                onChange={(val) => handleChange("subUnit", val)}
+                                error={Boolean(errors.subUnit)}
+                                placeholder={
+                                    !form.facility
+                                        ? "Select a facility first..."
+                                        : subUnitsQuery.isLoading
+                                          ? "Loading sub-units..."
+                                          : subUnitsQuery.data?.length === 0
+                                            ? "No sub-units defined for facility"
+                                            : "Select sub-unit (e.g. Boiler House 1)..."
+                                }
+                                isLoading={subUnitsQuery.isLoading}
+                                isDisabled={!form.facility || (subUnitsQuery.data?.length === 0 && !subUnitsQuery.isLoading)}
+                            />
+                            {form.facility && subUnitsQuery.data && subUnitsQuery.data.length === 0 && !subUnitsQuery.isLoading && (
+                                <p className="mt-1 text-[11px] text-slate-400">
+                                    Activity will be attributed directly to facility level.
+                                </p>
+                            )}
                         </div>
                         <div id="form-field-activityStartDate" className="space-y-3 flex flex-col items-center">
                             <div className="flex items-center justify-between gap-2 w-full max-w-[340px]">

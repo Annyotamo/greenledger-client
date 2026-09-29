@@ -9,7 +9,7 @@ import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Calendar } from "@/components/ui/calendar";
 import { CustomSelect } from "@/components/ui/select";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
-import { useFacilities } from "@/lib/facility/hooks";
+import { useFacilities, useSubUnits } from "@/lib/facility/hooks";
 import { useEmissionSources } from "@/lib/emissionSource/hooks";
 import { createFuelActivity, uploadFuelActivityDocument, uploadS3File } from "@/lib/activity/api";
 import { ActivityDocumentsManager } from "@/components/activity/ActivityDocumentsManager";
@@ -40,6 +40,7 @@ function formFieldClass(error?: boolean) {
 type FuelActivityFormState = {
     reportingPeriod: string;
     facility: string;
+    subUnit: string;
     activityStartDate: string;
     activityEndDate: string;
     fuelType: string;
@@ -60,6 +61,7 @@ type FuelActivityFormState = {
 const initialFormState: FuelActivityFormState = {
     reportingPeriod: "",
     facility: "",
+    subUnit: "",
     activityStartDate: "",
     activityEndDate: "",
     fuelType: "",
@@ -112,6 +114,7 @@ export default function LogFuelActivityPage() {
     const router = useRouter();
     const reportingPeriodsQuery = useReportingPeriods();
     const facilitiesQuery = useFacilities();
+    const subUnitsQuery = useSubUnits(form.facility, { active_only: true });
     const emissionSourcesQuery = useEmissionSources("fuel");
     const customFuelUnitsQuery = useCustomFuelUnits(Boolean(form.customFuelId));
 
@@ -125,6 +128,10 @@ export default function LogFuelActivityPage() {
     const handleChange = useCallback((field: string, value: string) => {
         setForm((current) => {
             const next = { ...current, [field]: value } as FuelActivityFormState;
+
+            if (field === "facility") {
+                next.subUnit = "";
+            }
 
             if (field === "source") {
                 next.fuelCategory = "";
@@ -292,6 +299,10 @@ export default function LogFuelActivityPage() {
                 activity_end_date: form.activityEndDate,
             };
 
+            if (form.subUnit) {
+                payload.sub_unit_id = form.subUnit;
+            }
+
             if (form.customFuelId) {
                 payload.custom_fuel_id = form.customFuelId;
             } else {
@@ -398,7 +409,7 @@ export default function LogFuelActivityPage() {
                                 <CustomSelect
                                     options={
                                         reportingPeriodsQuery.data?.map((p: { id: string; name: string }) => ({
-                                            label: p.name,
+                                             label: p.name,
                                             value: String(p.id),
                                         })) || []
                                     }
@@ -432,6 +443,46 @@ export default function LogFuelActivityPage() {
                         </div>
 
                         <div className="grid gap-4 lg:grid-cols-2">
+                            <div id="form-field-subUnit">
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="block font-label-md text-label-md text-on-surface-variant">
+                                        Facility Sub-Unit <span className="text-xs text-slate-400 font-normal">(Optional)</span>
+                                    </label>
+                                    {form.facility && subUnitsQuery.data && subUnitsQuery.data.length > 0 && (
+                                        <span className="text-[11px] text-slate-500 font-medium">
+                                            {subUnitsQuery.data.length} sub-unit{subUnitsQuery.data.length > 1 ? "s" : ""} available
+                                        </span>
+                                    )}
+                                </div>
+                                <CustomSelect
+                                    options={[
+                                        ...(subUnitsQuery.data?.map((su) => ({
+                                            label: `${su.name}${su.subUnitCode ? ` (${su.subUnitCode})` : ""} • ${su.subUnitType.replace(/_/g, " ")}`,
+                                            value: String(su.id),
+                                        })) || []),
+                                    ]}
+                                    value={form.subUnit}
+                                    onChange={(val) => handleChange("subUnit", val)}
+                                    error={Boolean(errors.subUnit)}
+                                    placeholder={
+                                        !form.facility
+                                            ? "Select a facility first..."
+                                            : subUnitsQuery.isLoading
+                                              ? "Loading sub-units..."
+                                              : subUnitsQuery.data?.length === 0
+                                                ? "No sub-units defined for facility"
+                                                : "Select sub-unit (e.g. Boiler House 1)..."
+                                    }
+                                    isLoading={subUnitsQuery.isLoading}
+                                    isDisabled={!form.facility || (subUnitsQuery.data?.length === 0 && !subUnitsQuery.isLoading)}
+                                />
+                                {form.facility && subUnitsQuery.data && subUnitsQuery.data.length === 0 && !subUnitsQuery.isLoading && (
+                                    <p className="mt-1 text-[11px] text-slate-400">
+                                        Activity will be attributed directly to facility level.
+                                    </p>
+                                )}
+                            </div>
+
                             <div id="form-field-emissionType">
                                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                     Emission Type <span className="text-error">*</span>
@@ -447,7 +498,9 @@ export default function LogFuelActivityPage() {
                                     <p className="mt-2 text-xs text-error">{errors.emissionType}</p>
                                 )}
                             </div>
+                        </div>
 
+                        <div className="grid gap-4 lg:grid-cols-2">
                             <div id="form-field-source">
                                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                                     Emission Standard / Source <span className="text-error">*</span>

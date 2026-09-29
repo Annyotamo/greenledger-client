@@ -352,13 +352,36 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
 
                     {/* Facility & Period Context Badge - Refined & Transparent */}
                     <div className="flex flex-col gap-1.5 rounded-lg border border-outline-variant/50 bg-surface-container-lowest/40 backdrop-blur-xs p-3 min-w-[260px]">
-                        <div className="flex items-center gap-1.5 text-[10px] font-sans uppercase text-on-surface-variant font-semibold tracking-wider">
-                            <MaterialIcon name="domain" size="xs" />
-                            <span>Facility Location</span>
+                        <div className="flex items-center justify-between text-[10px] font-sans uppercase text-on-surface-variant font-semibold tracking-wider">
+                            <div className="flex items-center gap-1.5">
+                                <MaterialIcon name="domain" size="xs" />
+                                <span>Facility Location</span>
+                            </div>
+                            {(activity.subUnitName || activity.subUnit?.name) && (
+                                <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-bold uppercase">
+                                    Sub-Unit Linked
+                                </span>
+                            )}
                         </div>
                         <div className="font-sans font-semibold text-xs text-primary">
                             {activity.facilityName || "Primary Operational Center"}
                         </div>
+                        {(activity.subUnitName || activity.subUnit?.name) && (
+                            <div className="text-[11px] text-primary/90 flex items-center gap-1.5 font-sans font-medium">
+                                <MaterialIcon name="subdirectory_arrow_right" size="xs" className="text-secondary" />
+                                <span>{activity.subUnitName || activity.subUnit?.name}</span>
+                                {(activity.subUnitCode || activity.subUnit?.subUnitCode) && (
+                                    <span className="px-1 py-0.5 rounded bg-slate-100 font-mono text-[9px] text-slate-700">
+                                        {activity.subUnitCode || activity.subUnit?.subUnitCode}
+                                    </span>
+                                )}
+                                {(activity.subUnitType || activity.subUnit?.subUnitType) && (
+                                    <span className="text-[10px] text-slate-500 font-normal">
+                                        ({(activity.subUnitType || activity.subUnit?.subUnitType || "").replace(/_/g, " ")})
+                                    </span>
+                                )}
+                            </div>
+                        )}
                         <div className="text-[11px] text-on-surface-variant flex items-center gap-1.5 font-sans">
                             <span>Code: {activity.facilityCode || "FAC-GEN"}</span>
                             <span>•</span>

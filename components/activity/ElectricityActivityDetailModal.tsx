@@ -483,6 +483,28 @@ export function ElectricityActivityDetailModal({
                                         <span className="font-semibold text-primary">{formatValue(activity.facilityName || activity.facilityId)}</span>
                                     </div>
                                     <div>
+                                        <span className="text-on-surface-variant block">Facility Sub-Unit</span>
+                                        <span className="font-semibold text-primary">
+                                            {activity.subUnitName || activity.subUnit?.name ? (
+                                                <span className="inline-flex items-center gap-1.5 flex-wrap">
+                                                    <span>{activity.subUnitName || activity.subUnit?.name}</span>
+                                                    {(activity.subUnitCode || activity.subUnit?.subUnitCode) && (
+                                                        <span className="px-1.5 py-0.2 rounded bg-slate-100 font-mono text-[10px] text-slate-700">
+                                                            {activity.subUnitCode || activity.subUnit?.subUnitCode}
+                                                        </span>
+                                                    )}
+                                                    {(activity.subUnitType || activity.subUnit?.subUnitType) && (
+                                                        <span className="px-1.5 py-0.2 rounded bg-primary/10 text-primary text-[10px] font-medium uppercase">
+                                                            {(activity.subUnitType || activity.subUnit?.subUnitType || "").replace(/_/g, " ")}
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            ) : (
+                                                <span className="text-slate-400 font-normal">Facility Level (No Sub-Unit)</span>
+                                            )}
+                                        </span>
+                                    </div>
+                                    <div>
                                         <span className="text-on-surface-variant block">Facility Location</span>
                                         <span className="font-semibold text-primary">{facilityLocation || "—"}</span>
                                     </div>

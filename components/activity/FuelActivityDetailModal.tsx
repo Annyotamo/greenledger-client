@@ -292,6 +292,24 @@ export function FuelActivityDetailModal({
                                         {activity.facilityName} {activity.facilityCode && <span className="text-slate-500">({activity.facilityCode})</span>}
                                     </span>
                                 </div>
+                                {(activity.subUnitName || activity.subUnitCode || activity.subUnitId || activity.subUnit) && (
+                                    <div className="flex items-center justify-between py-1 border-b border-slate-100/70">
+                                        <span className="text-slate-500 font-medium">Facility Sub-Unit</span>
+                                        <span className="font-semibold text-primary text-right flex items-center gap-1.5">
+                                            <span>{activity.subUnitName || activity.subUnit?.name || "Sub-Unit"}</span>
+                                            {(activity.subUnitCode || activity.subUnit?.subUnitCode) && (
+                                                <span className="px-1.5 py-0.5 rounded bg-slate-100 font-mono text-[10px] text-slate-700">
+                                                    {activity.subUnitCode || activity.subUnit?.subUnitCode}
+                                                </span>
+                                            )}
+                                            {(activity.subUnitType || activity.subUnit?.subUnitType) && (
+                                                <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-medium uppercase">
+                                                    {(activity.subUnitType || activity.subUnit?.subUnitType || "").replace(/_/g, " ")}
+                                                </span>
+                                            )}
+                                        </span>
+                                    </div>
+                                )}
                                 <div className="flex items-center justify-between py-1 border-b border-slate-100/70">
                                     <span className="text-slate-500 font-medium">Location</span>
                                     <span className="font-semibold text-slate-900">{facilityLocation || "N/A"}</span>

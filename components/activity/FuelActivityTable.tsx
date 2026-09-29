@@ -346,6 +346,12 @@ export function FuelActivityTable({
                                                     {activeDays}d
                                                 </span>
                                             </div>
+                                            {(activity.subUnitName || activity.subUnit?.name) && (
+                                                <div className="mt-0.5 flex items-center gap-1 font-sans text-[10px] text-primary/80 font-medium">
+                                                    <MaterialIcon name="domain" size="xs" className="text-secondary" />
+                                                    <span className="truncate max-w-[140px]">{activity.subUnitName || activity.subUnit?.name}</span>
+                                                </div>
+                                            )}
                                         </TableCell>
                                         <TableCell className="py-2.5 px-4">
                                             <span

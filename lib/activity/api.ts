@@ -106,6 +106,9 @@ function mapFuelActivityItem(dto: any): FuelActivity {
           }
         : null;
 
+    const subUnitObj = ctx.sub_unit || dto.sub_unit || null;
+    const subUnitId = ctx.sub_unit_id || dto.sub_unit_id || subUnitObj?.id || null;
+
     return {
         id: dto.id,
         createdAt: dto.created_at || "",
@@ -115,6 +118,20 @@ function mapFuelActivityItem(dto: any): FuelActivity {
         facilityCode: ctx.facility?.facility_code,
         facilityCity: ctx.facility?.city,
         facilityCountry: ctx.facility?.country,
+        subUnitId,
+        subUnitName: subUnitObj?.name,
+        subUnitCode: subUnitObj?.sub_unit_code,
+        subUnitType: subUnitObj?.sub_unit_type,
+        subUnitStatus: subUnitObj?.status,
+        subUnit: subUnitObj
+            ? {
+                  id: subUnitObj.id,
+                  name: subUnitObj.name,
+                  subUnitCode: subUnitObj.sub_unit_code,
+                  subUnitType: subUnitObj.sub_unit_type,
+                  status: subUnitObj.status,
+              }
+            : null,
         reportingPeriodId: ctx.reporting_period_id || ctx.reporting_period?.id || "",
         reportingPeriodName: ctx.reporting_period?.name,
         periodStatus: ctx.reporting_period?.period_status,
@@ -196,6 +213,7 @@ export async function getFuelActivities(filters?: {
     status?: string;
     emission_type?: string;
     facility_id?: string;
+    sub_unit_id?: string;
     reporting_period_id?: string;
     meter_id?: string;
     fuel_id?: string;
@@ -211,6 +229,7 @@ export async function getFuelActivities(filters?: {
     if (filters?.status) params.append("status", filters.status.toLowerCase());
     if (filters?.emission_type) params.append("emission_type", filters.emission_type.toLowerCase());
     if (filters?.facility_id) params.append("facility_id", filters.facility_id);
+    if (filters?.sub_unit_id) params.append("sub_unit_id", filters.sub_unit_id);
     if (filters?.reporting_period_id) params.append("reporting_period_id", filters.reporting_period_id);
     if (filters?.meter_id) params.append("meter_id", filters.meter_id);
     if (filters?.fuel_id) params.append("fuel_id", filters.fuel_id);
@@ -398,6 +417,9 @@ function mapElectricityActivityItem(dto: any): ElectricityActivity {
           }))
         : undefined;
 
+    const subUnitObj = ctx.sub_unit || dto.sub_unit || null;
+    const subUnitId = ctx.sub_unit_id || dto.sub_unit_id || subUnitObj?.id || null;
+
     return {
         id: dto.id,
         createdAt: dto.created_at || "",
@@ -407,6 +429,20 @@ function mapElectricityActivityItem(dto: any): ElectricityActivity {
         facilityCode: ctx.facility?.facility_code,
         facilityCity: ctx.facility?.city,
         facilityCountry: ctx.facility?.country,
+        subUnitId,
+        subUnitName: subUnitObj?.name,
+        subUnitCode: subUnitObj?.sub_unit_code,
+        subUnitType: subUnitObj?.sub_unit_type,
+        subUnitStatus: subUnitObj?.status,
+        subUnit: subUnitObj
+            ? {
+                  id: subUnitObj.id,
+                  name: subUnitObj.name,
+                  subUnitCode: subUnitObj.sub_unit_code,
+                  subUnitType: subUnitObj.sub_unit_type,
+                  status: subUnitObj.status,
+              }
+            : null,
         reportingPeriodId: ctx.reporting_period_id || ctx.reporting_period?.id || dto.reporting_period_id || "",
         reportingPeriodName: ctx.reporting_period?.name,
         periodStatus: ctx.reporting_period?.period_status,
@@ -483,6 +519,7 @@ export async function getElectricityActivities(filters?: {
     data_quality_tier?: string;
     source_type?: string;
     facility_id?: string;
+    sub_unit_id?: string;
     reporting_period_id?: string;
     activity_start_date?: string;
     activity_end_date?: string;
@@ -508,6 +545,7 @@ export async function getElectricityActivities(filters?: {
     }
     if (filters?.source_type) params.append("source_type", filters.source_type);
     if (filters?.facility_id) params.append("facility_id", filters.facility_id);
+    if (filters?.sub_unit_id) params.append("sub_unit_id", filters.sub_unit_id);
     if (filters?.reporting_period_id) params.append("reporting_period_id", filters.reporting_period_id);
     if (filters?.activity_start_date) params.append("activity_start_date", filters.activity_start_date);
     if (filters?.activity_end_date) params.append("activity_end_date", filters.activity_end_date);

@@ -51,15 +51,20 @@ export function BrsrAirReportModal({ isOpen, onClose, payload, onDownload }: Brs
 
     return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in">
-            <div className="w-full max-w-md rounded-2xl border border-outline-variant/60 bg-white p-6 shadow-2xl space-y-5">
+            <div className="w-full max-w-lg rounded-2xl border border-outline-variant/60 bg-white p-6 shadow-2xl space-y-5">
                 <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
                     <div className="flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
                             <MaterialIcon name="air" size="sm" />
                         </div>
-                        <h3 className="font-display text-base font-bold text-on-surface">
-                            Download Air Emissions Report
-                        </h3>
+                        <div>
+                            <h3 className="font-display text-base font-bold text-on-surface">
+                                Export BRSR Air Emissions Report
+                            </h3>
+                            <p className="text-[11px] text-on-surface-variant font-sans">
+                                Official SEBI Principle 6 Multi-Tier Emissions Workbook (.xlsx)
+                            </p>
+                        </div>
                     </div>
                     <button
                         type="button"
@@ -71,22 +76,33 @@ export function BrsrAirReportModal({ isOpen, onClose, payload, onDownload }: Brs
 
                 <div className="space-y-3 text-xs text-on-surface-variant font-sans">
                     <p>
-                        Export official SEBI BRSR Principle 6 Air Emissions report (.xlsx) containing stack pollutant emission rates (kg/hr), annual totals (tonnes/year), and plant average concentrations (mg/Nm³).
+                        The generated Excel workbook provides comprehensive statutory compliance reporting containing:
                     </p>
-                    <div className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-3 space-y-1.5 text-xs font-sans tabular-nums">
+                    <ul className="list-disc pl-4 space-y-1 text-on-surface-variant">
+                        <li><strong>Table 1:</strong> Permitted Limits (NOx, SOx, PM10, PM2.5, CO)</li>
+                        <li><strong>Table 2:</strong> Sampling Readings Log with Mass Rates (kg/hr)</li>
+                        <li><strong>Table 3:</strong> Stack Totals &amp; Statutory Exceedances (mg/Nm³ and t/yr)</li>
+                        <li><strong>Table 4:</strong> BRSR Principle 6 Criteria Air Pollutants Summary (t/yr)</li>
+                    </ul>
+
+                    <div className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-3.5 space-y-2 text-xs font-sans tabular-nums">
                         <div className="flex justify-between">
-                            <span className="text-on-surface-variant">FY Period:</span>
-                            <span className="font-semibold text-on-surface">{payload.financial_year_label || "FY 2024-25"}</span>
+                            <span className="text-on-surface-variant">Financial Year:</span>
+                            <span className="font-semibold text-on-surface">{payload.financial_year_label || "FY 2025-26"}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-on-surface-variant">Active Stacks Count:</span>
+                            <span className="text-on-surface-variant">Configured Stacks:</span>
                             <span className="font-semibold text-on-surface">{payload.stacks?.length || 0} stack(s)</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-on-surface-variant">Total Readings Logged:</span>
+                            <span className="text-on-surface-variant">Sampling Readings:</span>
                             <span className="font-semibold text-on-surface">
                                 {payload.stacks?.reduce((acc, s) => acc + (s.readings?.length || 0), 0) || 0} reading(s)
                             </span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-on-surface-variant">Core Criteria Pollutants:</span>
+                            <span className="font-medium text-emerald-700">NOx, SOx, PM10, PM2.5, CO</span>
                         </div>
                     </div>
                     {error && <p className="text-xs text-error font-medium">{error}</p>}
@@ -101,16 +117,16 @@ export function BrsrAirReportModal({ isOpen, onClose, payload, onDownload }: Brs
                         size="md"
                         onClick={handleDownload}
                         disabled={isDownloading}
-                        className="flex items-center gap-2">
+                        className="flex items-center gap-2 shadow-sm">
                         {isDownloading ? (
                             <>
                                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                                <span>Generating...</span>
+                                <span>Generating Report...</span>
                             </>
                         ) : (
                             <>
                                 <MaterialIcon name="download" size="sm" />
-                                <span>Download Excel</span>
+                                <span>Download Excel (.xlsx)</span>
                             </>
                         )}
                     </Button>
@@ -120,3 +136,4 @@ export function BrsrAirReportModal({ isOpen, onClose, payload, onDownload }: Brs
         document.body
     );
 }
+

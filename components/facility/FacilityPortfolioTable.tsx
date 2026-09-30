@@ -18,11 +18,6 @@ const statusMap: Record<string, { label: string; variant: "positive" | "negative
     inactive: { label: "Inactive", variant: "negative" },
 };
 
-function calculateDataQuality(facility: Facility): number {
-    const scopeCount = Number(facility.scope1Enabled) + Number(facility.scope2Enabled) + Number(facility.scope3Enabled);
-    return Math.round((scopeCount / 3) * 100);
-}
-
 export function FacilityPortfolioTable({ facilities, isLoading, isError }: FacilityPortfolioTableProps) {
     const [selectedSubUnitsFacility, setSelectedSubUnitsFacility] = useState<Facility | null>(null);
 
@@ -53,7 +48,7 @@ export function FacilityPortfolioTable({ facilities, isLoading, isError }: Facil
 
                 {/* Table */}
                 <div className="overflow-x-auto">
-                    <Table className="min-w-[900px]">
+                    <Table className="min-w-[800px]">
                         <TableHeader>
                             <TableRow className="bg-surface-container-low border-b border-outline-variant">
                                 <TableHead className="py-3 px-4 font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
@@ -74,28 +69,25 @@ export function FacilityPortfolioTable({ facilities, isLoading, isError }: Facil
                                 <TableHead className="py-3 px-4 font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                     Sub-Units
                                 </TableHead>
-                                <TableHead className="py-3 px-4 font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
-                                    Data Quality
-                                </TableHead>
-                                <TableHead />
+                                <TableHead className="w-10" />
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {isLoading ? (
                                 <TableRow className="border-none">
-                                    <TableCell className="py-12 px-4 text-center text-on-surface-variant" colSpan={8}>
+                                    <TableCell className="py-12 px-4 text-center text-on-surface-variant" colSpan={7}>
                                         Loading facilities...
                                     </TableCell>
                                 </TableRow>
                             ) : isError ? (
                                 <TableRow className="border-none">
-                                    <TableCell className="py-12 px-4 text-center text-error" colSpan={8}>
+                                    <TableCell className="py-12 px-4 text-center text-error" colSpan={7}>
                                         Unable to load facilities. Refresh to try again.
                                     </TableCell>
                                 </TableRow>
                             ) : facilities.length === 0 ? (
                                 <TableRow className="border-none">
-                                    <TableCell className="py-12 px-4 text-center text-on-surface-variant" colSpan={8}>
+                                    <TableCell className="py-12 px-4 text-center text-on-surface-variant" colSpan={7}>
                                         No facilities available yet.
                                     </TableCell>
                                 </TableRow>
@@ -105,7 +97,6 @@ export function FacilityPortfolioTable({ facilities, isLoading, isError }: Facil
                                         label: facility.facilityStatus,
                                         variant: "neutral" as const,
                                     };
-                                    const quality = calculateDataQuality(facility);
 
                                     return (
                                         <TableRow
@@ -161,32 +152,6 @@ export function FacilityPortfolioTable({ facilities, isLoading, isError }: Facil
                                                         </span>
                                                     )}
                                                 </button>
-                                            </TableCell>
-                                            <TableCell className="py-3 px-4">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-24 bg-surface-container-high h-1.5 rounded-full overflow-hidden">
-                                                        <div
-                                                            className={`h-full ${
-                                                                quality >= 80
-                                                                    ? "bg-secondary"
-                                                                    : quality >= 60
-                                                                      ? "bg-secondary-container"
-                                                                      : "bg-error"
-                                                            }`}
-                                                            style={{ width: `${quality}%` }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-[11px] font-sans font-semibold text-secondary tabular-nums">
-                                                        {quality}%{" "}
-                                                        {quality >= 90
-                                                            ? "(Verified)"
-                                                            : quality >= 80
-                                                              ? "(High)"
-                                                              : quality >= 60
-                                                                ? "(Good)"
-                                                                : "(Low)"}
-                                                    </span>
-                                                </div>
                                             </TableCell>
                                             <TableCell className="py-3 px-4 text-right">
                                                 <button

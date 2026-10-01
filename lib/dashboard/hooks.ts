@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getEnergyDashboard, getGhgDashboard } from "./api";
-import type { ParsedEnergyDashboardData, ParsedGhgDashboardData } from "./types";
+import type { ParsedEnergyDashboardData, ParsedGhgDashboardData, GhgDashboardQueryParams } from "./types";
 
 export function useEnergyDashboard() {
     return useQuery<ParsedEnergyDashboardData, Error>({
@@ -13,11 +13,12 @@ export function useEnergyDashboard() {
     });
 }
 
-export function useGhgDashboard() {
+export function useGhgDashboard(params?: GhgDashboardQueryParams) {
     return useQuery<ParsedGhgDashboardData, Error>({
-        queryKey: ["tenant-ghg-dashboard"],
-        queryFn: getGhgDashboard,
+        queryKey: ["tenant-ghg-dashboard", params],
+        queryFn: () => getGhgDashboard(params),
         staleTime: 60 * 1000,
         refetchOnWindowFocus: false,
     });
 }
+

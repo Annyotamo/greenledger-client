@@ -9,6 +9,7 @@ import { DashboardSkeleton } from "./DashboardSkeleton";
 import { TenantDashboardBanner } from "./TenantDashboardBanner";
 import { TopHeroKpiBanner } from "./TopHeroKpiBanner";
 import { ScopeKpiCardsGrid } from "./ScopeKpiCardsGrid";
+import { GasSegregationMatrix } from "./GasSegregationMatrix";
 import { ScopeDistributionSection } from "./ScopeDistributionSection";
 import { MultiYearEmissionsTrendChart } from "./MultiYearEmissionsTrendChart";
 import { DetailedSourceBreakdowns } from "./DetailedSourceBreakdowns";
@@ -18,7 +19,10 @@ import { FacilityTable } from "./FacilityTable";
 import {
     FACILITY_ROWS,
     RECENT_ACTIVITIES,
+    DEFAULT_SCOPE_GAS_SEGREGATION,
+    DEFAULT_GRANULAR_GAS_BREAKDOWN,
 } from "@/lib/dashboard/data";
+import type { YearlyEmissionsTrendPoint, ParsedDetailedSourceBreakdowns } from "@/lib/dashboard/types";
 
 const DEFAULT_SCOPE_DISTRIBUTION = [
     { scopeName: "Scope 1", tco2e: 2.68, sharePct: 32.4, color: "#f97316" },
@@ -26,7 +30,7 @@ const DEFAULT_SCOPE_DISTRIBUTION = [
     { scopeName: "Scope 3", tco2e: 1.50, sharePct: 18.1, color: "#10b981" },
 ];
 
-const DEFAULT_YEARLY_TREND = [
+const DEFAULT_YEARLY_TREND: YearlyEmissionsTrendPoint[] = [
     {
         year: 2025,
         yearLabel: "FY 2024-25",
@@ -34,6 +38,9 @@ const DEFAULT_YEARLY_TREND = [
         scope1Tco2e: 2.80,
         scope2Tco2e: 4.25,
         scope3Tco2e: 1.60,
+        co2Tco2e: 8.41,
+        ch4Tco2e: 0.13,
+        n2oTco2e: 0.11,
         yoyChangePct: 0,
     },
     {
@@ -43,17 +50,28 @@ const DEFAULT_YEARLY_TREND = [
         scope1Tco2e: 2.68,
         scope2Tco2e: 4.10,
         scope3Tco2e: 1.50,
+        co2Tco2e: 8.05,
+        ch4Tco2e: 0.12,
+        n2oTco2e: 0.11,
         yoyChangePct: -4.2,
     },
 ];
 
-const DEFAULT_DETAILED_BREAKDOWNS = {
+const DEFAULT_DETAILED_BREAKDOWNS: ParsedDetailedSourceBreakdowns = {
     scope1: {
         stationaryCombustion: 2.68,
         mobileCombustion: 0.0,
         processEmissions: 0.0,
         fugitiveEmissions: 0.0,
         total: 2.68,
+        co2Tco2e: 2.65,
+        ch4Tco2e: 0.01,
+        n2oTco2e: 0.02,
+        biogenicCo2Tco2e: 0.0,
+        co2Kg: 2650.0,
+        ch4Kg: 10.0,
+        n2oKg: 20.0,
+        biogenicCo2Kg: 0.0,
     },
     scope2: {
         purchasedElectricity: 4.10,
@@ -62,12 +80,24 @@ const DEFAULT_DETAILED_BREAKDOWNS = {
         locationBased: 4.10,
         marketBased: 3.90,
         total: 4.10,
+        co2Tco2e: 4.0,
+        ch4Tco2e: 0.05,
+        n2oTco2e: 0.05,
+        co2Kg: 4000.0,
+        ch4Kg: 50.0,
+        n2oKg: 50.0,
     },
     scope3: {
         categories: [
             { categoryCode: "Cat 1", categoryName: "Purchased Goods and Services", tco2e: 1.50, sharePct: 18.1 },
         ],
         total: 1.50,
+        co2Tco2e: 1.4,
+        ch4Tco2e: 0.06,
+        n2oTco2e: 0.04,
+        co2Kg: 1400.0,
+        ch4Kg: 60.0,
+        n2oKg: 40.0,
     },
 };
 
@@ -121,6 +151,9 @@ export function DashboardView() {
         ? dashboard.top5EmissionSources
         : DEFAULT_TOP_5_SOURCES;
 
+    const scopeGasSegregation = dashboard?.scopeGasSegregation || DEFAULT_SCOPE_GAS_SEGREGATION;
+    const granularGasBreakdown = dashboard?.granularGasBreakdown || DEFAULT_GRANULAR_GAS_BREAKDOWN;
+
     const facilityRows = (dashboard?.facilityRows && dashboard.facilityRows.length > 0 ? dashboard.facilityRows : FACILITY_ROWS).slice(0, 5);
     const recentActivities = (dashboard?.recentActivities && dashboard.recentActivities.length > 0 ? dashboard.recentActivities : RECENT_ACTIVITIES).slice(0, 12);
 
@@ -135,17 +168,20 @@ export function DashboardView() {
             {/* 4 Scope KPI Cards Grid (Scope 1, Scope 2, Scope 3, Biogenic) */}
             <ScopeKpiCardsGrid scopeCards={scopeCards} />
 
-            {/* Section 2 & 3: Scope Distribution (Donut / Stacked Bar) & Multi-Year Emissions Trend Line Chart */}
+            {/* GHG Gas Segregation Matrix (CO2, CH4, N2O, Biogenic CO2 with Unit Selector & GWP) */}
+            <GasSegregationMatrix data={scopeGasSegregation} gasBreakdown={granularGasBreakdown} />
+
+            {/* Section 2 & 3: Scope Distribution (Donut / Stacked Bar with Scope vs Gas toggle) & Multi-Year Emissions Trend Line Chart */}
             <div className="grid grid-cols-12 gap-6 items-stretch">
                 <div className="col-span-12 lg:col-span-5">
-                    <ScopeDistributionSection data={scopeDistribution} />
+                    <ScopeDistributionSection data={scopeDistribution} gasBreakdown={granularGasBreakdown} />
                 </div>
                 <div className="col-span-12 lg:col-span-7">
                     <MultiYearEmissionsTrendChart data={yearlyTrend} />
                 </div>
             </div>
 
-            {/* Section 4: Detailed Sub-Source Breakdowns (Scope 1, Scope 2, Scope 3) */}
+            {/* Section 4: Detailed Sub-Source Breakdowns (Scope 1, Scope 2, Scope 3 with Gas Segregation toggle) */}
             <DetailedSourceBreakdowns data={detailedSourceBreakdowns} />
 
             {/* Section 5: Top 5 Emission Sources Table & Recent Activity Panel */}
@@ -162,7 +198,7 @@ export function DashboardView() {
                 </div>
             </div>
 
-            {/* Operational Facility Overview Table */}
+            {/* Operational Facility Overview Table (with Gas Mix CO2 / CH4 / N2O breakdown) */}
             {facilityRows && facilityRows.length > 0 && (
                 <FacilityTable rows={facilityRows} />
             )}

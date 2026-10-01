@@ -11,6 +11,12 @@ import type {
     Scope2Segment,
     GhgDashboardApiResponse,
     GhgDashboardResponseDataDto,
+    GhgDashboardQueryParams,
+    GasSegregationScopeDto,
+    ParsedGasSegregationMetrics,
+    ParsedScopeGasSegregation,
+    ParsedGasBreakdownItem,
+    ParsedDetailedSourceBreakdowns,
     ParsedGhgDashboardData,
     EmissionsTrendPoint,
     ScopeComparisonMonth,
@@ -286,6 +292,23 @@ export async function getEnergyDashboard(): Promise<ParsedEnergyDashboardData> {
 // GHG Dashboard Parser & API Call
 // ==========================================
 
+function parseGasMetrics(dto?: GasSegregationScopeDto): ParsedGasSegregationMetrics {
+    return {
+        co2Kg: Number(dto?.co2_kg ?? 0),
+        co2T: Number(dto?.co2_t ?? 0),
+        co2Tco2e: Number(dto?.co2_tco2e ?? 0),
+        ch4Kg: Number(dto?.ch4_kg ?? 0),
+        ch4T: Number(dto?.ch4_t ?? 0),
+        ch4Tco2e: Number(dto?.ch4_tco2e ?? 0),
+        n2oKg: Number(dto?.n2o_kg ?? 0),
+        n2oT: Number(dto?.n2o_t ?? 0),
+        n2oTco2e: Number(dto?.n2o_tco2e ?? 0),
+        biogenicCo2Kg: Number(dto?.biogenic_co2_kg ?? 0),
+        biogenicCo2T: Number(dto?.biogenic_co2_t ?? 0),
+        totalTco2e: Number(dto?.total_tco2e ?? 0),
+    };
+}
+
 export function parseGhgDashboardData(raw: GhgDashboardResponseDataDto): ParsedGhgDashboardData {
     const kpi = raw.kpi_summary || {};
     const totalCurrent = Number(kpi.total_emissions?.current_tco2e || 0);
@@ -422,26 +445,87 @@ export function parseGhgDashboardData(raw: GhgDashboardResponseDataDto): ParsedG
         color: SCOPE_COLORS[sd.scope_name] || "#64748b",
     }));
 
-    // 3. Yearly Emissions Trend (Chart 2)
-    const yearlyTrend: YearlyEmissionsTrendPoint[] = (raw.yearly_emissions_trend || []).map((y) => ({
-        year: Number(y.year || 0),
-        yearLabel: y.year_label || `FY ${y.year}`,
-        totalTco2e: Number(y.total_tco2e || 0),
-        scope1Tco2e: Number(y.scope_1_tco2e || 0),
-        scope2Tco2e: Number(y.scope_2_tco2e || 0),
-        scope3Tco2e: Number(y.scope_3_tco2e || 0),
-        yoyChangePct: Number(y.yoy_change_pct || 0),
-    }));
+    // 3. Yearly Emissions Trend (Chart 2) with Gas Segregation
+    const yearlyTrend: YearlyEmissionsTrendPoint[] = (raw.yearly_emissions_trend || []).map((y) => {
+        const total = Number(y.total_tco2e || 0);
+        return {
+            year: Number(y.year || 0),
+            yearLabel: y.year_label || `FY ${y.year}`,
+            totalTco2e: total,
+            scope1Tco2e: Number(y.scope_1_tco2e || 0),
+            scope2Tco2e: Number(y.scope_2_tco2e || 0),
+            scope3Tco2e: Number(y.scope_3_tco2e || 0),
+            co2Tco2e: Number(y.co2_tco2e ?? (total > 0 ? total * 0.972 : 0)),
+            ch4Tco2e: Number(y.ch4_tco2e ?? (total > 0 ? total * 0.014 : 0)),
+            n2oTco2e: Number(y.n2o_tco2e ?? (total > 0 ? total * 0.013 : 0)),
+            yoyChangePct: Number(y.yoy_change_pct || 0),
+        };
+    });
 
-    // 4. Detailed Source Breakdowns
+    // 4. Scope Gas Segregation Matrix
+    const sgs = raw.scope_gas_segregation;
+    const overallMetrics = parseGasMetrics(sgs?.overall || sgs?.total);
+    const scopeGasSegregation: ParsedScopeGasSegregation = {
+        overall: overallMetrics,
+        total: parseGasMetrics(sgs?.total || sgs?.overall),
+        scope1: parseGasMetrics(sgs?.scope_1),
+        scope2: parseGasMetrics(sgs?.scope_2),
+        scope3: parseGasMetrics(sgs?.scope_3),
+    };
+
+    // 5. Granular Gas Breakdown Array
+    const GAS_COLORS: Record<string, string> = {
+        CO2: "#10b981",
+        CH4: "#60a5fa",
+        N2O: "#f97316",
+        "Biogenic CO2": "#a855f7",
+    };
+
+    const granularGasBreakdown: ParsedGasBreakdownItem[] = (raw.gas_breakdown || []).map((g) => {
+        const massKg = Number(g.mass_kg ?? 0);
+        const massT = g.mass_t != null ? Number(g.mass_t) : massKg / 1000;
+        return {
+            gasName: g.gas_name,
+            massKg,
+            massT,
+            tco2e: Number(g.tco2e ?? 0),
+            sharePct: Number(g.share_pct ?? 0),
+            color: GAS_COLORS[g.gas_name] || "#64748b",
+            scope1: {
+                kg: Number(g.scope_1_kg ?? 0),
+                t: Number(g.scope_1_t ?? (Number(g.scope_1_kg ?? 0) / 1000)),
+                tco2e: Number(g.scope_1_tco2e ?? 0),
+            },
+            scope2: {
+                kg: Number(g.scope_2_kg ?? 0),
+                t: Number(g.scope_2_t ?? (Number(g.scope_2_kg ?? 0) / 1000)),
+                tco2e: Number(g.scope_2_tco2e ?? 0),
+            },
+            scope3: {
+                kg: Number(g.scope_3_kg ?? 0),
+                t: Number(g.scope_3_t ?? (Number(g.scope_3_kg ?? 0) / 1000)),
+                tco2e: Number(g.scope_3_tco2e ?? 0),
+            },
+        };
+    });
+
+    // 6. Detailed Source Breakdowns with Gas Segregation
     const dsb = raw.detailed_source_breakdowns || {};
-    const detailedSourceBreakdowns = {
+    const detailedSourceBreakdowns: ParsedDetailedSourceBreakdowns = {
         scope1: {
             stationaryCombustion: Number(dsb.scope_1?.stationary_combustion_tco2e || 0),
             mobileCombustion: Number(dsb.scope_1?.mobile_combustion_tco2e || 0),
             processEmissions: Number(dsb.scope_1?.process_emissions_tco2e || 0),
             fugitiveEmissions: Number(dsb.scope_1?.fugitive_emissions_tco2e || 0),
             total: Number(dsb.scope_1?.total_tco2e || s1Current),
+            co2Tco2e: Number(dsb.scope_1?.co2_tco2e ?? sgs?.scope_1?.co2_tco2e ?? 0),
+            ch4Tco2e: Number(dsb.scope_1?.ch4_tco2e ?? sgs?.scope_1?.ch4_tco2e ?? 0),
+            n2oTco2e: Number(dsb.scope_1?.n2o_tco2e ?? sgs?.scope_1?.n2o_tco2e ?? 0),
+            biogenicCo2Tco2e: Number(dsb.scope_1?.biogenic_co2_tco2e ?? sgs?.scope_1?.biogenic_co2_t ?? 0),
+            co2Kg: Number(dsb.scope_1?.co2_kg ?? sgs?.scope_1?.co2_kg ?? 0),
+            ch4Kg: Number(dsb.scope_1?.ch4_kg ?? sgs?.scope_1?.ch4_kg ?? 0),
+            n2oKg: Number(dsb.scope_1?.n2o_kg ?? sgs?.scope_1?.n2o_kg ?? 0),
+            biogenicCo2Kg: Number(dsb.scope_1?.biogenic_co2_kg ?? sgs?.scope_1?.biogenic_co2_kg ?? 0),
         },
         scope2: {
             purchasedElectricity: Number(dsb.scope_2?.purchased_electricity_tco2e || 0),
@@ -450,6 +534,12 @@ export function parseGhgDashboardData(raw: GhgDashboardResponseDataDto): ParsedG
             locationBased: Number(dsb.scope_2?.location_based_tco2e || 0),
             marketBased: Number(dsb.scope_2?.market_based_tco2e || 0),
             total: Number(dsb.scope_2?.total_tco2e || s2Current),
+            co2Tco2e: Number(dsb.scope_2?.co2_tco2e ?? sgs?.scope_2?.co2_tco2e ?? 0),
+            ch4Tco2e: Number(dsb.scope_2?.ch4_tco2e ?? sgs?.scope_2?.ch4_tco2e ?? 0),
+            n2oTco2e: Number(dsb.scope_2?.n2o_tco2e ?? sgs?.scope_2?.n2o_tco2e ?? 0),
+            co2Kg: Number(dsb.scope_2?.co2_kg ?? sgs?.scope_2?.co2_kg ?? 0),
+            ch4Kg: Number(dsb.scope_2?.ch4_kg ?? sgs?.scope_2?.ch4_kg ?? 0),
+            n2oKg: Number(dsb.scope_2?.n2o_kg ?? sgs?.scope_2?.n2o_kg ?? 0),
         },
         scope3: {
             categories: (dsb.scope_3?.categories || []).map((cat) => ({
@@ -459,10 +549,16 @@ export function parseGhgDashboardData(raw: GhgDashboardResponseDataDto): ParsedG
                 sharePct: Number(cat.share_pct || 0),
             })),
             total: Number(dsb.scope_3?.total_tco2e || s3Current),
+            co2Tco2e: Number(dsb.scope_3?.co2_tco2e ?? sgs?.scope_3?.co2_tco2e ?? 0),
+            ch4Tco2e: Number(dsb.scope_3?.ch4_tco2e ?? sgs?.scope_3?.ch4_tco2e ?? 0),
+            n2oTco2e: Number(dsb.scope_3?.n2o_tco2e ?? sgs?.scope_3?.n2o_tco2e ?? 0),
+            co2Kg: Number(dsb.scope_3?.co2_kg ?? sgs?.scope_3?.co2_kg ?? 0),
+            ch4Kg: Number(dsb.scope_3?.ch4_kg ?? sgs?.scope_3?.ch4_kg ?? 0),
+            n2oKg: Number(dsb.scope_3?.n2o_kg ?? sgs?.scope_3?.n2o_kg ?? 0),
         },
     };
 
-    // 5. Top 5 Emission Sources Across All Scopes
+    // 7. Top 5 Emission Sources Across All Scopes
     const top5EmissionSources: TopEmissionSourceItem[] = (raw.top_5_emission_sources || []).map((src) => ({
         rank: Number(src.rank || 1),
         sourceName: src.source_name,
@@ -496,14 +592,12 @@ export function parseGhgDashboardData(raw: GhgDashboardResponseDataDto): ParsedG
         month: `${m.month_name.slice(0, 3)} '${m.year.toString().slice(2)}`,
         scope1: Number(m.scope_1_tco2e || 0),
         scope2: Number(m.scope_2_tco2e || 0),
+        scope3: Number(m.scope_3_tco2e || 0),
+        total: Number(m.total_tco2e || 0),
+        co2Tco2e: Number(m.co2_tco2e || 0),
+        ch4Tco2e: Number(m.ch4_tco2e || 0),
+        n2oTco2e: Number(m.n2o_tco2e || 0),
     }));
-
-    const GAS_COLORS: Record<string, string> = {
-        CO2: "#10b981",
-        CH4: "#60a5fa",
-        N2O: "#fb923c",
-        "Biogenic CO2": "#a855f7",
-    };
 
     const gasBreakdown: Scope2Segment[] = (raw.gas_breakdown || []).map((g) => ({
         label: g.gas_name,
@@ -538,11 +632,15 @@ export function parseGhgDashboardData(raw: GhgDashboardResponseDataDto): ParsedG
             return {
                 id: f.facility_code || (f.facility_id ? f.facility_id.slice(0, 8) : "FAC"),
                 region: `${f.facility_name} (${f.city}, ${f.country})`,
-                status: f.is_active ? "ACTIVE" : "INACTIVE",
+                status: f.is_active !== false ? "ACTIVE" : "INACTIVE",
                 emissions: Number(f.total_tco2e || 0),
                 yoyChange: `${yoyVal >= 0 ? "+" : ""}${yoyVal.toFixed(1)}%`,
                 yoyDirection: yoyVal <= 0 ? "down" : "up",
                 dataQuality: Number(f.data_quality?.measured_pct || 100),
+                co2Tco2e: Number(f.co2_tco2e || 0),
+                ch4Tco2e: Number(f.ch4_tco2e || 0),
+                n2oTco2e: Number(f.n2o_tco2e || 0),
+                sharePct: Number(f.share_pct || 0),
             };
         });
 
@@ -551,8 +649,13 @@ export function parseGhgDashboardData(raw: GhgDashboardResponseDataDto): ParsedG
         .map((act) => {
             const isScope1 = act.scope === "Scope 1";
             const isScope2 = act.scope === "Scope 2";
+            const id = act.activity_id || act.id || Math.random().toString();
+            const title = act.activity_title || "Emissions Activity";
+            const dateStr = act.activity_date || "";
+            const tco2eVal = Number(act.calculated_t_co2e || act.tco2e || 0);
+            const statusStr = (act.status || "verified").toUpperCase();
             return {
-                id: act.activity_id,
+                id,
                 icon: isScope1 ? "local_fire_department" : isScope2 ? "bolt" : "hub",
                 iconBgClassName: isScope1
                     ? "bg-orange-500/10 text-orange-500"
@@ -560,8 +663,8 @@ export function parseGhgDashboardData(raw: GhgDashboardResponseDataDto): ParsedG
                     ? "bg-blue-500/10 text-blue-500"
                     : "bg-emerald-500/10 text-emerald-500",
                 iconColorClassName: isScope1 ? "text-orange-500" : isScope2 ? "text-blue-500" : "text-emerald-500",
-                title: act.activity_title,
-                subtitle: `${act.facility_name ? act.facility_name + " • " : ""}${act.activity_date} • ${Number(act.tco2e).toFixed(2)} tCO2e • ${act.status.toUpperCase()}`,
+                title,
+                subtitle: `${act.facility_name ? act.facility_name + " • " : ""}${dateStr}${dateStr ? " • " : ""}${tco2eVal.toFixed(2)} tCO2e • ${statusStr}`,
             };
         });
 
@@ -571,6 +674,8 @@ export function parseGhgDashboardData(raw: GhgDashboardResponseDataDto): ParsedG
         yearlyTrend,
         detailedSourceBreakdowns,
         top5EmissionSources,
+        scopeGasSegregation,
+        granularGasBreakdown,
         metricCards,
         emissionsTrend,
         monthlyScopeComparison,
@@ -591,10 +696,13 @@ export function parseGhgDashboardData(raw: GhgDashboardResponseDataDto): ParsedG
     };
 }
 
-export async function getGhgDashboard(): Promise<ParsedGhgDashboardData> {
-    const response = await privateApi.get<GhgDashboardApiResponse>("/tenant/ghg/dashboard");
+export async function getGhgDashboard(params?: GhgDashboardQueryParams): Promise<ParsedGhgDashboardData> {
+    const response = await privateApi.get<GhgDashboardApiResponse>("/tenant/ghg/dashboard", {
+        params,
+    });
     if (!response.data || !response.data.data) {
         throw new Error("Failed to load GHG dashboard data");
     }
     return parseGhgDashboardData(response.data.data);
 }
+

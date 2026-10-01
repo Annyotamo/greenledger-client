@@ -47,6 +47,10 @@ export type FacilityRow = {
     yoyChange: string;
     yoyDirection: TrendDirection;
     dataQuality: number;
+    co2Tco2e?: number;
+    ch4Tco2e?: number;
+    n2oTco2e?: number;
+    sharePct?: number;
 };
 
 export type ActivityItem = {
@@ -75,6 +79,11 @@ export type ScopeComparisonMonth = {
     month: string;
     scope1: number;
     scope2: number;
+    scope3?: number;
+    total?: number;
+    co2Tco2e?: number;
+    ch4Tco2e?: number;
+    n2oTco2e?: number;
 };
 
 export type DashboardTab = "emissions" | "energy";
@@ -337,6 +346,54 @@ export interface ParsedEnergyDashboardData {
 // API DTO Types for GET /tenant/ghg/dashboard
 // ==========================================
 
+export interface GhgDashboardQueryParams {
+    scope?: number | null;
+    start_date?: string;
+    end_date?: string;
+    facility_id?: string;
+    reporting_period_id?: string;
+    status?: "draft" | "submitted" | "verified" | "rejected" | string;
+    data_quality_tier?: "tier_1_measured" | "tier_2_calculated" | "tier_3_estimated" | string;
+    exclude_amendments?: boolean;
+}
+
+export interface GasSegregationScopeDto {
+    co2_kg?: number | string;
+    co2_t?: number | string;
+    co2_tco2e?: number | string;
+    ch4_kg?: number | string;
+    ch4_t?: number | string;
+    ch4_tco2e?: number | string;
+    n2o_kg?: number | string;
+    n2o_t?: number | string;
+    n2o_tco2e?: number | string;
+    biogenic_co2_kg?: number | string;
+    biogenic_co2_t?: number | string;
+    total_tco2e?: number | string;
+}
+
+export interface ScopeGasSegregationDto {
+    overall?: GasSegregationScopeDto;
+    total?: GasSegregationScopeDto;
+    scope_1?: GasSegregationScopeDto;
+    scope_2?: GasSegregationScopeDto;
+    scope_3?: GasSegregationScopeDto;
+}
+
+export interface GHGMetricTotalsDto {
+    total_t_co2?: number | string | null;
+    total_kg_ch4?: number | string | null;
+    total_t_ch4?: number | string | null;
+    total_ch4_tco2e?: number | string | null;
+    total_kg_n2o?: number | string | null;
+    total_t_n2o?: number | string | null;
+    total_n2o_tco2e?: number | string | null;
+    biogenic_kg_co2?: number | string | null;
+    biogenic_t_co2?: number | string | null;
+    total_tco2e?: number | string | null;
+    total_kg_co2e?: number | string | null;
+}
+
 export interface GhgDashboardKpiItemDto {
     current_tco2e?: number | string;
     previous_tco2e?: number | string;
@@ -377,7 +434,10 @@ export interface YearlyEmissionsTrendItemDto {
     scope_1_tco2e: number | string;
     scope_2_tco2e: number | string;
     scope_3_tco2e: number | string;
-    yoy_change_pct: number | string;
+    co2_tco2e?: number | string;
+    ch4_tco2e?: number | string;
+    n2o_tco2e?: number | string;
+    yoy_change_pct?: number | string | null;
 }
 
 export interface Scope1DetailedBreakdownDto {
@@ -386,6 +446,14 @@ export interface Scope1DetailedBreakdownDto {
     process_emissions_tco2e?: number | string;
     fugitive_emissions_tco2e?: number | string;
     total_tco2e?: number | string;
+    co2_tco2e?: number | string;
+    ch4_tco2e?: number | string;
+    n2o_tco2e?: number | string;
+    biogenic_co2_tco2e?: number | string;
+    co2_kg?: number | string;
+    ch4_kg?: number | string;
+    n2o_kg?: number | string;
+    biogenic_co2_kg?: number | string;
 }
 
 export interface Scope2DetailedBreakdownDto {
@@ -395,6 +463,12 @@ export interface Scope2DetailedBreakdownDto {
     location_based_tco2e?: number | string;
     market_based_tco2e?: number | string;
     total_tco2e?: number | string;
+    co2_tco2e?: number | string;
+    ch4_tco2e?: number | string;
+    n2o_tco2e?: number | string;
+    co2_kg?: number | string;
+    ch4_kg?: number | string;
+    n2o_kg?: number | string;
 }
 
 export interface Scope3CategoryBreakdownItemDto {
@@ -407,6 +481,12 @@ export interface Scope3CategoryBreakdownItemDto {
 export interface Scope3DetailedBreakdownDto {
     categories?: Scope3CategoryBreakdownItemDto[];
     total_tco2e?: number | string;
+    co2_tco2e?: number | string;
+    ch4_tco2e?: number | string;
+    n2o_tco2e?: number | string;
+    co2_kg?: number | string;
+    ch4_kg?: number | string;
+    n2o_kg?: number | string;
 }
 
 export interface DetailedSourceBreakdownsDto {
@@ -427,10 +507,13 @@ export interface MonthlyScopeComparisonItemDto {
     month_key: string;
     month_name: string;
     year: number;
-    scope_1_tco2e: string;
-    scope_2_tco2e: string;
-    scope_3_tco2e: string;
-    total_tco2e: string;
+    scope_1_tco2e: number | string;
+    scope_2_tco2e: number | string;
+    scope_3_tco2e: number | string;
+    total_tco2e: number | string;
+    co2_tco2e?: number | string;
+    ch4_tco2e?: number | string;
+    n2o_tco2e?: number | string;
 }
 
 export interface EmissionsTrendItemDto {
@@ -444,9 +527,19 @@ export interface EmissionsTrendItemDto {
 
 export interface GasBreakdownItemDto {
     gas_name: string;
-    mass_kg: string;
-    tco2e: string;
-    share_pct: string;
+    mass_kg: number | string;
+    mass_t?: number | string;
+    tco2e: number | string;
+    share_pct: number | string;
+    scope_1_kg?: number | string;
+    scope_1_t?: number | string;
+    scope_1_tco2e?: number | string;
+    scope_2_kg?: number | string;
+    scope_2_t?: number | string;
+    scope_2_tco2e?: number | string;
+    scope_3_kg?: number | string;
+    scope_3_t?: number | string;
+    scope_3_tco2e?: number | string;
 }
 
 export interface SourceCategoryItemDto {
@@ -476,34 +569,52 @@ export interface TopFacilityItemDto {
     country: string;
     city: string;
     facility_status: string;
-    is_active: boolean;
-    total_tco2e: string;
-    scope_1_tco2e: string;
-    scope_2_tco2e: string;
-    scope_3_tco2e: string;
-    yoy_change_pct: string;
+    is_active?: boolean;
+    total_tco2e: number | string;
+    share_pct?: number | string;
+    scope_1_tco2e?: number | string;
+    scope_2_tco2e?: number | string;
+    scope_3_tco2e?: number | string;
+    co2_tco2e?: number | string;
+    ch4_tco2e?: number | string;
+    n2o_tco2e?: number | string;
+    yoy_change_pct?: number | string;
     data_quality?: {
-        measured_pct: string;
-        calculated_pct: string;
-        estimated_pct: string;
+        measured_pct?: number | string;
+        calculated_pct?: number | string;
+        estimated_pct?: number | string;
     };
 }
 
-export interface RecentActivityItemDto {
-    activity_id: string;
-    scope: string;
+export interface GhgDashboardActivityItemDto {
+    id?: string;
+    activity_id?: string;
+    scope?: string;
     facility_id?: string | null;
     facility_name?: string | null;
-    activity_title: string;
-    activity_date: string;
-    tco2e: string;
-    status: string;
-    created_at: string;
+    activity_title?: string;
+    activity_date?: string;
+    calculated_t_co2e?: number | string;
+    tco2e?: number | string;
+    calculated_t_co2?: number | string | null;
+    calculated_t_ch4?: number | string | null;
+    calculated_t_n2o?: number | string | null;
+    biogenic_kg_co2?: number | string | null;
+    biogenic_t_co2?: number | string | null;
+    status?: string;
+    created_at?: string;
+}
+
+export interface GhgScopeSectionDto {
+    totals?: GHGMetricTotalsDto;
+    activities?: GhgDashboardActivityItemDto[];
+    breakdown?: Record<string, unknown>;
 }
 
 export interface GhgDashboardResponseDataDto {
     requested_scope?: string | null;
     kpi_summary: GhgDashboardKpiSummaryDto;
+    scope_gas_segregation?: ScopeGasSegregationDto;
     scope_distribution?: ScopeDistributionItemDto[];
     yearly_emissions_trend?: YearlyEmissionsTrendItemDto[];
     detailed_source_breakdowns?: DetailedSourceBreakdownsDto;
@@ -513,8 +624,12 @@ export interface GhgDashboardResponseDataDto {
     gas_breakdown?: GasBreakdownItemDto[];
     source_categories?: SourceCategoriesDto;
     top_facilities?: TopFacilityItemDto[];
-    recent_activities?: RecentActivityItemDto[];
-    scope_1?: Record<string, unknown>;
+    recent_activities?: GhgDashboardActivityItemDto[];
+    scope_1?: GhgScopeSectionDto | Record<string, unknown>;
+    scope_2?: GhgScopeSectionDto | Record<string, unknown>;
+    scope_3?: GhgScopeSectionDto | Record<string, unknown>;
+    facility_summaries?: { facility_id: string; totals?: GHGMetricTotalsDto }[];
+    meter_summaries?: { meter_id: string; totals?: GHGMetricTotalsDto }[];
 }
 
 export interface GhgDashboardApiResponse {
@@ -557,6 +672,9 @@ export interface YearlyEmissionsTrendPoint {
     scope1Tco2e: number;
     scope2Tco2e: number;
     scope3Tco2e: number;
+    co2Tco2e: number;
+    ch4Tco2e: number;
+    n2oTco2e: number;
     yoyChangePct: number;
 }
 
@@ -568,32 +686,91 @@ export interface TopEmissionSourceItem {
     sharePct: number;
 }
 
+export interface ParsedGasSegregationMetrics {
+    co2Kg: number;
+    co2T: number;
+    co2Tco2e: number;
+    ch4Kg: number;
+    ch4T: number;
+    ch4Tco2e: number;
+    n2oKg: number;
+    n2oT: number;
+    n2oTco2e: number;
+    biogenicCo2Kg: number;
+    biogenicCo2T: number;
+    totalTco2e: number;
+}
+
+export interface ParsedScopeGasSegregation {
+    overall: ParsedGasSegregationMetrics;
+    total: ParsedGasSegregationMetrics;
+    scope1: ParsedGasSegregationMetrics;
+    scope2: ParsedGasSegregationMetrics;
+    scope3: ParsedGasSegregationMetrics;
+}
+
+export interface ParsedGasBreakdownItem {
+    gasName: string;
+    massKg: number;
+    massT: number;
+    tco2e: number;
+    sharePct: number;
+    color: string;
+    scope1: { kg: number; t: number; tco2e: number };
+    scope2: { kg: number; t: number; tco2e: number };
+    scope3: { kg: number; t: number; tco2e: number };
+}
+
+export interface ParsedDetailedSourceBreakdowns {
+    scope1: {
+        stationaryCombustion: number;
+        mobileCombustion: number;
+        processEmissions: number;
+        fugitiveEmissions: number;
+        total: number;
+        co2Tco2e: number;
+        ch4Tco2e: number;
+        n2oTco2e: number;
+        biogenicCo2Tco2e: number;
+        co2Kg: number;
+        ch4Kg: number;
+        n2oKg: number;
+        biogenicCo2Kg: number;
+    };
+    scope2: {
+        purchasedElectricity: number;
+        purchasedSteam: number;
+        purchasedHeatCooling: number;
+        locationBased: number;
+        marketBased: number;
+        total: number;
+        co2Tco2e: number;
+        ch4Tco2e: number;
+        n2oTco2e: number;
+        co2Kg: number;
+        ch4Kg: number;
+        n2oKg: number;
+    };
+    scope3: {
+        categories: { categoryCode: string; categoryName: string; tco2e: number; sharePct: number }[];
+        total: number;
+        co2Tco2e: number;
+        ch4Tco2e: number;
+        n2oTco2e: number;
+        co2Kg: number;
+        ch4Kg: number;
+        n2oKg: number;
+    };
+}
+
 export interface ParsedGhgDashboardData {
     topKpiCards: TopKpiCardData[];
     scopeDistribution: ScopeDistributionItem[];
     yearlyTrend: YearlyEmissionsTrendPoint[];
-    detailedSourceBreakdowns: {
-        scope1: {
-            stationaryCombustion: number;
-            mobileCombustion: number;
-            processEmissions: number;
-            fugitiveEmissions: number;
-            total: number;
-        };
-        scope2: {
-            purchasedElectricity: number;
-            purchasedSteam: number;
-            purchasedHeatCooling: number;
-            locationBased: number;
-            marketBased: number;
-            total: number;
-        };
-        scope3: {
-            categories: { categoryCode: string; categoryName: string; tco2e: number; sharePct: number }[];
-            total: number;
-        };
-    };
+    detailedSourceBreakdowns: ParsedDetailedSourceBreakdowns;
     top5EmissionSources: TopEmissionSourceItem[];
+    scopeGasSegregation: ParsedScopeGasSegregation;
+    granularGasBreakdown: ParsedGasBreakdownItem[];
     // Legacy fields kept for backward compatibility with existing components
     metricCards: MetricCardData[];
     emissionsTrend: EmissionsTrendPoint[];

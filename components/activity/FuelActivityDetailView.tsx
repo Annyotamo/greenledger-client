@@ -30,6 +30,7 @@ import {
     deleteFuelActivity,
 } from "@/lib/activity/api";
 import type { FuelActivity } from "@/lib/activity/types";
+import { formatSubUnitTypeLabel } from "@/lib/facility/types";
 
 const GHG_COLORS = {
     co2: "#2563eb",
@@ -377,7 +378,7 @@ export function FuelActivityDetailView({ activity }: { activity: FuelActivity })
                                 )}
                                 {(activity.subUnitType || activity.subUnit?.subUnitType) && (
                                     <span className="text-[10px] text-slate-500 font-normal">
-                                        ({(activity.subUnitType || activity.subUnit?.subUnitType || "").replace(/_/g, " ")})
+                                        ({formatSubUnitTypeLabel(activity.subUnitType || activity.subUnit?.subUnitType, activity.customSubUnitType || activity.subUnit?.customSubUnitType)})
                                     </span>
                                 )}
                             </div>

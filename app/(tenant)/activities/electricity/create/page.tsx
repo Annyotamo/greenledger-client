@@ -11,6 +11,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { useFacilities, useSubUnits } from "@/lib/facility/hooks";
+import { formatSubUnitTypeLabel } from "@/lib/facility/types";
 import { useEmissionSources } from "@/lib/emissionSource/hooks";
 import type { MarketInstrumentType } from "@/lib/activity/electricityTypes";
 import {
@@ -855,7 +856,7 @@ export default function LogElectricityActivityPage() {
                             <CustomSelect
                                 options={[
                                     ...(subUnitsQuery.data?.map((su) => ({
-                                        label: `${su.name}${su.subUnitCode ? ` (${su.subUnitCode})` : ""} • ${su.subUnitType.replace(/_/g, " ")}`,
+                                        label: `${su.name}${su.subUnitCode ? ` (${su.subUnitCode})` : ""} • ${formatSubUnitTypeLabel(su.subUnitType, su.customSubUnitType)}`,
                                         value: String(su.id),
                                     })) || []),
                                 ]}

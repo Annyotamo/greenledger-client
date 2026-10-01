@@ -90,6 +90,7 @@ export type FuelActivityItemDto = {
             name: string;
             sub_unit_code?: string;
             sub_unit_type?: string;
+            custom_sub_unit_type?: string | null;
             status?: string;
         } | null;
         meter_id: string | null;
@@ -328,12 +329,14 @@ export type FuelActivity = {
     subUnitName?: string;
     subUnitCode?: string;
     subUnitType?: string;
+    customSubUnitType?: string | null;
     subUnitStatus?: string;
     subUnit?: {
         id: string;
         name: string;
         subUnitCode?: string;
         subUnitType?: string;
+        customSubUnitType?: string | null;
         status?: string;
     } | null;
     reportingPeriodName?: string;

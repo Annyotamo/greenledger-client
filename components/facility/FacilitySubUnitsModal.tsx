@@ -13,35 +13,32 @@ import {
     useSubUnits,
     useUpdateSubUnit,
 } from "@/lib/facility/hooks";
-import type {
-    Facility,
-    FacilitySubUnit,
-    SubUnitStatus,
-    SubUnitType,
+import {
+    formatSubUnitTypeLabel,
+    SUB_UNIT_TYPE_LABELS,
+    type Facility,
+    type FacilitySubUnit,
+    type SubUnitStatus,
+    type SubUnitType,
 } from "@/lib/facility/types";
 import { getErrorMessage } from "@/lib/utils/error";
 
 const subUnitTypeOptions: { label: string; value: SubUnitType; icon: string; description: string }[] = [
-    { label: "Production Line", value: "production_line", icon: "precision_manufacturing", description: "Automated or manual manufacturing lines" },
-    { label: "Process Unit", value: "process_unit", icon: "tune", description: "Chemical, refining, or mechanical processing units" },
-    { label: "Boiler House", value: "boiler_house", icon: "heat_pump", description: "Steam boilers, thermal generation, combustion plants" },
-    { label: "Building Block", value: "building_block", icon: "domain", description: "Dedicated structural sections, towers or wings" },
-    { label: "Warehouse Bay", value: "warehouse_bay", icon: "warehouse", description: "Storage bays, inventory logistics, distribution wings" },
-    { label: "Office Section", value: "office_section", icon: "apartment", description: "Administrative, support or executive workspaces" },
-    { label: "Data Hall", value: "data_hall", icon: "dns", description: "Server rooms, data center halls, critical IT infrastructure" },
-    { label: "Other", value: "other", icon: "category", description: "Custom or specialized facility division" },
+    { label: "Raw Material Handling", value: "raw_material_handling", icon: "inventory_2", description: "Raw material storage, conveyers, handling & yard" },
+    { label: "Coke Oven", value: "coke_oven", icon: "local_fire_department", description: "Coal carbonization & coke battery production" },
+    { label: "Sinter Plant", value: "sinter_plant", icon: "grain", description: "Iron ore sintering and agglomeration" },
+    { label: "Pellet Plant", value: "pellet_plant", icon: "scatter_plot", description: "Iron ore beneficiation and pelletizing plant" },
+    { label: "Lime & Dolo Plant", value: "lime_dolo_plant", icon: "foundation", description: "Lime and calcined dolomite kiln processing" },
+    { label: "Blast Furnace", value: "blast_furnace", icon: "heat_pump", description: "Primary ironmaking blast furnace stack" },
+    { label: "DRI Plant", value: "dri_plant", icon: "precision_manufacturing", description: "Direct reduced iron (sponge iron) reduction plant" },
+    { label: "Ferro Alloy Plant", value: "ferro_alloy_plant", icon: "shield", description: "Submerged arc electric furnace for ferroalloys" },
+    { label: "Steel Melt Shop", value: "steel_melt_shop", icon: "whatshot", description: "Basic oxygen furnace (BOF) / Electric arc furnace (EAF)" },
+    { label: "Rolling Mill", value: "rolling_mill", icon: "view_week", description: "Hot / cold rolling, bar, rebar, wire & strip mills" },
+    { label: "Power Plant", value: "power_plant", icon: "bolt", description: "Captive thermal, gas turbine, or steam generator plant" },
+    { label: "Utilities", value: "utilities", icon: "water_drop", description: "Water treatment, compressed air, nitrogen & oxygen plants" },
+    { label: "Auxiliary", value: "auxiliary", icon: "build", description: "Maintenance workshops, laboratories, and support services" },
+    { label: "Other (Custom Input)", value: "other", icon: "category", description: "Custom specialized industrial division" },
 ];
-
-const subUnitTypeLabels: Record<string, string> = {
-    production_line: "Production Line",
-    process_unit: "Process Unit",
-    boiler_house: "Boiler House",
-    building_block: "Building Block",
-    warehouse_bay: "Warehouse Bay",
-    office_section: "Office Section",
-    data_hall: "Data Hall",
-    other: "Other",
-};
 
 const statusStyles: Record<string, { bg: string; label: string }> = {
     active: { bg: "bg-emerald-500/10 text-emerald-800 border-emerald-500/20", label: "Active" },
@@ -67,6 +64,7 @@ export function FacilitySubUnitsModal({ facility, onClose }: FacilitySubUnitsMod
         name: string;
         subUnitCode: string;
         subUnitType: SubUnitType;
+        customSubUnitType: string;
         status: SubUnitStatus;
         floorArea: string;
         floorAreaUnit: string;
@@ -74,7 +72,8 @@ export function FacilitySubUnitsModal({ facility, onClose }: FacilitySubUnitsMod
     }>({
         name: "",
         subUnitCode: "",
-        subUnitType: "production_line",
+        subUnitType: "raw_material_handling",
+        customSubUnitType: "",
         status: "active",
         floorArea: "",
         floorAreaUnit: "sqm",
@@ -110,7 +109,8 @@ export function FacilitySubUnitsModal({ facility, onClose }: FacilitySubUnitsMod
         setSubUnitForm({
             name: "",
             subUnitCode: "",
-            subUnitType: "production_line",
+            subUnitType: "raw_material_handling",
+            customSubUnitType: "",
             status: "active",
             floorArea: "",
             floorAreaUnit: "sqm",
@@ -125,7 +125,8 @@ export function FacilitySubUnitsModal({ facility, onClose }: FacilitySubUnitsMod
         setSubUnitForm({
             name: subUnit.name,
             subUnitCode: subUnit.subUnitCode || "",
-            subUnitType: subUnit.subUnitType || "other",
+            subUnitType: subUnit.subUnitType || "raw_material_handling",
+            customSubUnitType: subUnit.customSubUnitType || "",
             status: subUnit.status || "active",
             floorArea: subUnit.floorArea != null ? String(subUnit.floorArea) : "",
             floorAreaUnit: subUnit.floorAreaUnit || "sqm",
@@ -143,6 +144,10 @@ export function FacilitySubUnitsModal({ facility, onClose }: FacilitySubUnitsMod
             errors.name = "Sub-unit name is required.";
         }
 
+        if (subUnitForm.subUnitType === "other" && !subUnitForm.customSubUnitType.trim()) {
+            errors.customSubUnitType = "Custom sub-unit type name is required when 'Other' is selected.";
+        }
+
         setFormErrors(errors);
         if (Object.keys(errors).length > 0) return;
 
@@ -154,6 +159,8 @@ export function FacilitySubUnitsModal({ facility, onClose }: FacilitySubUnitsMod
                         name: subUnitForm.name.trim(),
                         sub_unit_code: subUnitForm.subUnitCode.trim() || undefined,
                         sub_unit_type: subUnitForm.subUnitType,
+                        custom_sub_unit_type:
+                            subUnitForm.subUnitType === "other" ? subUnitForm.customSubUnitType.trim() : null,
                         status: subUnitForm.status,
                         description: subUnitForm.description.trim() || null,
                         floor_area: subUnitForm.floorArea ? Number(subUnitForm.floorArea) : null,
@@ -166,6 +173,8 @@ export function FacilitySubUnitsModal({ facility, onClose }: FacilitySubUnitsMod
                     name: subUnitForm.name.trim(),
                     sub_unit_code: subUnitForm.subUnitCode.trim() || undefined,
                     sub_unit_type: subUnitForm.subUnitType,
+                    custom_sub_unit_type:
+                        subUnitForm.subUnitType === "other" ? subUnitForm.customSubUnitType.trim() : undefined,
                     description: subUnitForm.description.trim() || undefined,
                     floor_area: subUnitForm.floorArea ? Number(subUnitForm.floorArea) : undefined,
                     floor_area_unit: subUnitForm.floorAreaUnit.trim() || "sqm",
@@ -292,7 +301,7 @@ export function FacilitySubUnitsModal({ facility, onClose }: FacilitySubUnitsMod
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                     <div className="space-y-1.5">
                                         <label className="block text-xs font-semibold text-slate-700">
                                             Sub-Unit Type <span className="text-error">*</span>
@@ -308,6 +317,30 @@ export function FacilitySubUnitsModal({ facility, onClose }: FacilitySubUnitsMod
                                             }
                                         />
                                     </div>
+
+                                    {subUnitForm.subUnitType === "other" && (
+                                        <div className="space-y-1.5">
+                                            <label className="block text-xs font-semibold text-slate-700">
+                                                Custom Sub-Unit Type <span className="text-error">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                maxLength={255}
+                                                value={subUnitForm.customSubUnitType}
+                                                onChange={(e) => {
+                                                    setSubUnitForm((cur) => ({ ...cur, customSubUnitType: e.target.value }));
+                                                    setFormErrors((cur) => ({ ...cur, customSubUnitType: "" }));
+                                                }}
+                                                placeholder="e.g. Slag Grinding & Processing Area"
+                                                className={`w-full rounded-lg border ${
+                                                    formErrors.customSubUnitType ? "border-error" : "border-outline-variant"
+                                                } bg-white px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs`}
+                                            />
+                                            {formErrors.customSubUnitType && (
+                                                <p className="mt-1 text-[10px] text-error">{formErrors.customSubUnitType}</p>
+                                            )}
+                                        </div>
+                                    )}
 
                                     {editingSubUnit && (
                                         <div className="space-y-1.5">
@@ -548,7 +581,7 @@ export function FacilitySubUnitsModal({ facility, onClose }: FacilitySubUnitsMod
                                                                     </span>
                                                                     <span className="text-[10px] text-slate-400">•</span>
                                                                     <span className="text-[10px] text-slate-600 font-medium">
-                                                                        {subUnitTypeLabels[subUnit.subUnitType] || subUnit.subUnitType}
+                                                                        {formatSubUnitTypeLabel(subUnit.subUnitType, subUnit.customSubUnitType)}
                                                                     </span>
                                                                 </div>
                                                             </div>

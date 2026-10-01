@@ -6,6 +6,7 @@ import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { useElectricityActivity } from "@/lib/activity/hooks";
 import type { ElectricityActivity } from "@/lib/activity/electricityTypes";
+import { formatSubUnitTypeLabel } from "@/lib/facility/types";
 
 const formatValue = (value: string | number | null | undefined) =>
     value == null || value === "" || Number.isNaN(Number(value)) ? "—" : String(value);
@@ -495,7 +496,7 @@ export function ElectricityActivityDetailModal({
                                                     )}
                                                     {(activity.subUnitType || activity.subUnit?.subUnitType) && (
                                                         <span className="px-1.5 py-0.2 rounded bg-primary/10 text-primary text-[10px] font-medium uppercase">
-                                                            {(activity.subUnitType || activity.subUnit?.subUnitType || "").replace(/_/g, " ")}
+                                                            {formatSubUnitTypeLabel(activity.subUnitType || activity.subUnit?.subUnitType, activity.customSubUnitType || activity.subUnit?.customSubUnitType)}
                                                         </span>
                                                     )}
                                                 </span>

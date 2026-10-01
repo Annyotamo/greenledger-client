@@ -13,6 +13,7 @@ import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { useFuelActivity } from "@/lib/activity/hooks";
 import type { FuelActivity } from "@/lib/activity/types";
+import { formatSubUnitTypeLabel } from "@/lib/facility/types";
 
 const GHG_COLORS = {
     co2: "#2563eb",
@@ -304,7 +305,7 @@ export function FuelActivityDetailModal({
                                             )}
                                             {(activity.subUnitType || activity.subUnit?.subUnitType) && (
                                                 <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-medium uppercase">
-                                                    {(activity.subUnitType || activity.subUnit?.subUnitType || "").replace(/_/g, " ")}
+                                                    {formatSubUnitTypeLabel(activity.subUnitType || activity.subUnit?.subUnitType, activity.customSubUnitType || activity.subUnit?.customSubUnitType)}
                                                 </span>
                                             )}
                                         </span>

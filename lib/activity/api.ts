@@ -106,8 +106,9 @@ function mapFuelActivityItem(dto: any): FuelActivity {
           }
         : null;
 
-    const subUnitObj = ctx.sub_unit || dto.sub_unit || null;
+    const subUnitObj = ctx.sub_unit || dto.sub_unit_info || dto.sub_unit || null;
     const subUnitId = ctx.sub_unit_id || dto.sub_unit_id || subUnitObj?.id || null;
+    const customSubUnitType = subUnitObj?.custom_sub_unit_type ?? null;
 
     return {
         id: dto.id,
@@ -122,6 +123,7 @@ function mapFuelActivityItem(dto: any): FuelActivity {
         subUnitName: subUnitObj?.name,
         subUnitCode: subUnitObj?.sub_unit_code,
         subUnitType: subUnitObj?.sub_unit_type,
+        customSubUnitType,
         subUnitStatus: subUnitObj?.status,
         subUnit: subUnitObj
             ? {
@@ -129,6 +131,7 @@ function mapFuelActivityItem(dto: any): FuelActivity {
                   name: subUnitObj.name,
                   subUnitCode: subUnitObj.sub_unit_code,
                   subUnitType: subUnitObj.sub_unit_type,
+                  customSubUnitType,
                   status: subUnitObj.status,
               }
             : null,
@@ -417,8 +420,9 @@ function mapElectricityActivityItem(dto: any): ElectricityActivity {
           }))
         : undefined;
 
-    const subUnitObj = ctx.sub_unit || dto.sub_unit || null;
+    const subUnitObj = ctx.sub_unit || dto.sub_unit_info || dto.sub_unit || null;
     const subUnitId = ctx.sub_unit_id || dto.sub_unit_id || subUnitObj?.id || null;
+    const customSubUnitType = subUnitObj?.custom_sub_unit_type ?? null;
 
     return {
         id: dto.id,
@@ -433,6 +437,7 @@ function mapElectricityActivityItem(dto: any): ElectricityActivity {
         subUnitName: subUnitObj?.name,
         subUnitCode: subUnitObj?.sub_unit_code,
         subUnitType: subUnitObj?.sub_unit_type,
+        customSubUnitType,
         subUnitStatus: subUnitObj?.status,
         subUnit: subUnitObj
             ? {
@@ -440,6 +445,7 @@ function mapElectricityActivityItem(dto: any): ElectricityActivity {
                   name: subUnitObj.name,
                   subUnitCode: subUnitObj.sub_unit_code,
                   subUnitType: subUnitObj.sub_unit_type,
+                  customSubUnitType,
                   status: subUnitObj.status,
               }
             : null,

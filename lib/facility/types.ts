@@ -1,14 +1,51 @@
 export type SubUnitType =
-    | "production_line"
-    | "process_unit"
-    | "boiler_house"
-    | "building_block"
-    | "warehouse_bay"
-    | "office_section"
-    | "data_hall"
+    | "raw_material_handling"
+    | "coke_oven"
+    | "sinter_plant"
+    | "pellet_plant"
+    | "lime_dolo_plant"
+    | "blast_furnace"
+    | "dri_plant"
+    | "ferro_alloy_plant"
+    | "steel_melt_shop"
+    | "rolling_mill"
+    | "power_plant"
+    | "utilities"
+    | "auxiliary"
     | "other";
 
 export type SubUnitStatus = "active" | "inactive" | "decommissioned";
+
+export const SUB_UNIT_TYPE_LABELS: Record<string, string> = {
+    raw_material_handling: "Raw Material Handling",
+    coke_oven: "Coke Oven",
+    sinter_plant: "Sinter Plant",
+    pellet_plant: "Pellet Plant",
+    lime_dolo_plant: "Lime & Dolo Plant",
+    blast_furnace: "Blast Furnace",
+    dri_plant: "DRI Plant",
+    ferro_alloy_plant: "Ferro Alloy Plant",
+    steel_melt_shop: "Steel Melt Shop",
+    rolling_mill: "Rolling Mill",
+    power_plant: "Power Plant",
+    utilities: "Utilities",
+    auxiliary: "Auxiliary",
+    other: "Other",
+};
+
+export function formatSubUnitTypeLabel(
+    subUnitType?: string | null,
+    customSubUnitType?: string | null
+): string {
+    if (!subUnitType) return "Sub-Unit";
+    const normalizedType = subUnitType.toLowerCase();
+    if (normalizedType === "other") {
+        return customSubUnitType && customSubUnitType.trim()
+            ? `Other (${customSubUnitType.trim()})`
+            : "Other";
+    }
+    return SUB_UNIT_TYPE_LABELS[normalizedType] || subUnitType.replace(/_/g, " ");
+}
 
 export type FacilitySubUnitDto = {
     id: string;
@@ -16,8 +53,9 @@ export type FacilitySubUnitDto = {
     name: string;
     sub_unit_code: string;
     description?: string | null;
-    sub_unit_type: SubUnitType;
-    status: SubUnitStatus;
+    sub_unit_type: SubUnitType | string;
+    custom_sub_unit_type?: string | null;
+    status: SubUnitStatus | string;
     floor_area?: number | null;
     floor_area_unit?: string | null;
     is_active: boolean;
@@ -32,6 +70,7 @@ export type FacilitySubUnit = {
     subUnitCode: string;
     description?: string | null;
     subUnitType: SubUnitType;
+    customSubUnitType?: string | null;
     status: SubUnitStatus;
     floorArea?: number | null;
     floorAreaUnit?: string | null;
@@ -126,7 +165,8 @@ export type FacilitySubUnitsApiResponse<T = FacilitySubUnitDto[]> = {
 export type CreateSubUnitPayload = {
     name: string;
     sub_unit_code?: string;
-    sub_unit_type: SubUnitType;
+    sub_unit_type?: SubUnitType | string;
+    custom_sub_unit_type?: string | null;
     description?: string | null;
     floor_area?: number | string | null;
     floor_area_unit?: string | null;
@@ -135,7 +175,8 @@ export type CreateSubUnitPayload = {
 export type UpdateSubUnitPayload = {
     name?: string;
     sub_unit_code?: string;
-    sub_unit_type?: SubUnitType;
+    sub_unit_type?: SubUnitType | string;
+    custom_sub_unit_type?: string | null;
     status?: SubUnitStatus;
     description?: string | null;
     floor_area?: number | string | null;

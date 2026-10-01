@@ -10,6 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CustomSelect } from "@/components/ui/select";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { useFacilities, useSubUnits } from "@/lib/facility/hooks";
+import { formatSubUnitTypeLabel } from "@/lib/facility/types";
 import { useEmissionSources } from "@/lib/emissionSource/hooks";
 import { createFuelActivity, uploadFuelActivityDocument, uploadS3File } from "@/lib/activity/api";
 import { ActivityDocumentsManager } from "@/components/activity/ActivityDocumentsManager";
@@ -457,7 +458,7 @@ export default function LogFuelActivityPage() {
                                 <CustomSelect
                                     options={[
                                         ...(subUnitsQuery.data?.map((su) => ({
-                                            label: `${su.name}${su.subUnitCode ? ` (${su.subUnitCode})` : ""} • ${su.subUnitType.replace(/_/g, " ")}`,
+                                            label: `${su.name}${su.subUnitCode ? ` (${su.subUnitCode})` : ""} • ${formatSubUnitTypeLabel(su.subUnitType, su.customSubUnitType)}`,
                                             value: String(su.id),
                                         })) || []),
                                     ]}

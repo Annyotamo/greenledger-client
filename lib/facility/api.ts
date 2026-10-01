@@ -8,6 +8,8 @@ import type {
     FacilitySubUnit,
     FacilitySubUnitDto,
     FacilitySubUnitsApiResponse,
+    SubUnitStatus,
+    SubUnitType,
     UpdateSubUnitPayload,
 } from "./types";
 
@@ -18,8 +20,9 @@ export function formatSubUnit(dto: FacilitySubUnitDto): FacilitySubUnit {
         name: dto.name || "",
         subUnitCode: dto.sub_unit_code || "",
         description: dto.description ?? null,
-        subUnitType: dto.sub_unit_type || "other",
-        status: dto.status || "active",
+        subUnitType: (dto.sub_unit_type as SubUnitType) || "raw_material_handling",
+        customSubUnitType: dto.custom_sub_unit_type ?? null,
+        status: (dto.status as SubUnitStatus) || "active",
         floorArea: dto.floor_area != null ? Number(dto.floor_area) : null,
         floorAreaUnit: dto.floor_area_unit ?? null,
         isActive: dto.is_active ?? true,
@@ -170,8 +173,13 @@ export async function getSubUnitById(facilityId: string, subUnitId: string): Pro
 export async function createSubUnit(facilityId: string, payload: CreateSubUnitPayload): Promise<FacilitySubUnit> {
     const body: Record<string, unknown> = {
         name: payload.name,
-        sub_unit_type: payload.sub_unit_type,
+        sub_unit_type: payload.sub_unit_type || "raw_material_handling",
     };
+    if (payload.custom_sub_unit_type !== undefined && payload.custom_sub_unit_type !== null && payload.custom_sub_unit_type.trim() !== "") {
+        body.custom_sub_unit_type = payload.custom_sub_unit_type.trim();
+    } else if (payload.custom_sub_unit_type === null) {
+        body.custom_sub_unit_type = null;
+    }
     if (payload.sub_unit_code?.trim()) body.sub_unit_code = payload.sub_unit_code.trim();
     if (payload.description?.trim()) body.description = payload.description.trim();
     if (payload.floor_area !== undefined && payload.floor_area !== null && payload.floor_area !== "") {
@@ -197,6 +205,9 @@ export async function updateSubUnit(
     if (payload.name !== undefined) body.name = payload.name;
     if (payload.sub_unit_code !== undefined) body.sub_unit_code = payload.sub_unit_code;
     if (payload.sub_unit_type !== undefined) body.sub_unit_type = payload.sub_unit_type;
+    if (payload.custom_sub_unit_type !== undefined) {
+        body.custom_sub_unit_type = payload.custom_sub_unit_type ? payload.custom_sub_unit_type.trim() : null;
+    }
     if (payload.status !== undefined) body.status = payload.status;
     if (payload.description !== undefined) body.description = payload.description;
     if (payload.floor_area !== undefined && payload.floor_area !== null && payload.floor_area !== "") {

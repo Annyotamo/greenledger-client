@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTenantProfile } from "@/lib/tenantProfile/hooks";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { motion, AnimatePresence } from "framer-motion";
@@ -38,6 +38,8 @@ const STEPS = [
 
 export default function InitializingPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirect = searchParams.get("redirect");
     const { data: tenant, isLoading } = useTenantProfile();
     const [videoFinished, setVideoFinished] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -166,11 +168,15 @@ export default function InitializingPage() {
     useEffect(() => {
         if (progress === 100) {
             const timeout = setTimeout(() => {
-                router.push("/dashboard");
+                if (redirect && redirect.startsWith("/") && redirect !== "/login" && redirect !== "/register" && redirect !== "/initializing") {
+                    router.push(redirect);
+                } else {
+                    router.push("/dashboard");
+                }
             }, 150); // Crisp 150ms handover
             return () => clearTimeout(timeout);
         }
-    }, [progress, router]);
+    }, [progress, router, redirect]);
 
     return (
         <AnimatePresence mode="wait">

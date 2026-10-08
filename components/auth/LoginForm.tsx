@@ -1,7 +1,7 @@
 "use client";
 
 import { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useId, useState } from "react";
 import { LuEye, LuEyeOff, LuLock, LuMail, LuShieldCheck } from "react-icons/lu";
 import { publicApi } from "@/lib/http/client";
@@ -163,9 +163,15 @@ function CredentialsStep({ onSuccess }: { onSuccess: () => void }) {
 
 export default function LoginForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirect = searchParams.get("redirect");
 
     function handleCredentialsSuccess() {
-        router.push("/initializing");
+        if (redirect && redirect.startsWith("/")) {
+            router.push(`/initializing?redirect=${encodeURIComponent(redirect)}`);
+        } else {
+            router.push("/initializing");
+        }
     }
 
     return (

@@ -1,5 +1,6 @@
 import LoginForm from "@/components/auth/LoginForm";
 import Image from "next/image";
+import { Suspense } from "react";
 
 export default function LoginPage() {
     return (
@@ -67,7 +68,9 @@ export default function LoginPage() {
                 <section className="relative">
                     <div className="gl-shimmer-border h-full rounded-3xl border border-white/35 bg-white/80 shadow-2xl shadow-black/20 backdrop-blur-md">
                         <div className="flex h-full flex-col rounded-3xl p-6 sm:p-8">
-                            <LoginForm />
+                            <Suspense fallback={<div className="p-8 text-center text-sm text-slate-500">Loading sign-in...</div>}>
+                                <LoginForm />
+                            </Suspense>
                         </div>
                     </div>
                 </section>

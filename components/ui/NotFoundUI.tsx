@@ -122,6 +122,13 @@ export default function NotFoundUI() {
                             <span>Platform</span>
                         </Link>
                         <Link
+                            href="/#solutions"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-800/40 bg-emerald-950/40 px-3 py-1.5 text-xs font-mono text-emerald-300/80 transition-colors hover:border-emerald-500/40 hover:bg-emerald-900/60 hover:text-emerald-200"
+                        >
+                            <HiSquares2X2 className="h-3.5 w-3.5 text-emerald-400" />
+                            <span>Solutions</span>
+                        </Link>
+                        <Link
                             href="/cbam"
                             className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-800/40 bg-emerald-950/40 px-3 py-1.5 text-xs font-mono text-emerald-300/80 transition-colors hover:border-emerald-500/40 hover:bg-emerald-900/60 hover:text-emerald-200"
                         >
@@ -129,11 +136,11 @@ export default function NotFoundUI() {
                             <span>CBAM</span>
                         </Link>
                         <Link
-                            href="/dashboard"
+                            href="/#pricing"
                             className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-800/40 bg-emerald-950/40 px-3 py-1.5 text-xs font-mono text-emerald-300/80 transition-colors hover:border-emerald-500/40 hover:bg-emerald-900/60 hover:text-emerald-200"
                         >
-                            <HiSquares2X2 className="h-3.5 w-3.5 text-emerald-400" />
-                            <span>Dashboard</span>
+                            <HiGlobeAlt className="h-3.5 w-3.5 text-emerald-400" />
+                            <span>Pricing</span>
                         </Link>
                         <Link
                             href="/login"

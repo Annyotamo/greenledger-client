@@ -1,11 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useMemo, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { DashboardTab } from "@/lib/dashboard/types";
 import { cn } from "@/lib/utils/cn";
 import { useSidebarStore } from "@/stores/sidebar-store";
+import { getAuthToken } from "@/lib/auth/token";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
 
@@ -22,6 +23,17 @@ export function TenantShell({ children }: TenantShellProps) {
     const collapsed = useSidebarStore((s) => s.collapsed);
     const pathname = usePathname();
     const router = useRouter();
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        const token = getAuthToken();
+        if (!token) {
+            setIsAuthenticated(false);
+            router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+        } else {
+            setIsAuthenticated(true);
+        }
+    }, [pathname, router]);
 
     const activeTab = useMemo<DashboardTab>(() => {
         return pathname === "/energy-dashboard" ? "energy" : "emissions";
@@ -29,6 +41,19 @@ export function TenantShell({ children }: TenantShellProps) {
 
     const mainMargin = collapsed ? "5rem" : "16rem";
     const mainPaddingTop = "6rem";
+
+    if (isAuthenticated === false || isAuthenticated === null) {
+        return (
+            <div className="flex h-screen w-screen items-center justify-center bg-[#070c12] text-white">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+                    <p className="font-mono text-xs text-emerald-400/80 tracking-wider uppercase">
+                        Verifying authentication...
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     if (pathname === "/initializing") {
         return (

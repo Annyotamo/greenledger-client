@@ -4,14 +4,6 @@ import DecorativeVideo from "@/components/landing/DecorativeVideo";
 export default function CBAMHero() {
     return (
         <section className="full-bleed relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden rounded-none">
-            {/* Go Back to Home Button (Top-Left) */}
-            {/* <Link
-                href="/"
-                className="absolute top-14 right-4 z-50 flex items-center gap-2 px-4 py-2 rounded-full bg-[#0a1f19]/70 text-white text-xs font-semibold backdrop-blur-md hover:bg-[#0d2a22]/90 hover:border-emerald-400/55 transition-all shadow-lg shadow-black/10">
-                <span className="material-symbols-outlined text-sm font-bold">arrow_back</span>
-                Back to Home
-            </Link> */}
-
             {/* Video Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#01140f] via-[#02281d] to-[#043325] z-0">
                 <DecorativeVideo
@@ -26,9 +18,17 @@ export default function CBAMHero() {
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10" aria-hidden />
             <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent z-10" aria-hidden />
 
-            {/* Top Context Bar */}
-            <div className="absolute top-0 left-0 right-0 z-40 flex flex-col sm:flex-row items-start sm:items-center justify-between px-6 sm:px-10 py-4 text-[10px] sm:text-[11px] font-mono tracking-wider uppercase text-emerald-300/60 font-semibold border-b border-emerald-500/10">
-                <span>CBAM Module &nbsp;/&nbsp; Exporter View — India → EU</span>
+            {/* Top Context Bar with Back to Home */}
+            <div className="absolute top-0 left-0 right-0 z-40 flex flex-col sm:flex-row items-start sm:items-center justify-between px-6 sm:px-10 py-3 text-[10px] sm:text-[11px] font-mono tracking-wider uppercase text-emerald-300/70 font-semibold border-b border-emerald-500/15 backdrop-blur-xs">
+                <div className="flex items-center gap-3">
+                    <Link
+                        href="/"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/70 hover:bg-emerald-900 border border-emerald-500/30 text-emerald-200 transition-all font-sans text-xs font-medium backdrop-blur-md shadow-sm">
+                        <span className="material-symbols-outlined text-xs">arrow_back</span>
+                        Back to Home
+                    </Link>
+                    <span className="hidden sm:inline">CBAM Module &nbsp;/&nbsp; Exporter View — India → EU</span>
+                </div>
                 <span className="mt-1 sm:mt-0">Accurate as of 22 Jun 2026 · Operator / Installation</span>
             </div>
 

@@ -38,7 +38,7 @@ export function CBAMInstallationCard({ installation, isLoading }: CBAMInstallati
                 <p className="font-sans text-xs text-slate-500 max-w-md mx-auto mt-1 mb-4 leading-relaxed">
                     Set up your industrial installation's master data (Sheet A_InstData), geographical coordinates, UNLOCODE, accredited verifier, and declare produced goods G1..G10.
                 </p>
-                <Link href="/cbam/installation">
+                <Link href="/tenant-cbam/installation">
                     <Button variant="primary" size="md" className="gap-2 font-sans text-xs font-semibold">
                         <MaterialIcon name="add" size="sm" />
                         <span>Create Installation Profile (Sheet A)</span>
@@ -75,7 +75,7 @@ export function CBAMInstallationCard({ installation, isLoading }: CBAMInstallati
                     </div>
                 </div>
 
-                <Link href="/cbam/installation">
+                <Link href="/tenant-cbam/installation">
                     <Button variant="secondary" size="sm" className="gap-1.5 font-sans text-xs font-semibold">
                         <MaterialIcon name="edit" size="xs" />
                         <span>Edit Installation Profile</span>

@@ -7,6 +7,6 @@ export const metadata: Metadata = {
         "Official EU Carbon Border Adjustment Mechanism (CBAM) Communication Template reporting across Sheet A_InstData and Sheet B_EmInst.",
 };
 
-export default function CBAMPage() {
+export default function CBAMExecutivePage() {
     return <CBAMExecutiveView />;
 }

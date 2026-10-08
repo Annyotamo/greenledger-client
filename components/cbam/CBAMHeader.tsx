@@ -75,7 +75,7 @@ export function CBAMHeader({ onOpenStreamModal }: CBAMHeaderProps) {
                 )}
 
                 {!installation && (
-                    <Link href="/cbam/installation">
+                    <Link href="/tenant-cbam/installation">
                         <Button variant="primary" size="md" className="gap-2 font-sans text-xs font-semibold shadow-sm">
                             <MaterialIcon name="domain" size="sm" />
                             <span>Setup Installation Profile</span>

@@ -13,7 +13,7 @@ export function CBAMCatalogView() {
             {/* Header */}
             <div className="flex flex-col gap-2 border-b border-outline-variant/40 pb-4">
                 <div className="flex items-center gap-2 font-sans text-xs text-slate-500 font-medium">
-                    <Link href="/cbam" className="hover:text-primary transition-colors">
+                    <Link href="/tenant-cbam" className="hover:text-primary transition-colors">
                         EU CBAM Declaration
                     </Link>
                     <span>/</span>

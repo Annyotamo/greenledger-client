@@ -9,10 +9,10 @@ import { cn } from "@/lib/utils/cn";
 import { useState } from "react";
 
 const NAV_TABS = [
-    { label: "Executive Overview", href: "/cbam", icon: "dashboard" },
-    { label: "Installation Setup (Sheet A)", href: "/cbam/installation", icon: "domain" },
-    { label: "Source Streams & Emissions (Sheet B)", href: "/cbam/source-streams", icon: "tune" },
-    { label: "Guided CN Catalog & IPCC Fuels", href: "/cbam/catalog", icon: "menu_book" },
+    { label: "Executive Overview", href: "/tenant-cbam", icon: "dashboard" },
+    { label: "Installation Setup (Sheet A)", href: "/tenant-cbam/installation", icon: "domain" },
+    { label: "Source Streams & Emissions (Sheet B)", href: "/tenant-cbam/source-streams", icon: "tune" },
+    { label: "Guided CN Catalog & IPCC Fuels", href: "/tenant-cbam/catalog", icon: "menu_book" },
 ];
 
 export function CBAMNavbar() {
@@ -41,7 +41,7 @@ export function CBAMNavbar() {
             <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
                 <div className="flex flex-col gap-2 py-2.5 sm:flex-row sm:items-center sm:justify-between border-b border-outline-variant/30">
                     <div className="flex items-center gap-3">
-                        <Link href="/cbam" className="flex items-center gap-2 group">
+                        <Link href="/tenant-cbam" className="flex items-center gap-2 group">
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-700/10 text-emerald-800 border border-emerald-700/20 transition-transform group-hover:scale-105">
                                 <MaterialIcon name="verified" size="sm" className="text-emerald-800" />
                             </div>

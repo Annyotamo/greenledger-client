@@ -22,7 +22,7 @@ export function CBAMProcessesSummaryTable({ processes }: CBAMProcessesSummaryTab
                             Production Processes (P1..P10)
                         </h3>
                     </div>
-                    <Link href="/cbam/installation">
+                    <Link href="/tenant-cbam/installation">
                         <Button variant="secondary" size="sm" className="font-sans text-xs">
                             Add Process
                         </Button>
@@ -50,7 +50,7 @@ export function CBAMProcessesSummaryTable({ processes }: CBAMProcessesSummaryTab
                     </div>
                 </div>
 
-                <Link href="/cbam/installation">
+                <Link href="/tenant-cbam/installation">
                     <Button variant="secondary" size="sm" className="gap-1 font-sans text-xs font-semibold">
                         <MaterialIcon name="tune" size="xs" />
                         <span>Manage Processes</span>

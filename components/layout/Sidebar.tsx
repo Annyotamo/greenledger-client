@@ -7,6 +7,8 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
+import { logoutUser } from "@/lib/auth/api";
+import { clearAuthToken } from "@/lib/auth/token";
 import { getCurrentUser, UserProfile } from "@/lib/user/api";
 import { cn } from "@/lib/utils/cn";
 import { useSidebarStore } from "@/stores/sidebar-store";
@@ -21,7 +23,21 @@ export function Sidebar() {
     const [activitiesOpen, setActivitiesOpen] = useState(false);
     const [brsrOpen, setBrsrOpen] = useState(false);
     const [user, setUser] = useState<UserProfile | null>(null);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const pathname = usePathname();
+
+    const handleLogout = async () => {
+        if (isLoggingOut) return;
+        setIsLoggingOut(true);
+        try {
+            await logoutUser();
+        } catch {
+            clearAuthToken();
+            if (typeof window !== "undefined") {
+                window.location.replace("/login");
+            }
+        }
+    };
 
     const beforeActivities = MAIN_NAV.filter(
         (i) => i.label === "Dashboard" || i.label === "Facilities" || i.label === "EU CBAM",
@@ -176,15 +192,23 @@ export function Sidebar() {
                     {BOTTOM_NAV.map((item) => (
                         <SidebarLink key={item.label} item={item} collapsed={collapsed} compact />
                     ))}
-                    <Link
-                        href="/login"
+                    <button
+                        type="button"
+                        onClick={handleLogout}
+                        disabled={isLoggingOut}
+                        title={collapsed ? "Logout" : undefined}
                         className={cn(
-                            "mb-4 flex items-center gap-3 px-4 py-2 text-error transition-colors duration-200 hover:bg-error-container/20 rounded-lg",
+                            "mb-4 flex w-full items-center gap-3 px-4 py-2 text-error transition-colors duration-200 hover:bg-error-container/20 rounded-lg text-left cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed",
                             collapsed && "justify-center px-2",
-                        )}>
-                        <MaterialIcon name="logout" />
-                        {!collapsed && <span className="font-sans text-[13px] font-medium">Logout</span>}
-                    </Link>
+                        )}
+                        aria-label="Logout">
+                        <MaterialIcon name="logout" className="shrink-0" />
+                        {!collapsed && (
+                            <span className="font-sans text-[13px] font-medium">
+                                {isLoggingOut ? "Logging out..." : "Logout"}
+                            </span>
+                        )}
+                    </button>
 
                     {!collapsed && (
                         <Link href="/user" className="mx-1 block">

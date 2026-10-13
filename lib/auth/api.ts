@@ -1,4 +1,5 @@
-import { publicApi } from "@/lib/http/client";
+import { privateApi, publicApi } from "@/lib/http/client";
+import { clearAuthToken } from "@/lib/auth/token";
 
 export type RegisterTenantPayload = {
     companyName: string;
@@ -102,3 +103,23 @@ export async function registerTenant(payload: RegisterTenantPayload): Promise<Au
     const response = await publicApi.post<AuthApiResponse>('/user/auth/register', body);
     return response.data;
 }
+
+/**
+ * Logs out the authenticated user.
+ * Attempts to inform the backend session endpoint,
+ * cleanses client authentication tokens from storage and cookies,
+ * and redirects to the login screen.
+ */
+export async function logoutUser(redirectTo: string = "/login"): Promise<void> {
+    try {
+        await privateApi.post("/user/auth/logout");
+    } catch {
+        // Silently ignore network or API errors to ensure client logout always completes
+    } finally {
+        clearAuthToken();
+        if (typeof window !== "undefined") {
+            window.location.replace(redirectTo);
+        }
+    }
+}
+

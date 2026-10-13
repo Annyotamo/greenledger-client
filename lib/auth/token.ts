@@ -37,7 +37,14 @@ export function getAuthToken(): string | null {
 export function clearAuthToken(): void {
     if (typeof window === "undefined") return;
 
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+    try {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+        sessionStorage.clear();
+    } catch {
+        // Ignore storage access errors
+    }
+
     const secure = window.location.protocol === "https:" ? "; Secure" : "";
-    document.cookie = `${AUTH_COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax${secure}`;
+    document.cookie = `${AUTH_COOKIE_NAME}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; SameSite=Lax${secure}`;
+    document.cookie = `${AUTH_COOKIE_NAME}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; SameSite=Lax`;
 }

@@ -339,7 +339,7 @@ export default function BrsrWaterPage() {
 
                                 <div className="space-y-1">
                                     <label htmlFor="physical-filter" className="text-xs font-semibold text-on-surface-variant block">
-                                        Physical Output
+                                        Production Volume
                                     </label>
                                     <input
                                         id="physical-filter"
@@ -354,7 +354,7 @@ export default function BrsrWaterPage() {
 
                                 <div className="space-y-1">
                                     <label htmlFor="physical-unit-filter" className="text-xs font-semibold text-on-surface-variant block">
-                                        Physical Output Unit
+                                        Production Volume Unit
                                     </label>
                                     <input
                                         id="physical-unit-filter"

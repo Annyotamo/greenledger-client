@@ -202,7 +202,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
 
                             <div className="space-y-1">
                                 <label htmlFor="modal-physical-output" className="text-xs font-semibold text-on-surface-variant">
-                                    Physical Output (Tonnes)
+                                    Production Volume
                                 </label>
                                 <input
                                     id="modal-physical-output"
@@ -218,7 +218,7 @@ export function BrsrWasteReportModal({ isOpen, onClose, onDownload }: BrsrWasteR
 
                             <div className="space-y-1">
                                 <label htmlFor="modal-physical-unit" className="text-xs font-semibold text-on-surface-variant">
-                                    Output Unit
+                                    Production Volume Unit
                                 </label>
                                 <input
                                     id="modal-physical-unit"

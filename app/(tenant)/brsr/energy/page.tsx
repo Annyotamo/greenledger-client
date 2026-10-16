@@ -284,9 +284,9 @@ export default function BrsrEnergyPage() {
                                 />
                             </div>
 
-                            {/* Physical Output Input */}
+                            {/* Production Volume Input */}
                             <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-on-surface-variant block">Physical Output</label>
+                                <label className="text-xs font-semibold text-on-surface-variant block">Production Volume</label>
                                 <input
                                     type="number"
                                     step="any"
@@ -297,9 +297,9 @@ export default function BrsrEnergyPage() {
                                 />
                             </div>
 
-                            {/* Output Unit Input */}
+                            {/* Production Volume Unit Input */}
                             <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-on-surface-variant block">Physical Output Unit</label>
+                                <label className="text-xs font-semibold text-on-surface-variant block">Production Volume Unit</label>
                                 <input
                                     type="text"
                                     placeholder="e.g. tonnes, tcs"
@@ -341,7 +341,7 @@ export default function BrsrEnergyPage() {
                         Select Parameters to Calculate BRSR Energy Disclosure
                     </h3>
                     <p className="mt-2 text-body-md text-on-surface-variant max-w-md mx-auto">
-                        Please select a date range and input turnover or physical output in the controls panel above, then click Generate Consumption Metrics.
+                        Please select a date range and input turnover or production volume in the controls panel above, then click Generate Consumption Metrics.
                     </p>
                 </div>
             ) : isPending ? (

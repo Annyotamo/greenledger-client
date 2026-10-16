@@ -352,7 +352,7 @@ export default function BrsrWastePage() {
                                     </div>
                                     <div className="space-y-1">
                                         <label htmlFor="output-in" className="text-xs font-semibold text-on-surface-variant block">
-                                            Physical Output <span className="text-error">*</span>
+                                            Production Volume <span className="text-error">*</span>
                                         </label>
                                         <input
                                             id="output-in"
@@ -365,7 +365,7 @@ export default function BrsrWastePage() {
                                     </div>
                                     <div className="space-y-1">
                                         <label htmlFor="physical-unit-in" className="text-xs font-semibold text-on-surface-variant block">
-                                            Output Unit
+                                            Production Volume Unit
                                         </label>
                                         <input
                                             id="physical-unit-in"

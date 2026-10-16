@@ -165,7 +165,7 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
                         </div>
                     </div>
 
-                    {/* Turnover & Physical Output inputs */}
+                    {/* Turnover & Production Volume inputs */}
                     <div className="border-t border-outline-variant/60 pt-5 space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
                             <div className="flex flex-col gap-1.5">
@@ -195,7 +195,7 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
 
                             <div className="flex flex-col gap-1.5">
                                 <label htmlFor="physical_output_tonnes" className="text-xs font-semibold text-on-surface">
-                                    Physical Output (Tonnes)
+                                    Production Volume
                                 </label>
                                 <input
                                     id="physical_output_tonnes"
@@ -215,7 +215,7 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
 
                             <div className="flex flex-col gap-1.5">
                                 <label htmlFor="physical_output_unit" className="text-xs font-semibold text-on-surface">
-                                    Output Unit
+                                    Production Volume Unit
                                 </label>
                                 <input
                                     id="physical_output_unit"
@@ -232,7 +232,7 @@ export function BrsrEnergyReportModal({ isOpen, onClose, onDownload }: BrsrEnerg
                             </div>
                         </div>
                         <p className="text-xs text-on-surface-variant text-center">
-                            Turnover and physical output tonnes are used to calculate output energy intensity metrics.
+                            Turnover and production volume are used to calculate output energy intensity metrics.
                         </p>
                     </div>
 

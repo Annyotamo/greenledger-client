@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import team1 from "@/assets/team/Carousel Sample SM1.png";
-import team2 from "@/assets/team/team-2.jpg";
-import team3 from "@/assets/team/team-3.jpeg"
-import team4 from "@/assets/team/team-4.jpeg"
+import shubhiImg from "@/assets/team/team-5.jpeg";
+import team3 from "@/assets/team/team-3.jpeg";
+import team4 from "@/assets/team/team-4.jpeg";
 
 
 interface TeamMember {
@@ -27,12 +27,12 @@ const teamMembers: TeamMember[] = [
         linkedin: "https://www.linkedin.com/in/sayanmaitra",
     },
     {
-        name: "Subhash Kumar Das",
-        role: "Senior Sustainability Expert, Strategic Advisor",
+        name: "Shubhi Goel",
+        role: "Board Advisor-Climate Finance & Carbon Markets",
         description:
-            "Subhash Kumar Das is the former Executive Director (Logistics & Infrastructure) at SAIL with over 35 years of leadership in steel manufacturing, sustainability, logistics, and industrial operations. A B.E. (BIT Mesra) and M.Tech (NIT Durgapur) graduate, he led SAIL's BRSR implementation, CO₂ reduction roadmap, and Green Steel initiatives under the Ministry of Steel. He is a recipient of the Kalinga Best Environment Engineer Award, Golden Peacock Sustainability Award, and serves as a Research Council Member at CSIR–NEERI.",
-        image: team2,
-        linkedin: "https://linkedin.com/in/subhashkumardas",
+            "She is a Climate Finance Expert and Sustainability Consultant with over 6 years of experience in climate finance, carbon accounting, CBAM, ESG reporting, and industrial decarbonisation. An ISO 14064-certified auditor, she specializes in market mechanisms, GHG accounting, Emission Trading Schemes (ETS), and environmental integrity. She has worked on diverse consulting projects across sectors, where she identified key gaps in inclusive development, climate education, and community engagement, which led her to found Parijata, a non-profit close to her heart focused on environmental protection and social impact",
+        image: shubhiImg,
+        linkedin: "https://www.linkedin.com/in/shubhi-goel22",
     },
     {
         name: "Annyotamo Barman",

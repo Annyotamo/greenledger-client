@@ -46,9 +46,6 @@ export function Scope3DashboardView() {
             {/* Section 4: Value Chain Hotspots Table & Live Recent Activities Feed */}
             <Scope3HotspotsAndActivities />
 
-            {/* Section 5: Protocol Compliance & Data Assurance Tier Banner */}
-            <Scope3GovernanceBanner />
-
             {/* Floating AI Sustainability Copilot */}
             <AiAssistantFAB />
         </div>

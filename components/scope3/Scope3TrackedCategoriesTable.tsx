@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatInrSpend, SCOPE3_CATEGORIES, Scope3Category } from "@/lib/scope3/data";
+import { formatInrSpend, SCOPE3_CATEGORIES } from "@/lib/scope3/data";
 import { cn } from "@/lib/utils/cn";
 
 export function Scope3TrackedCategoriesTable() {
@@ -23,18 +23,6 @@ export function Scope3TrackedCategoriesTable() {
         return true;
     });
 
-    const getStatusBadge = (status: Scope3Category["status"]) => {
-        switch (status) {
-            case "Verified":
-                return "bg-emerald-50 text-emerald-800 border-emerald-200";
-            case "Audited":
-                return "bg-blue-50 text-blue-800 border-blue-200";
-            case "Estimated":
-                return "bg-amber-50 text-amber-800 border-amber-200";
-            default:
-                return "bg-surface-container-high text-on-surface-variant border-outline-variant";
-        }
-    };
 
     return (
         <div className="bg-white border border-outline-variant rounded-lg overflow-hidden flex flex-col shadow-2xs">
@@ -107,12 +95,7 @@ export function Scope3TrackedCategoriesTable() {
                             <TableHead className="font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                 Scope 3 Contribution
                             </TableHead>
-                            <TableHead className="font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
-                                Methodology
-                            </TableHead>
-                            <TableHead className="text-center font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
-                                Data Assurance
-                            </TableHead>
+
                             <TableHead className="text-right font-sans text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                                 Mapped Spend (INR)
                             </TableHead>
@@ -181,22 +164,7 @@ export function Scope3TrackedCategoriesTable() {
                                     </div>
                                 </TableCell>
 
-                                {/* Methodology */}
-                                <TableCell>
-                                    <span className="rounded bg-surface-container-high px-2 py-0.5 font-sans text-[11px] font-semibold text-primary">
-                                        {item.methodology}
-                                    </span>
-                                </TableCell>
 
-                                {/* Data Assurance */}
-                                <TableCell className="text-center">
-                                    <span
-                                        className={`inline-block font-sans text-[10px] font-semibold uppercase px-2 py-0.5 rounded border tracking-tight ${getStatusBadge(
-                                            item.status,
-                                        )}`}>
-                                        {item.status}
-                                    </span>
-                                </TableCell>
 
                                 {/* Mapped Spend */}
                                 <TableCell className="text-right font-display text-xs text-primary font-bold tabular-nums">

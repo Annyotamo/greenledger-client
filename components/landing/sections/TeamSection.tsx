@@ -28,7 +28,7 @@ const teamMembers: TeamMember[] = [
     },
     {
         name: "Shubhi Goel",
-        role: "Board Advisor-Climate Finance & Carbon Markets",
+        role: "Board Advisor-Climate Finance",
         description:
             "She is a Climate Finance Expert and Sustainability Consultant with over 6 years of experience in climate finance, carbon accounting, CBAM, ESG reporting, and industrial decarbonisation. An ISO 14064-certified auditor, she specializes in market mechanisms, GHG accounting, Emission Trading Schemes (ETS), and environmental integrity. She has worked on diverse consulting projects across sectors, where she identified key gaps in inclusive development, climate education, and community engagement, which led her to found Parijata, a non-profit close to her heart focused on environmental protection and social impact",
         image: shubhiImg,

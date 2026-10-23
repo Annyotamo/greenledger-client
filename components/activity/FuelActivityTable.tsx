@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { getScope1Report } from "@/lib/ghg/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { verifyFuelActivity, rejectFuelActivity, submitFuelActivity, deleteFuelActivity } from "@/lib/activity/api";
+import { approveFuelActivity, verifyFuelActivity, rejectFuelActivity, submitFuelActivity, deleteFuelActivity } from "@/lib/activity/api";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,6 +16,7 @@ import { FuelActivityDetailModal } from "./FuelActivityDetailModal";
 import { ExportReportModal } from "./ExportReportModal";
 
 const statusStyles: Record<string, string> = {
+    approved: "bg-emerald-500/10 text-emerald-800 border border-emerald-500/20 font-bold",
     verified: "bg-emerald-500/10 text-emerald-800 border border-emerald-500/20 font-bold",
     pending: "bg-amber-500/10 text-amber-800 border border-amber-500/20 font-semibold",
     submitted: "bg-blue-500/10 text-blue-800 border border-blue-500/20 font-semibold",
@@ -25,7 +26,8 @@ const statusStyles: Record<string, string> = {
 };
 
 const StatusLabel: Record<string, string> = {
-    verified: "Verified",
+    approved: "Approved",
+    verified: "Approved",
     pending: "Pending",
     submitted: "Submitted",
     draft: "Draft",
@@ -130,7 +132,7 @@ export function FuelActivityTable({
 
     const [confirmState, setConfirmState] = useState<{
         open: boolean;
-        action: "verify" | "reject" | "submit" | "delete" | null;
+        action: "approve" | "verify" | "reject" | "submit" | "delete" | null;
         activityId?: string | null;
     }>({ open: false, action: null, activityId: null });
     const [rejectReason, setRejectReason] = useState("");
@@ -139,19 +141,23 @@ export function FuelActivityTable({
 
     const selectedActivity = activities.find((a) => a.id === selectedActivityId);
 
-    const verifyMutation = useMutation<unknown, Error, string>({
-        mutationFn: verifyFuelActivity,
+    const approveMutation = useMutation<unknown, Error, string>({
+        mutationFn: approveFuelActivity,
         onSuccess: () => {
             setConfirmState({ open: false, action: null, activityId: null });
             setSelectedActivityId(null);
             setRejectReason("");
             queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
             queryClient.invalidateQueries({ queryKey: ["fuel-activity"] });
+            queryClient.invalidateQueries({ queryKey: ["ghg-dashboard"] });
+            queryClient.invalidateQueries({ queryKey: ["energy-dashboard"] });
         },
         onError: (error: Error) => {
-            console.error("Verify failed", error);
+            console.error("Approve failed", error);
         },
     });
+
+    const verifyMutation = approveMutation;
 
     const rejectMutation = useMutation<unknown, Error, { activityId: string; rejected_reason: string }>({
         mutationFn: ({ activityId, rejected_reason }) => rejectFuelActivity(activityId, rejected_reason),
@@ -161,6 +167,8 @@ export function FuelActivityTable({
             setRejectReason("");
             queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
             queryClient.invalidateQueries({ queryKey: ["fuel-activity"] });
+            queryClient.invalidateQueries({ queryKey: ["ghg-dashboard"] });
+            queryClient.invalidateQueries({ queryKey: ["energy-dashboard"] });
         },
         onError: (error: Error) => {
             console.error("Reject failed", error);
@@ -187,6 +195,8 @@ export function FuelActivityTable({
             setSelectedActivityId(null);
             queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
             queryClient.invalidateQueries({ queryKey: ["fuel-activity"] });
+            queryClient.invalidateQueries({ queryKey: ["ghg-dashboard"] });
+            queryClient.invalidateQueries({ queryKey: ["energy-dashboard"] });
         },
         onError: (error: Error) => {
             console.error("Delete failed", error);
@@ -194,15 +204,19 @@ export function FuelActivityTable({
     });
 
     const isSubmitting =
-        verifyMutation.status === "pending" ||
+        approveMutation.status === "pending" ||
         rejectMutation.status === "pending" ||
         submitMutation.status === "pending" ||
         deleteMutation.status === "pending";
 
-    async function performVerify(activityId?: string | null) {
+    async function performApprove(activityId?: string | null) {
         if (!activityId) return;
         setSelectedActivityId(null);
-        await verifyMutation.mutateAsync(activityId);
+        await approveMutation.mutateAsync(activityId);
+    }
+
+    async function performVerify(activityId?: string | null) {
+        return performApprove(activityId);
     }
 
     async function performReject(activityId?: string | null, reason?: string) {
@@ -459,7 +473,7 @@ export function FuelActivityTable({
                                                                 onClick={() => {
                                                                     setConfirmState({
                                                                         open: true,
-                                                                        action: "verify",
+                                                                        action: "approve",
                                                                         activityId: activity.id,
                                                                     });
                                                                     setOpenMenuId(null);
@@ -467,7 +481,7 @@ export function FuelActivityTable({
                                                                 className="w-full text-left px-3 py-2 hover:bg-surface-container-high">
                                                                 <div className="flex items-center gap-2 text-emerald-600 font-medium">
                                                                     <MaterialIcon name="check_circle" size="sm" />
-                                                                    <span>Verify</span>
+                                                                    <span>Approve</span>
                                                                 </div>
                                                             </button>
                                                             <button
@@ -539,9 +553,13 @@ export function FuelActivityTable({
                 <FuelActivityDetailModal
                     activity={selectedActivity}
                     onClose={() => setSelectedActivityId(null)}
+                    onApprove={(id) => {
+                        setSelectedActivityId(null);
+                        setConfirmState({ open: true, action: "approve", activityId: id });
+                    }}
                     onVerify={(id) => {
                         setSelectedActivityId(null);
-                        setConfirmState({ open: true, action: "verify", activityId: id });
+                        setConfirmState({ open: true, action: "approve", activityId: id });
                     }}
                     onReject={(id) => {
                         setSelectedActivityId(null);
@@ -566,15 +584,15 @@ export function FuelActivityTable({
                         <div className="flex items-start justify-between gap-4 px-6 py-5">
                             <div>
                                 <h3 className="font-display text-base font-semibold text-primary">
-                                    {confirmState.action === "verify" && "Verify activity"}
+                                    {(confirmState.action === "approve" || confirmState.action === "verify") && "Approve activity"}
                                     {confirmState.action === "reject" && "Reject activity"}
                                     {confirmState.action === "submit" && "Submit activity"}
                                     {confirmState.action === "delete" && "Delete activity"}
                                 </h3>
                                 <p className="font-sans text-xs text-on-surface-variant mt-1">
-                                    {confirmState.action === "verify" && "This will mark the activity as verified."}
+                                    {(confirmState.action === "approve" || confirmState.action === "verify") && "This will mark the activity as approved."}
                                     {confirmState.action === "reject" && "Please provide a reason for rejecting this activity (1-2000 characters)."}
-                                    {confirmState.action === "submit" && "This will submit the activity for reviewer verification."}
+                                    {confirmState.action === "submit" && "This will submit the activity for reviewer approval."}
                                     {confirmState.action === "delete" && "Are you sure you want to delete this fuel activity? This action cannot be undone."}
                                 </p>
                             </div>
@@ -605,13 +623,13 @@ export function FuelActivityTable({
                                 onClick={() => setConfirmState({ open: false, action: null, activityId: null })}>
                                 Cancel
                             </Button>
-                            {confirmState.action === "verify" && (
+                            {(confirmState.action === "approve" || confirmState.action === "verify") && (
                                 <button
                                     className="bg-emerald-600 text-white px-5 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm disabled:opacity-70 font-sans text-xs font-semibold uppercase tracking-wider"
-                                    onClick={() => performVerify(confirmState.activityId)}
+                                    onClick={() => performApprove(confirmState.activityId)}
                                     disabled={isSubmitting}>
                                     <MaterialIcon name="check_circle" size="sm" />
-                                    <span>{verifyMutation.status === "pending" ? "Verifying..." : "Confirm verify"}</span>
+                                    <span>{approveMutation.status === "pending" ? "Approving..." : "Confirm approve"}</span>
                                 </button>
                             )}
                             {confirmState.action === "submit" && (

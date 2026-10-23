@@ -352,7 +352,7 @@ export interface GhgDashboardQueryParams {
     end_date?: string;
     facility_id?: string;
     reporting_period_id?: string;
-    status?: "draft" | "submitted" | "verified" | "rejected" | string;
+    status?: "draft" | "submitted" | "approved" | "verified" | "rejected" | string;
     data_quality_tier?: "tier_1_measured" | "tier_2_calculated" | "tier_3_estimated" | string;
     exclude_amendments?: boolean;
 }

@@ -33,6 +33,7 @@ const emissionTypeStyles: Record<string, string> = {
 };
 
 const statusStyles: Record<string, string> = {
+    approved: "bg-emerald-500/10 text-emerald-800 border-emerald-500/20 font-bold",
     verified: "bg-emerald-500/10 text-emerald-800 border-emerald-500/20 font-bold",
     pending: "bg-amber-500/10 text-amber-800 border-amber-500/20 font-semibold",
     submitted: "bg-blue-500/10 text-blue-800 border-blue-500/20 font-semibold",
@@ -44,12 +45,14 @@ const statusStyles: Record<string, string> = {
 export function FuelActivityDetailModal({
     activity: initialActivity,
     onClose,
+    onApprove,
     onVerify,
     onReject,
     onSubmit,
 }: {
     activity: FuelActivity;
     onClose: () => void;
+    onApprove?: (id: string) => void;
     onVerify?: (id: string) => void;
     onReject?: (id: string) => void;
     onSubmit?: (id: string) => void;

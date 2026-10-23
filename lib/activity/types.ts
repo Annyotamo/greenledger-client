@@ -111,8 +111,10 @@ export type FuelActivityItemDto = {
     workflow: {
         status: string;
         rejected_reason: string | null;
-        verified_by: string | null;
-        verified_at: string | null;
+        approved_by?: string | null;
+        approved_at?: string | null;
+        verified_by?: string | null;
+        verified_at?: string | null;
         is_amendment: boolean;
         amended_from_id: string | null;
         entered_by: string;
@@ -347,6 +349,8 @@ export type FuelActivity = {
     cost?: number | null;
     // Workflow metadata
     rejectedReason?: string | null;
+    approvedBy?: string | null;
+    approvedAt?: string | null;
     verifiedBy?: string | null;
     verifiedAt?: string | null;
     enteredBy?: string | null;
@@ -409,3 +413,8 @@ export type FuelActivityApiResponse<T = FuelActivityItemDto> = {
     path: string;
     timestamp: string;
 };
+
+export type FuelActivityStatus = "draft" | "submitted" | "approved" | "rejected" | "verified";
+
+export type AmendFuelActivityPayload = Record<string, unknown>;
+

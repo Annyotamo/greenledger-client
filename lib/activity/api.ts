@@ -168,8 +168,10 @@ function mapFuelActivityItem(dto: any): FuelActivity {
         notes: act.notes || null,
         workflowStatus: wf.status || "draft",
         rejectedReason: wf.rejected_reason || null,
-        verifiedBy: wf.verified_by || null,
-        verifiedAt: wf.verified_at || null,
+        approvedBy: wf.approved_by || wf.verified_by || null,
+        approvedAt: wf.approved_at || wf.verified_at || null,
+        verifiedBy: wf.verified_by || wf.approved_by || null,
+        verifiedAt: wf.verified_at || wf.approved_at || null,
         enteredBy: wf.entered_by || null,
         isAmendment: wf.is_amendment || false,
         amendedFromId: wf.amended_from_id || null,
@@ -277,9 +279,17 @@ export async function submitFuelActivity(activityId: string) {
     return response.data;
 }
 
-export async function verifyFuelActivity(activityId: string) {
-    const response = await privateApi.post(`/tenant/activity/fuel/${activityId}/verify`);
+export async function approveFuelActivity(activityId: string) {
+    const response = await privateApi.post(`/tenant/activity/fuel/${activityId}/approve`);
     return response.data;
+}
+
+/**
+ * Backward-compatible alias for approveFuelActivity
+ * @deprecated Use approveFuelActivity instead
+ */
+export async function verifyFuelActivity(activityId: string) {
+    return approveFuelActivity(activityId);
 }
 
 export async function rejectFuelActivity(activityId: string, rejected_reason: string) {

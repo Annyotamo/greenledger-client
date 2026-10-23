@@ -1,7 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     getFuelActivities,
     getFuelActivityById,
+    approveFuelActivity,
+    verifyFuelActivity,
+    rejectFuelActivity,
+    submitFuelActivity,
+    deleteFuelActivity,
+    amendFuelActivity,
     getElectricityActivities,
     getElectricityActivityById,
 } from "./api";
@@ -31,6 +37,73 @@ export function useFuelActivity(activityId: string | null) {
         queryKey: ["fuel-activity", activityId],
         queryFn: () => getFuelActivityById(activityId!),
         enabled: Boolean(activityId),
+    });
+}
+
+export function useApproveFuelActivity() {
+    const queryClient = useQueryClient();
+    return useMutation<unknown, Error, string>({
+        mutationFn: (activityId: string) => approveFuelActivity(activityId),
+        onSuccess: (_data, activityId) => {
+            queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
+            queryClient.invalidateQueries({ queryKey: ["fuel-activity", activityId] });
+            queryClient.invalidateQueries({ queryKey: ["ghg-dashboard"] });
+            queryClient.invalidateQueries({ queryKey: ["energy-dashboard"] });
+        },
+    });
+}
+
+/** Backward-compatible alias for useApproveFuelActivity */
+export function useVerifyFuelActivity() {
+    return useApproveFuelActivity();
+}
+
+export function useRejectFuelActivity() {
+    const queryClient = useQueryClient();
+    return useMutation<unknown, Error, { activityId: string; rejectedReason: string }>({
+        mutationFn: ({ activityId, rejectedReason }) => rejectFuelActivity(activityId, rejectedReason),
+        onSuccess: (_data, { activityId }) => {
+            queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
+            queryClient.invalidateQueries({ queryKey: ["fuel-activity", activityId] });
+            queryClient.invalidateQueries({ queryKey: ["ghg-dashboard"] });
+            queryClient.invalidateQueries({ queryKey: ["energy-dashboard"] });
+        },
+    });
+}
+
+export function useSubmitFuelActivity() {
+    const queryClient = useQueryClient();
+    return useMutation<unknown, Error, string>({
+        mutationFn: (activityId: string) => submitFuelActivity(activityId),
+        onSuccess: (_data, activityId) => {
+            queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
+            queryClient.invalidateQueries({ queryKey: ["fuel-activity", activityId] });
+        },
+    });
+}
+
+export function useDeleteFuelActivity() {
+    const queryClient = useQueryClient();
+    return useMutation<unknown, Error, string>({
+        mutationFn: (activityId: string) => deleteFuelActivity(activityId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
+            queryClient.invalidateQueries({ queryKey: ["ghg-dashboard"] });
+            queryClient.invalidateQueries({ queryKey: ["energy-dashboard"] });
+        },
+    });
+}
+
+export function useAmendFuelActivity() {
+    const queryClient = useQueryClient();
+    return useMutation<unknown, Error, { activityId: string; payload: Record<string, unknown> }>({
+        mutationFn: ({ activityId, payload }) => amendFuelActivity(activityId, payload),
+        onSuccess: (_data, { activityId }) => {
+            queryClient.invalidateQueries({ queryKey: ["fuel-activities"] });
+            queryClient.invalidateQueries({ queryKey: ["fuel-activity", activityId] });
+            queryClient.invalidateQueries({ queryKey: ["ghg-dashboard"] });
+            queryClient.invalidateQueries({ queryKey: ["energy-dashboard"] });
+        },
     });
 }
 
@@ -64,4 +137,5 @@ export function useElectricityActivity(activityId: string | null) {
         enabled: Boolean(activityId),
     });
 }
+
 

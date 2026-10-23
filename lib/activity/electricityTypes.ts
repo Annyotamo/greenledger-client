@@ -157,6 +157,8 @@ export type ElectricityActivityItemDto = {
     workflow?: {
         status: string;
         rejected_reason?: string | null;
+        approved_by?: string | null;
+        approved_at?: string | null;
         verified_by?: string | null;
         verified_at?: string | null;
         is_amendment?: boolean;
@@ -308,6 +310,8 @@ export type ElectricityActivity = {
     notes: string | null;
     workflowStatus: string;
     rejectedReason: string | null;
+    approvedBy: string | null;
+    approvedAt: string | null;
     verifiedBy: string | null;
     verifiedAt: string | null;
     isAmendment: boolean;
@@ -354,5 +358,10 @@ export type ElectricityActivityApiResponse<T = ElectricityActivityItemDto> = {
     path: string;
     timestamp: string;
 };
+
+export type ElectricityActivityStatus = "draft" | "submitted" | "approved" | "rejected" | "verified";
+
+export type AmendElectricityActivityPayload = Record<string, unknown>;
+
 
 

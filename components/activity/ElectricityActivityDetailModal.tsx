@@ -20,6 +20,7 @@ const formatNumber = (value: number | null | undefined, digits = 2) => {
 };
 
 const statusStyles: Record<string, string> = {
+    approved: "bg-emerald-500/10 text-emerald-800 border-emerald-500/20 font-bold",
     verified: "bg-emerald-500/10 text-emerald-800 border-emerald-500/20 font-bold",
     pending: "bg-amber-500/10 text-amber-800 border-amber-500/20 font-semibold",
     submitted: "bg-blue-500/10 text-blue-800 border-blue-500/20 font-semibold",
@@ -48,6 +49,7 @@ const activityTypeLabels: Record<string, string> = {
 export function ElectricityActivityDetailModal({
     activity: initialActivity,
     onClose,
+    onApprove,
     onVerify,
     onReject,
     onSubmit,
@@ -55,8 +57,9 @@ export function ElectricityActivityDetailModal({
 }: {
     activity: ElectricityActivity;
     onClose: () => void;
+    onApprove?: (id: string) => void;
     onVerify?: (id: string) => void;
-    onReject?: (id: string) => void;
+    onReject?: (id: string, reason?: string) => void;
     onSubmit?: (id: string) => void;
     onDelete?: (id: string) => void;
 }) {
@@ -69,7 +72,7 @@ export function ElectricityActivityDetailModal({
 
     const isGridImport = activity.electricityActivityType === "grid_import";
     const statusLower = (activity.workflowStatus || "draft").toLowerCase();
-    const isVerified = statusLower === "verified";
+    const isApproved = statusLower === "approved" || statusLower === "verified";
     const isDraft = statusLower === "draft";
     const isSubmitted = statusLower === "submitted" || statusLower === "pending";
     const isRejected = statusLower === "rejected";
@@ -534,12 +537,12 @@ export function ElectricityActivityDetailModal({
                                         <span className="font-semibold text-primary">{formatValue(activity.enteredBy)}</span>
                                     </div>
                                     <div>
-                                        <span className="text-on-surface-variant block">Verified By</span>
-                                        <span className="font-semibold text-primary">{formatValue(activity.verifiedBy)}</span>
+                                        <span className="text-on-surface-variant block">Approved By</span>
+                                        <span className="font-semibold text-primary">{formatValue(activity.approvedBy || activity.verifiedBy)}</span>
                                     </div>
                                     <div>
-                                        <span className="text-on-surface-variant block">Verified At</span>
-                                        <span className="font-semibold text-primary">{formatValue(activity.verifiedAt)}</span>
+                                        <span className="text-on-surface-variant block">Approved At</span>
+                                        <span className="font-semibold text-primary">{formatValue(activity.approvedAt || activity.verifiedAt)}</span>
                                     </div>
                                     {activity.rejectedReason && (
                                         <div className="col-span-2 p-2.5 rounded-lg bg-rose-50 text-rose-900 border border-rose-200">
@@ -612,7 +615,7 @@ export function ElectricityActivityDetailModal({
                                     size="sm"
                                     onClick={() => {
                                         if (onReject && rejectReason.trim()) {
-                                            onReject(activity.id);
+                                            onReject(activity.id, rejectReason.trim());
                                             setShowRejectBox(false);
                                         }
                                     }}>
@@ -643,17 +646,17 @@ export function ElectricityActivityDetailModal({
                                 size="sm"
                                 onClick={() => onSubmit(activity.id)}>
                                 <MaterialIcon name="send" size="xs" />
-                                Submit for Verification
+                                Submit
                             </Button>
                         )}
-                        {isSubmitted && onVerify && (
+                        {isSubmitted && (onApprove || onVerify) && (
                             <Button
                                 variant="primary"
                                 size="sm"
-                                onClick={() => onVerify(activity.id)}
+                                onClick={() => (onApprove || onVerify)!(activity.id)}
                                 className="bg-emerald-700 hover:bg-emerald-800 text-white">
                                 <MaterialIcon name="check_circle" size="xs" />
-                                Verify
+                                Approve Activity
                             </Button>
                         )}
                         {isSubmitted && onReject && !showRejectBox && (

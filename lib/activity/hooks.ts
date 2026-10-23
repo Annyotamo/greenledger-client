@@ -10,6 +10,12 @@ import {
     amendFuelActivity,
     getElectricityActivities,
     getElectricityActivityById,
+    approveElectricityActivity,
+    verifyElectricityActivity,
+    rejectElectricityActivity,
+    submitElectricityActivity,
+    deleteElectricityActivity,
+    amendElectricityActivity,
 } from "./api";
 
 export function useFuelActivities(filters?: {
@@ -137,5 +143,73 @@ export function useElectricityActivity(activityId: string | null) {
         enabled: Boolean(activityId),
     });
 }
+
+export function useApproveElectricityActivity() {
+    const queryClient = useQueryClient();
+    return useMutation<unknown, Error, string>({
+        mutationFn: (activityId: string) => approveElectricityActivity(activityId),
+        onSuccess: (_data, activityId) => {
+            queryClient.invalidateQueries({ queryKey: ["electricity-activities"] });
+            queryClient.invalidateQueries({ queryKey: ["electricity-activity", activityId] });
+            queryClient.invalidateQueries({ queryKey: ["ghg-dashboard"] });
+            queryClient.invalidateQueries({ queryKey: ["energy-dashboard"] });
+        },
+    });
+}
+
+/** Backward-compatible alias for useApproveElectricityActivity */
+export function useVerifyElectricityActivity() {
+    return useApproveElectricityActivity();
+}
+
+export function useRejectElectricityActivity() {
+    const queryClient = useQueryClient();
+    return useMutation<unknown, Error, { activityId: string; rejectedReason: string }>({
+        mutationFn: ({ activityId, rejectedReason }) => rejectElectricityActivity(activityId, rejectedReason),
+        onSuccess: (_data, { activityId }) => {
+            queryClient.invalidateQueries({ queryKey: ["electricity-activities"] });
+            queryClient.invalidateQueries({ queryKey: ["electricity-activity", activityId] });
+            queryClient.invalidateQueries({ queryKey: ["ghg-dashboard"] });
+            queryClient.invalidateQueries({ queryKey: ["energy-dashboard"] });
+        },
+    });
+}
+
+export function useSubmitElectricityActivity() {
+    const queryClient = useQueryClient();
+    return useMutation<unknown, Error, string>({
+        mutationFn: (activityId: string) => submitElectricityActivity(activityId),
+        onSuccess: (_data, activityId) => {
+            queryClient.invalidateQueries({ queryKey: ["electricity-activities"] });
+            queryClient.invalidateQueries({ queryKey: ["electricity-activity", activityId] });
+        },
+    });
+}
+
+export function useDeleteElectricityActivity() {
+    const queryClient = useQueryClient();
+    return useMutation<unknown, Error, string>({
+        mutationFn: (activityId: string) => deleteElectricityActivity(activityId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["electricity-activities"] });
+            queryClient.invalidateQueries({ queryKey: ["ghg-dashboard"] });
+            queryClient.invalidateQueries({ queryKey: ["energy-dashboard"] });
+        },
+    });
+}
+
+export function useAmendElectricityActivity() {
+    const queryClient = useQueryClient();
+    return useMutation<unknown, Error, { activityId: string; payload: Record<string, unknown> }>({
+        mutationFn: ({ activityId, payload }) => amendElectricityActivity(activityId, payload),
+        onSuccess: (_data, { activityId }) => {
+            queryClient.invalidateQueries({ queryKey: ["electricity-activities"] });
+            queryClient.invalidateQueries({ queryKey: ["electricity-activity", activityId] });
+            queryClient.invalidateQueries({ queryKey: ["ghg-dashboard"] });
+            queryClient.invalidateQueries({ queryKey: ["energy-dashboard"] });
+        },
+    });
+}
+
 
 

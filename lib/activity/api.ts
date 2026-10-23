@@ -485,8 +485,10 @@ function mapElectricityActivityItem(dto: any): ElectricityActivity {
         notes: act.notes ?? dto.notes ?? null,
         workflowStatus: wf.status || dto.workflow_status || dto.status || "pending",
         rejectedReason: wf.rejected_reason || null,
-        verifiedBy: wf.verified_by || null,
-        verifiedAt: wf.verified_at || null,
+        approvedBy: wf.approved_by || wf.verified_by || null,
+        approvedAt: wf.approved_at || wf.verified_at || null,
+        verifiedBy: wf.verified_by || wf.approved_by || null,
+        verifiedAt: wf.verified_at || wf.approved_at || null,
         isAmendment: Boolean(wf.is_amendment),
         amendedFromId: wf.amended_from_id || null,
         enteredBy: wf.entered_by || null,
@@ -603,9 +605,14 @@ export async function submitElectricityActivity(activityId: string) {
     return response.data;
 }
 
-export async function verifyElectricityActivity(activityId: string) {
-    const response = await privateApi.post(`/tenant/activity/electricity/${activityId}/verify`);
+export async function approveElectricityActivity(activityId: string) {
+    const response = await privateApi.post(`/tenant/activity/electricity/${activityId}/approve`);
     return response.data;
+}
+
+/** Backward-compatible alias routing to approveElectricityActivity */
+export async function verifyElectricityActivity(activityId: string) {
+    return approveElectricityActivity(activityId);
 }
 
 export async function rejectElectricityActivity(activityId: string, rejected_reason: string) {

@@ -10,8 +10,16 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { ElectricityActivity } from "@/lib/activity/electricityTypes";
 import { ExportReportModal } from "./ExportReportModal";
+import { ElectricityActivityDetailModal } from "./ElectricityActivityDetailModal";
+import {
+    useApproveElectricityActivity,
+    useRejectElectricityActivity,
+    useSubmitElectricityActivity,
+    useDeleteElectricityActivity,
+} from "@/lib/activity/hooks";
 
 const statusStyles: Record<string, string> = {
+    approved: "bg-emerald-500/10 text-emerald-800 border border-emerald-500/20 font-bold",
     verified: "bg-emerald-500/10 text-emerald-800 border border-emerald-500/20 font-bold",
     pending: "bg-amber-500/10 text-amber-800 border border-amber-500/20 font-semibold",
     submitted: "bg-blue-500/10 text-blue-800 border border-blue-500/20 font-semibold",
@@ -21,7 +29,8 @@ const statusStyles: Record<string, string> = {
 };
 
 const StatusLabel: Record<string, string> = {
-    verified: "Verified",
+    approved: "Approved",
+    verified: "Approved",
     pending: "Pending",
     submitted: "Submitted",
     draft: "Draft",
@@ -141,9 +150,17 @@ export function ElectricityActivityTable({
     facilityOptions: string[];
 }) {
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
+    const selectedActivity = activities.find((a) => a.id === selectedActivityId) ?? null;
+
+    const { mutate: approveActivity } = useApproveElectricityActivity();
+    const { mutate: rejectActivity } = useRejectElectricityActivity();
+    const { mutate: submitActivity } = useSubmitElectricityActivity();
+    const { mutate: deleteActivity } = useDeleteElectricityActivity();
 
     return (
-        <Card className="overflow-hidden">
+        <>
+            <Card className="overflow-hidden">
             <div className="flex flex-col gap-6 border-b border-outline-variant bg-surface p-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="space-y-1">
                     <h3 className="font-display text-base font-semibold text-primary">Electricity Activity Details</h3>
@@ -226,6 +243,7 @@ export function ElectricityActivityTable({
                                 return (
                                     <TableRow
                                         key={activity.id}
+                                        onClick={() => setSelectedActivityId(activity.id)}
                                         className="hover:bg-slate-50/90 transition-colors cursor-pointer border-b border-slate-100 last:border-none">
                                         <TableCell className="py-2.5 px-4 text-nowrap">
                                             <div className="flex items-center gap-2">
@@ -326,6 +344,34 @@ export function ElectricityActivityTable({
                 </div>
             </div>
         </Card>
+
+        {selectedActivity && (
+            <ElectricityActivityDetailModal
+                activity={selectedActivity}
+                onClose={() => setSelectedActivityId(null)}
+                onApprove={(id) => {
+                    approveActivity(id);
+                    setSelectedActivityId(null);
+                }}
+                onVerify={(id) => {
+                    approveActivity(id);
+                    setSelectedActivityId(null);
+                }}
+                onReject={(id, reason) => {
+                    rejectActivity({ activityId: id, rejectedReason: reason || "Rejected by reviewer" });
+                    setSelectedActivityId(null);
+                }}
+                onSubmit={(id) => {
+                    submitActivity(id);
+                    setSelectedActivityId(null);
+                }}
+                onDelete={(id) => {
+                    deleteActivity(id);
+                    setSelectedActivityId(null);
+                }}
+            />
+        )}
+    </>
     );
 }
 

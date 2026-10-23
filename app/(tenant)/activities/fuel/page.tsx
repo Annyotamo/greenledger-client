@@ -125,7 +125,7 @@ export default function FuelActivitiesPage() {
                         <option value="">All statuses</option>
                         <option value="draft">Draft</option>
                         <option value="submitted">Submitted</option>
-                        <option value="verified">Verified</option>
+                        <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
                     </select>
                     <select

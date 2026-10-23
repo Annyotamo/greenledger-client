@@ -93,7 +93,7 @@ export function FuelActivityDetailModal({
     ].filter((item) => item.value > 0);
 
     const statusLower = (activity.workflowStatus || "draft").toLowerCase();
-    const isVerified = statusLower === "verified";
+    const isApproved = statusLower === "approved" || statusLower === "verified";
     const isDraft = statusLower === "draft";
     const isSubmitted = statusLower === "submitted" || statusLower === "pending";
     const isRejected = statusLower === "rejected";

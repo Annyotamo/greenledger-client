@@ -11,6 +11,7 @@ import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import {
     AmendCategory15InvestmentPayload,
     AssetClassEnum,
+    ASSET_CLASS_TOTAL_VALUE_METHODS,
     Category15InvestmentEntry,
     CreateCategory15InvestmentPayload,
 } from "@/lib/scope3/category15/types";
@@ -90,6 +91,8 @@ export function Category15FormModal({
             })),
         [assetClasses],
     );
+
+    const activeMethodInfo = assetClass ? ASSET_CLASS_TOTAL_VALUE_METHODS[assetClass] : null;
 
     const numOutstanding = parseFloat(outstandingAmount) || 0;
     const numWorth = parseFloat(totalCompanyWorth) || 0;
@@ -278,10 +281,42 @@ export function Category15FormModal({
                         </div>
                     </div>
 
+                    {/* Informative PCAF Total Value Calculation Method Guidance */}
+                    {activeMethodInfo && (
+                        <div className="rounded-xl border border-secondary/30 bg-secondary/5 p-4 flex items-start gap-3 transition-all duration-200">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-secondary text-on-secondary shadow-xs mt-0.5">
+                                <MaterialIcon name={activeMethodInfo.icon || "calculate"} size="sm" />
+                            </div>
+                            <div className="space-y-1.5 min-w-0 flex-1 font-sans">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-secondary px-2 py-0.5 rounded bg-secondary/15">
+                                        PCAF Total Value Calculation Method
+                                    </span>
+                                    <span className="text-xs font-bold text-slate-900">
+                                        {activeMethodInfo.title}
+                                    </span>
+                                </div>
+                                <div className="flex items-start gap-1.5 flex-wrap">
+                                    <span className="text-xs font-semibold text-slate-600">
+                                        Total Value Formula:
+                                    </span>
+                                    <span className="text-xs font-bold text-primary bg-white/80 px-2 py-0.5 rounded border border-secondary/20">
+                                        {activeMethodInfo.method}
+                                    </span>
+                                </div>
+                                {activeMethodInfo.note && (
+                                    <p className="text-[11px] text-slate-600 leading-relaxed pt-0.5">
+                                        {activeMethodInfo.note}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                             <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
-                                Outstanding (₹ Crores) <span className="text-error">*</span>
+                                Outstanding Investment / Loan (₹ Crores) <span className="text-error">*</span>
                             </label>
                             <Input
                                 type="number"
@@ -292,11 +327,14 @@ export function Category15FormModal({
                                 placeholder="e.g. 250"
                                 className="font-sans text-xs font-semibold tabular-nums"
                             />
+                            <p className="font-sans text-[10px] text-slate-400 mt-0.5">
+                                Gross exposure or loan outstanding (numerator)
+                            </p>
                         </div>
 
                         <div>
                             <label className="block font-sans text-xs font-semibold text-slate-700 mb-1">
-                                Company Worth (₹ Cr) <span className="text-error">*</span>
+                                {activeMethodInfo?.denominatorLabel ?? "Total Company Worth (₹ Cr)"} <span className="text-error">*</span>
                             </label>
                             <Input
                                 type="number"
@@ -304,9 +342,12 @@ export function Category15FormModal({
                                 min="0.01"
                                 value={totalCompanyWorth}
                                 onChange={(e) => setTotalCompanyWorth(e.target.value)}
-                                placeholder="e.g. 2500"
+                                placeholder={activeMethodInfo ? `e.g. 2500 (${activeMethodInfo.title})` : "e.g. 2500"}
                                 className="font-sans text-xs font-semibold tabular-nums"
                             />
+                            <p className="font-sans text-[10px] text-secondary font-medium mt-0.5 truncate">
+                                Method: {activeMethodInfo?.method}
+                            </p>
                         </div>
                     </div>
 
@@ -393,6 +434,13 @@ export function Category15FormModal({
                                 <span className="font-bold text-secondary tabular-nums">{totalFinancedEmissionsTco2e.toFixed(4)} tCO₂e</span>
                             </div>
                         </div>
+
+                        {activeMethodInfo && (
+                            <div className="text-[11px] text-slate-500 border-t border-outline-variant/30 pt-2 flex items-center justify-between gap-2 flex-wrap">
+                                <span className="font-medium text-slate-600">Attribution Denominator:</span>
+                                <span className="font-semibold text-primary">{activeMethodInfo.method}</span>
+                            </div>
+                        )}
                     </div>
 
                     <div>
@@ -412,6 +460,7 @@ export function Category15FormModal({
                         value={pendingDocument}
                         onChange={setPendingDocument}
                         disabled={busy}
+                        defaultDate={activityDate}
                     />
 
                     <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/40">

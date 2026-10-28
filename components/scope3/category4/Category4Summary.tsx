@@ -17,12 +17,8 @@ export function Category4Summary({ entries }: Category4SummaryProps) {
     const totalEmissionsTco2e = entries.reduce((sum, e) => sum + e.calculatedTCo2e, 0);
     const totalEmissionsKgCo2e = entries.reduce((sum, e) => sum + e.calculatedKgCo2e, 0);
 
-    const verifiedCount = entries.filter((e) => e.status === "verified").length;
-    const submittedCount = entries.filter((e) => e.status === "submitted").length;
-    const draftCount = entries.filter((e) => e.status === "draft").length;
-
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 font-sans">
             <Card className="p-card-padding border-outline-variant/60">
                 <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                     Total Transport Activity Quantity
@@ -56,18 +52,6 @@ export function Category4Summary({ entries }: Category4SummaryProps) {
                 </p>
                 <p className="mt-2 font-sans text-xs font-medium text-on-surface-variant">
                     Freighting Goods Factor Catalog
-                </p>
-            </Card>
-
-            <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                    Audit Verification Status
-                </p>
-                <p className="mt-2 font-display text-2xl font-bold tracking-tight text-primary tabular-nums">
-                    {verifiedCount} <span className="font-sans text-sm font-normal text-on-surface-variant">Verified</span>
-                </p>
-                <p className="mt-2 font-sans text-xs font-medium text-on-surface-variant tabular-nums">
-                    {submittedCount} Submitted • {draftCount} Draft
                 </p>
             </Card>
         </div>

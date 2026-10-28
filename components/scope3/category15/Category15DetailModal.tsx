@@ -2,7 +2,7 @@
 
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
-import { Category15InvestmentEntry } from "@/lib/scope3/category15/types";
+import { ASSET_CLASS_TOTAL_VALUE_METHODS, Category15InvestmentEntry } from "@/lib/scope3/category15/types";
 import { Scope3DocumentsSection } from "@/components/scope3/documents/Scope3DocumentsSection";
 
 interface Category15DetailModalProps {
@@ -12,6 +12,8 @@ interface Category15DetailModalProps {
 
 export function Category15DetailModal({ entry, onClose }: Category15DetailModalProps) {
     if (!entry) return null;
+
+    const methodInfo = entry.assetClass ? ASSET_CLASS_TOTAL_VALUE_METHODS[entry.assetClass] : null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto font-sans">
@@ -55,10 +57,16 @@ export function Category15DetailModal({ entry, onClose }: Category15DetailModalP
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="rounded-xl bg-surface-container-low p-4 border border-outline-variant/40 space-y-2 font-sans text-xs">
                             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block mb-1">PCAF Attribution Math</span>
-                            <div className="flex justify-between"><span className="text-slate-500">Outstanding Amount:</span><span className="font-semibold text-slate-900 tabular-nums">₹{entry.outstandingAmountCrores.toLocaleString()} Cr</span></div>
-                            <div className="flex justify-between"><span className="text-slate-500">Total Company Worth:</span><span className="font-semibold text-slate-900 tabular-nums">₹{entry.totalCompanyWorthCrores.toLocaleString()} Cr</span></div>
+                            <div className="flex justify-between"><span className="text-slate-500">Outstanding Exposure:</span><span className="font-semibold text-slate-900 tabular-nums">₹{entry.outstandingAmountCrores.toLocaleString()} Cr</span></div>
+                            <div className="flex justify-between"><span className="text-slate-500">{methodInfo?.denominatorLabel || "Total Company Worth"}:</span><span className="font-semibold text-slate-900 tabular-nums">₹{entry.totalCompanyWorthCrores.toLocaleString()} Cr</span></div>
                             <div className="flex justify-between"><span className="text-slate-500">Attribution Factor:</span><span className="font-semibold text-secondary tabular-nums">{entry.attributionFactor.toFixed(6)} ({entry.attributionFactorPercentage.toFixed(2)}%)</span></div>
                             <div className="flex justify-between"><span className="text-slate-500">Valuation Date:</span><span className="font-semibold text-slate-900 tabular-nums">{entry.activityDate}</span></div>
+                            {methodInfo && (
+                                <div className="pt-2 border-t border-outline-variant/30 space-y-0.5">
+                                    <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold block">Total Value Method:</span>
+                                    <p className="text-[11px] font-medium text-primary">{methodInfo.method}</p>
+                                </div>
+                            )}
                         </div>
 
                         <div className="rounded-xl bg-surface-container-low p-4 border border-outline-variant/40 space-y-2 font-sans text-xs">

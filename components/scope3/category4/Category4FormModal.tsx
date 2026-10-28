@@ -532,6 +532,7 @@ export function Category4FormModal({
                         value={pendingDocument}
                         onChange={setPendingDocument}
                         disabled={busy}
+                        defaultDate={activityDate}
                     />
 
                     <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/40">

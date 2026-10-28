@@ -19,14 +19,8 @@ export function Category1Summary({ entries }: Category1SummaryProps) {
     const totalProducerTco2e = entries.reduce((sum, e) => sum + e.calculatedTCo2eWithoutMargins, 0);
     const totalMarginTco2e = entries.reduce((sum, e) => sum + e.marginTCo2e, 0);
 
-    const verifiedCount = entries.filter((e) => e.status === "verified").length;
-    const submittedCount = entries.filter((e) => e.status === "submitted").length;
-    const draftCount = entries.filter((e) => e.status === "draft").length;
-
-    const avgIntensityKgPerUsd = totalUsd > 0 ? (totalEmissionsTco2e * 1000) / totalUsd : 0;
-
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 font-sans">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 font-sans">
             <Card className="p-card-padding border-outline-variant/60">
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-500 font-display">
                     Total Category 1 Spend
@@ -60,18 +54,6 @@ export function Category1Summary({ entries }: Category1SummaryProps) {
                 </p>
                 <p className="mt-1 text-xs text-secondary font-medium tabular-nums">
                     + {formatNumber(totalMarginTco2e, 3)} tCO₂e Trade & Freight Margin
-                </p>
-            </Card>
-
-            <Card className="p-card-padding border-outline-variant/60">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 font-display">
-                    Verification & Intensity
-                </p>
-                <p className="mt-2 font-display text-2xl font-bold tabular-nums text-slate-900">
-                    {verifiedCount} <span className="text-xs font-normal text-on-surface-variant">Verified</span>
-                </p>
-                <p className="mt-1 text-xs text-on-surface-variant tabular-nums">
-                    {submittedCount} Submitted • {draftCount} Draft • {formatNumber(avgIntensityKgPerUsd, 3)} kgCO₂e/$
                 </p>
             </Card>
         </div>

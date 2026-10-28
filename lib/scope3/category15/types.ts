@@ -173,3 +173,63 @@ export const DEFAULT_ASSET_CLASSES: AssetClassMetadata[] = [
         description: "Sovereign bond holdings and government-backed securities.",
     },
 ];
+
+export type TotalValueMethodInfo = {
+    title: string;
+    method: string;
+    denominatorLabel: string;
+    note?: string;
+    icon: string;
+};
+
+export const ASSET_CLASS_TOTAL_VALUE_METHODS: Record<AssetClassEnum, TotalValueMethodInfo> = {
+    listed_shares_or_corporate_bonds: {
+        title: "Listed shares or corporate bonds",
+        method: "Market cap + total debt (EVIC). Bonds to a private firm: equity + debt.",
+        denominatorLabel: "Total Company Worth / EVIC (₹ Cr)",
+        note: "Under the PCAF standard, Enterprise Value Including Cash (EVIC) is the sum of market cap at fiscal year-end plus total debt.",
+        icon: "account_balance",
+    },
+    business_loan_or_unlisted_equity: {
+        title: "Business loan or unlisted equity",
+        method: "Listed borrower: EVIC. Private borrower: total equity + debt.",
+        denominatorLabel: "Total Borrower Worth (₹ Cr)",
+        note: "For unlisted private businesses, use the book value of total equity plus total debt as the attribution denominator.",
+        icon: "business",
+    },
+    project_finance: {
+        title: "Project finance",
+        method: "Total project equity + debt",
+        denominatorLabel: "Total Project Equity + Debt (₹ Cr)",
+        note: "Calculated based on the specific ring-fenced project capital structure rather than the general parent balance sheet.",
+        icon: "precision_manufacturing",
+    },
+    commercial_property_loan: {
+        title: "Commercial property loan",
+        method: "Property value at origination",
+        denominatorLabel: "Property Value at Origination (₹ Cr)",
+        note: "Use the official certified commercial property valuation recorded at loan origination.",
+        icon: "apartment",
+    },
+    home_loan_mortgage: {
+        title: "Home loan / mortgage",
+        method: "Property value at origination",
+        denominatorLabel: "Property Value at Origination (₹ Cr)",
+        note: "Use the appraised value or property transaction purchase price at mortgage origination.",
+        icon: "home",
+    },
+    motor_vehicle_loan: {
+        title: "Motor vehicle loan",
+        method: "Total vehicle or fleet value at origination",
+        denominatorLabel: "Total Vehicle / Fleet Value at Origination (₹ Cr)",
+        note: "Use the total vehicle purchase price or fleet valuation recorded at credit origination.",
+        icon: "directions_car",
+    },
+    sovereign_debt: {
+        title: "Sovereign debt",
+        method: "PPP-adjusted GDP of that country in international USD",
+        denominatorLabel: "PPP-Adjusted GDP (₹ Cr / USD eq.)",
+        note: "Purchasing Power Parity (PPP) adjusted Gross Domestic Product of the issuing sovereign state.",
+        icon: "public",
+    },
+};

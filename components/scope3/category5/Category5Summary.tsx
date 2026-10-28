@@ -16,16 +16,12 @@ export function Category5Summary({ entries }: Category5SummaryProps) {
     const totalTonnes = entries.reduce((sum, e) => sum + e.wasteGeneratedTonnes, 0);
     const totalEmissionsTco2e = entries.reduce((sum, e) => sum + e.calculatedTCo2e, 0);
 
-    const verifiedCount = entries.filter((e) => e.status === "verified").length;
-    const submittedCount = entries.filter((e) => e.status === "submitted").length;
-    const draftCount = entries.filter((e) => e.status === "draft").length;
-
     const recycledTonnes = entries
         .filter((e) => e.treatmentMethod === "open_loop" || e.treatmentMethod === "closed_loop")
         .reduce((sum, e) => sum + e.wasteGeneratedTonnes, 0);
 
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 font-sans">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 font-sans">
             <Card className="p-5 border-outline-variant/60">
                 <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     Total Operational Waste
@@ -59,18 +55,6 @@ export function Category5Summary({ entries }: Category5SummaryProps) {
                 </p>
                 <p className="mt-2 font-sans text-xs font-semibold text-secondary tabular-nums">
                     {totalTonnes > 0 ? ((recycledTonnes / totalTonnes) * 100).toFixed(1) : "0.0"}% Circular Diversion Rate
-                </p>
-            </Card>
-
-            <Card className="p-5 border-outline-variant/60">
-                <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                    Audit Verification Status
-                </p>
-                <p className="mt-2 font-display text-2xl lg:text-3xl font-bold tracking-tight text-primary tabular-nums">
-                    {verifiedCount} <span className="font-sans text-sm font-normal text-slate-500">Verified</span>
-                </p>
-                <p className="mt-2 font-sans text-xs text-slate-500">
-                    {submittedCount} Submitted • {draftCount} Draft
                 </p>
             </Card>
         </div>

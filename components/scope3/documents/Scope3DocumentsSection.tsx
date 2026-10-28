@@ -51,7 +51,7 @@ export function Scope3DocumentsSection({
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [documentName, setDocumentName] = useState("");
     const [documentType, setDocumentType] = useState<string>(Scope3DocumentType.INVOICE);
-    const [documentDate, setDocumentDate] = useState("");
+    const [documentDate, setDocumentDate] = useState(() => new Date().toISOString().split("T")[0]);
     const [issuedBy, setIssuedBy] = useState("");
     const [notes, setNotes] = useState("");
     const [formError, setFormError] = useState<string | null>(null);
@@ -74,7 +74,7 @@ export function Scope3DocumentsSection({
         setSelectedFile(null);
         setDocumentName("");
         setDocumentType(Scope3DocumentType.INVOICE);
-        setDocumentDate("");
+        setDocumentDate(new Date().toISOString().split("T")[0]);
         setIssuedBy("");
         setNotes("");
         setFormError(null);

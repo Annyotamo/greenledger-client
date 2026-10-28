@@ -84,7 +84,7 @@ export async function uploadScope3Document(
     } else if (payload.file?.name) {
         formData.append("document_name", payload.file.name);
     }
-    if (payload.document_type) formData.append("document_type", payload.document_type);
+    formData.append("document_type", payload.document_type || "invoice");
     if (payload.document_date) formData.append("document_date", payload.document_date);
     if (payload.issued_by) formData.append("issued_by", payload.issued_by);
     if (payload.notes) formData.append("notes", payload.notes);

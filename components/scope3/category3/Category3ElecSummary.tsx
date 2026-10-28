@@ -16,16 +16,12 @@ export function Category3ElecSummary({ entries }: Category3ElecSummaryProps) {
     const totalKwh = entries.reduce((sum, e) => sum + e.electricityConsumedKwh, 0);
     const totalEmissionsTco2e = entries.reduce((sum, e) => sum + e.calculatedTCo2e, 0);
 
-    const verifiedCount = entries.filter((e) => e.status === "verified").length;
-    const submittedCount = entries.filter((e) => e.status === "submitted").length;
-    const draftCount = entries.filter((e) => e.status === "draft").length;
-
     const avgLossRate = entries.length > 0
         ? entries.reduce((sum, e) => sum + e.tdLossRate, 0) / entries.length
         : 0.1700;
 
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Card className="p-card-padding border-outline-variant/60">
                 <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
                     Total Grid Electricity Consumed
@@ -59,18 +55,6 @@ export function Category3ElecSummary({ entries }: Category3ElecSummaryProps) {
                 </p>
                 <p className="mt-2 font-sans text-xs font-medium text-secondary">
                     National Grid Loss Factor Benchmark (17.0% CEA)
-                </p>
-            </Card>
-
-            <Card className="p-card-padding border-outline-variant/60">
-                <p className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                    Audit Verification Status
-                </p>
-                <p className="mt-2 font-display text-2xl font-bold tracking-tight text-primary tabular-nums">
-                    {verifiedCount} <span className="font-sans text-sm font-normal text-on-surface-variant">Verified</span>
-                </p>
-                <p className="mt-2 font-sans text-xs font-medium text-on-surface-variant tabular-nums">
-                    {submittedCount} Submitted • {draftCount} Draft
                 </p>
             </Card>
         </div>

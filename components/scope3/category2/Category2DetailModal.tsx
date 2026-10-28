@@ -3,6 +3,7 @@
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Category2SpendEntry } from "@/lib/scope3/category2/types";
+import { Scope3DocumentsSection } from "@/components/scope3/documents/Scope3DocumentsSection";
 
 interface Category2DetailModalProps {
     entry: Category2SpendEntry | null;
@@ -13,13 +14,13 @@ export function Category2DetailModal({ entry, onClose }: Category2DetailModalPro
     if (!entry) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
             <div
-                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+                className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
             />
 
-            <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-2xl z-10 p-6 space-y-6">
+            <div className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-2xl z-10 p-6 space-y-6 my-auto max-h-[90vh] flex flex-col">
                 <div className="flex items-start justify-between border-b border-outline-variant/40 pb-4">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
@@ -55,102 +56,111 @@ export function Category2DetailModal({ entry, onClose }: Category2DetailModalPro
                     </button>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div className="rounded-xl bg-surface-container-low p-4 border border-outline-variant/40 space-y-2">
-                        <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                            Capital Spend & Currency Conversion
-                        </span>
-                        <div className="space-y-1">
-                            <div className="flex justify-between font-sans text-sm">
-                                <span className="text-on-surface-variant">Spend in INR:</span>
-                                <span className="font-semibold text-primary tabular-nums">₹{entry.spendInInr.toLocaleString()}</span>
+                <div className="overflow-y-auto pr-1 space-y-6">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div className="rounded-xl bg-surface-container-low p-4 border border-outline-variant/40 space-y-2">
+                            <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
+                                Capital Spend &amp; Currency Conversion
+                            </span>
+                            <div className="space-y-1">
+                                <div className="flex justify-between font-sans text-sm">
+                                    <span className="text-on-surface-variant">Spend in INR:</span>
+                                    <span className="font-semibold text-primary tabular-nums">₹{entry.spendInInr.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between font-sans text-sm">
+                                    <span className="text-on-surface-variant">Spend Year:</span>
+                                    <span className="font-semibold text-primary tabular-nums">{entry.spendYear}</span>
+                                </div>
+                                <div className="flex justify-between font-sans text-sm">
+                                    <span className="text-on-surface-variant">Exchange Rate:</span>
+                                    <span className="font-semibold text-primary tabular-nums">₹{entry.exchangeRateUsdToInr}/USD</span>
+                                </div>
+                                <div className="flex justify-between font-sans text-sm pt-1 border-t border-outline-variant/30">
+                                    <span className="text-on-surface-variant font-medium">Spend in USD:</span>
+                                    <span className="font-semibold text-secondary tabular-nums">${entry.spendInUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</span>
+                                </div>
                             </div>
-                            <div className="flex justify-between font-sans text-sm">
-                                <span className="text-on-surface-variant">Spend Year:</span>
-                                <span className="font-semibold text-primary tabular-nums">{entry.spendYear}</span>
-                            </div>
-                            <div className="flex justify-between font-sans text-sm">
-                                <span className="text-on-surface-variant">Exchange Rate:</span>
-                                <span className="font-semibold text-primary tabular-nums">₹{entry.exchangeRateUsdToInr}/USD</span>
-                            </div>
-                            <div className="flex justify-between font-sans text-sm pt-1 border-t border-outline-variant/30">
-                                <span className="text-on-surface-variant font-medium">Spend in USD:</span>
-                                <span className="font-semibold text-secondary tabular-nums">${entry.spendInUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</span>
+                        </div>
+
+                        <div className="rounded-xl bg-surface-container-low p-4 border border-outline-variant/40 space-y-2">
+                            <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
+                                Headline Emissions (With Margins)
+                            </span>
+                            <div className="space-y-1">
+                                <div className="flex justify-between font-sans text-sm">
+                                    <span className="text-on-surface-variant">Total Calculated:</span>
+                                    <span className="font-semibold text-primary tabular-nums">{entry.calculatedTCo2e.toFixed(4)} tCO₂e</span>
+                                </div>
+                                <div className="flex justify-between font-sans text-sm">
+                                    <span className="text-on-surface-variant">In Kilograms:</span>
+                                    <span className="font-semibold text-primary tabular-nums">{entry.calculatedKgCo2e.toLocaleString()} kgCO₂e</span>
+                                </div>
+                                <div className="flex justify-between font-sans text-sm">
+                                    <span className="text-on-surface-variant">Factor with Margins:</span>
+                                    <span className="font-semibold text-secondary tabular-nums">{entry.factor?.kgCo2ePerUsdWithMargins ?? 0.5120} kg/USD</span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="rounded-xl bg-surface-container-low p-4 border border-outline-variant/40 space-y-2">
-                        <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                            Headline Emissions (With Margins)
+                    <div className="rounded-xl bg-surface-container-high/40 p-4 border border-outline-variant/50 space-y-3">
+                        <span className="font-sans text-xs font-semibold uppercase tracking-wider text-primary">
+                            Capital Equipment Producer vs Trade Margin Breakdown
                         </span>
-                        <div className="space-y-1">
-                            <div className="flex justify-between font-sans text-sm">
-                                <span className="text-on-surface-variant">Total Calculated:</span>
-                                <span className="font-semibold text-primary tabular-nums">{entry.calculatedTCo2e.toFixed(4)} tCO₂e</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-1 bg-surface-container-lowest p-3 rounded-lg border border-outline-variant/30">
+                                <span className="font-sans text-[11px] uppercase font-semibold text-on-surface-variant tracking-wider">
+                                    Producer Price Component (Without Margins)
+                                </span>
+                                <p className="font-display text-xl font-bold tracking-tight text-primary tabular-nums">
+                                    {entry.calculatedTCo2eWithoutMargins.toFixed(4)} <span className="text-xs font-normal">tCO₂e</span>
+                                </p>
+                                <p className="font-sans text-xs text-on-surface-variant tabular-nums">
+                                    Factor: {entry.factor?.kgCo2ePerUsdWithoutMargins ?? 0.4480} kgCO₂e/USD
+                                </p>
                             </div>
-                            <div className="flex justify-between font-sans text-sm">
-                                <span className="text-on-surface-variant">In Kilograms:</span>
-                                <span className="font-semibold text-primary tabular-nums">{entry.calculatedKgCo2e.toLocaleString()} kgCO₂e</span>
-                            </div>
-                            <div className="flex justify-between font-sans text-sm">
-                                <span className="text-on-surface-variant">Factor with Margins:</span>
-                                <span className="font-semibold text-secondary tabular-nums">{entry.factor?.kgCo2ePerUsdWithMargins ?? 0.5120} kg/USD</span>
+
+                            <div className="space-y-1 bg-surface-container-lowest p-3 rounded-lg border border-outline-variant/30">
+                                <span className="font-sans text-[11px] uppercase font-semibold text-secondary tracking-wider">
+                                    Trade &amp; Freight Distribution Margin
+                                </span>
+                                <p className="font-display text-xl font-bold tracking-tight text-secondary tabular-nums">
+                                    {entry.marginTCo2e.toFixed(4)} <span className="text-xs font-normal">tCO₂e</span>
+                                </p>
+                                <p className="font-sans text-xs text-on-surface-variant tabular-nums">
+                                    Factor: {entry.factor?.marginKgCo2ePerUsd ?? 0.0640} kgCO₂e/USD
+                                </p>
                             </div>
                         </div>
                     </div>
+
+                    {/* Supporting Documents Section */}
+                    <Scope3DocumentsSection
+                        category="category_2"
+                        activityId={entry.id}
+                        activityTitle={entry.factor?.commodityTitle ?? "Capital Goods Spend"}
+                    />
+
+                    {entry.notes && (
+                        <div className="space-y-1">
+                            <span className="font-sans text-xs font-semibold uppercase tracking-wider text-primary">Notes &amp; Asset Remarks:</span>
+                            <p className="font-sans text-sm text-slate-700 bg-surface-container-low p-3 rounded-lg">
+                                {entry.notes}
+                            </p>
+                        </div>
+                    )}
+
+                    {entry.rejectedReason && (
+                        <div className="space-y-1">
+                            <span className="font-sans text-xs font-semibold uppercase tracking-wider text-error">Rejection Reason:</span>
+                            <p className="font-sans text-sm text-error font-medium bg-error-container/20 p-3 rounded-lg">
+                                {entry.rejectedReason}
+                            </p>
+                        </div>
+                    )}
                 </div>
 
-                <div className="rounded-xl bg-surface-container-high/40 p-4 border border-outline-variant/50 space-y-3">
-                    <span className="font-sans text-xs font-semibold uppercase tracking-wider text-primary">
-                        Capital Equipment Producer vs Trade Margin Breakdown
-                    </span>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1 bg-surface-container-lowest p-3 rounded-lg border border-outline-variant/30">
-                            <span className="font-sans text-[11px] uppercase font-semibold text-on-surface-variant tracking-wider">
-                                Producer Price Component (Without Margins)
-                            </span>
-                            <p className="font-display text-xl font-bold tracking-tight text-primary tabular-nums">
-                                {entry.calculatedTCo2eWithoutMargins.toFixed(4)} <span className="text-xs font-normal">tCO₂e</span>
-                            </p>
-                            <p className="font-sans text-xs text-on-surface-variant tabular-nums">
-                                Factor: {entry.factor?.kgCo2ePerUsdWithoutMargins ?? 0.4480} kgCO₂e/USD
-                            </p>
-                        </div>
-
-                        <div className="space-y-1 bg-surface-container-lowest p-3 rounded-lg border border-outline-variant/30">
-                            <span className="font-sans text-[11px] uppercase font-semibold text-secondary tracking-wider">
-                                Trade & Freight Distribution Margin
-                            </span>
-                            <p className="font-display text-xl font-bold tracking-tight text-secondary tabular-nums">
-                                {entry.marginTCo2e.toFixed(4)} <span className="text-xs font-normal">tCO₂e</span>
-                            </p>
-                            <p className="font-sans text-xs text-on-surface-variant tabular-nums">
-                                Factor: {entry.factor?.marginKgCo2ePerUsd ?? 0.0640} kgCO₂e/USD
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {entry.notes && (
-                    <div className="space-y-1">
-                        <span className="font-sans text-xs font-semibold uppercase tracking-wider text-primary">Notes & Asset Remarks:</span>
-                        <p className="font-sans text-sm text-slate-700 bg-surface-container-low p-3 rounded-lg">
-                            {entry.notes}
-                        </p>
-                    </div>
-                )}
-
-                {entry.rejectedReason && (
-                    <div className="space-y-1">
-                        <span className="font-sans text-xs font-semibold uppercase tracking-wider text-error">Rejection Reason:</span>
-                        <p className="font-sans text-sm text-error font-medium bg-error-container/20 p-3 rounded-lg">
-                            {entry.rejectedReason}
-                        </p>
-                    </div>
-                )}
-
-                <div className="flex justify-end pt-2">
+                <div className="flex justify-end pt-2 border-t border-outline-variant/40">
                     <Button variant="secondary" size="md" onClick={onClose}>
                         Close
                     </Button>

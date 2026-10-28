@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { isAxiosError } from "axios";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -30,6 +31,41 @@ import {
 import { useFacilities } from "@/lib/facility/hooks";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { AiAssistantFAB } from "@/components/dashboard/AiAssistantFAB";
+import { uploadPendingScope3Document, PendingDocumentAttachment } from "@/lib/scope3/documents";
+
+/**
+ * Extracts a user-friendly message from backend API errors.
+ * Maps known Scope 3 error codes to actionable UI copy.
+ */
+function resolveApiErrorMessage(err: unknown, fallback: string): string {
+    if (isAxiosError(err)) {
+        const errorBody = err.response?.data?.error;
+        const errorCode: string | undefined =
+            errorBody?.error_code ?? err.response?.data?.error_code;
+
+        switch (errorCode) {
+            case "ACTIVITY_DATE_OUTSIDE_PERIOD":
+                return "The spend date falls outside the selected reporting period window. Please choose a date within the period.";
+            case "REPORTING_PERIOD_LOCKED":
+                return "This reporting period is locked and cannot accept new or modified entries.";
+            case "REPORTING_PERIOD_ARCHIVED":
+                return "This reporting period is archived and cannot accept entries.";
+            case "ACTIVITY_AMENDMENT_SOURCE_NOT_APPROVED":
+                return "Only verified or approved activities can be amended.";
+            case "SCOPE3_ACTIVITY_IMMUTABLE":
+                return "This activity is verified and cannot be edited directly. Use the Amend function instead.";
+            default:
+                break;
+        }
+
+        // Fall back to the backend message string if present
+        const backendMsg: string | undefined =
+            errorBody?.message ?? err.response?.data?.message;
+        if (backendMsg) return backendMsg;
+    }
+
+    return err instanceof Error ? err.message : fallback;
+}
 
 export function Category2View() {
     const [statusFilter, setStatusFilter] = useState<string>("");
@@ -101,28 +137,43 @@ export function Category2View() {
         setIsRejectModalOpen(true);
     }
 
-    async function handleFormSubmit(payload: CreateCategory2SpendPayload | AmendCategory2SpendPayload) {
+    async function handleFormSubmit(
+        payload: CreateCategory2SpendPayload | AmendCategory2SpendPayload,
+        pendingDocument?: PendingDocumentAttachment | null,
+    ) {
         try {
+            let savedEntry: Category2SpendEntry | null = null;
             if (formMode === "create") {
-                await createMutation.mutateAsync(payload as CreateCategory2SpendPayload);
+                savedEntry = await createMutation.mutateAsync(payload as CreateCategory2SpendPayload);
                 showNotify("success", "Category 2 capital spend entry created successfully.");
             } else if (formMode === "edit" && selectedEntry) {
-                await updateMutation.mutateAsync({
+                savedEntry = await updateMutation.mutateAsync({
                     activityId: selectedEntry.id,
                     payload: payload as CreateCategory2SpendPayload,
                 });
                 showNotify("success", "Category 2 capital spend entry updated successfully.");
             } else if (formMode === "amend" && selectedEntry) {
-                await amendMutation.mutateAsync({
+                savedEntry = await amendMutation.mutateAsync({
                     activityId: selectedEntry.id,
                     payload: payload as AmendCategory2SpendPayload,
                 });
                 showNotify("success", "Verified capital goods entry amended successfully.");
             }
+
+            // Upload attached document if provided
+            if (pendingDocument?.file && savedEntry?.id) {
+                try {
+                    await uploadPendingScope3Document("category_2", savedEntry.id, pendingDocument);
+                    showNotify("success", "Capital activity and supporting document saved successfully.");
+                } catch (docErr) {
+                    console.error("Document upload error:", docErr);
+                    showNotify("error", "Activity created, but document upload failed. You can re-upload in Evidence & Documents.");
+                }
+            }
+
             setIsFormModalOpen(false);
         } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : "Operation failed.";
-            showNotify("error", msg);
+            showNotify("error", resolveApiErrorMessage(err, "Operation failed."));
         }
     }
 
@@ -131,8 +182,7 @@ export function Category2View() {
             await submitMutation.mutateAsync(id);
             showNotify("success", "Capital goods entry submitted for reviewer approval.");
         } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : "Failed to submit entry.";
-            showNotify("error", msg);
+            showNotify("error", resolveApiErrorMessage(err, "Failed to submit entry."));
         }
     }
 
@@ -141,8 +191,7 @@ export function Category2View() {
             await verifyMutation.mutateAsync(id);
             showNotify("success", "Capital goods entry verified and locked.");
         } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : "Failed to verify entry.";
-            showNotify("error", msg);
+            showNotify("error", resolveApiErrorMessage(err, "Failed to verify entry."));
         }
     }
 
@@ -154,8 +203,7 @@ export function Category2View() {
             setIsRejectModalOpen(false);
             setRejectEntry(null);
         } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : "Failed to reject entry.";
-            showNotify("error", msg);
+            showNotify("error", resolveApiErrorMessage(err, "Failed to reject entry."));
         }
     }
 
@@ -165,8 +213,7 @@ export function Category2View() {
             await deleteMutation.mutateAsync(id);
             showNotify("success", "Capital spend entry deleted.");
         } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : "Failed to delete entry.";
-            showNotify("error", msg);
+            showNotify("error", resolveApiErrorMessage(err, "Failed to delete entry."));
         }
     }
 
@@ -204,7 +251,7 @@ export function Category2View() {
                         Capital Goods (Spend-Based)
                     </h1>
                     <p className="font-sans text-sm text-on-surface-variant max-w-3xl">
-                        Quantify upstream Scope 3 Category 2 emissions from capital expenditures (machinery, equipment, vehicles, buildings) using US EPA USEEIO factors and annual average USD/INR exchange rates.
+                        Quantify upstream Scope 3 Category 2 emissions from capital expenditures (machinery, equipment, vehicles, buildings) using US EPA USEEIO factors and the EPA 2022 USD/INR conversion baseline.
                     </p>
                 </div>
 
@@ -242,7 +289,7 @@ export function Category2View() {
                             value={yearFilter}
                             onChange={(e) => setYearFilter(e.target.value)}
                             className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-sm font-medium text-primary focus:outline-none focus:ring-1 focus:ring-primary">
-                            <option value="">All Years (2020–2025)</option>
+                            <option value="">All Years</option>
                             <option value="2020">2020</option>
                             <option value="2021">2021</option>
                             <option value="2022">2022</option>

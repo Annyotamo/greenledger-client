@@ -120,7 +120,7 @@ export type CreateCategory1SpendPayload = {
     scope3_spend_emission_factor_id: string;
     spend_date: string;
     spend_in_inr: number;
-    spend_year: number;
+    spend_year?: number | null;
     status?: Scope3SpendStatus;
     notes?: string | null;
 };
@@ -147,7 +147,10 @@ export type Category1FilterParams = {
     sort_order?: "asc" | "desc";
 };
 
-// Annual USD to INR exchange rates (Average annual benchmark)
+// EPA 2022 USD/INR conversion factor used by US EPA USEEIO model (fixed baseline)
+export const EPA_2022_EXCHANGE_RATE = 78.60;
+
+// Annual USD to INR exchange rates (Average annual benchmark — kept for reference/display)
 export const ANNUAL_USD_INR_EXCHANGE_RATES: Record<number, number> = {
     2020: 74.13,
     2021: 73.92,

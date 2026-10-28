@@ -1,6 +1,6 @@
 import { privateApi } from "@/lib/http/client";
 import {
-    ANNUAL_USD_INR_EXCHANGE_RATES,
+    EPA_2022_EXCHANGE_RATE,
     AmendCategory1SpendPayload,
     Category1FilterParams,
     Category1SpendApiResponse,
@@ -41,8 +41,11 @@ export function mapFactor(dto?: Scope3SpendFactorDto | null, factorId?: string):
 
 export function mapCategory1SpendItem(dto: Category1SpendItemDto): Category1SpendEntry {
     const factor = mapFactor(dto.factor, dto.scope3_spend_emission_factor_id);
-    const spendYear = dto.spend_year || (dto.spend_date ? new Date(dto.spend_date).getFullYear() : 2024);
-    const exchangeRate = dto.exchange_rate_usd_to_inr || ANNUAL_USD_INR_EXCHANGE_RATES[spendYear] || 83.45;
+    const spendYear = dto.spend_year || (dto.spend_date ? new Date(dto.spend_date).getFullYear() : new Date().getFullYear());
+
+    // Always use the EPA 2022 USD/INR conversion factor as the canonical baseline.
+    // The backend returns exchange_rate_usd_to_inr = 78.60; fall back to the constant if absent.
+    const exchangeRate = dto.exchange_rate_usd_to_inr || EPA_2022_EXCHANGE_RATE;
 
     const spendInInr = Number(dto.spend_in_inr || 0);
     const spendInUsd = dto.spend_in_usd ? Number(dto.spend_in_usd) : spendInInr / exchangeRate;
@@ -265,9 +268,9 @@ function getMockCategory1Entries(): Category1SpendEntry[] {
             scope3SpendEmissionFactorId: "ca68b110-59ba-4c62-b841-270138cc06dd",
             spendDate: "2024-05-15",
             spendYear: 2024,
-            spendInInr: 830000.00,
+            spendInInr: 786000.00,
             spendInUsd: 10000.00,
-            exchangeRateUsdToInr: 83.00,
+            exchangeRateUsdToInr: EPA_2022_EXCHANGE_RATE,
             calculatedKgCo2e: 5200.00,
             calculatedTCo2e: 5.20,
             calculatedKgCo2eWithoutMargins: 4200.00,

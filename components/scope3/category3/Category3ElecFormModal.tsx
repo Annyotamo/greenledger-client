@@ -14,13 +14,18 @@ import {
     DEFAULT_CEA_GRID_FACTOR_KG_PER_KWH,
     ElectricityTdActivityEntry,
 } from "@/lib/scope3/category3/types";
+import { FormDocumentAttachmentField } from "@/components/scope3/documents/FormDocumentAttachmentField";
+import { PendingDocumentAttachment } from "@/lib/scope3/documents/types";
 
 interface Category3ElecFormModalProps {
     isOpen: boolean;
     mode: "create" | "edit" | "amend";
     initialEntry?: ElectricityTdActivityEntry | null;
     onClose: () => void;
-    onSubmit: (payload: CreateElectricityTdPayload | AmendElectricityTdPayload) => Promise<void>;
+    onSubmit: (
+        payload: CreateElectricityTdPayload | AmendElectricityTdPayload,
+        pendingDocument?: PendingDocumentAttachment | null,
+    ) => Promise<void>;
     isSubmitting: boolean;
 }
 
@@ -64,6 +69,7 @@ export function Category3ElecFormModal({
     const [notes, setNotes] = useState(
         () => (isEditOrAmend ? initialEntry?.notes || "" : ""),
     );
+    const [pendingDocument, setPendingDocument] = useState<PendingDocumentAttachment | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const numKwh = parseFloat(electricityKwh) || 0;
@@ -120,9 +126,9 @@ export function Category3ElecFormModal({
                     ...basePayload,
                     amended_from_id: initialEntry.id,
                 };
-                await onSubmit(amendPayload);
+                await onSubmit(amendPayload, pendingDocument);
             } else {
-                await onSubmit(basePayload);
+                await onSubmit(basePayload, pendingDocument);
             }
         } finally {
             submittingRef.current = false;
@@ -305,6 +311,12 @@ export function Category3ElecFormModal({
                             className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         />
                     </div>
+
+                    <FormDocumentAttachmentField
+                        value={pendingDocument}
+                        onChange={setPendingDocument}
+                        disabled={busy}
+                    />
 
                     <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/40">
                         <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={busy}>

@@ -3,6 +3,7 @@
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { ElectricityTdActivityEntry, WttFuelActivityEntry } from "@/lib/scope3/category3/types";
+import { Scope3DocumentsSection } from "@/components/scope3/documents/Scope3DocumentsSection";
 
 interface Category3DetailModalProps {
     type: "fuel" | "electricity";
@@ -17,12 +18,14 @@ export function Category3DetailModal({ type, fuelEntry, elecEntry, onClose }: Ca
 
     const isFuel = type === "fuel";
     const status = isFuel ? fuelEntry!.status : elecEntry!.status;
+    const activityId = isFuel ? fuelEntry!.id : elecEntry!.id;
+    const activityTitle = isFuel ? fuelEntry!.fuelName : "Grid Electricity T&D Losses";
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
             <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md" onClick={onClose} />
 
-            <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-2xl z-10 p-6 space-y-6 my-auto">
+            <div className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-2xl z-10 p-6 space-y-6 my-auto max-h-[90vh] flex flex-col">
                 <div className="flex items-start justify-between border-b border-outline-variant/40 pb-4">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
@@ -58,55 +61,64 @@ export function Category3DetailModal({ type, fuelEntry, elecEntry, onClose }: Ca
                     </button>
                 </div>
 
-                {isFuel ? (
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div className="rounded-xl bg-surface-container-low p-4 border border-outline-variant/40 space-y-2">
-                            <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Fuel Consumption Input</span>
-                            <div className="space-y-1">
-                                <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">Quantity:</span><span className="font-semibold text-primary tabular-nums">{fuelEntry!.fuelQuantity.toLocaleString()} {fuelEntry!.unitSymbol}</span></div>
-                                <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">Activity Date:</span><span className="font-semibold text-primary">{fuelEntry!.activityDate}</span></div>
+                <div className="overflow-y-auto pr-1 space-y-6">
+                    {isFuel ? (
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div className="rounded-xl bg-surface-container-low p-4 border border-outline-variant/40 space-y-2">
+                                <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Fuel Consumption Input</span>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">Quantity:</span><span className="font-semibold text-primary tabular-nums">{fuelEntry!.fuelQuantity.toLocaleString()} {fuelEntry!.unitSymbol}</span></div>
+                                    <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">Activity Date:</span><span className="font-semibold text-primary">{fuelEntry!.activityDate}</span></div>
+                                </div>
+                            </div>
+
+                            <div className="rounded-xl bg-surface-container-low p-4 border border-outline-variant/40 space-y-2">
+                                <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Calculated WTT Emissions</span>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">Total tCO₂e:</span><span className="font-semibold text-primary tabular-nums">{fuelEntry!.calculatedTCo2e.toFixed(4)} tCO₂e</span></div>
+                                    <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">Total kgCO₂e:</span><span className="font-semibold text-secondary tabular-nums">{fuelEntry!.calculatedKgCo2e.toLocaleString()} kgCO₂e</span></div>
+                                </div>
                             </div>
                         </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div className="rounded-xl bg-surface-container-low p-4 border border-outline-variant/40 space-y-2">
+                                <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Grid Consumption &amp; Rate</span>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">Electricity Consumed:</span><span className="font-semibold text-primary tabular-nums">{elecEntry!.electricityConsumedKwh.toLocaleString()} kWh</span></div>
+                                    <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">T&amp;D Loss Rate:</span><span className="font-semibold text-primary tabular-nums">{(elecEntry!.tdLossRate * 100).toFixed(1)}%</span></div>
+                                    <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">Grid Factor:</span><span className="font-semibold text-primary tabular-nums">{elecEntry!.gridKgCo2ePerKwh.toFixed(4)} kg/kWh</span></div>
+                                </div>
+                            </div>
 
-                        <div className="rounded-xl bg-surface-container-low p-4 border border-outline-variant/40 space-y-2">
-                            <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Calculated WTT Emissions</span>
-                            <div className="space-y-1">
-                                <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">Total tCO₂e:</span><span className="font-semibold text-primary tabular-nums">{fuelEntry!.calculatedTCo2e.toFixed(4)} tCO₂e</span></div>
-                                <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">Total kgCO₂e:</span><span className="font-semibold text-secondary tabular-nums">{fuelEntry!.calculatedKgCo2e.toLocaleString()} kgCO₂e</span></div>
+                            <div className="rounded-xl bg-surface-container-low p-4 border border-outline-variant/40 space-y-2">
+                                <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Calculated T&amp;D Loss Emissions</span>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">Total tCO₂e:</span><span className="font-semibold text-primary tabular-nums">{elecEntry!.calculatedTCo2e.toFixed(4)} tCO₂e</span></div>
+                                    <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">Total kgCO₂e:</span><span className="font-semibold text-secondary tabular-nums">{elecEntry!.calculatedKgCo2e.toLocaleString()} kgCO₂e</span></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div className="rounded-xl bg-surface-container-low p-4 border border-outline-variant/40 space-y-2">
-                            <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Grid Consumption & Rate</span>
-                            <div className="space-y-1">
-                                <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">Electricity Consumed:</span><span className="font-semibold text-primary tabular-nums">{elecEntry!.electricityConsumedKwh.toLocaleString()} kWh</span></div>
-                                <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">T&D Loss Rate:</span><span className="font-semibold text-primary tabular-nums">{(elecEntry!.tdLossRate * 100).toFixed(1)}%</span></div>
-                                <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">Grid Factor:</span><span className="font-semibold text-primary tabular-nums">{elecEntry!.gridKgCo2ePerKwh.toFixed(4)} kg/kWh</span></div>
-                            </div>
+                    )}
+
+                    {/* Supporting Evidence Documents Section */}
+                    <Scope3DocumentsSection
+                        category="category_3"
+                        activityId={activityId}
+                        activityTitle={activityTitle}
+                    />
+
+                    {(isFuel ? fuelEntry!.notes : elecEntry!.notes) && (
+                        <div className="space-y-1">
+                            <span className="font-sans text-xs font-semibold uppercase tracking-wider text-primary">Notes &amp; Remarks:</span>
+                            <p className="font-sans text-sm text-slate-700 bg-surface-container-low p-3 rounded-lg">
+                                {isFuel ? fuelEntry!.notes : elecEntry!.notes}
+                            </p>
                         </div>
+                    )}
+                </div>
 
-                        <div className="rounded-xl bg-surface-container-low p-4 border border-outline-variant/40 space-y-2">
-                            <span className="font-sans text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Calculated T&D Loss Emissions</span>
-                            <div className="space-y-1">
-                                <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">Total tCO₂e:</span><span className="font-semibold text-primary tabular-nums">{elecEntry!.calculatedTCo2e.toFixed(4)} tCO₂e</span></div>
-                                <div className="flex justify-between font-sans text-sm"><span className="text-on-surface-variant">Total kgCO₂e:</span><span className="font-semibold text-secondary tabular-nums">{elecEntry!.calculatedKgCo2e.toLocaleString()} kgCO₂e</span></div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {(isFuel ? fuelEntry!.notes : elecEntry!.notes) && (
-                    <div className="space-y-1">
-                        <span className="font-sans text-xs font-semibold uppercase tracking-wider text-primary">Notes & Remarks:</span>
-                        <p className="font-sans text-sm text-slate-700 bg-surface-container-low p-3 rounded-lg">
-                            {isFuel ? fuelEntry!.notes : elecEntry!.notes}
-                        </p>
-                    </div>
-                )}
-
-                <div className="flex justify-end pt-2">
+                <div className="flex justify-end pt-2 border-t border-outline-variant/40">
                     <Button variant="secondary" size="md" onClick={onClose}>
                         Close
                     </Button>

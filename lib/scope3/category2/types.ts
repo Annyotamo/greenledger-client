@@ -76,7 +76,7 @@ export type CreateCategory2SpendPayload = {
     scope3_spend_emission_factor_id: string;
     spend_date: string;
     spend_in_inr: number;
-    spend_year: number;
+    spend_year?: number | null;
     status?: Scope3SpendStatus;
     notes?: string | null;
 };

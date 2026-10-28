@@ -42,6 +42,7 @@ import {
     WttFuelActivityEntry,
 } from "@/lib/scope3/category3/types";
 import { useFacilities } from "@/lib/facility/hooks";
+import { uploadPendingScope3Document, PendingDocumentAttachment } from "@/lib/scope3/documents";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { AiAssistantFAB } from "@/components/dashboard/AiAssistantFAB";
 
@@ -144,24 +145,40 @@ export function Category3View() {
         setIsRejectOpen(true);
     }
 
-    async function handleFuelFormSubmit(payload: CreateWttFuelPayload | AmendWttFuelPayload) {
+    async function handleFuelFormSubmit(
+        payload: CreateWttFuelPayload | AmendWttFuelPayload,
+        pendingDocument?: PendingDocumentAttachment | null,
+    ) {
         try {
+            let savedEntry: WttFuelActivityEntry | null = null;
             if (fuelFormMode === "create") {
-                await createFuelMutation.mutateAsync(payload as CreateWttFuelPayload);
+                savedEntry = await createFuelMutation.mutateAsync(payload as CreateWttFuelPayload);
                 showNotify("success", "WTT Fuel activity logged successfully.");
             } else if (fuelFormMode === "edit" && selectedFuelEntry) {
-                await updateFuelMutation.mutateAsync({
+                savedEntry = await updateFuelMutation.mutateAsync({
                     activityId: selectedFuelEntry.id,
                     payload: payload as CreateWttFuelPayload,
                 });
                 showNotify("success", "WTT Fuel activity updated successfully.");
             } else if (fuelFormMode === "amend" && selectedFuelEntry) {
-                await amendFuelMutation.mutateAsync({
+                savedEntry = await amendFuelMutation.mutateAsync({
                     activityId: selectedFuelEntry.id,
                     payload: payload as AmendWttFuelPayload,
                 });
                 showNotify("success", "Verified WTT Fuel entry amended successfully.");
             }
+
+            // Upload attached document if provided
+            if (pendingDocument?.file && savedEntry?.id) {
+                try {
+                    await uploadPendingScope3Document("category_3", savedEntry.id, pendingDocument);
+                    showNotify("success", "Fuel activity and supporting document saved successfully.");
+                } catch (docErr) {
+                    console.error("Document upload error:", docErr);
+                    showNotify("error", "Activity created, but document upload failed. You can re-upload in Evidence & Documents.");
+                }
+            }
+
             setIsFuelFormOpen(false);
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : "Operation failed.";
@@ -199,24 +216,40 @@ export function Category3View() {
         setIsRejectOpen(true);
     }
 
-    async function handleElecFormSubmit(payload: CreateElectricityTdPayload | AmendElectricityTdPayload) {
+    async function handleElecFormSubmit(
+        payload: CreateElectricityTdPayload | AmendElectricityTdPayload,
+        pendingDocument?: PendingDocumentAttachment | null,
+    ) {
         try {
+            let savedEntry: ElectricityTdActivityEntry | null = null;
             if (elecFormMode === "create") {
-                await createElecMutation.mutateAsync(payload as CreateElectricityTdPayload);
+                savedEntry = await createElecMutation.mutateAsync(payload as CreateElectricityTdPayload);
                 showNotify("success", "Electricity T&D loss activity logged successfully.");
             } else if (elecFormMode === "edit" && selectedElecEntry) {
-                await updateElecMutation.mutateAsync({
+                savedEntry = await updateElecMutation.mutateAsync({
                     activityId: selectedElecEntry.id,
                     payload: payload as CreateElectricityTdPayload,
                 });
                 showNotify("success", "Electricity T&D loss activity updated successfully.");
             } else if (elecFormMode === "amend" && selectedElecEntry) {
-                await amendElecMutation.mutateAsync({
+                savedEntry = await amendElecMutation.mutateAsync({
                     activityId: selectedElecEntry.id,
                     payload: payload as AmendElectricityTdPayload,
                 });
                 showNotify("success", "Verified T&D Loss entry amended successfully.");
             }
+
+            // Upload attached document if provided
+            if (pendingDocument?.file && savedEntry?.id) {
+                try {
+                    await uploadPendingScope3Document("category_3", savedEntry.id, pendingDocument);
+                    showNotify("success", "T&D Loss activity and supporting document saved successfully.");
+                } catch (docErr) {
+                    console.error("Document upload error:", docErr);
+                    showNotify("error", "Activity created, but document upload failed. You can re-upload in Evidence & Documents.");
+                }
+            }
+
             setIsElecFormOpen(false);
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : "Operation failed.";

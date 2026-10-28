@@ -31,6 +31,7 @@ import {
 import { useFacilities } from "@/lib/facility/hooks";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { AiAssistantFAB } from "@/components/dashboard/AiAssistantFAB";
+import { uploadPendingScope3Document, PendingDocumentAttachment } from "@/lib/scope3/documents";
 
 export function Category7View() {
     // Filter State
@@ -106,24 +107,40 @@ export function Category7View() {
         setIsRejectOpen(true);
     }
 
-    async function handleFormSubmit(payload: CreateTravelActivityPayload | AmendTravelActivityPayload) {
+    async function handleFormSubmit(
+        payload: CreateTravelActivityPayload | AmendTravelActivityPayload,
+        pendingDocument?: PendingDocumentAttachment | null,
+    ) {
         try {
+            let savedEntry: TravelActivityEntry | null = null;
             if (formMode === "create") {
-                await createMutation.mutateAsync(payload as CreateTravelActivityPayload);
+                savedEntry = await createMutation.mutateAsync(payload as CreateTravelActivityPayload);
                 showNotify("success", "Employee commute activity logged successfully.");
             } else if (formMode === "edit" && selectedEntry) {
-                await updateMutation.mutateAsync({
+                savedEntry = await updateMutation.mutateAsync({
                     activityId: selectedEntry.id,
                     payload: payload as CreateTravelActivityPayload,
                 });
                 showNotify("success", "Employee commute activity updated successfully.");
             } else if (formMode === "amend" && selectedEntry) {
-                await amendMutation.mutateAsync({
+                savedEntry = await amendMutation.mutateAsync({
                     activityId: selectedEntry.id,
                     payload: payload as AmendTravelActivityPayload,
                 });
                 showNotify("success", "Verified Employee Commute record amended successfully.");
             }
+
+            // Upload attached document if provided
+            if (pendingDocument?.file && savedEntry?.id) {
+                try {
+                    await uploadPendingScope3Document("category_7", savedEntry.id, pendingDocument);
+                    showNotify("success", "Commute activity and supporting document saved successfully.");
+                } catch (docErr) {
+                    console.error("Document upload error:", docErr);
+                    showNotify("error", "Activity created, but document upload failed. You can re-upload in Evidence & Documents.");
+                }
+            }
+
             setIsFormOpen(false);
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : "Operation failed.";

@@ -15,13 +15,18 @@ import {
     WttFuelActivityEntry,
 } from "@/lib/scope3/category3/types";
 import { useWttFuelUnits, useWttFuels } from "@/lib/scope3/category3/hooks";
+import { FormDocumentAttachmentField } from "@/components/scope3/documents/FormDocumentAttachmentField";
+import { PendingDocumentAttachment } from "@/lib/scope3/documents/types";
 
 interface Category3FuelFormModalProps {
     isOpen: boolean;
     mode: "create" | "edit" | "amend";
     initialEntry?: WttFuelActivityEntry | null;
     onClose: () => void;
-    onSubmit: (payload: CreateWttFuelPayload | AmendWttFuelPayload) => Promise<void>;
+    onSubmit: (
+        payload: CreateWttFuelPayload | AmendWttFuelPayload,
+        pendingDocument?: PendingDocumentAttachment | null,
+    ) => Promise<void>;
     isSubmitting: boolean;
 }
 
@@ -111,6 +116,7 @@ export function Category3FuelFormModal({
     const [notes, setNotes] = useState(
         () => (isEditOrAmend ? initialEntry?.notes || "" : ""),
     );
+    const [pendingDocument, setPendingDocument] = useState<PendingDocumentAttachment | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const fuelSelectOptions: CustomSelectOption[] = useMemo(
@@ -195,9 +201,9 @@ export function Category3FuelFormModal({
                     ...basePayload,
                     amended_from_id: initialEntry.id,
                 };
-                await onSubmit(amendPayload);
+                await onSubmit(amendPayload, pendingDocument);
             } else {
-                await onSubmit(basePayload);
+                await onSubmit(basePayload, pendingDocument);
             }
         } finally {
             submittingRef.current = false;
@@ -397,6 +403,12 @@ export function Category3FuelFormModal({
                             className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         />
                     </div>
+
+                    <FormDocumentAttachmentField
+                        value={pendingDocument}
+                        onChange={setPendingDocument}
+                        disabled={busy}
+                    />
 
                     <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/40">
                         <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={busy}>

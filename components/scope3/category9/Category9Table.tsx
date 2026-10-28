@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Category9TransportActivityEntry } from "@/lib/scope3/category9/types";
 import { cn } from "@/lib/utils/cn";
+import { Scope3DocumentManagerModal } from "@/components/scope3/documents/Scope3DocumentManagerModal";
 
 interface Category9TableProps {
     entries: Category9TransportActivityEntry[];
@@ -33,6 +34,7 @@ export function Category9Table({
     onDeleteEntry,
 }: Category9TableProps) {
     const [openActionId, setOpenActionId] = useState<string | null>(null);
+    const [documentsEntry, setDocumentsEntry] = useState<Category9TransportActivityEntry | null>(null);
 
     return (
         <Card className="overflow-hidden border-outline-variant/60 font-sans">
@@ -169,6 +171,17 @@ export function Category9Table({
                                                 <div
                                                     onMouseLeave={() => setOpenActionId(null)}
                                                     className="absolute right-4 top-10 z-30 w-44 rounded-xl border border-outline-variant/80 bg-surface-container-lowest p-1.5 shadow-xl text-left font-sans text-xs">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setOpenActionId(null);
+                                                            setDocumentsEntry(entry);
+                                                        }}
+                                                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-primary hover:bg-surface-container-high font-medium">
+                                                        <MaterialIcon name="attach_file" size="xs" />
+                                                        <span>Evidence & Documents</span>
+                                                    </button>
+
                                                     {entry.status === "draft" && (
                                                         <>
                                                             <button
@@ -269,6 +282,14 @@ export function Category9Table({
                     </TableBody>
                 </Table>
             </div>
+
+            <Scope3DocumentManagerModal
+                isOpen={!!documentsEntry}
+                onClose={() => setDocumentsEntry(null)}
+                category="category_9"
+                activityId={documentsEntry?.id ?? null}
+                activityTitle={documentsEntry?.vehicleType ?? "Freight Transportation"}
+            />
         </Card>
     );
 }

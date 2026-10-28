@@ -26,13 +26,18 @@ import {
     useCarTypes,
     useSeaPassengerTypes,
 } from "@/lib/scope3/travel/hooks";
+import { FormDocumentAttachmentField } from "@/components/scope3/documents/FormDocumentAttachmentField";
+import { PendingDocumentAttachment } from "@/lib/scope3/documents/types";
 
 interface Category6FormModalProps {
     isOpen: boolean;
     mode: "create" | "edit" | "amend";
     initialEntry?: TravelActivityEntry | null;
     onClose: () => void;
-    onSubmit: (payload: CreateTravelActivityPayload | AmendTravelActivityPayload) => Promise<void>;
+    onSubmit: (
+        payload: CreateTravelActivityPayload | AmendTravelActivityPayload,
+        pendingDocument?: PendingDocumentAttachment | null,
+    ) => Promise<void>;
     isSubmitting: boolean;
 }
 
@@ -81,6 +86,7 @@ export function Category6FormModal({
     const [endDate, setEndDate] = useState(
         () => (isEditOrAmend ? initialEntry?.endDate || "2026-03-15" : "2026-03-15"),
     );
+    const [pendingDocument, setPendingDocument] = useState<PendingDocumentAttachment | null>(null);
 
     // Initial trips builder state
     const [trips, setTrips] = useState<TravelTripDto[]>(() => {
@@ -229,9 +235,9 @@ export function Category6FormModal({
                     ...basePayload,
                     amended_from_id: initialEntry.id,
                 };
-                await onSubmit(amendPayload);
+                await onSubmit(amendPayload, pendingDocument);
             } else {
-                await onSubmit(basePayload);
+                await onSubmit(basePayload, pendingDocument);
             }
         } finally {
             submittingRef.current = false;
@@ -598,6 +604,12 @@ export function Category6FormModal({
                             ))}
                         </div>
                     </div>
+
+                    <FormDocumentAttachmentField
+                        value={pendingDocument}
+                        onChange={setPendingDocument}
+                        disabled={busy}
+                    />
 
                     <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/40">
                         <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={busy} className="font-sans text-xs font-semibold">

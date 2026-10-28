@@ -31,6 +31,7 @@ import {
 import { useFacilities } from "@/lib/facility/hooks";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { AiAssistantFAB } from "@/components/dashboard/AiAssistantFAB";
+import { uploadPendingScope3Document, PendingDocumentAttachment } from "@/lib/scope3/documents";
 
 export function Category15View() {
     // Filter State
@@ -108,24 +109,40 @@ export function Category15View() {
         setIsRejectOpen(true);
     }
 
-    async function handleFormSubmit(payload: CreateCategory15InvestmentPayload | AmendCategory15InvestmentPayload) {
+    async function handleFormSubmit(
+        payload: CreateCategory15InvestmentPayload | AmendCategory15InvestmentPayload,
+        pendingDocument?: PendingDocumentAttachment | null,
+    ) {
         try {
+            let savedEntry: Category15InvestmentEntry | null = null;
             if (formMode === "create") {
-                await createMutation.mutateAsync(payload as CreateCategory15InvestmentPayload);
+                savedEntry = await createMutation.mutateAsync(payload as CreateCategory15InvestmentPayload);
                 showNotify("success", "Category 15 investment entry created successfully.");
             } else if (formMode === "edit" && selectedEntry) {
-                await updateMutation.mutateAsync({
+                savedEntry = await updateMutation.mutateAsync({
                     activityId: selectedEntry.id,
                     payload: payload as CreateCategory15InvestmentPayload,
                 });
                 showNotify("success", "Category 15 investment entry updated successfully.");
             } else if (formMode === "amend" && selectedEntry) {
-                await amendMutation.mutateAsync({
+                savedEntry = await amendMutation.mutateAsync({
                     activityId: selectedEntry.id,
                     payload: payload as AmendCategory15InvestmentPayload,
                 });
                 showNotify("success", "Verified Category 15 investment record amended successfully.");
             }
+
+            // Upload attached document if provided
+            if (pendingDocument?.file && savedEntry?.id) {
+                try {
+                    await uploadPendingScope3Document("category_15", savedEntry.id, pendingDocument);
+                    showNotify("success", "Investment activity and supporting document saved successfully.");
+                } catch (docErr) {
+                    console.error("Document upload error:", docErr);
+                    showNotify("error", "Activity created, but document upload failed. You can re-upload in Evidence & Documents.");
+                }
+            }
+
             setIsFormOpen(false);
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : "Operation failed.";

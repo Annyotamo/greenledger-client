@@ -30,6 +30,7 @@ import {
 import { useFacilities } from "@/lib/facility/hooks";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { AiAssistantFAB } from "@/components/dashboard/AiAssistantFAB";
+import { uploadPendingScope3Document, PendingDocumentAttachment } from "@/lib/scope3/documents";
 
 export function Category9View() {
     // Filter State
@@ -103,21 +104,37 @@ export function Category9View() {
         setIsRejectOpen(true);
     }
 
-    async function handleFormSubmit(payload: CreateCategory9TransportPayload | AmendCategory9TransportPayload) {
+    async function handleFormSubmit(
+        payload: CreateCategory9TransportPayload | AmendCategory9TransportPayload,
+        pendingDocument?: PendingDocumentAttachment | null,
+    ) {
         try {
+            let savedEntry: Category9TransportActivityEntry | null = null;
             if (formMode === "create") {
-                await createMutation.mutateAsync(payload as CreateCategory9TransportPayload);
+                savedEntry = await createMutation.mutateAsync(payload as CreateCategory9TransportPayload);
                 showNotify("success", "Category 9 downstream transport activity created.");
             } else if (formMode === "edit" && selectedEntry) {
-                await updateMutation.mutateAsync({
+                savedEntry = await updateMutation.mutateAsync({
                     activityId: selectedEntry.id,
                     payload: payload as CreateCategory9TransportPayload,
                 });
                 showNotify("success", "Category 9 downstream transport activity updated.");
             } else if (formMode === "amend" && selectedEntry) {
-                await amendMutation.mutateAsync(payload as AmendCategory9TransportPayload);
+                savedEntry = await amendMutation.mutateAsync(payload as AmendCategory9TransportPayload);
                 showNotify("success", "Verified Category 9 transport entry amended.");
             }
+
+            // Upload attached document if provided
+            if (pendingDocument?.file && savedEntry?.id) {
+                try {
+                    await uploadPendingScope3Document("category_9", savedEntry.id, pendingDocument);
+                    showNotify("success", "Transport activity and supporting document saved successfully.");
+                } catch (docErr) {
+                    console.error("Document upload error:", docErr);
+                    showNotify("error", "Activity created, but document upload failed. You can re-upload in Evidence & Documents.");
+                }
+            }
+
             setIsFormOpen(false);
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : "Operation failed.";

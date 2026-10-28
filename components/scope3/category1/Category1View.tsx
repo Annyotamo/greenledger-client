@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { isAxiosError } from "axios";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -30,6 +31,41 @@ import {
 import { useFacilities } from "@/lib/facility/hooks";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 import { AiAssistantFAB } from "@/components/dashboard/AiAssistantFAB";
+import { uploadPendingScope3Document, PendingDocumentAttachment } from "@/lib/scope3/documents";
+
+/**
+ * Extracts a user-friendly message from backend API errors.
+ * Maps known Scope 3 error codes to actionable UI copy.
+ */
+function resolveApiErrorMessage(err: unknown, fallback: string): string {
+    if (isAxiosError(err)) {
+        const errorBody = err.response?.data?.error;
+        const errorCode: string | undefined =
+            errorBody?.error_code ?? err.response?.data?.error_code;
+
+        switch (errorCode) {
+            case "ACTIVITY_DATE_OUTSIDE_PERIOD":
+                return "The spend date falls outside the selected reporting period window. Please choose a date within the period.";
+            case "REPORTING_PERIOD_LOCKED":
+                return "This reporting period is locked and cannot accept new or modified entries.";
+            case "REPORTING_PERIOD_ARCHIVED":
+                return "This reporting period is archived and cannot accept entries.";
+            case "ACTIVITY_AMENDMENT_SOURCE_NOT_APPROVED":
+                return "Only verified or approved activities can be amended.";
+            case "SCOPE3_ACTIVITY_IMMUTABLE":
+                return "This activity is verified and cannot be edited directly. Use the Amend function instead.";
+            default:
+                break;
+        }
+
+        // Fall back to the backend message string if present
+        const backendMsg: string | undefined =
+            errorBody?.message ?? err.response?.data?.message;
+        if (backendMsg) return backendMsg;
+    }
+
+    return err instanceof Error ? err.message : fallback;
+}
 
 export function Category1View() {
     // Filter State
@@ -106,28 +142,43 @@ export function Category1View() {
         setIsRejectModalOpen(true);
     }
 
-    async function handleFormSubmit(payload: CreateCategory1SpendPayload | AmendCategory1SpendPayload) {
+    async function handleFormSubmit(
+        payload: CreateCategory1SpendPayload | AmendCategory1SpendPayload,
+        pendingDocument?: PendingDocumentAttachment | null,
+    ) {
         try {
+            let savedEntry: Category1SpendEntry | null = null;
             if (formMode === "create") {
-                await createMutation.mutateAsync(payload as CreateCategory1SpendPayload);
+                savedEntry = await createMutation.mutateAsync(payload as CreateCategory1SpendPayload);
                 showNotify("success", "Category 1 spend entry created successfully.");
             } else if (formMode === "edit" && selectedEntry) {
-                await updateMutation.mutateAsync({
+                savedEntry = await updateMutation.mutateAsync({
                     activityId: selectedEntry.id,
                     payload: payload as CreateCategory1SpendPayload,
                 });
                 showNotify("success", "Category 1 spend entry updated successfully.");
             } else if (formMode === "amend" && selectedEntry) {
-                await amendMutation.mutateAsync({
+                savedEntry = await amendMutation.mutateAsync({
                     activityId: selectedEntry.id,
                     payload: payload as AmendCategory1SpendPayload,
                 });
                 showNotify("success", "Verified entry amended successfully.");
             }
+
+            // Upload attached document if provided
+            if (pendingDocument?.file && savedEntry?.id) {
+                try {
+                    await uploadPendingScope3Document("category_1", savedEntry.id, pendingDocument);
+                    showNotify("success", "Activity and supporting document saved successfully.");
+                } catch (docErr) {
+                    console.error("Document upload error:", docErr);
+                    showNotify("error", "Activity created, but document upload failed. You can re-upload in Evidence & Documents.");
+                }
+            }
+
             setIsFormModalOpen(false);
         } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : "Operation failed.";
-            showNotify("error", msg);
+            showNotify("error", resolveApiErrorMessage(err, "Operation failed."));
         }
     }
 
@@ -136,8 +187,7 @@ export function Category1View() {
             await submitMutation.mutateAsync(id);
             showNotify("success", "Entry submitted for reviewer approval.");
         } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : "Failed to submit entry.";
-            showNotify("error", msg);
+            showNotify("error", resolveApiErrorMessage(err, "Failed to submit entry."));
         }
     }
 
@@ -146,8 +196,7 @@ export function Category1View() {
             await verifyMutation.mutateAsync(id);
             showNotify("success", "Entry verified and locked.");
         } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : "Failed to verify entry.";
-            showNotify("error", msg);
+            showNotify("error", resolveApiErrorMessage(err, "Failed to verify entry."));
         }
     }
 
@@ -159,8 +208,7 @@ export function Category1View() {
             setIsRejectModalOpen(false);
             setRejectEntry(null);
         } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : "Failed to reject entry.";
-            showNotify("error", msg);
+            showNotify("error", resolveApiErrorMessage(err, "Failed to reject entry."));
         }
     }
 
@@ -170,8 +218,7 @@ export function Category1View() {
             await deleteMutation.mutateAsync(id);
             showNotify("success", "Spend entry deleted.");
         } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : "Failed to delete entry.";
-            showNotify("error", msg);
+            showNotify("error", resolveApiErrorMessage(err, "Failed to delete entry."));
         }
     }
 
@@ -206,10 +253,10 @@ export function Category1View() {
                             Scope 3 Value Chain
                         </Link>
                         <span>/</span>
-                        <span className="text-secondary font-semibold">Cat 1: Purchased Goods & Services</span>
+                        <span className="text-secondary font-semibold">Cat 1: Purchased Goods &amp; Services</span>
                     </div>
                     <h1 className="font-display text-2xl font-bold tracking-tight text-primary">
-                        Purchased Goods & Services (Spend-Based)
+                        Purchased Goods &amp; Services (Spend-Based)
                     </h1>
                     <p className="font-sans text-sm text-on-surface-variant max-w-3xl">
                         Quantify upstream Scope 3 Category 1 emissions by mapping purchase spend (INR to USD) against US EPA USEEIO spend factors (kg CO₂e/USD) with producer price and trade margin splits.
@@ -253,7 +300,7 @@ export function Category1View() {
                             value={yearFilter}
                             onChange={(e) => setYearFilter(e.target.value)}
                             className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-sm font-medium text-primary focus:outline-none focus:ring-1 focus:ring-primary">
-                            <option value="">All Years (2020–2025)</option>
+                            <option value="">All Years</option>
                             <option value="2020">2020</option>
                             <option value="2021">2021</option>
                             <option value="2022">2022</option>

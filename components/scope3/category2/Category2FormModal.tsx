@@ -9,7 +9,7 @@ import { CustomSelect, CustomSelectOption } from "@/components/ui/select";
 import { FormErrorSummary } from "@/components/ui/FormErrorSummary";
 import { useFacilities } from "@/lib/facility/hooks";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
-import { ANNUAL_USD_INR_EXCHANGE_RATES } from "@/lib/scope3/category1/types";
+import { EPA_2022_EXCHANGE_RATE } from "@/lib/scope3/category1/types";
 import {
     Category2SpendEntry,
     CreateCategory2SpendPayload,
@@ -18,13 +18,18 @@ import {
 } from "@/lib/scope3/category2/types";
 import { useActiveEmissionFactorSources } from "@/lib/scope3/category1/hooks";
 import { useCategory2SpendFactors } from "@/lib/scope3/category2/hooks";
+import { FormDocumentAttachmentField } from "@/components/scope3/documents/FormDocumentAttachmentField";
+import { PendingDocumentAttachment } from "@/lib/scope3/documents/types";
 
 interface Category2FormModalProps {
     isOpen: boolean;
     mode: "create" | "edit" | "amend";
     initialEntry?: Category2SpendEntry | null;
     onClose: () => void;
-    onSubmit: (payload: CreateCategory2SpendPayload | AmendCategory2SpendPayload) => Promise<void>;
+    onSubmit: (
+        payload: CreateCategory2SpendPayload | AmendCategory2SpendPayload,
+        pendingDocument?: PendingDocumentAttachment | null,
+    ) => Promise<void>;
     isSubmitting: boolean;
 }
 
@@ -100,15 +105,13 @@ export function Category2FormModal({
     const [spendDate, setSpendDate] = useState(
         () => (isEditOrAmend ? initialEntry?.spendDate || "2024-07-20" : "2024-07-20"),
     );
-    const [spendYear, setSpendYear] = useState<number>(
-        () => (isEditOrAmend ? initialEntry?.spendYear || 2024 : 2024),
-    );
     const [spendInInr, setSpendInInr] = useState(
         () => (isEditOrAmend ? String(initialEntry?.spendInInr || "2490000") : "2490000"),
     );
     const [notes, setNotes] = useState(
         () => (isEditOrAmend ? initialEntry?.notes || "" : ""),
     );
+    const [pendingDocument, setPendingDocument] = useState<PendingDocumentAttachment | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const selectedFactorId = factorId || (filteredFactors[0]?.id ?? factors[0]?.id ?? "ca68b110-59ba-4c62-b841-270138cc06dd");
@@ -126,17 +129,8 @@ export function Category2FormModal({
         [filteredFactors],
     );
 
-    function handleSpendDateChange(dateStr: string) {
-        setSpendDate(dateStr);
-        if (dateStr) {
-            const parsedYear = new Date(dateStr).getFullYear();
-            if (parsedYear >= 2020 && parsedYear <= 2025) {
-                setSpendYear(parsedYear);
-            }
-        }
-    }
-
-    const exchangeRate = ANNUAL_USD_INR_EXCHANGE_RATES[spendYear] || 83.45;
+    // Exchange rate is always the fixed EPA 2022 USD/INR baseline (78.60 INR/USD)
+    const exchangeRate = EPA_2022_EXCHANGE_RATE;
     const numSpendInr = parseFloat(spendInInr) || 0;
     const numSpendUsd = numSpendInr > 0 ? numSpendInr / exchangeRate : 0;
 
@@ -155,14 +149,6 @@ export function Category2FormModal({
         }
         if (!spendDate) {
             newErrors.spendDate = "Spend date is required.";
-        } else {
-            const dateYear = new Date(spendDate).getFullYear();
-            if (dateYear !== spendYear) {
-                newErrors.spendDate = `Spend date year (${dateYear}) must match Spend Year (${spendYear}).`;
-            }
-        }
-        if (spendYear < 2020 || spendYear > 2025) {
-            newErrors.spendYear = "Spend year must be between 2020 and 2025.";
         }
         if (!numSpendInr || numSpendInr <= 0) {
             newErrors.spendInInr = "Spend amount in INR must be greater than 0.";
@@ -188,7 +174,6 @@ export function Category2FormModal({
                 scope3_spend_emission_factor_id: selectedFactorId,
                 spend_date: spendDate,
                 spend_in_inr: numSpendInr,
-                spend_year: spendYear,
                 status: "draft",
                 notes: notes.trim() || null,
             };
@@ -198,9 +183,9 @@ export function Category2FormModal({
                     ...basePayload,
                     amended_from_id: initialEntry.id,
                 };
-                await onSubmit(amendPayload);
+                await onSubmit(amendPayload, pendingDocument);
             } else {
-                await onSubmit(basePayload);
+                await onSubmit(basePayload, pendingDocument);
             }
         } finally {
             submittingRef.current = false;
@@ -318,7 +303,7 @@ export function Category2FormModal({
                                 setSectorCategory(val);
                                 setFactorId("");
                             }}
-                            placeholder="All NAICS Sectors & Categories..."
+                            placeholder="All NAICS Sectors &amp; Categories..."
                             className="font-sans text-sm"
                             variant="form"
                             isSearchable={true}
@@ -341,34 +326,16 @@ export function Category2FormModal({
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div>
-                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
-                                Spend Date <span className="text-error">*</span>
-                            </label>
-                            <DatePicker
-                                value={spendDate}
-                                onChange={handleSpendDateChange}
-                                className="font-sans text-sm"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block font-sans text-xs font-semibold text-primary mb-1">
-                                Spend Year (2020–2025) <span className="text-error">*</span>
-                            </label>
-                            <select
-                                value={spendYear}
-                                onChange={(e) => setSpendYear(Number(e.target.value))}
-                                className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary">
-                                <option value={2020}>2020 (Ex. Rate: ₹74.13/USD)</option>
-                                <option value={2021}>2021 (Ex. Rate: ₹73.92/USD)</option>
-                                <option value={2022}>2022 (Ex. Rate: ₹78.60/USD)</option>
-                                <option value={2023}>2023 (Ex. Rate: ₹82.58/USD)</option>
-                                <option value={2024}>2024 (Ex. Rate: ₹83.45/USD)</option>
-                                <option value={2025}>2025 (Ex. Rate: ₹84.20/USD)</option>
-                            </select>
-                        </div>
+                    {/* Spend Date — full width; year derived automatically by backend */}
+                    <div>
+                        <label className="block font-sans text-xs font-semibold text-primary mb-1">
+                            Spend Date <span className="text-error">*</span>
+                        </label>
+                        <DatePicker
+                            value={spendDate}
+                            onChange={(dateStr) => setSpendDate(dateStr)}
+                            className="font-sans text-sm"
+                        />
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -400,7 +367,7 @@ export function Category2FormModal({
                                 </span>
                             </div>
                             <p className="font-sans text-xs text-on-surface-variant tabular-nums">
-                                Ex. Rate: ₹{exchangeRate}/USD • Factor: {selectedFactor?.kgCo2ePerUsdWithMargins ?? 0} kg/USD
+                                Ex. Rate: ₹{exchangeRate}/USD (EPA 2022) • Factor: {selectedFactor?.kgCo2ePerUsdWithMargins ?? 0} kg/USD
                             </p>
                         </div>
                     </div>
@@ -417,6 +384,12 @@ export function Category2FormModal({
                             className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         />
                     </div>
+
+                    <FormDocumentAttachmentField
+                        value={pendingDocument}
+                        onChange={setPendingDocument}
+                        disabled={busy}
+                    />
 
                     <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/40">
                         <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={busy}>

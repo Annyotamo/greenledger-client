@@ -19,13 +19,18 @@ import {
     CreateCategory9TransportPayload,
 } from "@/lib/scope3/category9/types";
 import { DEFAULT_FREIGHTING_FACTORS, FreightingGoodsFactor, GasEmissionsDto } from "@/lib/scope3/freighting-goods/types";
+import { FormDocumentAttachmentField } from "@/components/scope3/documents/FormDocumentAttachmentField";
+import { PendingDocumentAttachment } from "@/lib/scope3/documents/types";
 
 interface Category9FormModalProps {
     isOpen: boolean;
     mode: "create" | "edit" | "amend";
     initialEntry?: Category9TransportActivityEntry | null;
     onClose: () => void;
-    onSubmit: (payload: CreateCategory9TransportPayload | AmendCategory9TransportPayload) => Promise<void>;
+    onSubmit: (
+        payload: CreateCategory9TransportPayload | AmendCategory9TransportPayload,
+        pendingDocument?: PendingDocumentAttachment | null,
+    ) => Promise<void>;
     isSubmitting: boolean;
 }
 
@@ -221,6 +226,7 @@ export function Category9FormModal({
     const [notes, setNotes] = useState(
         () => (isEditOrAmend ? initialEntry?.notes || "" : ""),
     );
+    const [pendingDocument, setPendingDocument] = useState<PendingDocumentAttachment | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     // Dropdown Select Options
@@ -310,9 +316,9 @@ export function Category9FormModal({
                     ...basePayload,
                     amended_from_id: initialEntry.id,
                 };
-                await onSubmit(amendPayload);
+                await onSubmit(amendPayload, pendingDocument);
             } else {
-                await onSubmit(basePayload);
+                await onSubmit(basePayload, pendingDocument);
             }
         } finally {
             submittingRef.current = false;
@@ -526,6 +532,12 @@ export function Category9FormModal({
                             className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary leading-relaxed"
                         />
                     </div>
+
+                    <FormDocumentAttachmentField
+                        value={pendingDocument}
+                        onChange={setPendingDocument}
+                        disabled={busy}
+                    />
 
                     <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/40">
                         <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={busy} className="font-sans text-xs font-semibold">

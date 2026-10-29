@@ -8,12 +8,14 @@ import {
     Category1SpendItemDto,
     CreateCategory1SpendPayload,
     DEFAULT_EMISSION_FACTOR_SOURCES,
+    DEFAULT_NAICS_SECTORS,
     DEFAULT_USEEIO_SPEND_FACTORS,
     EmissionFactorSource,
     Scope3SpendFactor,
     Scope3SpendFactorDto,
     UpdateCategory1SpendPayload,
 } from "./types";
+import { DEFAULT_CATEGORY2_USEEIO_FACTORS } from "../category2/types";
 
 export function mapFactor(dto?: Scope3SpendFactorDto | null, factorId?: string): Scope3SpendFactor | undefined {
     if (dto) {
@@ -95,7 +97,7 @@ export function mapCategory1SpendItem(dto: Category1SpendItemDto): Category1Spen
     };
 }
 
-export async function getActiveEmissionFactorSources(type = "other"): Promise<EmissionFactorSource[]> {
+export async function getActiveEmissionFactorSources(type = "supply_chain"): Promise<EmissionFactorSource[]> {
     try {
         const response = await privateApi.get<{ success: boolean; data: EmissionFactorSource[] }>(
             `/user/emission-factor-sources/active?type=${type}`,
@@ -107,6 +109,74 @@ export async function getActiveEmissionFactorSources(type = "other"): Promise<Em
         // Fallback demo source list
     }
     return DEFAULT_EMISSION_FACTOR_SOURCES;
+}
+
+/**
+ * Fetches the NAICS sectors for a given source_id.
+ * Category 1: GET /tenant/scope3/category1/naics_sector?source_id={source_id}
+ * Category 2: GET /tenant/scope3/category2/naics_sector?source_id={source_id}
+ */
+export async function getScope3NaicsSectors(
+    category: "category1" | "category2" = "category1",
+    sourceId: string,
+): Promise<string[]> {
+    if (!sourceId) return [];
+    try {
+        const response = await privateApi.get<{
+            success: boolean;
+            data: string[];
+        }>(`/tenant/scope3/${category}/naics_sector?source_id=${sourceId}`);
+
+        if (Array.isArray(response.data?.data) && response.data.data.length > 0) {
+            return response.data.data;
+        }
+    } catch {
+        // Fallback demo sectors if request fails
+    }
+    return DEFAULT_NAICS_SECTORS;
+}
+
+/**
+ * Fetches the factors for a given source_id and optional naics_sector.
+ * Category 1: GET /tenant/scope3/category1/factors?naics_sector={naics_sector}&source_id={source_id}
+ * Category 2: GET /tenant/scope3/category2/factors?naics_sector={naics_sector}&source_id={source_id}
+ */
+export async function getScope3FactorsBySector(
+    category: "category1" | "category2" = "category1",
+    sourceId: string,
+    naicsSector?: string,
+): Promise<Scope3SpendFactor[]> {
+    if (!sourceId) return [];
+    try {
+        const params = new URLSearchParams({ source_id: sourceId });
+        if (naicsSector) {
+            params.append("naics_sector", naicsSector);
+        }
+        const response = await privateApi.get<{
+            success: boolean;
+            data: Scope3SpendFactorDto[] | { items: Scope3SpendFactorDto[] };
+        }>(`/tenant/scope3/${category}/factors?${params.toString()}`);
+
+        const dataPayload = response.data?.data;
+        const rawData = Array.isArray(dataPayload)
+            ? dataPayload
+            : (dataPayload as { items?: Scope3SpendFactorDto[] })?.items ?? [];
+
+        if (Array.isArray(rawData) && rawData.length > 0) {
+            const mapped = rawData.map((dto) => mapFactor(dto)).filter((f): f is Scope3SpendFactor => Boolean(f));
+            if (mapped.length > 0) return mapped;
+        }
+    } catch {
+        // Fallback demo factor list
+    }
+    const defaultFactors = category === "category2" ? DEFAULT_CATEGORY2_USEEIO_FACTORS : DEFAULT_USEEIO_SPEND_FACTORS;
+    if (naicsSector) {
+        const filtered = defaultFactors.filter(
+            (f) => (f.naicsSectorCategory || f.category)?.toLowerCase() === naicsSector.toLowerCase(),
+        );
+        if (filtered.length > 0) return filtered;
+    }
+    return defaultFactors;
 }
 
 export async function getScope3SpendFactors(sourceId?: string): Promise<Scope3SpendFactor[]> {

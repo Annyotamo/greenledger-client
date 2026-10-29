@@ -7,6 +7,8 @@ import {
     deleteCategory1SpendEntry,
     getActiveEmissionFactorSources,
     getCategory1SpendEntries,
+    getScope3FactorsBySector,
+    getScope3NaicsSectors,
     getScope3SpendFactors,
     rejectCategory1SpendEntry,
     submitCategory1SpendEntry,
@@ -23,11 +25,29 @@ import type {
     UpdateCategory1SpendPayload,
 } from "./types";
 
-export function useActiveEmissionFactorSources(type = "other") {
+export function useActiveEmissionFactorSources(type = "supply_chain") {
     return useQuery<EmissionFactorSource[], Error>({
         queryKey: ["emission-factor-sources-active", type],
         queryFn: () => getActiveEmissionFactorSources(type),
         staleTime: 1000 * 60 * 30, // 30 minutes cache
+    });
+}
+
+export function useCategory1NaicsSectors(sourceId?: string) {
+    return useQuery<string[], Error>({
+        queryKey: ["scope3-category1-naics-sectors", sourceId],
+        queryFn: () => (sourceId ? getScope3NaicsSectors("category1", sourceId) : Promise.resolve([])),
+        enabled: Boolean(sourceId),
+        staleTime: 1000 * 60 * 30,
+    });
+}
+
+export function useCategory1Factors(sourceId?: string, naicsSector?: string) {
+    return useQuery<Scope3SpendFactor[], Error>({
+        queryKey: ["scope3-category1-factors", sourceId, naicsSector],
+        queryFn: () => (sourceId ? getScope3FactorsBySector("category1", sourceId, naicsSector) : Promise.resolve([])),
+        enabled: Boolean(sourceId),
+        staleTime: 1000 * 60 * 30,
     });
 }
 

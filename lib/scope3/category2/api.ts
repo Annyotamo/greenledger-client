@@ -1,5 +1,6 @@
 import { privateApi } from "@/lib/http/client";
 import { EPA_2022_EXCHANGE_RATE, DEFAULT_USEEIO_SPEND_FACTORS } from "@/lib/scope3/category1/types";
+import { getScope3NaicsSectors, getScope3FactorsBySector } from "@/lib/scope3/category1/api";
 import {
     Category2FilterParams,
     Category2SpendApiResponse,
@@ -236,6 +237,14 @@ export async function getCategory2SpendFactors(sourceId?: string): Promise<Scope
         // Fallback demo factor list
     }
     return DEFAULT_CATEGORY2_USEEIO_FACTORS;
+}
+
+export async function getCategory2NaicsSectors(sourceId: string): Promise<string[]> {
+    return getScope3NaicsSectors("category2", sourceId);
+}
+
+export async function getCategory2Factors(sourceId: string, naicsSector?: string): Promise<Scope3SpendFactor[]> {
+    return getScope3FactorsBySector("category2", sourceId, naicsSector);
 }
 
 function getMockCategory2Entries(): Category2SpendEntry[] {

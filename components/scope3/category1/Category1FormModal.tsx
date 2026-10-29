@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { CustomSelect, CustomSelectOption } from "@/components/ui/select";
 import { FormErrorSummary } from "@/components/ui/FormErrorSummary";
 import { useFacilities } from "@/lib/facility/hooks";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
+import { useEmissionSources } from "@/lib/emissionSource/hooks";
 import {
     EPA_2022_EXCHANGE_RATE,
     Category1SpendEntry,
@@ -17,7 +18,7 @@ import {
     DEFAULT_USEEIO_SPEND_FACTORS,
     Scope3SpendFactor,
 } from "@/lib/scope3/category1/types";
-import { useActiveEmissionFactorSources, useScope3SpendFactors } from "@/lib/scope3/category1/hooks";
+import { useCategory1NaicsSectors, useCategory1Factors } from "@/lib/scope3/category1/hooks";
 import { FormDocumentAttachmentField } from "@/components/scope3/documents/FormDocumentAttachmentField";
 import { PendingDocumentAttachment } from "@/lib/scope3/documents/types";
 
@@ -42,10 +43,10 @@ export function Category1FormModal({
     isSubmitting,
 }: Category1FormModalProps) {
     const facilitiesQuery = useFacilities();
-    const sourcesQuery = useActiveEmissionFactorSources("other");
+    const emissionSourcesQuery = useEmissionSources("supply_chain");
     const reportingPeriodsQuery = useReportingPeriods();
 
-    const sources = useMemo(() => sourcesQuery.data ?? [], [sourcesQuery.data]);
+    const sources = useMemo(() => emissionSourcesQuery.data ?? [], [emissionSourcesQuery.data]);
     const facilities = useMemo(() => facilitiesQuery.data ?? [], [facilitiesQuery.data]);
     const periods = useMemo(() => reportingPeriodsQuery.data ?? [], [reportingPeriodsQuery.data]);
 
@@ -54,44 +55,49 @@ export function Category1FormModal({
     const [submitting, setSubmitting] = useState(false);
     const submittingRef = useRef(false);
 
+    const defaultSourceId = "8578936a-9e7e-4b14-81c5-870c13a4a046";
     const [sourceId, setSourceId] = useState<string>(
-        () => initialEntry?.factor?.source?.id || sources[0]?.id || "ce689b2d-6882-4c9b-9cc5-45d65f21d42e",
+        () => initialEntry?.factor?.source?.id || defaultSourceId,
     );
 
-    const selectedSourceId = sourceId || sources[0]?.id || "ce689b2d-6882-4c9b-9cc5-45d65f21d42e";
-    const factorsQuery = useScope3SpendFactors(selectedSourceId);
+    // If sources load and sourceId is not set, default to first supply chain source
+    useEffect(() => {
+        if (!sourceId && sources.length > 0) {
+            setSourceId(String(sources[0].id));
+        }
+    }, [sourceId, sources]);
+
+    const selectedSourceId = sourceId || (sources[0]?.id ? String(sources[0].id) : defaultSourceId);
+
+    // 1. Fetch dynamic NAICS sectors for selected source
+    const sectorsQuery = useCategory1NaicsSectors(selectedSourceId);
+    const sectors = useMemo(() => sectorsQuery.data ?? [], [sectorsQuery.data]);
+
+    const [sectorCategory, setSectorCategory] = useState<string>(
+        () => initialEntry?.factor?.naicsSectorCategory || "",
+    );
+
+    // Auto-select first sector if not set in create mode
+    useEffect(() => {
+        if (!isEditOrAmend && !sectorCategory && sectors.length > 0) {
+            setSectorCategory(sectors[0]);
+        }
+    }, [isEditOrAmend, sectorCategory, sectors]);
+
+    const sectorSelectOptions: CustomSelectOption[] = useMemo(() => {
+        return sectors.map((sec) => ({
+            label: sec,
+            value: sec,
+        }));
+    }, [sectors]);
+
+    // 2. Fetch dynamic factors for selected source & sector
+    const factorsQuery = useCategory1Factors(selectedSourceId, sectorCategory || undefined);
     const rawFactors = useMemo(() => factorsQuery.data ?? [], [factorsQuery.data]);
     const factors = useMemo(
         () => (rawFactors.length > 0 ? rawFactors : DEFAULT_USEEIO_SPEND_FACTORS),
         [rawFactors],
     );
-
-    const [sectorCategory, setSectorCategory] = useState<string>("");
-
-    const sectorCategories = useMemo(() => {
-        const set = new Set<string>();
-        factors.forEach((f: Scope3SpendFactor) => {
-            const cat = f.naicsSectorCategory || f.category;
-            if (cat) set.add(cat);
-        });
-        return Array.from(set);
-    }, [factors]);
-
-    const sectorSelectOptions: CustomSelectOption[] = useMemo(() => {
-        const options: CustomSelectOption[] = [
-            { label: `All NAICS Sectors & Categories (${factors.length} factors)`, value: "" },
-        ];
-        sectorCategories.forEach((cat) => {
-            const count = factors.filter((f: Scope3SpendFactor) => (f.naicsSectorCategory || f.category) === cat).length;
-            options.push({ label: `${cat} (${count})`, value: cat });
-        });
-        return options;
-    }, [factors, sectorCategories]);
-
-    const filteredFactors = useMemo(() => {
-        if (!sectorCategory) return factors;
-        return factors.filter((f: Scope3SpendFactor) => (f.naicsSectorCategory || f.category) === sectorCategory);
-    }, [factors, sectorCategory]);
 
     const [reportingPeriodId, setReportingPeriodId] = useState(
         () => (isEditOrAmend ? initialEntry?.reportingPeriodId || periods[0]?.id || "" : periods[0]?.id || ""),
@@ -99,7 +105,7 @@ export function Category1FormModal({
     const [facilityId, setFacilityId] = useState(
         () => (isEditOrAmend ? initialEntry?.facilityId || "" : ""),
     );
-    const [factorId, setFactorId] = useState(
+    const [factorId, setFactorId] = useState<string>(
         () => (isEditOrAmend ? initialEntry?.scope3SpendEmissionFactorId || "" : ""),
     );
     const [spendDate, setSpendDate] = useState(
@@ -114,19 +120,35 @@ export function Category1FormModal({
     const [pendingDocument, setPendingDocument] = useState<PendingDocumentAttachment | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    const selectedFactorId = factorId || (filteredFactors[0]?.id ?? factors[0]?.id ?? "ca68b110-59ba-4c62-b841-270138cc06dd");
-    const selectedFactor = useMemo(
-        () => factors.find((f: Scope3SpendFactor) => f.id === selectedFactorId) ?? factors[0],
-        [factors, selectedFactorId],
-    );
+    // Auto-select first factor when factors load if none is selected
+    useEffect(() => {
+        if (factors.length > 0) {
+            const exists = factors.some((f) => f.id === factorId);
+            if (!factorId || !exists) {
+                if (!isEditOrAmend || sectorCategory !== initialEntry?.factor?.naicsSectorCategory) {
+                    setFactorId(factors[0].id);
+                }
+            }
+        }
+    }, [factors, factorId, isEditOrAmend, sectorCategory, initialEntry]);
+
+    const selectedFactorId = factorId || factors[0]?.id || "";
+    const selectedFactor = useMemo(() => {
+        const found = factors.find((f: Scope3SpendFactor) => f.id === selectedFactorId);
+        if (found) return found;
+        if (initialEntry?.factor && (initialEntry.factor.id === selectedFactorId || initialEntry.scope3SpendEmissionFactorId === selectedFactorId)) {
+            return initialEntry.factor;
+        }
+        return factors[0];
+    }, [factors, selectedFactorId, initialEntry]);
 
     const factorSelectOptions: CustomSelectOption[] = useMemo(
         () =>
-            filteredFactors.map((f: Scope3SpendFactor) => ({
+            factors.map((f: Scope3SpendFactor) => ({
                 value: f.id,
                 label: `NAICS ${f.naicsCode} - ${f.naicsTitle || f.commodityTitle} (${f.kgCo2ePerUsdWithMargins} kgCO₂e/$)`,
             })),
-        [filteredFactors],
+        [factors],
     );
 
     // Exchange rate is always the fixed EPA 2022 USD/INR baseline (78.60 INR/USD)
@@ -276,25 +298,37 @@ export function Category1FormModal({
                         <label className="block font-sans text-xs font-semibold text-primary mb-1">
                             Emission Factor Source Standard <span className="text-error">*</span>
                         </label>
-                        <select
+                        <CustomSelect
+                            options={
+                                sources.length > 0
+                                    ? sources.map((s) => ({
+                                          label: `${s.standard} ${s.version ? `v${s.version}` : ""}${s.data_year ? ` (${s.data_year})` : ""} - ${s.region || "US"} (${s.emission_unit || "kg"}/$)`,
+                                          value: String(s.id),
+                                      }))
+                                    : [
+                                          {
+                                              label: "US EPA (USEEIO) v1.2 (2022) - US (kg/$)",
+                                              value: "8578936a-9e7e-4b14-81c5-870c13a4a046",
+                                          },
+                                      ]
+                            }
                             value={selectedSourceId}
-                            onChange={(e) => {
-                                setSourceId(e.target.value);
+                            onChange={(val) => {
+                                setSourceId(val);
                                 setSectorCategory("");
+                                setFactorId("");
                             }}
-                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 font-sans text-sm text-primary focus:outline-none focus:ring-1 focus:ring-primary">
-                            {sources.map((s) => (
-                                <option key={s.id} value={s.id}>
-                                    {s.standard} v{s.version} ({s.data_year}) - {s.region} ({s.emission_unit}/$)
-                                </option>
-                            ))}
-                        </select>
+                            placeholder={emissionSourcesQuery.isLoading ? "Loading emission sources..." : "Select Emission Source..."}
+                            className="font-sans text-sm"
+                            variant="form"
+                            isLoading={emissionSourcesQuery.isLoading}
+                        />
                     </div>
 
-                    {/* CustomSelect NAICS Sector / Category Filter Dropdown */}
+                    {/* NAICS Sector Dropdown */}
                     <div>
                         <label className="block font-sans text-xs font-semibold text-primary mb-1">
-                            NAICS Sector / Category Filter
+                            NAICS Sector <span className="text-error">*</span>
                         </label>
                         <CustomSelect
                             options={sectorSelectOptions}
@@ -303,10 +337,11 @@ export function Category1FormModal({
                                 setSectorCategory(val);
                                 setFactorId("");
                             }}
-                            placeholder="All NAICS Sectors &amp; Categories..."
+                            placeholder={sectorsQuery.isLoading ? "Loading NAICS sectors..." : "Select NAICS Sector..."}
                             className="font-sans text-sm"
                             variant="form"
                             isSearchable={true}
+                            isLoading={sectorsQuery.isLoading}
                         />
                     </div>
 
@@ -319,11 +354,20 @@ export function Category1FormModal({
                             options={factorSelectOptions}
                             value={selectedFactorId}
                             onChange={(val) => setFactorId(val)}
-                            placeholder="Type to search NAICS code, commodity title..."
+                            placeholder={
+                                factorsQuery.isLoading
+                                    ? "Loading commodity factors..."
+                                    : !sectorCategory
+                                    ? "Please choose a sector first..."
+                                    : "Type to search NAICS code, commodity title..."
+                            }
                             className="font-sans text-sm"
                             variant="form"
                             isSearchable={true}
+                            isLoading={factorsQuery.isLoading}
+                            isDisabled={!sectorCategory}
                         />
+                        {errors.factorId && <p className="mt-1 font-sans text-xs text-error">{errors.factorId}</p>}
                     </div>
 
                     {/* Spend Date — full width; year derived automatically by backend */}

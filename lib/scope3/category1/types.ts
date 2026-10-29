@@ -160,13 +160,45 @@ export const ANNUAL_USD_INR_EXCHANGE_RATES: Record<number, number> = {
     2025: 84.20,
 };
 
+export const DEFAULT_NAICS_SECTORS: string[] = [
+    "Accommodation and Food Services",
+    "Administrative and Support and Waste Management and Remediation Services",
+    "Agriculture, Forestry, Fishing and Hunting",
+    "Arts, Entertainment, and Recreation",
+    "Educational Services",
+    "Finance and Insurance",
+    "Health Care and Social Assistance",
+    "Information",
+    "Management of Companies and Enterprises",
+    "Manufacturing",
+    "Mining, Quarrying, and Oil and Gas Extraction",
+    "Other Services (except Public Administration)",
+    "Professional, Scientific, and Technical Services",
+    "Real Estate and Rental and Leasing",
+    "Retail Trade",
+    "Transportation and Warehousing",
+    "Utilities",
+    "Wholesale Trade",
+];
+
 export const DEFAULT_EMISSION_FACTOR_SOURCES: EmissionFactorSource[] = [
+    {
+        id: "8578936a-9e7e-4b14-81c5-870c13a4a046",
+        standard: "US EPA (USEEIO)",
+        version: "1.2",
+        region: "US",
+        type: "supply_chain",
+        data_year: 2022,
+        is_active: true,
+        emission_unit: "kg",
+        tablename: "",
+    },
     {
         id: "ce689b2d-6882-4c9b-9cc5-45d65f21d42e",
         standard: "US EPA - USEEIO",
         version: "6.0",
         region: "US",
-        type: "other",
+        type: "supply_chain",
         data_year: 2022,
         is_active: true,
         emission_unit: "kg",

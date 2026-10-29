@@ -6,6 +6,8 @@ import {
     amendCategory2SpendEntry,
     createCategory2SpendEntry,
     deleteCategory2SpendEntry,
+    getCategory2Factors,
+    getCategory2NaicsSectors,
     getCategory2SpendEntries,
     rejectCategory2SpendEntry,
     submitCategory2SpendEntry,
@@ -25,6 +27,24 @@ export function useCategory2SpendEntries(filters?: Category2FilterParams) {
     return useQuery<Category2SpendEntry[], Error>({
         queryKey: ["scope3-category2-spend", filters],
         queryFn: () => getCategory2SpendEntries(filters),
+    });
+}
+
+export function useCategory2NaicsSectors(sourceId?: string) {
+    return useQuery<string[], Error>({
+        queryKey: ["scope3-category2-naics-sectors", sourceId],
+        queryFn: () => (sourceId ? getCategory2NaicsSectors(sourceId) : Promise.resolve([])),
+        enabled: Boolean(sourceId),
+        staleTime: 1000 * 60 * 30,
+    });
+}
+
+export function useCategory2Factors(sourceId?: string, naicsSector?: string) {
+    return useQuery<Scope3SpendFactor[], Error>({
+        queryKey: ["scope3-category2-factors", sourceId, naicsSector],
+        queryFn: () => (sourceId ? getCategory2Factors(sourceId, naicsSector) : Promise.resolve([])),
+        enabled: Boolean(sourceId),
+        staleTime: 1000 * 60 * 30,
     });
 }
 

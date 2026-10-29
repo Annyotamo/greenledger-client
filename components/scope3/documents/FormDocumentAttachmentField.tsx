@@ -40,7 +40,7 @@ export function FormDocumentAttachmentField({
 
     const initialDate = defaultDate || new Date().toISOString().split("T")[0];
 
-    const [docType, setDocType] = useState<string>(value?.documentType || Scope3DocumentType.INVOICE);
+    const [docType, setDocType] = useState<string>(value?.documentType || Scope3DocumentType.INVOICE_BILL);
     const [docDate, setDocDate] = useState<string>(value?.documentDate || initialDate);
     const [issuedBy, setIssuedBy] = useState<string>(value?.issuedBy || "");
     const [notes, setNotes] = useState<string>(value?.notes || "");
@@ -65,7 +65,7 @@ export function FormDocumentAttachmentField({
     function handleFile(file: File) {
         onChange({
             file,
-            documentType: docType || Scope3DocumentType.INVOICE,
+            documentType: docType || Scope3DocumentType.INVOICE_BILL,
             documentDate: docDate || initialDate,
             issuedBy,
             notes,
@@ -111,7 +111,7 @@ export function FormDocumentAttachmentField({
     }
 
     function handleTypeChange(val: string) {
-        const nextType = val || Scope3DocumentType.INVOICE;
+        const nextType = val || Scope3DocumentType.INVOICE_BILL;
         setDocType(nextType);
         if (value?.file) {
             onChange({

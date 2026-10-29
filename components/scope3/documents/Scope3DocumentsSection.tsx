@@ -50,7 +50,7 @@ export function Scope3DocumentsSection({
     const [isUploadingOpen, setIsUploadingOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [documentName, setDocumentName] = useState("");
-    const [documentType, setDocumentType] = useState<string>(Scope3DocumentType.INVOICE);
+    const [documentType, setDocumentType] = useState<string>(Scope3DocumentType.INVOICE_BILL);
     const [documentDate, setDocumentDate] = useState(() => new Date().toISOString().split("T")[0]);
     const [issuedBy, setIssuedBy] = useState("");
     const [notes, setNotes] = useState("");
@@ -73,7 +73,7 @@ export function Scope3DocumentsSection({
     function resetUploadForm() {
         setSelectedFile(null);
         setDocumentName("");
-        setDocumentType(Scope3DocumentType.INVOICE);
+        setDocumentType(Scope3DocumentType.INVOICE_BILL);
         setDocumentDate(new Date().toISOString().split("T")[0]);
         setIssuedBy("");
         setNotes("");

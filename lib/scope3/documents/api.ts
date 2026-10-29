@@ -8,6 +8,7 @@ import {
     Scope3Document,
     Scope3DocumentApiResponse,
     Scope3DocumentDto,
+    Scope3DocumentType,
     UploadScope3DocumentMultipartPayload,
 } from "./types";
 
@@ -24,7 +25,7 @@ export function mapScope3Document(dto: Scope3DocumentDto): Scope3Document {
         tenantId: dto.tenant_id || "",
         category: dto.category,
         activityId: dto.activity_id,
-        documentType: dto.document_type || "invoice",
+        documentType: dto.document_type || Scope3DocumentType.INVOICE_BILL,
         documentName: dto.document_name || rawFileName,
         sourceUrl: dto.source_url || "",
         downloadUrl: dto.download_url || "",
@@ -84,7 +85,7 @@ export async function uploadScope3Document(
     } else if (payload.file?.name) {
         formData.append("document_name", payload.file.name);
     }
-    formData.append("document_type", payload.document_type || "invoice");
+    formData.append("document_type", payload.document_type || Scope3DocumentType.INVOICE_BILL);
     if (payload.document_date) formData.append("document_date", payload.document_date);
     if (payload.issued_by) formData.append("issued_by", payload.issued_by);
     if (payload.notes) formData.append("notes", payload.notes);

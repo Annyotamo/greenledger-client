@@ -4,15 +4,15 @@ import { CustomSelectOption } from "@/components/ui/select";
  * Supported Scope 3 Document Types Enum
  */
 export enum Scope3DocumentType {
-    INVOICE = "invoice",
-    DELIVERY_NOTE = "delivery_note",
-    WEIGHBRIDGE_TICKET = "weighbridge_ticket",
-    FLOW_METER_READING = "flow_meter_reading",
-    METER_READING = "meter_reading",
-    UTILITY_BILL = "utility_bill",
-    LAB_REPORT = "lab_report",
-    AUDIT_REPORT = "audit_report",
-    ESTIMATION_BASIS = "estimation_basis",
+    INVOICE_BILL = "invoice_bill",
+    PURCHASE_PROCUREMENT_RECORD = "purchase_procurement_record",
+    SUPPLIER_DATA = "supplier_data",
+    UTILITY_ENERGY_RECORD = "utility_energy_record",
+    TRANSPORT_LOGISTICS_RECORD = "transport_logistics_record",
+    WEIGHBRIDGE_QUANTITY_RECORD = "weighbridge_quantity_record",
+    WASTE_DISPOSAL_RECORD = "waste_disposal_record",
+    TRAVEL_EXPENSE_RECORD = "travel_expense_record",
+    CERTIFICATE_THIRD_PARTY_DOCUMENT = "certificate_third_party_document",
     OTHER = "other",
 }
 
@@ -42,16 +42,16 @@ export function formatScope3CategoryLabel(category: string | number): string {
 }
 
 export const SCOPE3_DOCUMENT_TYPE_OPTIONS: CustomSelectOption[] = [
-    { label: "Invoice (Purchase / Commercial)", value: Scope3DocumentType.INVOICE },
-    { label: "Delivery Note / Challan", value: Scope3DocumentType.DELIVERY_NOTE },
-    { label: "Weighbridge Ticket / Scale Slip", value: Scope3DocumentType.WEIGHBRIDGE_TICKET },
-    { label: "Flow Meter Reading", value: Scope3DocumentType.FLOW_METER_READING },
-    { label: "Meter Reading", value: Scope3DocumentType.METER_READING },
-    { label: "Utility Bill", value: Scope3DocumentType.UTILITY_BILL },
-    { label: "Lab Report / Analysis Certificate", value: Scope3DocumentType.LAB_REPORT },
-    { label: "Audit Report / Third-Party Assurance", value: Scope3DocumentType.AUDIT_REPORT },
-    { label: "Estimation Basis / Technical Memorandum", value: Scope3DocumentType.ESTIMATION_BASIS },
-    { label: "Other Supporting Document", value: Scope3DocumentType.OTHER },
+    { label: "Invoice / bill", value: Scope3DocumentType.INVOICE_BILL },
+    { label: "Purchase / Procurement Record", value: Scope3DocumentType.PURCHASE_PROCUREMENT_RECORD },
+    { label: "Supplier data", value: Scope3DocumentType.SUPPLIER_DATA },
+    { label: "Utility / energy record", value: Scope3DocumentType.UTILITY_ENERGY_RECORD },
+    { label: "Transport / logistics record", value: Scope3DocumentType.TRANSPORT_LOGISTICS_RECORD },
+    { label: "Weighbridge / quantity record", value: Scope3DocumentType.WEIGHBRIDGE_QUANTITY_RECORD },
+    { label: "Waste / disposal record", value: Scope3DocumentType.WASTE_DISPOSAL_RECORD },
+    { label: "Travel / expense record", value: Scope3DocumentType.TRAVEL_EXPENSE_RECORD },
+    { label: "Certificate / third party document", value: Scope3DocumentType.CERTIFICATE_THIRD_PARTY_DOCUMENT },
+    { label: "Other", value: Scope3DocumentType.OTHER },
 ];
 
 export function formatScope3DocumentType(type: string): string {

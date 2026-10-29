@@ -43,9 +43,6 @@ export function Scope3DashboardView() {
             {/* Section 3: Tracked Value Chain Categories Contribution Table & Ledger Actions */}
             <Scope3TrackedCategoriesTable />
 
-            {/* Section 4: Value Chain Hotspots Table & Live Recent Activities Feed */}
-            <Scope3HotspotsAndActivities />
-
             {/* Floating AI Sustainability Copilot */}
             <AiAssistantFAB />
         </div>

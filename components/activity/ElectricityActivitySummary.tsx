@@ -99,9 +99,6 @@ export function ElectricityActivitySummary({ activities }: ElectricityActivitySu
                     <p className="font-sans text-xs text-on-surface-variant">
                         {renewableCertified} of {activities.length} activities certified green/PPA
                     </p>
-                    <div className="mt-1 font-sans text-xs text-on-surface-variant capitalize">
-                        Top source: {mostCommonSource.replace(/_/g, " ")}
-                    </div>
                 </div>
             </Card>
         </div>

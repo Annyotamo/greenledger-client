@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -448,42 +449,67 @@ export function CBAMGuidedCatalog() {
                                     <TableHead className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                                         Fuel Name
                                     </TableHead>
-                                    <TableHead className="w-32 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                                    <TableHead className="w-28 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                                         Unit Symbol
                                     </TableHead>
-                                    <TableHead className="w-40 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                                    <TableHead className="w-36 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                                         Unit Name
                                     </TableHead>
-                                    <TableHead className="w-40 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">
-                                        Default Factor (t CO₂/unit)
+                                    <TableHead className="w-32 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">
+                                        NCV (GJ/t)
+                                    </TableHead>
+                                    <TableHead className="w-36 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">
+                                        kg CO₂e of CO₂
                                     </TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {loadingIpcc ? (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="text-center py-12 text-xs text-slate-400">
+                                        <TableCell colSpan={5} className="text-center py-12 text-xs text-slate-400">
                                             Loading IPCC fuels...
                                         </TableCell>
                                     </TableRow>
                                 ) : ipccFuels.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="text-center py-12 text-xs text-slate-400">
+                                        <TableCell colSpan={5} className="text-center py-12 text-xs text-slate-400">
                                             No IPCC fuels found.
                                         </TableCell>
                                     </TableRow>
                                 ) : (
                                     ipccFuels.map((fuel) => (
                                         <TableRow key={fuel.id} className="hover:bg-slate-50 text-xs">
-                                            <TableCell className="font-semibold text-slate-900">
-                                                {fuel.fuel_name}
+                                            <TableCell>
+                                                <div className="font-semibold text-slate-900">{fuel.fuel_name}</div>
+                                                {fuel.fuel_details?.category_name && (
+                                                    <div className="text-[10px] text-slate-400">
+                                                        {fuel.fuel_details.category_name}
+                                                    </div>
+                                                )}
                                             </TableCell>
                                             <TableCell className="font-mono text-slate-700 bg-slate-100/60">
                                                 {fuel.unit_symbol}
                                             </TableCell>
                                             <TableCell className="text-slate-600">{fuel.unit_name}</TableCell>
+                                            <TableCell className="text-right font-medium text-slate-700 tabular-nums">
+                                                {fuel.fuel_profile?.net_cv_gj_per_tonne !== null &&
+                                                fuel.fuel_profile?.net_cv_gj_per_tonne !== undefined
+                                                    ? fuel.fuel_profile.net_cv_gj_per_tonne.toLocaleString("en-US", {
+                                                          maximumFractionDigits: 3,
+                                                      })
+                                                    : "—"}
+                                            </TableCell>
                                             <TableCell className="text-right font-mono font-bold text-slate-900 tabular-nums">
-                                                {fuel.default_ef_tco2_per_unit.toFixed(5)}
+                                                {fuel.kg_co2e_of_co2 !== null && fuel.kg_co2e_of_co2 !== undefined
+                                                    ? fuel.kg_co2e_of_co2.toLocaleString("en-US", {
+                                                          maximumFractionDigits: 4,
+                                                      })
+                                                    : fuel.default_ef_tco2_per_unit !== null &&
+                                                      fuel.default_ef_tco2_per_unit !== undefined
+                                                    ? (fuel.default_ef_tco2_per_unit * 1000).toLocaleString("en-US", {
+                                                          maximumFractionDigits: 4,
+                                                      })
+                                                    : "—"}
                                             </TableCell>
                                         </TableRow>
                                     ))

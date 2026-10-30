@@ -24,7 +24,8 @@ export function CBAMIPCCFuelPickerModal({ isOpen, onClose, onSelectFuel }: CBAMI
             (f) =>
                 f.fuel_name.toLowerCase().includes(q) ||
                 f.unit_symbol.toLowerCase().includes(q) ||
-                f.unit_name.toLowerCase().includes(q),
+                f.unit_name.toLowerCase().includes(q) ||
+                (f.fuel_details?.category_name || "").toLowerCase().includes(q),
         );
     }, [fuels, search]);
 
@@ -89,7 +90,10 @@ export function CBAMIPCCFuelPickerModal({ isOpen, onClose, onSelectFuel }: CBAMI
                                         Unit
                                     </TableHead>
                                     <TableHead className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">
-                                        Default Factor (t CO₂/unit)
+                                        NCV (GJ/t)
+                                    </TableHead>
+                                    <TableHead className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">
+                                        kg CO₂e of CO₂
                                     </TableHead>
                                     <TableHead className="w-24 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-center">
                                         Action
@@ -99,13 +103,13 @@ export function CBAMIPCCFuelPickerModal({ isOpen, onClose, onSelectFuel }: CBAMI
                             <TableBody>
                                 {isLoading ? (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="text-center py-10 font-sans text-xs text-slate-500">
+                                        <TableCell colSpan={5} className="text-center py-10 font-sans text-xs text-slate-500">
                                             Loading IPCC fuels catalog...
                                         </TableCell>
                                     </TableRow>
                                 ) : filteredFuels.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="text-center py-10 font-sans text-xs text-slate-500">
+                                        <TableCell colSpan={5} className="text-center py-10 font-sans text-xs text-slate-500">
                                             No IPCC fuels found matching &ldquo;{search}&rdquo;
                                         </TableCell>
                                     </TableRow>
@@ -114,8 +118,13 @@ export function CBAMIPCCFuelPickerModal({ isOpen, onClose, onSelectFuel }: CBAMI
                                         <TableRow
                                             key={fuel.id}
                                             className="hover:bg-slate-50/80 font-sans text-xs transition-colors">
-                                            <TableCell className="font-semibold text-slate-900">
-                                                {fuel.fuel_name}
+                                            <TableCell>
+                                                <div className="font-semibold text-slate-900">{fuel.fuel_name}</div>
+                                                {fuel.fuel_details?.category_name && (
+                                                    <div className="text-[10px] text-slate-400">
+                                                        {fuel.fuel_details.category_name}
+                                                    </div>
+                                                )}
                                             </TableCell>
                                             <TableCell className="text-slate-600">
                                                 <span className="font-mono text-[11px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">
@@ -123,8 +132,25 @@ export function CBAMIPCCFuelPickerModal({ isOpen, onClose, onSelectFuel }: CBAMI
                                                 </span>{" "}
                                                 <span className="text-slate-400">({fuel.unit_name})</span>
                                             </TableCell>
+                                            <TableCell className="text-right font-medium text-slate-700 tabular-nums">
+                                                {fuel.fuel_profile?.net_cv_gj_per_tonne !== null &&
+                                                fuel.fuel_profile?.net_cv_gj_per_tonne !== undefined
+                                                    ? fuel.fuel_profile.net_cv_gj_per_tonne.toLocaleString("en-US", {
+                                                          maximumFractionDigits: 3,
+                                                      })
+                                                    : "—"}
+                                            </TableCell>
                                             <TableCell className="text-right font-bold text-slate-900 tabular-nums">
-                                                {fuel.default_ef_tco2_per_unit.toFixed(5)}
+                                                {fuel.kg_co2e_of_co2 !== null && fuel.kg_co2e_of_co2 !== undefined
+                                                    ? fuel.kg_co2e_of_co2.toLocaleString("en-US", {
+                                                          maximumFractionDigits: 4,
+                                                      })
+                                                    : fuel.default_ef_tco2_per_unit !== null &&
+                                                      fuel.default_ef_tco2_per_unit !== undefined
+                                                    ? (fuel.default_ef_tco2_per_unit * 1000).toLocaleString("en-US", {
+                                                          maximumFractionDigits: 4,
+                                                      })
+                                                    : "—"}
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 <Button

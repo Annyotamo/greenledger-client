@@ -62,7 +62,7 @@ and Excel generation pipeline corresponding to the official EU CBAM Communicatio
 
 1.2 NEW ENUMS ADDED:
    - `CBAMSector`: 'CEMENT', 'ELECTRICITY', 'FERTILISERS', 'IRON_AND_STEEL', 'ALUMINIUM', 'CHEMICALS'
-   - `CBAMStreamMethod`: 'Combustion', 'Mass balance'
+   - `CBAMStreamMethod`: 'Combustion', 'Mass Balance'
    - `CBAMActivityUnit`: 't', '1000 Nm3'
    - `CBAMEmissionFactorUnit`: 'tCO2/TJ', 'tCO2/t', 'tCO2/1000Nm3'
 
@@ -629,7 +629,7 @@ RESPONSE:
 SCENARIO 5: Mass Balance Input (e.g. Coal / Coke Input, Carbon Content)
 REQUEST:
 {
-  "method": "Mass balance",
+  "method": "Mass Balance",
   "name": "Coking Coal Input",
   "activity_data": 50000.0,
   "activity_unit": "t",
@@ -643,7 +643,7 @@ SCENARIO 6: Mass Balance Output (e.g. Crude Steel Output - Carbon Bound in Good)
 NOTE: Activity data MUST be negative for mass balance outputs!
 REQUEST:
 {
-  "method": "Mass balance",
+  "method": "Mass Balance",
   "name": "Crude Steel Output (C-bound)",
   "activity_data": -1808226.0,
   "activity_unit": "t",
@@ -676,7 +676,7 @@ REQUEST EXAMPLE:
     },
     {
       "slot_number": 2,
-      "method": "Mass balance",
+      "method": "Mass Balance",
       "name": "Steel Output",
       "activity_data": -1808226.0,
       "activity_unit": "t",

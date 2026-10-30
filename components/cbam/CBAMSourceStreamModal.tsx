@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -54,7 +55,7 @@ export function CBAMSourceStreamModal({
 
     useEffect(() => {
         if (streamToEdit) {
-            setMethod(streamToEdit.method);
+            setMethod(streamToEdit.method?.toLowerCase() === "mass balance" ? "Mass Balance" : "Combustion");
             setName(streamToEdit.name);
             setSlotNumber(streamToEdit.slot_number);
             setActivityData(String(streamToEdit.activity_data));
@@ -98,15 +99,48 @@ export function CBAMSourceStreamModal({
     function handleSelectIpccFuel(fuel: CBAMIPCCFuel) {
         setSelectedIpccFuel(fuel);
         setName(fuel.fuel_name);
-        setEmissionFactor(String(fuel.default_ef_tco2_per_unit));
-        setEmissionFactorUnit("tCO2/t");
-        setOxidationFactor("100");
-        setBiomassFraction("0");
-        if (fuel.unit_symbol.toLowerCase().includes("nm3") || fuel.unit_symbol.toLowerCase().includes("m3")) {
+
+        const sym = fuel.unit_symbol.toLowerCase();
+        const isGj = sym.includes("gj");
+        const isGasVolume = sym.includes("nm3") || sym.includes("m3");
+
+        if (isGj) {
+            // Energy-based factor: in tCO2/TJ (1 kg CO2/GJ = 1 t CO2/TJ)
+            // Value is unchanged from table (e.g. 56.1)
+            setEmissionFactorUnit("tCO2/TJ");
+            setEmissionFactor(
+                fuel.kg_co2e_of_co2 !== null && fuel.kg_co2e_of_co2 !== undefined
+                    ? String(fuel.kg_co2e_of_co2)
+                    : fuel.default_ef_tco2_per_unit !== null && fuel.default_ef_tco2_per_unit !== undefined
+                    ? String(fuel.default_ef_tco2_per_unit * 1000)
+                    : "",
+            );
+            setActivityUnit("t");
+        } else if (isGasVolume) {
+            setEmissionFactorUnit("tCO2/1000Nm3");
+            setEmissionFactor(
+                fuel.default_ef_tco2_per_unit !== null && fuel.default_ef_tco2_per_unit !== undefined
+                    ? String(fuel.default_ef_tco2_per_unit)
+                    : "",
+            );
             setActivityUnit("1000 Nm3");
         } else {
+            // Mass / direct fuel factor: in tCO2/t (e.g. 2.6928)
+            setEmissionFactorUnit("tCO2/t");
+            setEmissionFactor(
+                fuel.default_ef_tco2_per_unit !== null && fuel.default_ef_tco2_per_unit !== undefined
+                    ? String(fuel.default_ef_tco2_per_unit)
+                    : "",
+            );
             setActivityUnit("t");
         }
+
+        if (fuel.fuel_profile?.net_cv_gj_per_tonne !== null && fuel.fuel_profile?.net_cv_gj_per_tonne !== undefined) {
+            setNcv(String(fuel.fuel_profile.net_cv_gj_per_tonne));
+        }
+
+        setOxidationFactor("100");
+        setBiomassFraction("0");
     }
 
     // Client-side deterministic calculation preview
@@ -144,17 +178,21 @@ export function CBAMSourceStreamModal({
         } else {
             // Mass Balance: Stoichiometric factor 3.664 (44.01 / 12.011)
             const cContent = parseFloat(carbonContent) || 0;
-            const totalEmissions = actVal * cContent * 3.664;
+            const oxVal = (parseFloat(oxidationFactor) || 100) / 100;
+            const ncvVal = parseFloat(ncv) || 0;
+            const totalEmissions = actVal * cContent * 3.664 * oxVal;
             const fossilCo2 = totalEmissions * fossilFrac;
             const bioCo2 = totalEmissions * bioFrac;
+            const fossilTj = ncvVal > 0 ? actVal * (ncvVal / 1000) * fossilFrac : 0;
+            const bioTj = ncvVal > 0 ? actVal * (ncvVal / 1000) * bioFrac : 0;
 
             return {
                 fossilCo2,
                 bioCo2,
                 totalCo2: fossilCo2 + bioCo2,
-                fossilTj: 0,
-                bioTj: 0,
-                totalTj: 0,
+                fossilTj,
+                bioTj,
+                totalTj: fossilTj + bioTj,
             };
         }
     }, [method, activityData, emissionFactor, emissionFactorUnit, ncv, oxidationFactor, biomassFraction, carbonContent]);
@@ -219,10 +257,10 @@ export function CBAMSourceStreamModal({
             payload.carbon_content = null;
         } else {
             payload.carbon_content = parseFloat(carbonContent);
-            payload.ncv = null;
+            payload.ncv = ncv ? parseFloat(ncv) : null;
             payload.emission_factor = null;
             payload.emission_factor_unit = null;
-            payload.oxidation_factor = null;
+            payload.oxidation_factor = parseFloat(oxidationFactor) || 100;
         }
 
         await onSubmit(payload);
@@ -279,9 +317,9 @@ export function CBAMSourceStreamModal({
 
                             <button
                                 type="button"
-                                onClick={() => setMethod("Mass balance")}
+                                onClick={() => setMethod("Mass Balance")}
                                 className={`flex items-center justify-center gap-2 rounded-lg py-2 text-xs font-semibold transition-all ${
-                                    method === "Mass balance"
+                                    method === "Mass Balance"
                                         ? "bg-white text-slate-900 shadow-xs border border-slate-200/60"
                                         : "text-slate-600 hover:text-slate-900"
                                 }`}>
@@ -342,7 +380,7 @@ export function CBAMSourceStreamModal({
                             {errors.activityData && (
                                 <p className="text-[11px] text-rose-500 font-medium">{errors.activityData}</p>
                             )}
-                            {method === "Mass balance" && (
+                            {method === "Mass Balance" && (
                                 <p className="text-[10px] text-amber-700 font-medium">
                                     💡 Tip: Use positive values for carbon inputs, and negative values (-) for carbon bound in exported products.
                                 </p>
@@ -406,7 +444,7 @@ export function CBAMSourceStreamModal({
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                                 <div className="space-y-1.5">
                                     <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                                        Net Calorific Value (GJ/t) {emissionFactorUnit === "tCO2/TJ" && <span className="text-rose-500">*</span>}
+                                        NCV (GJ/t) {emissionFactorUnit === "tCO2/TJ" && <span className="text-rose-500">*</span>}
                                     </label>
                                     <input
                                         type="number"
@@ -456,22 +494,53 @@ export function CBAMSourceStreamModal({
                                 Mass Balance Carbon Content & Stoichiometry
                             </span>
 
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div className="space-y-1.5">
+                                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                                    Carbon Content (Fraction or tC/t) <span className="text-rose-500">*</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    step="any"
+                                    value={carbonContent}
+                                    onChange={(e) => setCarbonContent(e.target.value)}
+                                    placeholder="e.g. 0.85 (for 85%) or 0.00388"
+                                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 tabular-nums focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                                />
+                                {errors.carbonContent && (
+                                    <p className="text-[11px] text-rose-500 font-medium">{errors.carbonContent}</p>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                                 <div className="space-y-1.5">
                                     <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                                        Carbon Content (Fraction or tC/t) <span className="text-rose-500">*</span>
+                                        NCV (GJ/t)
                                     </label>
                                     <input
                                         type="number"
                                         step="any"
-                                        value={carbonContent}
-                                        onChange={(e) => setCarbonContent(e.target.value)}
-                                        placeholder="e.g. 0.85 (for 85%) or 0.00388"
+                                        value={ncv}
+                                        onChange={(e) => setNcv(e.target.value)}
+                                        placeholder="e.g. 45.0"
                                         className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 tabular-nums focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
                                     />
-                                    {errors.carbonContent && (
-                                        <p className="text-[11px] text-rose-500 font-medium">{errors.carbonContent}</p>
+                                    {errors.ncv && (
+                                        <p className="text-[11px] text-rose-500 font-medium">{errors.ncv}</p>
                                     )}
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                                        Oxidation Factor (%)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        step="any"
+                                        value={oxidationFactor}
+                                        onChange={(e) => setOxidationFactor(e.target.value)}
+                                        placeholder="100"
+                                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 tabular-nums focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                                    />
                                 </div>
 
                                 <div className="space-y-1.5">
@@ -490,7 +559,7 @@ export function CBAMSourceStreamModal({
                             </div>
 
                             <p className="text-[11px] text-slate-500">
-                                ℹ️ Formula: <code className="font-mono text-emerald-800 font-semibold">Emissions = ActivityData × CarbonContent × 3.664</code> (Stoichiometric constant 44.01/12.011).
+                                ℹ️ Formula: <code className="font-mono text-emerald-800 font-semibold">Emissions = ActivityData × CarbonContent × 3.664 × (Oxidation Factor / 100)</code> (Stoichiometric constant 44.01/12.011).
                             </p>
                         </div>
                     )}

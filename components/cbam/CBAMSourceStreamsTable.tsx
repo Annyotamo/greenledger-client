@@ -5,7 +5,7 @@ import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { CBAMSourceStream, CBAMStreamMethod } from "@/lib/cbam/types";
+import type { CBAMSourceStream } from "@/lib/cbam/types";
 
 interface CBAMSourceStreamsTableProps {
     streams: CBAMSourceStream[];
@@ -27,7 +27,7 @@ export function CBAMSourceStreamsTable({
 
     const filteredStreams = useMemo(() => {
         return streams.filter((stream) => {
-            if (methodFilter && stream.method !== methodFilter) return false;
+            if (methodFilter && stream.method !== methodFilter && stream.method?.toLowerCase() !== methodFilter.toLowerCase()) return false;
             if (search) {
                 const query = search.toLowerCase();
                 const matchName = stream.name.toLowerCase().includes(query);
@@ -112,7 +112,7 @@ export function CBAMSourceStreamsTable({
                         className="w-full rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-primary">
                         <option value="">All Methodologies</option>
                         <option value="Combustion">Combustion Fuels</option>
-                        <option value="Mass balance">Mass Balance (Carbon)</option>
+                        <option value="Mass Balance">Mass Balance (Carbon)</option>
                     </select>
                 </div>
             </div>
@@ -239,10 +239,35 @@ export function CBAMSourceStreamsTable({
                                                 </div>
                                             ) : (
                                                 <div className="space-y-0.5 text-[11px] text-slate-600">
-                                                    <span className="tabular-nums">
-                                                        Carbon Content: {(stream.carbon_content ?? 0) * 100}%
-                                                    </span>
-                                                    <span className="ml-2 text-slate-400 tabular-nums">(Factor 3.664)</span>
+                                                    <div>
+                                                        <span className="tabular-nums">
+                                                            Carbon Content: {(stream.carbon_content ?? 0) * 100}%
+                                                        </span>
+                                                        <span className="ml-2 text-slate-400 tabular-nums">(Factor 3.664)</span>
+                                                    </div>
+                                                    {((stream.ncv !== null && stream.ncv !== undefined) ||
+                                                        (stream.oxidation_factor !== null &&
+                                                            stream.oxidation_factor !== undefined &&
+                                                            stream.oxidation_factor !== 100) ||
+                                                        stream.biomass_fraction > 0) && (
+                                                        <div className="text-[10px] text-slate-500 flex flex-wrap items-center gap-x-2">
+                                                            {stream.ncv !== null && stream.ncv !== undefined && (
+                                                                <span className="tabular-nums">NCV: {stream.ncv} GJ/t</span>
+                                                            )}
+                                                            {stream.oxidation_factor !== null &&
+                                                                stream.oxidation_factor !== undefined &&
+                                                                stream.oxidation_factor !== 100 && (
+                                                                    <span className="tabular-nums">
+                                                                        Ox: {stream.oxidation_factor}%
+                                                                    </span>
+                                                                )}
+                                                            {stream.biomass_fraction > 0 && (
+                                                                <span className="text-emerald-700 font-medium tabular-nums">
+                                                                    Bio: {stream.biomass_fraction}%
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
                                         </TableCell>

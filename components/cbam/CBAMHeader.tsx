@@ -33,15 +33,6 @@ export function CBAMHeader({ onOpenStreamModal }: CBAMHeaderProps) {
     return (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-outline-variant/40 pb-4">
             <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 font-sans text-[11px] font-semibold text-emerald-800">
-                        <MaterialIcon name="verified" size="xs" className="text-emerald-600" />
-                        EU CBAM Regulation (EU) 2023/956
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-md bg-surface-container-high border border-outline-variant/60 px-2.5 py-0.5 font-sans text-[11px] font-semibold text-on-surface-variant">
-                        Implementing Regulation (EU) 2023/1773
-                    </span>
-                </div>
                 <h1 className="font-display text-2xl sm:text-3xl font-bold text-primary tracking-tight">
                     Carbon Border Adjustment Mechanism (CBAM)
                 </h1>

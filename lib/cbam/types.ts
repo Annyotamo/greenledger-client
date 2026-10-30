@@ -6,7 +6,7 @@ export type CBAMSector =
     | "ALUMINIUM"
     | "CHEMICALS";
 
-export type CBAMStreamMethod = "Combustion" | "Mass balance";
+export type CBAMStreamMethod = "Combustion" | "Mass Balance";
 
 export type CBAMActivityUnit = "t" | "1000 Nm3";
 
@@ -80,6 +80,32 @@ export interface CBAMCountriesResponse {
     countries: CBAMCountry[];
 }
 
+export interface CBAMIPCCFuelProfile {
+    id?: string;
+    net_cv_gj_per_tonne?: number | null;
+    net_cv_kwh_per_tonne?: number | null;
+    net_cv_kwh_per_litre?: number | null;
+    gross_cv_gj_per_tonne?: number | null;
+    gross_cv_kwh_per_tonne?: number | null;
+    gross_cv_kwh_per_litre?: number | null;
+    density_kg_per_metre_cube?: number | null;
+    density_litres_per_tonne?: number | null;
+    density_kg_per_litre?: number | null;
+    density_tonne_per_litre?: number | null;
+}
+
+export interface CBAMIPCCFuelDetails {
+    id?: string;
+    name?: string;
+    slug?: string;
+    category_id?: string;
+    category_name?: string;
+    type?: string;
+    factor_type?: string;
+    description?: string;
+    renewable?: boolean;
+}
+
 export interface CBAMIPCCFuel {
     id: string;
     fuel_id: string;
@@ -90,6 +116,8 @@ export interface CBAMIPCCFuel {
     kg_co2e: number;
     kg_co2e_of_co2: number;
     default_ef_tco2_per_unit: number;
+    fuel_details?: CBAMIPCCFuelDetails | null;
+    fuel_profile?: CBAMIPCCFuelProfile | null;
 }
 
 export interface CBAMInstallationGood {

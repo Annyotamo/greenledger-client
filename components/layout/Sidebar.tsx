@@ -17,14 +17,37 @@ import { BOTTOM_NAV, MAIN_NAV, SCOPE_NAV_CHILDREN, BRSR_NAV_CHILDREN } from "./s
 const SIDEBAR_EXPANDED = 256;
 const SIDEBAR_COLLAPSED = 80;
 
+function isRouteActive(pathname: string | null, href: string) {
+    if (!pathname || !href || href === "#") return false;
+    if (pathname === href) return true;
+    return pathname.startsWith(href.endsWith("/") ? href : `${href}/`);
+}
+
 export function Sidebar() {
     const collapsed = useSidebarStore((s) => s.collapsed);
     const toggle = useSidebarStore((s) => s.toggle);
-    const [activitiesOpen, setActivitiesOpen] = useState(false);
-    const [brsrOpen, setBrsrOpen] = useState(false);
+    const pathname = usePathname();
+
+    const isActivitiesActive = Boolean(
+        pathname && (pathname === "/activities" || pathname.startsWith("/activities/")),
+    );
+    const isBrsrActive = Boolean(
+        pathname && (pathname === "/brsr" || pathname.startsWith("/brsr/")),
+    );
+
+    const [activitiesOpen, setActivitiesOpen] = useState(isActivitiesActive);
+    const [brsrOpen, setBrsrOpen] = useState(isBrsrActive);
     const [user, setUser] = useState<UserProfile | null>(null);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
-    const pathname = usePathname();
+
+    useEffect(() => {
+        if (isActivitiesActive) {
+            setActivitiesOpen(true);
+        }
+        if (isBrsrActive) {
+            setBrsrOpen(true);
+        }
+    }, [isActivitiesActive, isBrsrActive]);
 
     const handleLogout = async () => {
         if (isLoggingOut) return;
@@ -93,17 +116,31 @@ export function Sidebar() {
                     <div className="relative">
                         <button
                             type="button"
-                            onClick={() => !collapsed && setActivitiesOpen((o) => !o)}
-                            className="flex w-full items-center justify-between px-4 py-2.5 text-on-surface transition-colors duration-200 hover:bg-surface-container-high rounded-lg">
+                            onClick={() => {
+                                if (collapsed) {
+                                    toggle();
+                                    setActivitiesOpen(true);
+                                } else {
+                                    setActivitiesOpen((o) => !o);
+                                }
+                            }}
+                            title={collapsed ? "Activities" : undefined}
+                            className={cn(
+                                "flex w-full items-center justify-between px-4 py-2.5 transition-[transform,colors] duration-150 active:scale-[0.98] rounded-lg cursor-pointer",
+                                collapsed && "justify-center px-2",
+                                isActivitiesActive
+                                    ? "bg-secondary-container font-semibold text-on-secondary-container"
+                                    : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
+                            )}>
                             <span className="flex items-center gap-3">
-                                <MaterialIcon name="energy_savings_leaf" />
+                                <MaterialIcon name="energy_savings_leaf" className="shrink-0" />
                                 {!collapsed && <span className="font-sans text-[13px] font-medium">Activities</span>}
                             </span>
                             {!collapsed && (
                                 <MaterialIcon
                                     name={activitiesOpen ? "keyboard_arrow_down" : "keyboard_arrow_right"}
                                     size="sm"
-                                    className="!text-[18px]"
+                                    className="!text-[18px] shrink-0"
                                 />
                             )}
                         </button>
@@ -113,19 +150,24 @@ export function Sidebar() {
                                 <div className="nav-connector nav-connector-glow absolute bottom-4 left-0 top-0 w-[2px]" />
                                 <div className="space-y-1 py-1">
                                     {SCOPE_NAV_CHILDREN.map((child) => {
-                                        const childActive = pathname?.startsWith(child.href);
+                                        const childActive = isRouteActive(pathname, child.href);
                                         return (
                                             <Link
                                                 key={child.label}
                                                 href={child.href}
                                                 className={cn(
-                                                    "relative flex items-center gap-3 py-1.5 pl-6 transition-colors rounded-md",
+                                                    "relative flex items-center gap-3 py-1.5 pl-6 transition-colors rounded-md text-xs font-sans",
                                                     childActive
-                                                        ? "text-on-surface font-semibold bg-secondary-container/40"
+                                                        ? "text-primary font-medium bg-emerald-600/[0.07]"
                                                         : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low",
                                                 )}>
-                                                <div className="absolute left-0 top-1/2 h-[2px] w-4 -translate-y-1/2 bg-secondary opacity-40" />
-                                                <span className="font-sans text-xs">{child.label}</span>
+                                                <div
+                                                    className={cn(
+                                                        "absolute left-0 top-1/2 h-[1.5px] w-4 -translate-y-1/2 transition-colors",
+                                                        childActive ? "bg-emerald-700/70" : "bg-secondary opacity-40",
+                                                    )}
+                                                />
+                                                <span>{child.label}</span>
                                             </Link>
                                         );
                                     })}
@@ -141,18 +183,31 @@ export function Sidebar() {
                     <div className="relative">
                         <button
                             type="button"
-                            onClick={() => !collapsed && setBrsrOpen((o) => !o)}
-                            className="flex w-full items-center justify-between px-4 py-2.5 text-on-surface transition-colors duration-200 hover:bg-surface-container-high rounded-lg"
-                            title={collapsed ? "BRSR" : undefined}>
+                            onClick={() => {
+                                if (collapsed) {
+                                    toggle();
+                                    setBrsrOpen(true);
+                                } else {
+                                    setBrsrOpen((o) => !o);
+                                }
+                            }}
+                            title={collapsed ? "BRSR" : undefined}
+                            className={cn(
+                                "flex w-full items-center justify-between px-4 py-2.5 transition-[transform,colors] duration-150 active:scale-[0.98] rounded-lg cursor-pointer",
+                                collapsed && "justify-center px-2",
+                                isBrsrActive
+                                    ? "bg-secondary-container font-semibold text-on-secondary-container"
+                                    : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
+                            )}>
                             <span className="flex items-center gap-3">
-                                <MaterialIcon name="analytics" />
+                                <MaterialIcon name="analytics" className="shrink-0" />
                                 {!collapsed && <span className="font-sans text-[13px] font-medium">BRSR</span>}
                             </span>
                             {!collapsed && (
                                 <MaterialIcon
                                     name={brsrOpen ? "keyboard_arrow_down" : "keyboard_arrow_right"}
                                     size="sm"
-                                    className="!text-[18px]"
+                                    className="!text-[18px] shrink-0"
                                 />
                             )}
                         </button>
@@ -162,19 +217,24 @@ export function Sidebar() {
                                 <div className="nav-connector nav-connector-glow absolute bottom-4 left-0 top-0 w-[2px]" />
                                 <div className="space-y-1 py-1">
                                     {BRSR_NAV_CHILDREN.map((child) => {
-                                        const childActive = pathname?.startsWith(child.href);
+                                        const childActive = isRouteActive(pathname, child.href);
                                         return (
                                             <Link
                                                 key={child.label}
                                                 href={child.href}
                                                 className={cn(
-                                                    "relative flex items-center gap-3 py-1.5 pl-6 transition-colors rounded-md",
+                                                    "relative flex items-center gap-3 py-1.5 pl-6 transition-colors rounded-md text-xs font-sans",
                                                     childActive
-                                                        ? "text-on-surface font-semibold bg-secondary-container/40"
+                                                        ? "text-primary font-medium bg-emerald-600/[0.07]"
                                                         : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low",
                                                 )}>
-                                                <div className="absolute left-0 top-1/2 h-[2px] w-4 -translate-y-1/2 bg-secondary opacity-40" />
-                                                <span className="font-sans text-xs">{child.label}</span>
+                                                <div
+                                                    className={cn(
+                                                        "absolute left-0 top-1/2 h-[1.5px] w-4 -translate-y-1/2 transition-colors",
+                                                        childActive ? "bg-emerald-700/70" : "bg-secondary opacity-40",
+                                                    )}
+                                                />
+                                                <span>{child.label}</span>
                                             </Link>
                                         );
                                     })}
@@ -212,7 +272,10 @@ export function Sidebar() {
 
                     {!collapsed && (
                         <Link href="/user" className="mx-1 block">
-                            <div className="flex items-center gap-3 rounded-xl bg-surface-container p-3 hover:shadow-sm">
+                            <div className={cn(
+                                "flex items-center gap-3 rounded-xl bg-surface-container p-3 transition-colors hover:shadow-sm",
+                                isRouteActive(pathname, "/user") && "ring-1 ring-primary/40 bg-surface-container-high",
+                            )}>
                                 {/** client fetch will populate `user` state; render placeholder until loaded */}
                                 {user?.avatar ? (
                                     <Image
@@ -259,7 +322,7 @@ function SidebarLink({
     compact?: boolean;
 }) {
     const pathname = usePathname();
-    const isActive = !!item.active || (pathname && item.href !== "#" && pathname.startsWith(item.href));
+    const isActive = !!item.active || isRouteActive(pathname, item.href);
 
     return (
         <Link

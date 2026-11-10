@@ -41,7 +41,7 @@ GreenLedger is engineered as a monorepo workspace leveraging the Next.js 16 App 
         ┌──────────────┴──────────────┐                               ┌──────────────┴──────────────┐
         ▼                             ▼                               ▼                             ▼
   Landing Page                 Insights CMS                     Edge Middleware               Tenant Shell
-  - Hero WebGL SoftAurora      - Educational Guides             (Session & Auth Gate)         - Responsive Sidebar
+  - Watercolour hero (WebGL)   - Educational Guides             (Session & Auth Gate)         - Responsive Sidebar
   - Interactive Frameworks     - Regulatory Updates             - Cookie Validation           - Facility Switcher
   - ROI / Cost Estimator       - Deep Dives                     - 401 Interceptors            - Active FY Selector
                                                                                                     │
@@ -73,7 +73,7 @@ The application belongs to a workspace managed via `pnpm-workspace.yaml`:
 | **State Management** | **TanStack React Query v5** | Server-state caching, automatic background refetching, and optimistic mutations |
 | **Local State** | **Zustand v5** | Ultra-lightweight reactive client stores (`sidebar-store`, `cookie-consent-store`) |
 | **Visualizations** | **Recharts v3.8.1** | Responsive SVG charts (Sankey, Donut, Stacked Bar, Multi-axis Line) |
-| **3D & Shaders** | **OGL v1.0.11** | High-performance WebGL shader animations (`SoftAurora`) for visual storytelling |
+| **Landing Motion** | **Lenis, Lottie, WebGL** | Smooth scrolling, line-icon animations and hand-written WebGL background shaders on the public landing page |
 | **Animation** | **Framer Motion v12** | Layout transitions, animated KPI counters, modal mount sequences |
 | **Form & Inputs** | **React Select & React Day Picker** | Accessible cascading select pickers, date-range selectors, custom calendars |
 | **HTTP Client** | **Axios v1.15.0** | Configured with JWT interceptors, auto token eviction, and unified error wrappers |
@@ -209,7 +209,7 @@ Specialized reporting views conforming to SEBI BRSR Core requirements:
 ---
 
 ### 4.10 Public Landing Page & Insights CMS
-- **Interactive Visual Storytelling**: Built with WebGL shaders (`SoftAurora`), framer-motion scroll-triggered reveals, and framework comparison carousels.
+- **Watercolour Landing (`components/landing/watercolor`)**: Ported from the design source `designs/watercolor-landing.html`, with WebGL background fields, before/after explainer diagrams, a pixel-reveal team section, and Lenis smooth scrolling. After editing the design file run `pnpm port:landing`; see `components/landing/watercolor/README.md`.
 - **Educational Insights Engine (`/insights`, `/insights/[slug]`)**: In-depth articles covering carbon tax mechanisms, CSRD, CBAM updates, and ESG best practices with SEO metadata.
 
 ---
@@ -282,8 +282,6 @@ my-app/
 │   │       └── page.tsx
 │   ├── api/media/                      # Next.js media optimization stream routes
 │   │   ├── cbam/route.ts
-│   │   ├── green-earth/route.ts
-│   │   ├── industry-animation/route.ts
 │   │   ├── landing-intro/route.ts
 │   │   └── logo-animation/route.ts
 │   ├── insights/                       # Public insights CMS
@@ -301,11 +299,10 @@ my-app/
 │   ├── brsr/                           # BRSR Air, Energy, Waste, and Water modals
 │   ├── cbam/                           # CBAM guided catalog, installation form, stream modal
 │   ├── dashboard/                      # KPI cards, Recharts visualizations, gas matrix
-│   ├── designs/                        # WebGL shaders (SoftAurora) and UI canvases
 │   ├── facility/                       # Facility portfolio tables and subunit modals
 │   ├── icons/                          # SVG icons and Google Material Symbol wrappers
 │   ├── insights/                       # Editorial layouts for insights articles
-│   ├── landing/                        # Hero, framework grid, feature carousel, pricing
+│   ├── landing/                        # Watercolour landing (watercolor/) and the public CBAM page sections
 │   ├── layout/                         # TenantShell, TopBar, Sidebar, and navigation config
 │   ├── providers/                      # TanStack QueryClientProvider & ThemeProvider
 │   ├── reportingPeriod/                # Reporting period tables and creation forms

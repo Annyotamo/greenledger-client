@@ -25,7 +25,6 @@ const nextConfig: NextConfig = {
             "react-icons",
             "date-fns",
             "react-select",
-            "ogl",
             "@material-symbols/font-400",
         ],
     },

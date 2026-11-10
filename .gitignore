@@ -41,3 +41,27 @@ yarn-error.log*
 next-env.d.ts
 
 /gl-admin
+
+# AI agents, assistants and design-skill tooling (local only, never pushed)
+.claude/
+.agents/
+.agent/
+.codex/
+.cursor/
+.gemini/
+.windsurf/
+.continue/
+.cline/
+.roo/
+.kiro/
+.aider*
+.copilot/
+.github/copilot-instructions.md
+.mcp.json
+.impeccable/
+.taste-skill/
+.superdesign/
+.genjutsu/
+.hyperframes/
+.playwright-mcp/
+.serena/

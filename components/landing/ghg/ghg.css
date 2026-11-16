@@ -1,0 +1,46 @@
+/* GHG Accounting page (/ghg-accounting). Hand-written; builds on watercolor.css (the .wl tokens and the scope ledger's .sb* styles). */
+
+.wl.ghg .ghg-head{position:relative;padding:calc(var(--sec) + 92px) 0 var(--sec)}
+.wl.ghg .ghg-head>.wrap{position:relative;z-index:1}
+.wl.ghg .ghg-head h1{max-width:15ch}
+.wl.ghg .ghg-head p{max-width:62ch;margin-top:22px;font-size:1.06rem;color:var(--ink-soft);text-wrap:pretty}
+/* the same paper washes as the landing's frameworks band, fading out before the ledger */
+.wl.ghg .ghg-wash{position:absolute;inset:0 0 auto;height:760px;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 42% 60% at 6% 30%,rgba(127,165,138,.42),transparent 70%),radial-gradient(ellipse 40% 55% at 70% 18%,rgba(159,185,214,.45),transparent 70%),radial-gradient(ellipse 34% 50% at 96% 60%,rgba(217,164,65,.22),transparent 72%);
+  -webkit-mask-image:linear-gradient(180deg,#000 40%,transparent);mask-image:linear-gradient(180deg,#000 40%,transparent)}
+.wl.ghg .ghg-ledger{margin-top:var(--head-gap)}
+
+/* link to the full Scope 3 list, in the bar the landing used for its autoplay button */
+.wl.ghg .ghg-jump{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;font-size:.88rem;font-weight:500;color:var(--ink);text-decoration:none;background:rgba(31,42,42,.05);box-shadow:inset 0 0 0 1px rgba(31,42,42,.05);transition:background .3s cubic-bezier(.22,1,.36,1)}
+.wl.ghg .ghg-jump:hover{background:rgba(31,42,42,.1)}
+.wl.ghg .ghg-jump:focus-visible{outline:2px solid var(--moss);outline-offset:3px}
+.wl.ghg .ghg-jump svg{width:14px;height:14px}
+
+/* Scope 3: the fifteen categories as a two-column ledger, upstream beside downstream */
+.wl.ghg .s3{padding-top:0}
+.wl.ghg .s3-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:end;margin-bottom:var(--head-gap)}
+.wl.ghg .s3-head p{color:var(--ink-soft);max-width:52ch;text-wrap:pretty}
+.wl.ghg .s3-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(28px,4vw,64px);align-items:start}
+.wl.ghg .s3-col h3{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-bottom:14px;box-shadow:inset 0 -1.5px 0 var(--ink);font-size:1.6rem}
+.wl.ghg .s3-col h3 span{font:500 .82rem/1 Inter,system-ui,sans-serif;color:var(--ink-soft)}
+.wl.ghg .s3-col ol{list-style:none}
+.wl.ghg .s3-row{display:grid;grid-template-columns:44px 44px minmax(0,1fr);column-gap:16px;align-items:start;padding:20px 0;box-shadow:inset 0 -1px 0 var(--rule)}
+.wl.ghg .s3-n{font:300 2.1rem/1 var(--font-fraunces),serif;letter-spacing:-.02em;color:color-mix(in srgb,var(--s3) 82%,#1f2a2a);font-variant-numeric:lining-nums tabular-nums;padding-top:4px}
+.wl.ghg .s3-ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--ink);background:color-mix(in srgb,var(--s3) 12%,#fbf8f1)}
+.wl.ghg .s3-ic svg{width:24px;height:24px}
+.wl.ghg .s3-t h4{font-size:1.16rem;line-height:1.25;padding-top:2px}
+.wl.ghg .s3-t p{margin-top:6px;font-size:.92rem;line-height:1.55;color:var(--ink-soft);text-wrap:pretty}
+.wl.ghg .s3-tag{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:.78rem;font-weight:600;color:#2f6a4c}
+.wl.ghg .s3-tag svg{width:14px;height:14px}
+
+@media (max-width:900px){
+  .wl.ghg .s3-head,.wl.ghg .s3-cols{grid-template-columns:1fr}
+  .wl.ghg .s3-head{gap:16px}
+}
+@media (max-width:640px){
+  .wl.ghg .sb-bar{flex-direction:column;align-items:stretch}
+  .wl.ghg .ghg-jump{justify-content:center}
+  .wl.ghg .s3-row{grid-template-columns:36px minmax(0,1fr);row-gap:10px}
+  .wl.ghg .s3-ic{display:none}
+  .wl.ghg .s3-n{font-size:1.7rem}
+}

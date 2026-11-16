@@ -2,30 +2,78 @@
 
 /* eslint-disable @next/next/no-img-element -- the design's CSS sizes these images directly; sources are already resized via assets.ts */
 import Link from "next/link";
-import { useEffect, useRef, type CSSProperties } from "react";
-import { Fraunces } from "next/font/google";
+import { useEffect, useRef } from "react";
 import Lenis from "lenis";
 import "lenis/dist/lenis.css";
-import { useCookieConsentStore } from "@/stores/cookie-consent-store";
+import { SiteNav, SiteFooter, fraunces, cssVars, navIcon } from "./SiteChrome";
 import { IMG, runtimeAsset } from "./assets";
 import { createSandbox } from "./sandbox";
 import { run } from "./runtime";
 import INDIA from "./india.json";
 import "./watercolor.css";
 
-const fraunces = Fraunces({
-    subsets: ["latin"],
-    variable: "--font-fraunces",
-    style: ["normal", "italic"],
-    axes: ["opsz"],
-    display: "swap",
-});
-
 // lottie-web reads `document` on import, so it can't load during the server render; fetch it as soon as this module runs in the browser
 const lottieReady = typeof window === "undefined" ? null : import("lottie-web").then((m) => m.default);
 
 const INSIGHT_HREF = "/insights/why-reliable-esg-reporting-requires-systems-not-prompts";
-const cssVars = (v: Record<string, string | number>) => v as CSSProperties;
+
+/** BRSR section: the Principle 6 indicators GreenLedger compiles per module (mirrors designs/watercolor-landing.html). */
+const BRSR: { id: string; title: string; summary: string; color: string; icon: React.ReactNode; groups: [string, [string, string][]][] }[] = [
+    {
+        id: "energy",
+        title: "Energy",
+        summary: "Renewable split, captive generation, intensity",
+        color: "var(--ochre)",
+        icon: <path d="M13 3 5 14h6l-1 7 8-11h-6l1-7z" />,
+        groups: [
+            ["Renewable sources", [["Electricity consumption", "GJ"], ["Fuel consumption", "GJ"], ["Other renewable sources", "GJ"]]],
+            ["Non-renewable sources", [["Grid electricity", "GJ"], ["Fuel consumption", "GJ"]]],
+            ["Totals", [["Captive generation", "GJ"], ["Total energy consumed", "GJ"], ["Energy intensity per rupee of turnover", "GJ / ₹"]]],
+        ],
+    },
+    {
+        id: "water",
+        title: "Water",
+        summary: "Withdrawal by source, consumption, reuse",
+        color: "var(--indigo)",
+        icon: <path d="M12 3s-6 6.6-6 11a6 6 0 0 0 12 0c0-4.4-6-11-6-11z" />,
+        groups: [
+            ["Withdrawal by source", [["Surface water", "kL"], ["Groundwater", "kL"], ["Seawater or desalinated water", "kL"], ["Third-party (municipal) water", "kL"]]],
+            ["Use", [["Total water consumption", "kL"], ["Water recycled and reused", "kL"]]],
+        ],
+    },
+    {
+        id: "waste",
+        title: "Waste",
+        summary: "Generated, recovered and disposed",
+        color: "var(--clay)",
+        icon: <path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13M10 11v6M14 11v6" />,
+        groups: [
+            ["Generated", [["Hazardous waste", "t"], ["Non-hazardous waste", "t"]]],
+            ["Recovered", [["Recycled", "t"], ["Re-used", "t"], ["Other recovery operations", "t"]]],
+            ["Disposed", [["Incineration", "t"], ["Landfilling", "t"]]],
+        ],
+    },
+    {
+        id: "air",
+        title: "Air",
+        summary: "PM, SOx, NOx, CO and VOCs",
+        color: "var(--moss)",
+        icon: <path d="M3 9h11a3 3 0 1 0-3-3M3 15h15a3 3 0 1 1-3 3M3 12h7" />,
+        groups: [
+            [
+                "Emissions other than GHG",
+                [
+                    ["Particulate matter (PM)", "mg/Nm³"],
+                    ["Sulphur oxides (SOx)", "mg/Nm³"],
+                    ["Nitrogen oxides (NOx)", "mg/Nm³"],
+                    ["Carbon monoxide (CO)", "mg/Nm³"],
+                    ["Volatile organic compounds (VOCs)", "mg/Nm³"],
+                ],
+            ],
+        ],
+    },
+];
 
 /* React StrictMode (dev) mounts, unmounts and remounts effects on the same DOM. The script can't be re-run on
    markup it has already transformed, so a cleanup is deferred one tick and cancelled if the remount follows.
@@ -104,11 +152,6 @@ export default function WatercolorLanding() {
         };
     }, []);
 
-    const openCookiePrefs = (ev: React.MouseEvent) => {
-        ev.preventDefault();
-        useCookieConsentStore.getState().setOpen(true);
-    };
-
     return (
         <div ref={ref} className={`wl ${fraunces.variable}`}>
             <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
@@ -183,30 +226,7 @@ export default function WatercolorLanding() {
                 </div>
             </div>
 
-            <nav className="top" aria-label="Main">
-                <a className="glass logo" href="#">
-                    <img src={IMG.logo} alt="" />
-                    <span>GreenLedger</span>
-                </a>
-                <div className="glass links">
-                    <i className="ind" aria-hidden="true"></i>
-                    <a href="#value">Platform</a>
-                    <a href="#before-after">CBAM</a>
-                    <a href="#industries">Industries</a>
-                    <a href="#solutions">Solutions</a>
-                    <a href="#insights">Insights</a>
-                    <a href="#team">Team</a>
-                    <a href="#pricing">Pricing</a>
-                </div>
-                <div className="glass navbtns">
-                    <Link className="login" href="/login">
-                        Client login
-                    </Link>
-                    <a className="btn" href="#contact">
-                        Book demo
-                    </a>
-                </div>
-            </nav>
+            <SiteNav home />
 
             <header className="hero">
                 {/* city at dusk, printed on paper: the sky dissolves into the page, towers and water stay as ink */}
@@ -348,19 +368,69 @@ export default function WatercolorLanding() {
                 </div>
             </section>
 
-            <section id="solutions">
+            <section id="brsr" aria-labelledby="brTitle">
                 <div className="sx-bg" aria-hidden="true"></div>
-                <div className="wrap">
-                    <div className="inds-head reveal">
-                        <div>
-                            <div className="mono">Inventory module / emissions spine</div>
-                            <h2 style={{ marginTop: 14 }}>
-                                Greenhouse Gas Scopes <em>Ledger</em>
-                            </h2>
+                <div className="wrap br">
+                    <div className="br-head reveal">
+                        <h2 id="brTitle">
+                            BRSR reporting, ready from the <em>plant floor</em>
+                        </h2>
+                        <p>
+                            Pre-configured Principle 6 matrices for SEBI&apos;s Business Responsibility and Sustainability Report. Energy, water, waste and air are compiled from the
+                            activity data your teams already record, with the supporting documents attached.
+                        </p>
+                        <div className="br-tabs" role="tablist" aria-label="BRSR environmental modules">
+                            {BRSR.map((m, i) => (
+                                <button
+                                    key={m.id}
+                                    className="br-tab"
+                                    role="tab"
+                                    id={`brt-${m.id}`}
+                                    aria-controls={`brp-${m.id}`}
+                                    aria-selected={i === 0}
+                                    tabIndex={i === 0 ? undefined : -1}
+                                    style={cssVars({ "--c": m.color })}>
+                                    <span className="ic">{navIcon(m.icon)}</span>
+                                    <b>{m.title}</b>
+                                    <small>{m.summary}</small>
+                                </button>
+                            ))}
                         </div>
-                        <p>Select a scope category below to display target activity streams and compliance definitions.</p>
                     </div>
-                    <div className="sb reveal" id="scopeBento"></div>
+                    <div className="br-sheets reveal">
+                        {BRSR.map((m, i) => (
+                            <article
+                                key={m.id}
+                                className="br-sheet"
+                                role="tabpanel"
+                                id={`brp-${m.id}`}
+                                aria-labelledby={`brt-${m.id}`}
+                                style={cssVars({ "--c": m.color })}
+                                hidden={i !== 0}>
+                                <div className="br-sh">
+                                    <h3>{m.title}</h3>
+                                    <span>Principle 6 · Environment</span>
+                                </div>
+                                {m.groups.map(([label, rows]) => (
+                                    <div className="br-g" key={label}>
+                                        <h4>{label}</h4>
+                                        {rows.map(([name, unit]) => (
+                                            <div className="br-row" key={name}>
+                                                {name}
+                                                <span className="u">{unit}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ))}
+                                <p className="br-foot">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        <path d="M20 11.5 12.5 19a5 5 0 0 1-7-7l7.5-7.5a3.3 3.3 0 0 1 4.7 4.7l-7.4 7.4a1.7 1.7 0 0 1-2.4-2.4L14.5 7.5" />
+                                    </svg>
+                                    Supporting documents travel with every figure into the report.
+                                </p>
+                            </article>
+                        ))}
+                    </div>
                 </div>
             </section>
 
@@ -474,120 +544,7 @@ export default function WatercolorLanding() {
                 </div>
             </section>
 
-            <footer id="foot">
-                <div className="f-media" aria-hidden="true">
-                    <video
-                        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260820_010308_b1636845-4c15-4ab6-b0c9-9a29bfb0c6e3.mp4"
-                        muted
-                        loop
-                        playsInline
-                        preload="none"></video>
-                </div>
-                <div className="wrap">
-                    <div className="f-sheet">
-                        <div className="f-head">
-                            <a className="f-brand f-fade" style={cssVars({ "--i": 0 })} href="#">
-                                <img src={IMG.logo} alt="" />
-                                GreenLedger
-                            </a>
-                            <p className="f-lede f-fade" style={cssVars({ "--i": 1 })}>
-                                ESG reporting, carbon accounting, and supply chain traceability on one platform designed for audit ready enterprises and consumer-trusted brands.
-                            </p>
-                        </div>
-                        <div className="f-body">
-                            <nav className="f-nav f-fade" style={cssVars({ "--i": 2 })} aria-label="Footer">
-                                <Link href="/cbam">CBAM Compliance</Link>
-                                <a href="#">Privacy</a>
-                                <a href="#">Terms</a>
-                                <a href="#">Security</a>
-                                <a href="#" onClick={openCookiePrefs}>
-                                    Cookie Preferences
-                                </a>
-                                <a href="#contact">Contact</a>
-                            </nav>
-                            <div className="f-right">
-                                <div className="f-blk f-fade" id="contact" style={cssVars({ "--i": 3, scrollMarginTop: "110px" })}>
-                                    <h4>Connect &amp; Inquiries</h4>
-                                    <p>Have questions or need enterprise onboarding? Reach out to our advisory team directly.</p>
-                                    <div className="f-reach">
-                                        <a href="mailto:sayan@redswitchglobal.com">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                                <rect x="3" y="5" width="18" height="14" rx="2" />
-                                                <path d="m3 7 9 6 9-6" />
-                                            </svg>
-                                            sayan@redswitchglobal.com
-                                        </a>
-                                        <a href="tel:+919831076943">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                                <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" />
-                                            </svg>
-                                            +91 98310 76943
-                                        </a>
-                                    </div>
-                                </div>
-                                <div className="f-blk f-fade" style={cssVars({ "--i": 4 })}>
-                                    <h4>Certifications</h4>
-                                    <div className="f-names">
-                                        <a href="https://www.servicesepc.org/" target="_blank" rel="noopener">
-                                            Service Export Promotion Council (SEPC) India
-                                        </a>
-                                        <a href="https://www.iso.org/standard/27001" target="_blank" rel="noopener">
-                                            ISO 27001
-                                        </a>
-                                    </div>
-                                    <div className="f-logos">
-                                        <a href="https://www.servicesepc.org/" target="_blank" rel="noopener">
-                                            <img src={IMG.sepc} alt="SEPC certification" />
-                                        </a>
-                                        <a href="https://www.iso.org/standard/27001" target="_blank" rel="noopener">
-                                            <img src={IMG.iso} alt="ISO 27001 certification" />
-                                        </a>
-                                    </div>
-                                </div>
-                                <div className="f-blk wide f-fade" style={cssVars({ "--i": 5 })}>
-                                    <h4>Supported by</h4>
-                                    <div className="f-names">
-                                        <a href="https://www.startupindia.gov.in/" target="_blank" rel="noopener">
-                                            Startup India
-                                        </a>
-                                        <a href="https://www.entrepreneurcafe.org/" target="_blank" rel="noopener">
-                                            Entrepreneur Cafe
-                                        </a>
-                                        <a href="https://www.rpsg.in" target="_blank" rel="noopener">
-                                            RP-Sanjiv Goenka Group (IMI Kolkata)
-                                        </a>
-                                    </div>
-                                    <div className="f-logos">
-                                        <a href="https://www.startupindia.gov.in/" target="_blank" rel="noopener">
-                                            <img src={IMG.startupIndia} alt="Startup India" />
-                                        </a>
-                                        <a href="https://www.entrepreneurcafe.org/" target="_blank" rel="noopener">
-                                            <img src={IMG.entrepreneurCafe} alt="Entrepreneur Cafe" />
-                                        </a>
-                                        <a href="https://www.rpsg.in" target="_blank" rel="noopener">
-                                            <img src={IMG.rpsg3} alt="RP-Sanjiv Goenka Group (IMI Kolkata)" />
-                                        </a>
-                                        <a href="https://imik.edu.in" target="_blank" rel="noopener">
-                                            <img src={IMG.imi} alt="IMI Kolkata" />
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <p className="f-word" aria-hidden="true">
-                            {"GreenLedger".split("").map((ch, i) => (
-                                <span key={i} style={cssVars({ "--i": i })}>
-                                    {ch}
-                                </span>
-                            ))}
-                        </p>
-                    </div>
-                    <div className="copy">
-                        <span>© 2026 GreenLedger. All rights reserved.</span>
-                        <a href="#">Back to top ↑</a>
-                    </div>
-                </div>
-            </footer>
+            <SiteFooter home />
         </div>
     );
 }

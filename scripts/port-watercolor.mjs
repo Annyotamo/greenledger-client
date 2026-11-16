@@ -74,7 +74,6 @@ const cssOut = header + root.toString() + '\n' + extra;
 let js = [...L.slice(jsStart, swStart), ...L.slice(swEnd, jsEnd)].join('\n');
 const rep = (a, b, n) => { const c = js.split(a).length - 1; if (n != null && c !== n) throw new Error(`expected ${n}x "${a}", found ${c}`); if (!c) throw new Error('not found: ' + a); js = js.split(a).join(b); };
 rep('../assets/team/${img}', "${ASSET('team/'+img)}");
-rep('../assets/${PH[s.id][0]}', "${ASSET(PH[s.id][0])}");
 rep('../assets/standards/${f}', "${ASSET('standards/'+f)}");
 js = js.replace(/'\.\.\/assets\/([^']+)'/g, (_, p) => `ASSET('${p}')`);
 rep(`.font='11px "JetBrains Mono",monospace'`, ".font='11px '+MONO", 1);
@@ -102,11 +101,12 @@ const left = js.match(/\.\.\/(?:assets|public)\/[^'"`)\s]*/g);
 if (left) throw new Error('unrouted asset paths: ' + [...new Set(left)].join(', '));
 
 // self-check: every element id the script looks up must exist in the JSX markup or in markup the script builds itself
-const tsx = fs.readFileSync(path.join(out, 'WatercolorLanding.tsx'), 'utf8');
+const MARKUP = ['WatercolorLanding.tsx', 'SiteChrome.tsx']; // the landing page plus the shared navbar and footer
+const tsx = MARKUP.map(f => fs.readFileSync(path.join(out, f), 'utf8')).join('\n');
 const used = new Set([...js.matchAll(/\$\('#([\w-]+)'\)|getElementById\('([\w-]+)'\)|querySelector\('#([\w-]+)/g)].map(m => m[1] || m[2] || m[3]));
 const defined = new Set([...(tsx + js).matchAll(/\bid=["']([\w-]+)["']/g)].map(m => m[1]));
 const missing = [...used].filter(id => !defined.has(id));
-if (missing.length) throw new Error('script looks up ids missing from WatercolorLanding.tsx: ' + missing.join(', '));
+if (missing.length) throw new Error(`script looks up ids missing from ${MARKUP.join(' / ')}: ` + missing.join(', '));
 
 const PARAMS = ['window', 'document', 'addEventListener', 'removeEventListener', 'setTimeout', 'setInterval', 'requestAnimationFrame',
   'IntersectionObserver', 'ResizeObserver', 'MutationObserver', 'lottie', 'ASSET', 'MONO', 'INDIA'];

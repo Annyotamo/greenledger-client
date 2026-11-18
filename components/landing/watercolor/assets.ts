@@ -53,9 +53,6 @@ const RUNTIME: Record<string, string> = {
     "landing-images/cement-kiln.jpg": IMG.cement,
     "landing-images/bse-dalal-street.jpg": IMG.finance,
     "landing-images/container-port.jpg": IMG.logistics,
-    "boiler-house.jpg": sized(boiler, 1400),
-    "anchor-pylon-of-high-voltage-overhead-power.jpg": sized(pylon, 1400),
-    "jrf-koki-104-1552.jpg": sized(koki, 1400),
     "standards/GRI-removebg-preview.png": sized(gri, 320),
     "standards/BRSR_logo.png": sized(brsr, 320),
     "standards/epa.png": sized(epa, 320),
@@ -67,6 +64,9 @@ const RUNTIME: Record<string, string> = {
     "team/team-4.jpeg": sized(juhi, 720),
     "team/team-5.jpeg": sized(shubhi, 720),
 };
+
+/** One photograph per emission scope, used by the GHG Accounting page's scope ledger. */
+export const SCOPE_PHOTO = { 1: sized(boiler, 1400), 2: sized(pylon, 1400), 3: sized(koki, 1400) } as const;
 
 export function runtimeAsset(p: string): string {
     const url = RUNTIME[p];

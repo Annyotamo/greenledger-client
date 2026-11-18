@@ -281,7 +281,6 @@ my-app/
 │   │   └── user/                       # User profile & preferences
 │   │       └── page.tsx
 │   ├── api/media/                      # Next.js media optimization stream routes
-│   │   ├── cbam/route.ts
 │   │   ├── landing-intro/route.ts
 │   │   └── logo-animation/route.ts
 │   ├── insights/                       # Public insights CMS
@@ -302,7 +301,7 @@ my-app/
 │   ├── facility/                       # Facility portfolio tables and subunit modals
 │   ├── icons/                          # SVG icons and Google Material Symbol wrappers
 │   ├── insights/                       # Editorial layouts for insights articles
-│   ├── landing/                        # Watercolour landing (watercolor/) and the public CBAM page sections
+│   ├── landing/                        # Public pages: watercolor/ (landing + shared nav/footer), ghg/, cbam/
 │   ├── layout/                         # TenantShell, TopBar, Sidebar, and navigation config
 │   ├── providers/                      # TanStack QueryClientProvider & ThemeProvider
 │   ├── reportingPeriod/                # Reporting period tables and creation forms

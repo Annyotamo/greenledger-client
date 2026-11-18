@@ -93,6 +93,27 @@
 .wl .navbtns .login{font-size:.86rem;color:var(--ink-soft);text-decoration:none;padding:7px 12px;border-radius:999px;white-space:nowrap;transition:color .2s,background .2s}
 .wl .navbtns .login:hover{color:var(--ink);background:rgba(31,42,42,.06)}
 .wl .navbtns .btn{padding:9px 18px;font-size:.84rem;white-space:nowrap}
+/* Solutions: a hover dropdown in the links pill (CBAM, BRSR, GHG accounting); click/tap and keyboard open it too */
+.wl .dd{position:relative;z-index:1}
+.wl .dd-t{display:inline-flex;align-items:center;gap:6px;color:var(--ink-soft);padding:7px 14px;border-radius:999px;transition:color .3s,padding .4s}
+.wl nav.top.scrolled .dd-t{padding:7px 11px}
+.wl .dd-t svg{width:10px;height:10px;transition:transform .35s cubic-bezier(.22,1,.36,1)}
+.wl .dd:hover .dd-t,.wl .dd.open .dd-t{color:var(--ink)}
+.wl .dd:hover .dd-t svg,.wl .dd.open .dd-t svg{transform:rotate(180deg)}
+.wl .dd-t.active,.wl .dd:hover .dd-t.active,.wl .dd.open .dd-t.active{color:var(--paper)}
+.wl .dd-menu{position:absolute;left:50%;top:calc(100% + 14px);width:310px;padding:8px;border-radius:18px;background:#fbf8f1;
+  border:1px solid rgba(31,42,42,.08);box-shadow:0 1px 0 rgba(255,255,255,.8) inset,0 24px 48px -28px rgba(40,30,10,.45);
+  opacity:0;visibility:hidden;transform:translate(-50%,-6px);transition:opacity .25s cubic-bezier(.22,1,.36,1),transform .35s cubic-bezier(.22,1,.36,1),visibility 0s .35s}
+.wl .dd-menu::before{content:"";position:absolute;left:0;right:0;top:-16px;height:16px} /* hover bridge across the gap */
+.wl .dd:hover .dd-menu,.wl .dd.open .dd-menu{opacity:1;visibility:visible;transform:translate(-50%,0);transition-delay:0s}
+.wl .links .dd-menu a{display:grid;grid-template-columns:38px 1fr;column-gap:12px;align-items:center;padding:10px;border-radius:12px;color:var(--ink);transition:background .2s}
+.wl nav.top.scrolled .links .dd-menu a{padding:10px}
+.wl .links .dd-menu a:hover,.wl .links .dd-menu a:focus-visible{background:rgba(31,42,42,.05)}
+.wl .dd-menu .ic{grid-row:span 2;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 16%,#fbf8f1);color:color-mix(in srgb,var(--c) 75%,#1f2a2a)}
+.wl .dd-menu .ic svg{width:19px;height:19px}
+.wl .dd-menu b{font:500 15px/20px var(--font-fraunces),serif;letter-spacing:-.01em}
+.wl .dd-menu small{font-size:12.5px;line-height:17px;color:var(--ink-soft)}
+@media (prefers-reduced-motion:reduce){.wl .dd-menu,.wl .dd-t svg{transition:none}}
 
 
 /* ================= HERO ================= */
@@ -499,6 +520,36 @@
 .wl .frame .bar span{width:10px;height:10px;border-radius:50%;filter:url(#watercolor-sm)}
 .wl .frame video{width:100%;aspect-ratio:16/10;object-fit:cover}
 
+/* ================= BRSR: the Principle 6 sheet GreenLedger compiles, one per module ================= */
+.wl #brsr .sx-bg{background:#eeeadf}
+.wl #brsr>.wrap{position:relative;z-index:1}
+.wl .br{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(32px,5vw,72px);align-items:start}
+.wl .br-head h2{max-width:13ch}
+.wl .br-head p{color:var(--ink-soft);margin-top:18px;max-width:44ch;font-size:1.02rem;text-wrap:pretty}
+.wl .br-tabs{display:grid;gap:6px;margin-top:36px}
+.wl .br-tab{display:grid;grid-template-columns:40px 1fr;column-gap:14px;align-items:center;text-align:left;padding:14px 16px;border-radius:14px;color:var(--ink-soft);transition:background .35s cubic-bezier(.22,1,.36,1),box-shadow .35s cubic-bezier(.22,1,.36,1)}
+.wl .br-tab .ic{grid-row:span 2;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 16%,transparent);color:color-mix(in srgb,var(--c) 72%,#1f2a2a)}
+.wl .br-tab .ic svg{width:20px;height:20px}
+.wl .br-tab b{font:400 1.4rem/1.15 var(--font-fraunces),serif;letter-spacing:-.02em;color:var(--ink)}
+.wl .br-tab small{font-size:.88rem;line-height:1.4}
+.wl .br-tab:hover{background:rgba(251,248,241,.6)}
+.wl .br-tab[aria-selected=true]{background:#fbf8f1;box-shadow:0 14px 30px -22px rgba(40,30,10,.45)}
+.wl .br-tab:focus-visible{outline:2px solid var(--moss);outline-offset:2px}
+.wl .br-sheet{background:#fbf8f1;border-radius:16px;box-shadow:0 30px 60px -40px rgba(40,30,10,.5);padding:28px 32px 22px}
+.wl .br-sheet:not([hidden]){animation:swapIn .45s cubic-bezier(.16,1,.3,1)}
+.wl .br-sh{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-bottom:16px;box-shadow:inset 0 -1px 0 var(--rule)}
+.wl .br-sh h3{font-size:1.9rem}
+.wl .br-sh span{font-size:.84rem;color:var(--ink-soft)}
+.wl .br-g{margin-top:20px}
+.wl .br-g h4{font:600 .74rem/1 Inter,system-ui,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:color-mix(in srgb,var(--c) 70%,#1f2a2a);margin-bottom:4px}
+.wl .br-row{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:9px 0;box-shadow:inset 0 -1px 0 rgba(31,42,42,.07);font-size:.95rem;color:var(--ink)}
+.wl .br-row:last-child{box-shadow:none}
+.wl .br-row .u{font:400 .78rem/1.4 var(--font-jetbrains),monospace;color:var(--ink-soft);white-space:nowrap}
+.wl .br-foot{display:flex;gap:10px;align-items:center;margin-top:16px;padding-top:14px;box-shadow:inset 0 1px 0 var(--rule);font-size:.86rem;color:var(--ink-soft)}
+.wl .br-foot svg{width:16px;height:16px;color:var(--moss);flex:none}
+@media (max-width:900px){.wl .br{grid-template-columns:1fr}.wl .br-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.wl .br-tab{grid-template-columns:1fr;padding:12px}.wl .br-tab .ic{grid-row:auto;margin-bottom:8px}.wl .br-tab small{display:none}.wl .br-sheet{padding:22px 20px 18px}.wl .br-sh{flex-direction:column;gap:4px}}
+
 /* ================= SCOPES LEDGER ================= */
 /* one bento per scope: a photograph of where those emissions happen, the activity streams set beside it */
 .wl .sb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
@@ -666,8 +717,6 @@
   mask-image:linear-gradient(180deg,transparent 0,#000 var(--fade),#000 calc(100% - var(--fade)),transparent 100%)}
 .wl .sx-bg{position:absolute;inset:calc(var(--sec)*-.5) 0;z-index:0;pointer-events:none;overflow:hidden;background:#eeeadf}
 .wl #team .sx-bg{background:#ecefe5}
-.wl #solutions .sx-bg{background:#efe7d8}
-.wl #solutions>.wrap{position:relative;z-index:1}
 .wl .sx-gl{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity 1.4s cubic-bezier(.22,1,.36,1)}
 .wl .sx-gl.on{opacity:1}
 .wl #insights>.wrap{position:relative;z-index:1}
@@ -842,8 +891,9 @@
 .wl .f-reach a{display:inline-flex;align-items:center;gap:12px;width:fit-content;font-size:16px;line-height:28px;font-weight:500;color:var(--ink);text-decoration:none;transition:color .3s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1)}
 .wl .f-reach a:hover{color:#1e7a4e;transform:translateX(3px)}.wl .f-reach a:active{transform:scale(.98)}
 .wl .f-reach svg{width:16px;height:16px;flex:none;color:#1e7a4e}
-/* the name, set edge to edge; its foot dissolves into the meadow with the sheet's own fade */
-.wl .f-word{margin:96px 0 0;font:400 21.8cqi/.8 var(--font-fraunces),serif;letter-spacing:-.045em;color:var(--ink);white-space:nowrap;display:flex;justify-content:center}
+/* the name as a centred lockup: "Green" upright in ink, "Ledger" a lighter moss italic */
+.wl .f-word{margin:88px 0 0;font:400 clamp(52px,10.5cqi,132px)/.95 var(--font-fraunces),serif;letter-spacing:-.035em;color:var(--ink);white-space:nowrap;display:flex;justify-content:center}
+.wl .f-word span:nth-child(n+6){font-style:italic;font-weight:300;color:var(--moss);letter-spacing:-.02em}
 .wl .f-word span{display:inline-block;transform:translateY(40%);opacity:0;transition:transform 1.2s cubic-bezier(.22,1,.36,1),opacity .9s cubic-bezier(.22,1,.36,1);transition-delay:calc(var(--i)*55ms + .35s)}
 .wl footer.in .f-word span{transform:none;opacity:1}
 .wl .f-fade{opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .9s cubic-bezier(.22,1,.36,1);transition-delay:calc(var(--i)*80ms + .2s)}

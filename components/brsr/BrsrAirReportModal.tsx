@@ -5,12 +5,13 @@ import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import type { BrsrAirDisclosurePayload } from "@/lib/brsr/types";
+import type { EIAAirEmissionsPayload } from "@/lib/eia/types";
 
 type BrsrAirReportModalProps = {
     isOpen: boolean;
     onClose: () => void;
-    payload: BrsrAirDisclosurePayload;
-    onDownload: (payload: BrsrAirDisclosurePayload) => Promise<void>;
+    payload: EIAAirEmissionsPayload | BrsrAirDisclosurePayload;
+    onDownload: (payload: any) => Promise<void>;
 };
 
 export function BrsrAirReportModal({ isOpen, onClose, payload, onDownload }: BrsrAirReportModalProps) {
@@ -59,10 +60,10 @@ export function BrsrAirReportModal({ isOpen, onClose, payload, onDownload }: Brs
                         </div>
                         <div>
                             <h3 className="font-display text-base font-bold text-on-surface">
-                                Export BRSR Air Emissions Report
+                                Export EIA / Industrial Air Emissions Report
                             </h3>
                             <p className="text-[11px] text-on-surface-variant font-sans">
-                                Official SEBI Principle 6 Multi-Tier Emissions Workbook (.xlsx)
+                                Multi-Sheet Stack Monitoring &amp; Mass Emissions Workbook (.xlsx)
                             </p>
                         </div>
                     </div>

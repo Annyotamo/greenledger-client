@@ -16,8 +16,7 @@ import {
     BOTTOM_NAV,
     MAIN_NAV,
     SCOPE_NAV_CHILDREN,
-    BRSR_ENVIRONMENTAL_CHILDREN,
-    BRSR_SG_CHILD,
+    BRSR_NAV_CHILDREN,
 } from "./sidebar-nav";
 
 const SIDEBAR_EXPANDED = 256;
@@ -40,19 +39,9 @@ export function Sidebar() {
     const isBrsrActive = Boolean(
         pathname && (pathname === "/brsr" || pathname.startsWith("/brsr/")),
     );
-    const isEnvironmentalActive = Boolean(
-        pathname && (
-            pathname.startsWith("/brsr/energy") ||
-            pathname.startsWith("/brsr/water") ||
-            pathname.startsWith("/brsr/waste") ||
-            pathname.startsWith("/brsr/air")
-        ),
-    );
-    const isSgActive = Boolean(
-        pathname && (pathname === "/brsr/sg" || pathname.startsWith("/brsr/sg/")),
-    );
 
     const [activitiesOpen, setActivitiesOpen] = useState(isActivitiesActive);
+    const [brsrOpen, setBrsrOpen] = useState(isBrsrActive);
     const [user, setUser] = useState<UserProfile | null>(null);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -61,6 +50,12 @@ export function Sidebar() {
             setActivitiesOpen(true);
         }
     }, [isActivitiesActive]);
+
+    useEffect(() => {
+        if (isBrsrActive) {
+            setBrsrOpen(true);
+        }
+    }, [isBrsrActive]);
 
     const handleLogout = async () => {
         if (isLoggingOut) return;
@@ -79,11 +74,6 @@ export function Sidebar() {
         (i) => i.label === "Dashboard" || i.label === "Facilities" || i.label === "EU CBAM",
     );
     const valueChainItem = MAIN_NAV.find((i) => i.label === "Value Chain");
-    const brsrItem = MAIN_NAV.find((i) => i.label === "BRSR Reporting") || {
-        label: "BRSR Reporting",
-        icon: "analytics",
-        href: "/brsr",
-    };
     const afterActivities = MAIN_NAV.filter(
         (i) => i.label === "Reporting Periods" || i.label === "Team Members" || i.label === "Tenant Profile",
     );
@@ -208,10 +198,81 @@ export function Sidebar() {
                         <SidebarLink key={valueChainItem.label} item={valueChainItem} collapsed={collapsed} />
                     )}
 
-                    {/* BRSR Filing Workspace Entry */}
-                    {brsrItem && (
-                        <SidebarLink key={brsrItem.label} item={brsrItem} collapsed={collapsed} />
-                    )}
+                    {/* BRSR Menu */}
+                    <div className="relative">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (collapsed) {
+                                    toggle();
+                                    setBrsrOpen(true);
+                                } else {
+                                    setBrsrOpen((o) => !o);
+                                }
+                            }}
+                            title={collapsed ? "BRSR" : undefined}
+                            className={cn(
+                                "flex w-full items-center justify-between px-4 py-2.5 transition-[transform,colors] duration-150 active:scale-[0.98] rounded-lg cursor-pointer",
+                                collapsed && "justify-center px-2",
+                                isBrsrActive
+                                    ? "bg-secondary-container font-semibold text-on-secondary-container"
+                                    : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
+                            )}>
+                            <span className="flex items-center gap-3">
+                                <MaterialIcon name="analytics" className="shrink-0" />
+                                {!collapsed && <span className="font-sans text-[13px] font-medium">BRSR</span>}
+                            </span>
+                            {!collapsed && (
+                                <MaterialIcon
+                                    name={brsrOpen ? "keyboard_arrow_down" : "keyboard_arrow_right"}
+                                    size="sm"
+                                    className="!text-[18px] shrink-0"
+                                />
+                            )}
+                        </button>
+
+                        <AnimatePresence initial={false}>
+                            {brsrOpen && !collapsed && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: "auto" }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                                    className="overflow-hidden">
+                                    <div className="relative ml-[1.625rem]">
+                                        <div className="nav-connector nav-connector-glow absolute bottom-3.5 left-0 top-0 w-[2px]" />
+                                        <div className="space-y-1 py-1">
+                                            {BRSR_NAV_CHILDREN.map((child) => {
+                                                const childActive =
+                                                    child.href === "/brsr"
+                                                        ? pathname === "/brsr"
+                                                        : pathname?.startsWith(child.href);
+                                                return (
+                                                    <Link
+                                                        key={child.label}
+                                                        href={child.href}
+                                                        className={cn(
+                                                            "relative flex items-center gap-3 py-1.5 pl-6 transition-colors rounded-md text-xs font-sans",
+                                                            childActive
+                                                                ? "text-primary font-medium bg-emerald-600/[0.07]"
+                                                                : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low",
+                                                        )}>
+                                                        <div
+                                                            className={cn(
+                                                                "absolute left-0 top-1/2 h-[1.5px] w-4 -translate-y-1/2 transition-colors",
+                                                                childActive ? "bg-emerald-700/70" : "bg-secondary opacity-40",
+                                                            )}
+                                                        />
+                                                        <span>{child.label}</span>
+                                                    </Link>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
 
                     {afterActivities.map((item) => (
                         <SidebarLink key={item.label} item={item} collapsed={collapsed} />

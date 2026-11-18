@@ -15,7 +15,6 @@ export const MAIN_NAV: NavItem[] = [
     { label: "Facilities", icon: "domain", href: "/facilities" },
     { label: "EU CBAM", icon: "verified", href: "/tenant-cbam" },
     { label: "Value Chain", icon: "hub", href: "/scope-3" },
-    { label: "BRSR Reporting", icon: "analytics", href: "/brsr" },
     { label: "Team Members", icon: "group", href: "/team-members" },
     { label: "Tenant Profile", icon: "business", href: "/tenant" },
 ];
@@ -25,20 +24,10 @@ export const SCOPE_NAV_CHILDREN: NavScopeChild[] = [
     { label: "Electricity", href: "/activities/electricity" },
 ];
 
-export const BRSR_ENVIRONMENTAL_CHILDREN: NavScopeChild[] = [
-    { label: "Energy", href: "/brsr/energy" },
-    { label: "Water", href: "/brsr/water" },
-    { label: "Waste", href: "/brsr/waste" },
-    { label: "Air", href: "/brsr/air" },
+export const BRSR_NAV_CHILDREN: NavScopeChild[] = [
+    { label: "BRSR Reporting", href: "/brsr" },
+    { label: "EIA/NIPL Air Emissions", href: "/brsr/air" },
 ];
-
-export const BRSR_SG_CHILD: NavScopeChild = {
-    label: "S & G",
-    href: "/brsr/sg",
-};
-
-// Kept for backward compatibility
-export const BRSR_NAV_CHILDREN: NavScopeChild[] = BRSR_ENVIRONMENTAL_CHILDREN;
 
 export const BOTTOM_NAV: NavItem[] = [
     { label: "Audit Logs", icon: "history", href: "/audit-logs" },

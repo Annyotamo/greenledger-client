@@ -507,7 +507,27 @@ export default function EiaAirEmissionsPage() {
         const payload = buildPayload();
         try {
             const res = await computeMutation.mutateAsync(payload);
-            setComputedResult(res);
+            // Merge form stack readings and scope flags into computed stacks so they never get lost in audit views
+            const mergedResult = {
+                ...res,
+                stacks: (res.stacks || []).map((cs, idx) => ({
+                    ...cs,
+                    readings: stacks[idx]?.readings || cs.readings || [],
+                    permitted_limits: stacks[idx]?.permitted_limits || cs.permitted_limits,
+                    is_nox_monitored: stacks[idx]?.is_nox_monitored,
+                    is_sox_monitored: stacks[idx]?.is_sox_monitored,
+                    is_pm_monitored: stacks[idx]?.is_pm_monitored,
+                    is_pm10_monitored: stacks[idx]?.is_pm10_monitored,
+                    is_pm25_monitored: stacks[idx]?.is_pm25_monitored,
+                    is_co_monitored: stacks[idx]?.is_co_monitored,
+                    is_pop_monitored: stacks[idx]?.is_pop_monitored,
+                    is_voc_monitored: stacks[idx]?.is_voc_monitored,
+                    is_hap_monitored: stacks[idx]?.is_hap_monitored,
+                    is_co2_monitored: stacks[idx]?.is_co2_monitored,
+                    is_o2_monitored: stacks[idx]?.is_o2_monitored,
+                })),
+            };
+            setComputedResult(mergedResult);
         } catch (err) {
             console.error("Compute error:", err);
         }
@@ -518,7 +538,26 @@ export default function EiaAirEmissionsPage() {
         const payload = buildPayload();
         try {
             const res = await saveMutation.mutateAsync(payload);
-            setComputedResult(res);
+            const mergedResult = {
+                ...res,
+                stacks: (res.stacks || []).map((cs, idx) => ({
+                    ...cs,
+                    readings: stacks[idx]?.readings || cs.readings || [],
+                    permitted_limits: stacks[idx]?.permitted_limits || cs.permitted_limits,
+                    is_nox_monitored: stacks[idx]?.is_nox_monitored,
+                    is_sox_monitored: stacks[idx]?.is_sox_monitored,
+                    is_pm_monitored: stacks[idx]?.is_pm_monitored,
+                    is_pm10_monitored: stacks[idx]?.is_pm10_monitored,
+                    is_pm25_monitored: stacks[idx]?.is_pm25_monitored,
+                    is_co_monitored: stacks[idx]?.is_co_monitored,
+                    is_pop_monitored: stacks[idx]?.is_pop_monitored,
+                    is_voc_monitored: stacks[idx]?.is_voc_monitored,
+                    is_hap_monitored: stacks[idx]?.is_hap_monitored,
+                    is_co2_monitored: stacks[idx]?.is_co2_monitored,
+                    is_o2_monitored: stacks[idx]?.is_o2_monitored,
+                })),
+            };
+            setComputedResult(mergedResult);
             setSaveSuccessMsg("EIA Stack Air Emissions disclosure saved successfully.");
             setTimeout(() => setSaveSuccessMsg(null), 4000);
         } catch (err) {
@@ -2003,6 +2042,32 @@ export default function EiaAirEmissionsPage() {
                                                 const isExceeded = Object.values(exceedances).some((v) => v === true);
                                                 const rates = reading.hourly_emission_kg_hr || {};
 
+                                                // Resolve input reading from active stacks state or calculated stack
+                                                const inputReading =
+                                                    stacks[expandedStackLog]?.readings?.[rIdx] ||
+                                                    calculatedStacks[expandedStackLog]?.readings?.[rIdx];
+                                                const flow = reading.gas_flow_rate_nm3_hr || Number(inputReading?.gas_flow_rate?.value) || 0;
+
+                                                // Fallback: if concentration not directly in inputReading, derive from rate and flow: (rate_kg_hr * 1e6) / flow_nm3_hr
+                                                const resolveConc = (inputVal: any, rateKgHr: number | undefined) => {
+                                                    if (inputVal !== undefined && inputVal !== null && inputVal !== "") {
+                                                        const n = Number(inputVal);
+                                                        if (!isNaN(n)) return n;
+                                                    }
+                                                    if (rateKgHr !== undefined && rateKgHr !== null && flow > 0) {
+                                                        return (Number(rateKgHr) * 1000000) / flow;
+                                                    }
+                                                    return null;
+                                                };
+
+                                                const noxVal = resolveConc(inputReading?.nox?.value, rates.nox);
+                                                const soxVal = resolveConc(inputReading?.sox?.value, rates.sox);
+                                                const pmVal = resolveConc(
+                                                    inputReading?.pm?.value ?? inputReading?.pm10?.value ?? inputReading?.particulate_matter?.value,
+                                                    rates.pm ?? rates.pm10
+                                                );
+                                                const coVal = resolveConc(inputReading?.co?.value, rates.co);
+
                                                 return (
                                                     <TableRow key={rIdx} className={isExceeded ? "bg-error-container/10" : ""}>
                                                         <TableCell className="font-mono text-xs font-semibold">
@@ -2012,23 +2077,30 @@ export default function EiaAirEmissionsPage() {
                                                             {formatNum(reading.gas_flow_rate_nm3_hr, 0)}
                                                         </TableCell>
                                                         <TableCell className={`text-right font-mono text-xs ${exceedances.nox ? "text-error font-bold" : ""}`}>
-                                                            {formatNum(calculatedStacks[expandedStackLog].readings?.[rIdx]?.nox?.value)}
+                                                            {noxVal !== null ? formatNum(noxVal) : "—"}
                                                         </TableCell>
                                                         <TableCell className={`text-right font-mono text-xs ${exceedances.sox ? "text-error font-bold" : ""}`}>
-                                                            {formatNum(calculatedStacks[expandedStackLog].readings?.[rIdx]?.sox?.value)}
+                                                            {soxVal !== null ? formatNum(soxVal) : "—"}
                                                         </TableCell>
                                                         <TableCell className={`text-right font-mono text-xs ${exceedances.pm || exceedances.pm10 ? "text-error font-bold" : ""}`}>
-                                                            {formatNum(calculatedStacks[expandedStackLog].readings?.[rIdx]?.pm?.value ?? calculatedStacks[expandedStackLog].readings?.[rIdx]?.pm10?.value)}
+                                                            {pmVal !== null ? formatNum(pmVal) : "—"}
                                                         </TableCell>
                                                         <TableCell className={`text-right font-mono text-xs ${exceedances.co ? "text-error font-bold" : ""}`}>
-                                                            {formatNum(calculatedStacks[expandedStackLog].readings?.[rIdx]?.co?.value)}
+                                                            {coVal !== null ? formatNum(coVal) : "—"}
                                                         </TableCell>
                                                         <TableCell className="text-center font-mono text-[10px] text-on-surface-variant">
                                                             <div className="flex flex-wrap justify-center gap-1.5">
-                                                                <span>NOx: {formatNum(rates.nox)}</span>
-                                                                <span>SOx: {formatNum(rates.sox)}</span>
-                                                                <span>PM: {formatNum(rates.pm ?? rates.pm10)}</span>
-                                                                <span>CO: {formatNum(rates.co)}</span>
+                                                                {rates.nox !== undefined && <span>NOx: {formatNum(rates.nox)}</span>}
+                                                                {rates.sox !== undefined && <span>SOx: {formatNum(rates.sox)}</span>}
+                                                                {(rates.pm !== undefined || rates.pm10 !== undefined) && (
+                                                                    <span>PM: {formatNum(rates.pm ?? rates.pm10)}</span>
+                                                                )}
+                                                                {rates.co !== undefined && <span>CO: {formatNum(rates.co)}</span>}
+                                                                {Object.entries(rates)
+                                                                    .filter(([k]) => !["nox", "sox", "pm", "pm10", "co"].includes(k.toLowerCase()))
+                                                                    .map(([k, v]) => (
+                                                                        <span key={k}>{k.toUpperCase()}: {formatNum(v)}</span>
+                                                                    ))}
                                                             </div>
                                                         </TableCell>
                                                         <TableCell className="text-center">

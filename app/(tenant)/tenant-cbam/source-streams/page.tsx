@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CBAMSourceStreamsView } from "@/components/cbam/CBAMSourceStreamsView";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
 
 export const metadata: Metadata = {
     title: "Source Streams & Emissions (Sheet B_EmInst) | EU CBAM | GreenLedger ESG",
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function CBAMSourceStreamsPage() {
-    return <CBAMSourceStreamsView />;
+    return (
+        <ProtectedRoute feature="cbam" requiredLevel="read" featureTitle="EU CBAM Source Streams">
+            <CBAMSourceStreamsView />
+        </ProtectedRoute>
+    );
 }

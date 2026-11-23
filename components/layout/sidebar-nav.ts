@@ -1,34 +1,39 @@
+import type { FeatureKey } from "@/lib/rbac/types";
+
 export type NavItem = {
     label: string;
     icon: string;
     href: string;
     active?: boolean;
+    featureKey?: FeatureKey;
 };
 
 export type NavScopeChild = {
     label: string;
     href: string;
+    featureKey: FeatureKey;
 };
 
 export const MAIN_NAV: NavItem[] = [
-    { label: "Dashboard", icon: "dashboard", href: "/dashboard" },
-    { label: "Facilities", icon: "domain", href: "/facilities" },
-    { label: "EU CBAM", icon: "verified", href: "/tenant-cbam" },
-    { label: "Value Chain", icon: "hub", href: "/scope-3" },
-    { label: "Team Members", icon: "group", href: "/team-members" },
+    { label: "Dashboard", icon: "dashboard", href: "/dashboard", featureKey: "analytics" },
+    { label: "Facilities", icon: "domain", href: "/facilities", featureKey: "facilities" },
+    { label: "EU CBAM", icon: "verified", href: "/tenant-cbam", featureKey: "cbam" },
+    { label: "Value Chain", icon: "hub", href: "/scope-3", featureKey: "scope_3_cat1" },
+    { label: "Reporting Periods", icon: "calendar_month", href: "/reporting-period", featureKey: "reporting_periods" },
+    { label: "Team Members", icon: "group", href: "/team-members", featureKey: "team_members" },
     { label: "Tenant Profile", icon: "business", href: "/tenant" },
 ];
 
 export const SCOPE_NAV_CHILDREN: NavScopeChild[] = [
-    { label: "Fuel", href: "/activities/fuel" },
-    { label: "Electricity", href: "/activities/electricity" },
+    { label: "Fuel", href: "/activities/fuel", featureKey: "scope_1" },
+    { label: "Electricity", href: "/activities/electricity", featureKey: "scope_2" },
 ];
 
 export const BRSR_NAV_CHILDREN: NavScopeChild[] = [
-    { label: "BRSR Reporting", href: "/brsr" },
-    { label: "EIA/NIPL Air Emissions", href: "/brsr/air" },
+    { label: "BRSR Reporting", href: "/brsr", featureKey: "brsr" },
+    { label: "EIA/NIPL Air Emissions", href: "/brsr/air", featureKey: "eia" },
 ];
 
 export const BOTTOM_NAV: NavItem[] = [
-    { label: "Audit Logs", icon: "history", href: "/audit-logs" },
+    { label: "Audit Logs", icon: "history", href: "/audit-logs", featureKey: "audit_trails" },
 ];

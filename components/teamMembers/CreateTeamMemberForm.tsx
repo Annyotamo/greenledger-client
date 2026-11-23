@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import type { UserRole } from "@/lib/rbac/types";
 import { type FormEvent, useState, useEffect } from "react";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
@@ -51,17 +52,17 @@ export function CreateTeamMemberForm() {
     const getRoleOptions = () => {
         const options = [];
         const isOwnerOrAdmin = currentUser?.role === "TENANT_OWNER" || currentUser?.role === "TENANT_ADMIN";
-        
+
         if (isOwnerOrAdmin) {
             options.push({ label: "Tenant Admin", value: "TENANT_ADMIN" });
         }
-        
+
         options.push(
             { label: "ESG Team", value: "ESG_TEAM" },
             { label: "Facility Head", value: "FACILITY_HEAD" },
             { label: "Auditor", value: "AUDITOR" }
         );
-        
+
         return options;
     };
 
@@ -96,7 +97,7 @@ export function CreateTeamMemberForm() {
                 last_name: form.last_name.trim(),
                 email: form.email.trim(),
                 password: form.password,
-                role: form.role,
+                role: form.role as UserRole,
                 phone_number: form.phone_number || undefined,
                 job_title: form.job_title || undefined,
             },
@@ -114,7 +115,7 @@ export function CreateTeamMemberForm() {
                     <div>
                         <p className="font-sans text-[11px] text-error font-bold uppercase tracking-wider">Error</p>
                         <p className="font-sans text-xs text-error mt-1">
-                            {validationError || (error as any)?.message || "Failed to create user."}
+                            {validationError || (error instanceof Error ? error.message : "Failed to create user.")}
                         </p>
                     </div>
                 </div>

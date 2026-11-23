@@ -20,6 +20,7 @@ import { BrsrSectionCEnvTab, type EnvSubSection } from "@/components/brsr/BrsrSe
 import { BrsrSectionCSgTab, type SgPrincipleKey } from "@/components/brsr/BrsrSectionCSgTab";
 import { BrsrReviewExportTab } from "@/components/brsr/BrsrReviewExportTab";
 import { BrsrLivePdfModal } from "@/components/brsr/BrsrLivePdfModal";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
 import type { BRSRStatus } from "@/lib/brsr/types";
 
 function BrsrWorkspaceContent() {
@@ -305,17 +306,19 @@ function BrsrWorkspaceContent() {
 
 export default function BrsrPage() {
     return (
-        <Suspense
-            fallback={
-                <div className="flex h-64 w-full items-center justify-center">
-                    <div className="flex flex-col items-center gap-2">
-                        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                        <p className="font-mono text-xs text-on-surface-variant">Loading BRSR Filing Engine...</p>
+        <ProtectedRoute feature="brsr" requiredLevel="read" featureTitle="SEBI BRSR Reporting">
+            <Suspense
+                fallback={
+                    <div className="flex h-64 w-full items-center justify-center">
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                            <p className="font-mono text-xs text-on-surface-variant">Loading BRSR Filing Engine...</p>
+                        </div>
                     </div>
-                </div>
-            }>
-            <BrsrWorkspaceContent />
-        </Suspense>
+                }>
+                <BrsrWorkspaceContent />
+            </Suspense>
+        </ProtectedRoute>
     );
 }
 

@@ -1,0 +1,1188 @@
+================================================================================
+GREENLEDGER ESG SERVER - API ENDPOINTS & RBAC SPECIFICATION
+================================================================================
+Generated: 2026-11-19
+Architecture: FastAPI (Async) | PostgreSQL (asyncpg + SQLAlchemy 2.0) | Pydantic v2
+Auth Guard: Bearer JWT + Session Verification (Argon2id / SHA-256)
+Permission Model: Hierarchical AccessLevel (NONE < READ < WRITE < ADMIN)
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+1. GENERAL ARCHITECTURAL CONVENTIONS & ENVELOPE SCHEMAS
+2. STANDARD ERROR CODES & 403 FORBIDDEN RESPONSE FORMAT
+3. FEATURE KEYS & ACCESS LEVEL HIERARCHY
+4. NEW & MODIFIED ENDPOINTS (FULL SPECIFICATIONS WITH REQ/RES BODIES)
+   - 4.1. GET  /api/v1/user/auth/me
+   - 4.2. GET  /api/v1/user/auth/permissions
+   - 4.3. GET  /api/v1/tenant/user/{user_id}/permissions
+   - 4.4. PATCH /api/v1/tenant/user/{user_id}/permissions
+   - 4.5. POST /api/v1/tenant/user
+   - 4.6. POST /api/v1/tenant/user/invite
+   - 4.7. PATCH /api/v1/tenant/user/{user_id}
+   - 4.8. GET  /api/v1/tenant/user/{user_id}
+   - 4.9. GET  /api/v1/tenant/user
+   - 4.10. POST /api/v1/tenant/user/{user_id}/verify
+   - 4.11. POST /api/v1/tenant/user/{user_id}/deactivate
+   - 4.12. POST /api/v1/tenant/user/{user_id}/activate
+   - 4.13. DELETE /api/v1/tenant/user/{user_id}
+5. ALL APPLICATION DOMAIN ENDPOINTS PROTECTED BY RBAC ROUTE GUARDS
+   - 5.1. Scope 1 Activities (Fuel)
+   - 5.2. Scope 2 Activities (Electricity)
+   - 5.3. Scope 3 Category 1 (Purchased Goods - Spend)
+   - 5.4. Scope 3 Category 2 (Capital Goods - Spend)
+   - 5.5. Scope 3 Category 3 (Fuel & Energy - WTT, Fuel, Electricity)
+   - 5.6. Scope 3 Category 4 (Upstream Transportation - Spend & Distance)
+   - 5.7. Scope 3 Category 5 (Waste Operations)
+   - 5.8. Scope 3 Category 6 & 7 (Business Travel & Employee Commute)
+   - 5.9. Scope 3 Category 9 (Downstream Transportation)
+   - 5.10. Scope 3 Category 15 (Investments / Financed Emissions)
+   - 5.11. Scope 3 Activity Documents
+   - 5.12. BRSR Reporting (Principles & Core Disclosures)
+   - 5.13. CBAM (Installation, Source Streams, Preview, Export)
+   - 5.14. EIA (Industrial Stack Air Emissions & Disclosures)
+   - 5.15. Facilities & Meters
+   - 5.16. Reporting Periods (Lock / Unlock / Archive)
+   - 5.17. Analytics (GHG & Energy Dashboards)
+   - 5.18. Audit Trails & Logs
+
+================================================================================
+1. GENERAL ARCHITECTURAL CONVENTIONS & ENVELOPE SCHEMAS
+================================================================================
+Every response in the GreenLedger ESG Server is wrapped in a standard APIResponse
+envelope:
+
+SUCCESS ENVELOPE:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Operation completed successfully.",
+  "data": { ... },
+  "error": null,
+  "method": "GET",
+  "path": "/api/v1/...",
+  "timestamp": "2026-11-19T09:20:00.123456Z"
+}
+
+ERROR ENVELOPE:
+{
+  "success": false,
+  "status_code": 403,
+  "message": "You do not have 'write' permission for component 'scope_1'",
+  "data": null,
+  "error": {
+    "error_code": "AUTH_PERMISSION_DENIED",
+    "detail": "Action prohibited by access control policy.",
+    "validation": null
+  },
+  "method": "POST",
+  "path": "/api/v1/tenant/activity/fuel",
+  "timestamp": "2026-11-19T09:20:00.123456Z"
+}
+
+VALIDATION ERROR ENVELOPE (422):
+{
+  "success": false,
+  "status_code": 422,
+  "message": "Validation error",
+  "data": null,
+  "error": {
+    "error_code": "VALIDATION_ERROR",
+    "detail": "Request body failed validation constraints.",
+    "validation": [
+      {
+        "field": "custom_permissions.scope_1",
+        "message": "Input should be 'none', 'read', 'write' or 'admin'",
+        "type": "enum"
+      }
+    ]
+  },
+  "method": "PATCH",
+  "path": "/api/v1/tenant/user/...",
+  "timestamp": "2026-11-19T09:20:00.123456Z"
+}
+
+================================================================================
+2. STANDARD ERROR CODES & 403 FORBIDDEN RESPONSE FORMAT
+================================================================================
+- 400 Bad Request:         error_code = "BAD_REQUEST"
+- 401 Unauthorized:        error_code = "UNAUTHORIZED" / "AUTH_INVALID_TOKEN" / "AUTH_EXPIRED_TOKEN"
+- 403 Forbidden:           error_code = "AUTH_PERMISSION_DENIED" (Triggered when user lacks required permission)
+- 404 Not Found:           error_code = "USER_NOT_FOUND" / "TENANT_NOT_FOUND" / "NOT_FOUND"
+- 422 Unprocessable:       error_code = "VALIDATION_ERROR"
+- 500 Server Error:        error_code = "INTERNAL_SERVER_ERROR"
+
+================================================================================
+3. FEATURE KEYS & ACCESS LEVEL HIERARCHY
+================================================================================
+Standard Feature Keys:
+  - "scope_1"               Scope 1 Direct Combustion Emissions
+  - "scope_2"               Scope 2 Indirect Electricity Emissions
+  - "scope_3_cat1"          Category 1: Purchased Goods and Services
+  - "scope_3_cat2"          Category 2: Capital Goods
+  - "scope_3_cat3"          Category 3: Fuel and Energy Related Activities (WTT)
+  - "scope_3_cat4"          Category 4: Upstream Transportation and Distribution
+  - "scope_3_cat5"          Category 5: Waste Generated in Operations
+  - "scope_3_cat6"          Category 6: Business Travel
+  - "scope_3_cat7"          Category 7: Employee Commuting
+  - "scope_3_cat9"          Category 9: Downstream Transportation and Distribution
+  - "scope_3_cat15"         Category 15: Investments & Financed Emissions
+  - "brsr"                  BRSR Reports & Disclosures
+  - "cbam"                  EU CBAM Setup, Calculations & Excel Exporter
+  - "eia"                   Industrial Stack Air Emissions Monitoring
+  - "facilities"            Facility, Contacts, and Meter Management
+  - "reporting_periods"     Reporting Accounting Periods Lifecycle
+  - "analytics"             GHG Protocols & Energy Consumption Analytics
+  - "team_members"          Tenant Team Member & User Administration
+  - "audit_trails"          Compliance & Activity Audit Logs
+
+Access Level Hierarchy (Total Ordering):
+  NONE ("none", rank 0)   <   READ ("read", rank 10)   <   WRITE ("write", rank 20)   <   ADMIN ("admin", rank 30)
+
+Role Default Permissions Matrix:
+  - TENANT_OWNER:  ADMIN across all 19 components
+  - TENANT_ADMIN:  ADMIN across all 19 components
+  - ESG_TEAM:      WRITE across Scopes 1, 2, 3, BRSR, CBAM, EIA, Facilities, Periods, Analytics; READ on Audit Trails; NONE on Team Members
+  - FACILITY_HEAD: WRITE on Scope 1, Scope 2, Facilities; READ on Scope 3, BRSR, Periods, Analytics; NONE on Team Members & Audit Trails
+  - AUDITOR:       READ across all operational components and Audit Trails; NONE on Team Members
+
+================================================================================
+4. NEW & MODIFIED ENDPOINTS (FULL SPECIFICATIONS WITH REQ/RES BODIES)
+================================================================================
+
+--------------------------------------------------------------------------------
+4.1. GET /api/v1/user/auth/me
+--------------------------------------------------------------------------------
+Description:
+  Fetch the authenticated user's profile, including their full resolved component
+  permissions dictionary and dynamic UI navigation manifest for show/hide rendering.
+
+Headers:
+  Authorization: Bearer <JWT_ACCESS_TOKEN>  [MANDATORY]
+
+Request Query / Path / Body:
+  None.
+
+Response Body (HTTP 200 OK):
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Profile retrieved successfully",
+  "data": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "tenant_id": "8bb98a28-1f19-4a41-8664-5d5e56d78891",
+    "first_name": "Sarah",
+    "last_name": "Jenkins",
+    "full_name": "Sarah Jenkins",
+    "email": "sarah.jenkins@company.com",
+    "phone_number": "+1234567890",
+    "job_title": "Senior ESG Analyst",
+    "role": "ESG_TEAM",
+    "user_status": "ACTIVE",
+    "is_active": true,
+    "is_verified": true,
+    "mfa_enabled": false,
+    "last_login_at": "2026-11-19T08:00:00Z",
+    "email_verified_at": "2026-11-01T12:00:00Z",
+    "created_at": "2026-11-01T10:00:00Z",
+    "updated_at": "2026-11-19T08:00:00Z",
+    "permissions": {
+      "scope_1": "write",
+      "scope_2": "write",
+      "scope_3_cat1": "write",
+      "scope_3_cat2": "write",
+      "scope_3_cat3": "write",
+      "scope_3_cat4": "write",
+      "scope_3_cat5": "write",
+      "scope_3_cat6": "write",
+      "scope_3_cat7": "write",
+      "scope_3_cat9": "write",
+      "scope_3_cat15": "write",
+      "brsr": "write",
+      "cbam": "write",
+      "eia": "write",
+      "facilities": "write",
+      "reporting_periods": "write",
+      "analytics": "write",
+      "team_members": "none",
+      "audit_trails": "read"
+    },
+    "ui_navigation": {
+      "scope_1": true,
+      "scope_2": true,
+      "scope_3": true,
+      "scope_3_categories": {
+        "cat1_spend": true,
+        "cat2_spend": true,
+        "cat3_wtt": true,
+        "cat4_transport": true,
+        "cat5_waste": true,
+        "cat6_travel": true,
+        "cat7_commute": true,
+        "cat9_transport": true,
+        "cat15_investments": true
+      },
+      "brsr": true,
+      "cbam": true,
+      "eia": true,
+      "facilities": true,
+      "reporting_periods": true,
+      "analytics": true,
+      "team_members": false,
+      "audit_trails": true
+    }
+  },
+  "error": null,
+  "method": "GET",
+  "path": "/api/v1/user/auth/me",
+  "timestamp": "2026-11-19T09:20:00Z"
+}
+
+
+--------------------------------------------------------------------------------
+4.2. GET /api/v1/user/auth/permissions
+--------------------------------------------------------------------------------
+Description:
+  Lightweight endpoint specifically tailored for frontend bootstrap to initialize
+  navigation menus, routing guards, and action button visibility states.
+
+Headers:
+  Authorization: Bearer <JWT_ACCESS_TOKEN>  [MANDATORY]
+
+Request Query / Path / Body:
+  None.
+
+Response Body (HTTP 200 OK):
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Permissions retrieved successfully.",
+  "data": {
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "role": "ESG_TEAM",
+    "is_admin": false,
+    "custom_permissions": {
+      "team_members": "read",
+      "scope_1": "none"
+    },
+    "effective_permissions": {
+      "scope_1": "none",
+      "scope_2": "write",
+      "scope_3_cat1": "write",
+      "scope_3_cat2": "write",
+      "scope_3_cat3": "write",
+      "scope_3_cat4": "write",
+      "scope_3_cat5": "write",
+      "scope_3_cat6": "write",
+      "scope_3_cat7": "write",
+      "scope_3_cat9": "write",
+      "scope_3_cat15": "write",
+      "brsr": "write",
+      "cbam": "write",
+      "eia": "write",
+      "facilities": "write",
+      "reporting_periods": "write",
+      "analytics": "write",
+      "team_members": "read",
+      "audit_trails": "read"
+    },
+    "ui_navigation": {
+      "scope_1": false,
+      "scope_2": true,
+      "scope_3": true,
+      "scope_3_categories": {
+        "cat1_spend": true,
+        "cat2_spend": true,
+        "cat3_wtt": true,
+        "cat4_transport": true,
+        "cat5_waste": true,
+        "cat6_travel": true,
+        "cat7_commute": true,
+        "cat9_transport": true,
+        "cat15_investments": true
+      },
+      "brsr": true,
+      "cbam": true,
+      "eia": true,
+      "facilities": true,
+      "reporting_periods": true,
+      "analytics": true,
+      "team_members": true,
+      "audit_trails": true
+    }
+  },
+  "error": null,
+  "method": "GET",
+  "path": "/api/v1/user/auth/permissions",
+  "timestamp": "2026-11-19T09:20:00Z"
+}
+
+
+--------------------------------------------------------------------------------
+4.3. GET /api/v1/tenant/user/{user_id}/permissions
+--------------------------------------------------------------------------------
+Description:
+  Fetch a target user's role, explicit custom permissions, effective permissions,
+  and navigation manifest.
+  Requires ADMIN privileges on TEAM_MEMBERS (Tenant Owner or Tenant Admin).
+
+Headers:
+  Authorization: Bearer <JWT_ACCESS_TOKEN>  [MANDATORY]
+
+Path Parameters:
+  user_id: UUID (e.g. "3fa85f64-5717-4562-b3fc-2c963f66afa6")  [MANDATORY]
+
+Response Body (HTTP 200 OK):
+{
+  "success": true,
+  "status_code": 200,
+  "message": "User permissions fetched successfully.",
+  "data": {
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "role": "FACILITY_HEAD",
+    "is_admin": false,
+    "custom_permissions": {
+      "cbam": "write",
+      "scope_1": "admin"
+    },
+    "effective_permissions": {
+      "scope_1": "admin",
+      "scope_2": "write",
+      "scope_3_cat1": "read",
+      "scope_3_cat2": "read",
+      "scope_3_cat3": "read",
+      "scope_3_cat4": "read",
+      "scope_3_cat5": "read",
+      "scope_3_cat6": "read",
+      "scope_3_cat7": "read",
+      "scope_3_cat9": "read",
+      "scope_3_cat15": "read",
+      "brsr": "read",
+      "cbam": "write",
+      "eia": "none",
+      "facilities": "write",
+      "reporting_periods": "read",
+      "analytics": "read",
+      "team_members": "none",
+      "audit_trails": "none"
+    },
+    "ui_navigation": {
+      "scope_1": true,
+      "scope_2": true,
+      "scope_3": true,
+      "scope_3_categories": {
+        "cat1_spend": true,
+        "cat2_spend": true,
+        "cat3_wtt": true,
+        "cat4_transport": true,
+        "cat5_waste": true,
+        "cat6_travel": true,
+        "cat7_commute": true,
+        "cat9_transport": true,
+        "cat15_investments": true
+      },
+      "brsr": true,
+      "cbam": true,
+      "eia": false,
+      "facilities": true,
+      "reporting_periods": true,
+      "analytics": true,
+      "team_members": false,
+      "audit_trails": false
+    }
+  },
+  "error": null,
+  "method": "GET",
+  "path": "/api/v1/tenant/user/3fa85f64-5717-4562-b3fc-2c963f66afa6/permissions",
+  "timestamp": "2026-11-19T09:20:00Z"
+}
+
+
+--------------------------------------------------------------------------------
+4.4. PATCH /api/v1/tenant/user/{user_id}/permissions
+--------------------------------------------------------------------------------
+Description:
+  Grant or revoke granular component permissions for a tenant user.
+  Emits compliance audit event: USER_PERMISSIONS_MODIFIED.
+  Requires ADMIN privileges on TEAM_MEMBERS.
+
+Headers:
+  Authorization: Bearer <JWT_ACCESS_TOKEN>  [MANDATORY]
+  Content-Type: application/json             [MANDATORY]
+
+Path Parameters:
+  user_id: UUID  [MANDATORY]
+
+Request Body Fields:
+  custom_permissions: dict[str, str] [MANDATORY]
+    - Keys must be valid FeatureKey values.
+    - Values must be valid AccessLevel values ("none", "read", "write", "admin").
+    - Passing an empty dictionary {} clears all custom overrides and resets user to role defaults.
+
+Scenario 1: Granting Specific Write Overrides
+{
+  "custom_permissions": {
+    "cbam": "write",
+    "eia": "write",
+    "scope_1": "none"
+  }
+}
+
+Scenario 2: Resetting User to Default Role Matrix
+{
+  "custom_permissions": {}
+}
+
+Scenario 3: Complete Comprehensive Matrix Override
+{
+  "custom_permissions": {
+    "scope_1": "read",
+    "scope_2": "read",
+    "scope_3_cat1": "none",
+    "scope_3_cat2": "none",
+    "scope_3_cat3": "read",
+    "scope_3_cat4": "none",
+    "scope_3_cat5": "none",
+    "scope_3_cat6": "write",
+    "scope_3_cat7": "write",
+    "scope_3_cat9": "none",
+    "scope_3_cat15": "none",
+    "brsr": "read",
+    "cbam": "write",
+    "eia": "admin",
+    "facilities": "read",
+    "reporting_periods": "none",
+    "analytics": "read",
+    "team_members": "none",
+    "audit_trails": "read"
+  }
+}
+
+Response Body (HTTP 200 OK):
+{
+  "success": true,
+  "status_code": 200,
+  "message": "User permissions updated successfully.",
+  "data": {
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "role": "ESG_TEAM",
+    "is_admin": false,
+    "custom_permissions": {
+      "cbam": "write",
+      "eia": "write",
+      "scope_1": "none"
+    },
+    "effective_permissions": {
+      "scope_1": "none",
+      "scope_2": "write",
+      "scope_3_cat1": "write",
+      "scope_3_cat2": "write",
+      "scope_3_cat3": "write",
+      "scope_3_cat4": "write",
+      "scope_3_cat5": "write",
+      "scope_3_cat6": "write",
+      "scope_3_cat7": "write",
+      "scope_3_cat9": "write",
+      "scope_3_cat15": "write",
+      "brsr": "write",
+      "cbam": "write",
+      "eia": "write",
+      "facilities": "write",
+      "reporting_periods": "write",
+      "analytics": "write",
+      "team_members": "none",
+      "audit_trails": "read"
+    },
+    "ui_navigation": {
+      "scope_1": false,
+      "scope_2": true,
+      "scope_3": true,
+      "scope_3_categories": {
+        "cat1_spend": true,
+        "cat2_spend": true,
+        "cat3_wtt": true,
+        "cat4_transport": true,
+        "cat5_waste": true,
+        "cat6_travel": true,
+        "cat7_commute": true,
+        "cat9_transport": true,
+        "cat15_investments": true
+      },
+      "brsr": true,
+      "cbam": true,
+      "eia": true,
+      "facilities": true,
+      "reporting_periods": true,
+      "analytics": true,
+      "team_members": false,
+      "audit_trails": true
+    }
+  },
+  "error": null,
+  "method": "PATCH",
+  "path": "/api/v1/tenant/user/3fa85f64-5717-4562-b3fc-2c963f66afa6/permissions",
+  "timestamp": "2026-11-19T09:20:00Z"
+}
+
+
+--------------------------------------------------------------------------------
+4.5. POST /api/v1/tenant/user
+--------------------------------------------------------------------------------
+Description:
+  Create a new user within the authenticated tenant. Starts in PENDING_VERIFICATION
+  status with email verification token dispatched.
+  Requires ADMIN privileges on TEAM_MEMBERS.
+
+Headers:
+  Authorization: Bearer <JWT_ACCESS_TOKEN>  [MANDATORY]
+  Content-Type: application/json             [MANDATORY]
+
+Request Body Fields:
+  first_name:          str (min 1, max 100)                     [MANDATORY]
+  last_name:           str (min 1, max 100)                     [MANDATORY]
+  email:               EmailStr (unique)                        [MANDATORY]
+  password:            str (min 8, max 255)                     [MANDATORY]
+  role:                UserRole enum                            [MANDATORY]
+                       ("TENANT_OWNER", "TENANT_ADMIN", "ESG_TEAM", "FACILITY_HEAD", "AUDITOR", "CUSTOM")
+  phone_number:        str (max 30)                             [OPTIONAL, default=null]
+  job_title:           str (max 100)                            [OPTIONAL, default=null]
+  custom_permissions:  dict[str, AccessLevel]                   [OPTIONAL, default=null]
+
+Scenario 1: Minimal Required Body
+{
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john.doe@enterprise.com",
+  "password": "SecurePassword123!",
+  "role": "ESG_TEAM"
+}
+
+Scenario 2: Full Body with Contact Details and Custom Component Permissions
+{
+  "first_name": "Michael",
+  "last_name": "Scott",
+  "email": "m.scott@enterprise.com",
+  "password": "ProductionPassword987!",
+  "role": "FACILITY_HEAD",
+  "phone_number": "+1-555-019-2834",
+  "job_title": "Regional Plant Manager",
+  "custom_permissions": {
+    "scope_1": "admin",
+    "scope_2": "admin",
+    "cbam": "write",
+    "team_members": "read"
+  }
+}
+
+Response Body (HTTP 201 Created):
+{
+  "success": true,
+  "status_code": 201,
+  "message": "User created successfully",
+  "data": {
+    "id": "e4b52b22-8321-4f18-bb1a-f73752e5a407",
+    "email": "m.scott@enterprise.com",
+    "full_name": "Michael Scott",
+    "role": "FACILITY_HEAD",
+    "message": "User created successfully. Verification email sent."
+  },
+  "error": null,
+  "method": "POST",
+  "path": "/api/v1/tenant/user",
+  "timestamp": "2026-11-19T09:20:00Z"
+}
+
+
+--------------------------------------------------------------------------------
+4.6. POST /api/v1/tenant/user/invite
+--------------------------------------------------------------------------------
+Description:
+  Directly onboard and invite a user into the tenant as ACTIVE and pre-verified.
+  The user can log in immediately with the provided password.
+  Requires ADMIN privileges on TEAM_MEMBERS.
+
+Headers:
+  Authorization: Bearer <JWT_ACCESS_TOKEN>  [MANDATORY]
+  Content-Type: application/json             [MANDATORY]
+
+Request Body:
+  Identical schema to UserCreateRequest (Section 4.5).
+
+Scenario 1: Inviting an Auditor with Read Access
+{
+  "first_name": "Emma",
+  "last_name": "Watson",
+  "email": "emma.auditor@kpmg-example.com",
+  "password": "AuditVault2026!#",
+  "role": "AUDITOR",
+  "job_title": "Lead ESG Assurance Partner",
+  "custom_permissions": {
+    "audit_trails": "admin"
+  }
+}
+
+Response Body (HTTP 201 Created):
+{
+  "success": true,
+  "status_code": 201,
+  "message": "User invited successfully",
+  "data": {
+    "id": "98127391-72bb-4c28-98e2-182390238123",
+    "email": "emma.auditor@kpmg-example.com",
+    "full_name": "Emma Watson",
+    "role": "AUDITOR",
+    "message": "User invited and activated successfully."
+  },
+  "error": null,
+  "method": "POST",
+  "path": "/api/v1/tenant/user/invite",
+  "timestamp": "2026-11-19T09:20:00Z"
+}
+
+
+--------------------------------------------------------------------------------
+4.7. PATCH /api/v1/tenant/user/{user_id}
+--------------------------------------------------------------------------------
+Description:
+  Partial update of user attributes (name, role, contact info, active status,
+  or custom permissions).
+  Requires ADMIN privileges on TEAM_MEMBERS.
+
+Headers:
+  Authorization: Bearer <JWT_ACCESS_TOKEN>  [MANDATORY]
+  Content-Type: application/json             [MANDATORY]
+
+Path Parameters:
+  user_id: UUID  [MANDATORY]
+
+Request Body Fields (All Optional):
+  first_name:          str (min 1, max 100)                     [OPTIONAL]
+  last_name:           str (min 1, max 100)                     [OPTIONAL]
+  email:               EmailStr                                 [OPTIONAL]
+  role:                UserRole enum                            [OPTIONAL]
+  phone_number:        str (max 30)                             [OPTIONAL]
+  job_title:           str (max 100)                            [OPTIONAL]
+  is_active:           bool                                     [OPTIONAL]
+  custom_permissions:  dict[str, AccessLevel]                   [OPTIONAL]
+
+Scenario 1: Updating Profile & Contact Details Only
+{
+  "job_title": "Principal Sustainability Architect",
+  "phone_number": "+1-555-908-1122"
+}
+
+Scenario 2: Promoting Role and Modifying Permissions in Single Call
+{
+  "role": "TENANT_ADMIN",
+  "job_title": "Chief Sustainability Officer",
+  "custom_permissions": {}
+}
+
+Response Body (HTTP 200 OK):
+{
+  "success": true,
+  "status_code": 200,
+  "message": "User updated successfully",
+  "data": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "tenant_id": "8bb98a28-1f19-4a41-8664-5d5e56d78891",
+    "first_name": "Sarah",
+    "last_name": "Jenkins",
+    "full_name": "Sarah Jenkins",
+    "email": "sarah.jenkins@company.com",
+    "phone_number": "+1-555-908-1122",
+    "job_title": "Principal Sustainability Architect",
+    "role": "ESG_TEAM",
+    "user_status": "ACTIVE",
+    "is_active": true,
+    "is_verified": true,
+    "mfa_enabled": false,
+    "last_login_at": "2026-11-19T08:00:00Z",
+    "email_verified_at": "2026-11-01T12:00:00Z",
+    "custom_permissions": null,
+    "created_at": "2026-11-01T10:00:00Z",
+    "updated_at": "2026-11-19T09:25:00Z"
+  },
+  "error": null,
+  "method": "PATCH",
+  "path": "/api/v1/tenant/user/3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "timestamp": "2026-11-19T09:25:00Z"
+}
+
+
+--------------------------------------------------------------------------------
+4.8. GET /api/v1/tenant/user/{user_id}
+--------------------------------------------------------------------------------
+Description:
+  Fetch comprehensive user detail for a single team member by UUID.
+  Requires READ privileges on TEAM_MEMBERS.
+
+Headers:
+  Authorization: Bearer <JWT_ACCESS_TOKEN>  [MANDATORY]
+
+Path Parameters:
+  user_id: UUID  [MANDATORY]
+
+Response Body (HTTP 200 OK):
+{
+  "success": true,
+  "status_code": 200,
+  "message": "User details fetched successfully.",
+  "data": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "tenant_id": "8bb98a28-1f19-4a41-8664-5d5e56d78891",
+    "first_name": "Sarah",
+    "last_name": "Jenkins",
+    "full_name": "Sarah Jenkins",
+    "email": "sarah.jenkins@company.com",
+    "phone_number": "+1234567890",
+    "job_title": "Senior ESG Analyst",
+    "role": "ESG_TEAM",
+    "user_status": "ACTIVE",
+    "is_active": true,
+    "is_verified": true,
+    "mfa_enabled": false,
+    "last_login_at": "2026-11-19T08:00:00Z",
+    "email_verified_at": "2026-11-01T12:00:00Z",
+    "custom_permissions": {
+      "team_members": "read"
+    },
+    "created_at": "2026-11-01T10:00:00Z",
+    "updated_at": "2026-11-19T08:00:00Z"
+  },
+  "error": null,
+  "method": "GET",
+  "path": "/api/v1/tenant/user/3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "timestamp": "2026-11-19T09:20:00Z"
+}
+
+
+--------------------------------------------------------------------------------
+4.9. GET /api/v1/tenant/user
+--------------------------------------------------------------------------------
+Description:
+  List all team members/users in the authenticated tenant with filtering & pagination.
+  Requires READ privileges on TEAM_MEMBERS.
+
+Headers:
+  Authorization: Bearer <JWT_ACCESS_TOKEN>  [MANDATORY]
+
+Query Parameters (All Optional):
+  page:            int (ge=1, default=1)
+  page_size:       int (ge=1, le=200, default=50)
+  sort_by:         str (default="created_at", options: "created_at", "email", "full_name", "role")
+  sort_order:      str (default="desc", options: "asc", "desc")
+  role:            UserRole enum ("TENANT_OWNER", "TENANT_ADMIN", "ESG_TEAM", "FACILITY_HEAD", "AUDITOR")
+  is_active:       bool
+  is_verified:     bool
+  email_contains:  str (substring search)
+
+Response Body (HTTP 200 OK):
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Tenant users retrieved successfully.",
+  "data": {
+    "items": [
+      {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "first_name": "Sarah",
+        "last_name": "Jenkins",
+        "full_name": "Sarah Jenkins",
+        "email": "sarah.jenkins@company.com",
+        "role": "ESG_TEAM",
+        "user_status": "ACTIVE",
+        "is_active": true,
+        "is_verified": true,
+        "last_login_at": "2026-11-19T08:00:00Z",
+        "created_at": "2026-11-01T10:00:00Z"
+      }
+    ],
+    "pagination": {
+      "total": 1,
+      "page": 1,
+      "page_size": 50,
+      "total_pages": 1
+    }
+  },
+  "error": null,
+  "method": "GET",
+  "path": "/api/v1/tenant/user?page=1&page_size=50",
+  "timestamp": "2026-11-19T09:20:00Z"
+}
+
+
+--------------------------------------------------------------------------------
+4.10. POST /api/v1/tenant/user/{user_id}/verify
+--------------------------------------------------------------------------------
+Description:
+  Manually verify an existing tenant user's email address and activate the account.
+  Requires ADMIN privileges on TEAM_MEMBERS.
+
+Headers:
+  Authorization: Bearer <JWT_ACCESS_TOKEN>  [MANDATORY]
+
+Path Parameters:
+  user_id: UUID  [MANDATORY]
+
+Response Body (HTTP 200 OK):
+{
+  "success": true,
+  "status_code": 200,
+  "message": "User verified successfully.",
+  "data": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "is_verified": true,
+    "user_status": "ACTIVE"
+  },
+  "error": null,
+  "method": "POST",
+  "path": "/api/v1/tenant/user/3fa85f64-5717-4562-b3fc-2c963f66afa6/verify",
+  "timestamp": "2026-11-19T09:20:00Z"
+}
+
+
+--------------------------------------------------------------------------------
+4.11. POST /api/v1/tenant/user/{user_id}/deactivate
+--------------------------------------------------------------------------------
+Description:
+  Soft-deactivate a user. The user cannot log in, but historical audit logs,
+  submitted activities, and signature records remain 100% intact.
+  Requires ADMIN privileges on TEAM_MEMBERS.
+  Safety Guard: Cannot deactivate the last active tenant admin or owner.
+
+Headers:
+  Authorization: Bearer <JWT_ACCESS_TOKEN>  [MANDATORY]
+
+Path Parameters:
+  user_id: UUID  [MANDATORY]
+
+Response Body (HTTP 200 OK):
+{
+  "success": true,
+  "status_code": 200,
+  "message": "User sarah.jenkins@company.com has been deactivated",
+  "data": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "is_active": false,
+    "user_status": "SUSPENDED"
+  },
+  "error": null,
+  "method": "POST",
+  "path": "/api/v1/tenant/user/3fa85f64-5717-4562-b3fc-2c963f66afa6/deactivate",
+  "timestamp": "2026-11-19T09:20:00Z"
+}
+
+
+--------------------------------------------------------------------------------
+4.12. POST /api/v1/tenant/user/{user_id}/activate
+--------------------------------------------------------------------------------
+Description:
+  Reactivate a previously deactivated user, restoring login and access.
+  Requires ADMIN privileges on TEAM_MEMBERS.
+
+Headers:
+  Authorization: Bearer <JWT_ACCESS_TOKEN>  [MANDATORY]
+
+Path Parameters:
+  user_id: UUID  [MANDATORY]
+
+Response Body (HTTP 200 OK):
+{
+  "success": true,
+  "status_code": 200,
+  "message": "User sarah.jenkins@company.com has been activated",
+  "data": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "is_active": true,
+    "user_status": "ACTIVE"
+  },
+  "error": null,
+  "method": "POST",
+  "path": "/api/v1/tenant/user/3fa85f64-5717-4562-b3fc-2c963f66afa6/activate",
+  "timestamp": "2026-11-19T09:20:00Z"
+}
+
+
+--------------------------------------------------------------------------------
+4.13. DELETE /api/v1/tenant/user/{user_id}
+--------------------------------------------------------------------------------
+Description:
+  Hard delete a user from the tenant.
+  Safety Guard: Cannot delete the tenant owner.
+  Requires ADMIN privileges on TEAM_MEMBERS.
+
+Headers:
+  Authorization: Bearer <JWT_ACCESS_TOKEN>  [MANDATORY]
+
+Path Parameters:
+  user_id: UUID  [MANDATORY]
+
+Response Body (HTTP 200 OK):
+{
+  "success": true,
+  "status_code": 200,
+  "message": "User sarah.jenkins@company.com has been permanently deleted",
+  "data": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "email": "sarah.jenkins@company.com",
+    "message": "User deleted successfully"
+  },
+  "error": null,
+  "method": "DELETE",
+  "path": "/api/v1/tenant/user/3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "timestamp": "2026-11-19T09:20:00Z"
+}
+
+
+================================================================================
+5. ALL APPLICATION DOMAIN ENDPOINTS PROTECTED BY RBAC ROUTE GUARDS
+================================================================================
+Any attempt by a user without the requisite permission level on the feature key
+will instantly terminate with HTTP 403 Forbidden:
+  error_code: "AUTH_PERMISSION_DENIED"
+  message:    "You do not have '<required_level>' permission for component '<feature_key>'"
+
+--------------------------------------------------------------------------------
+5.1. SCOPE 1 ACTIVITIES (FUEL COMBUSTION)
+Component FeatureKey: "scope_1"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/activity/fuel                       Requires: READ
+  GET    /api/v1/tenant/activity/fuel/export-excel          Requires: READ
+  GET    /api/v1/tenant/activity/fuel/{activity_id}         Requires: READ
+  POST   /api/v1/tenant/activity/fuel                       Requires: WRITE
+  PATCH  /api/v1/tenant/activity/fuel/{activity_id}         Requires: WRITE
+  DELETE /api/v1/tenant/activity/fuel/{activity_id}         Requires: WRITE
+  POST   /api/v1/tenant/activity/fuel/{activity_id}/submit  Requires: WRITE
+  POST   /api/v1/tenant/activity/fuel/{activity_id}/amend   Requires: WRITE
+  POST   /api/v1/tenant/activity/fuel/{activity_id}/verify  Requires: ADMIN
+  POST   /api/v1/tenant/activity/fuel/{activity_id}/reject  Requires: ADMIN
+
+--------------------------------------------------------------------------------
+5.2. SCOPE 2 ACTIVITIES (ELECTRICITY)
+Component FeatureKey: "scope_2"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/activity/electricity                       Requires: READ
+  GET    /api/v1/tenant/activity/electricity/export-excel          Requires: READ
+  GET    /api/v1/tenant/activity/electricity/{activity_id}         Requires: READ
+  POST   /api/v1/tenant/activity/electricity                       Requires: WRITE
+  PATCH  /api/v1/tenant/activity/electricity/{activity_id}         Requires: WRITE
+  DELETE /api/v1/tenant/activity/electricity/{activity_id}         Requires: WRITE
+  POST   /api/v1/tenant/activity/electricity/{activity_id}/submit  Requires: WRITE
+  POST   /api/v1/tenant/activity/electricity/{activity_id}/amend   Requires: WRITE
+  POST   /api/v1/tenant/activity/electricity/{activity_id}/verify  Requires: ADMIN
+  POST   /api/v1/tenant/activity/electricity/{activity_id}/reject  Requires: ADMIN
+
+--------------------------------------------------------------------------------
+5.3. SCOPE 3 CATEGORY 1 (PURCHASED GOODS & SERVICES - SPEND)
+Component FeatureKey: "scope_3_cat1"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/scope3/category1/spend                       Requires: READ
+  GET    /api/v1/tenant/scope3/category1/spend/{activity_id}         Requires: READ
+  POST   /api/v1/tenant/scope3/category1/spend                       Requires: WRITE
+  PATCH  /api/v1/tenant/scope3/category1/spend/{activity_id}         Requires: WRITE
+  DELETE /api/v1/tenant/scope3/category1/spend/{activity_id}         Requires: WRITE
+  POST   /api/v1/tenant/scope3/category1/spend/{activity_id}/submit  Requires: WRITE
+  POST   /api/v1/tenant/scope3/category1/spend/{activity_id}/amend   Requires: WRITE
+  POST   /api/v1/tenant/scope3/category1/spend/{activity_id}/verify  Requires: ADMIN
+  POST   /api/v1/tenant/scope3/category1/spend/{activity_id}/reject  Requires: ADMIN
+
+--------------------------------------------------------------------------------
+5.4. SCOPE 3 CATEGORY 2 (CAPITAL GOODS - SPEND)
+Component FeatureKey: "scope_3_cat2"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/scope3/category2/spend                       Requires: READ
+  GET    /api/v1/tenant/scope3/category2/spend/{activity_id}         Requires: READ
+  POST   /api/v1/tenant/scope3/category2/spend                       Requires: WRITE
+  PATCH  /api/v1/tenant/scope3/category2/spend/{activity_id}         Requires: WRITE
+  DELETE /api/v1/tenant/scope3/category2/spend/{activity_id}         Requires: WRITE
+  POST   /api/v1/tenant/scope3/category2/spend/{activity_id}/submit  Requires: WRITE
+  POST   /api/v1/tenant/scope3/category2/spend/{activity_id}/amend   Requires: WRITE
+  POST   /api/v1/tenant/scope3/category2/spend/{activity_id}/verify  Requires: ADMIN
+  POST   /api/v1/tenant/scope3/category2/spend/{activity_id}/reject  Requires: ADMIN
+
+--------------------------------------------------------------------------------
+5.5. SCOPE 3 CATEGORY 3 (FUEL & ENERGY RELATED ACTIVITIES - WTT)
+Component FeatureKey: "scope_3_cat3"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/scope3/category3/wtt/*                       Requires: READ
+  GET    /api/v1/tenant/scope3/category3/fuel/*                      Requires: READ
+  GET    /api/v1/tenant/scope3/category3/electricity/*               Requires: READ
+  POST   /api/v1/tenant/scope3/category3/fuel                        Requires: WRITE
+  PATCH  /api/v1/tenant/scope3/category3/fuel/{id}                   Requires: WRITE
+  DELETE /api/v1/tenant/scope3/category3/fuel/{id}                   Requires: WRITE
+  POST   /api/v1/tenant/scope3/category3/fuel/{id}/submit            Requires: WRITE
+  POST   /api/v1/tenant/scope3/category3/fuel/{id}/amend             Requires: WRITE
+  POST   /api/v1/tenant/scope3/category3/fuel/{id}/verify            Requires: ADMIN
+  POST   /api/v1/tenant/scope3/category3/fuel/{id}/reject            Requires: ADMIN
+  POST   /api/v1/tenant/scope3/category3/electricity                 Requires: WRITE
+  PATCH  /api/v1/tenant/scope3/category3/electricity/{id}            Requires: WRITE
+  DELETE /api/v1/tenant/scope3/category3/electricity/{id}            Requires: WRITE
+  POST   /api/v1/tenant/scope3/category3/electricity/{id}/submit     Requires: WRITE
+  POST   /api/v1/tenant/scope3/category3/electricity/{id}/amend      Requires: WRITE
+  POST   /api/v1/tenant/scope3/category3/electricity/{id}/verify     Requires: ADMIN
+  POST   /api/v1/tenant/scope3/category3/electricity/{id}/reject     Requires: ADMIN
+
+--------------------------------------------------------------------------------
+5.6. SCOPE 3 CATEGORY 4 (UPSTREAM TRANSPORTATION & DISTRIBUTION)
+Component FeatureKey: "scope_3_cat4"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/scope3/category4/transport                   Requires: READ
+  GET    /api/v1/tenant/scope3/category4/transport/{id}              Requires: READ
+  POST   /api/v1/tenant/scope3/category4/transport                   Requires: WRITE
+  PATCH  /api/v1/tenant/scope3/category4/transport/{id}              Requires: WRITE
+  DELETE /api/v1/tenant/scope3/category4/transport/{id}              Requires: WRITE
+  POST   /api/v1/tenant/scope3/category4/transport/{id}/submit       Requires: WRITE
+  POST   /api/v1/tenant/scope3/category4/transport/{id}/amend        Requires: WRITE
+  POST   /api/v1/tenant/scope3/category4/transport/{id}/verify       Requires: ADMIN
+  POST   /api/v1/tenant/scope3/category4/transport/{id}/reject       Requires: ADMIN
+  GET    /api/v1/tenant/scope3/category4/spend                       Requires: READ
+  POST   /api/v1/tenant/scope3/category4/spend                       Requires: WRITE
+  PATCH  /api/v1/tenant/scope3/category4/spend/{id}                  Requires: WRITE
+  DELETE /api/v1/tenant/scope3/category4/spend/{id}                  Requires: WRITE
+  POST   /api/v1/tenant/scope3/category4/spend/{id}/submit           Requires: WRITE
+  POST   /api/v1/tenant/scope3/category4/spend/{id}/amend            Requires: WRITE
+  POST   /api/v1/tenant/scope3/category4/spend/{id}/verify           Requires: ADMIN
+  POST   /api/v1/tenant/scope3/category4/spend/{id}/reject           Requires: ADMIN
+
+--------------------------------------------------------------------------------
+5.7. SCOPE 3 CATEGORY 5 (WASTE GENERATED IN OPERATIONS)
+Component FeatureKey: "scope_3_cat5"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/scope3/category5/waste                       Requires: READ
+  GET    /api/v1/tenant/scope3/category5/waste/{id}                  Requires: READ
+  POST   /api/v1/tenant/scope3/category5/waste                       Requires: WRITE
+  PATCH  /api/v1/tenant/scope3/category5/waste/{id}                  Requires: WRITE
+  DELETE /api/v1/tenant/scope3/category5/waste/{id}                  Requires: WRITE
+  POST   /api/v1/tenant/scope3/category5/waste/{id}/submit           Requires: WRITE
+  POST   /api/v1/tenant/scope3/category5/waste/{id}/amend            Requires: WRITE
+  POST   /api/v1/tenant/scope3/category5/waste/{id}/verify           Requires: ADMIN
+  POST   /api/v1/tenant/scope3/category5/waste/{id}/reject           Requires: ADMIN
+
+--------------------------------------------------------------------------------
+5.8. SCOPE 3 CATEGORIES 6 & 7 (BUSINESS TRAVEL & EMPLOYEE COMMUTING)
+Component FeatureKeys: "scope_3_cat6" OR "scope_3_cat7"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/scope3/travel                                Requires: READ on CAT6 or CAT7
+  GET    /api/v1/tenant/scope3/travel/summary                        Requires: READ on CAT6 or CAT7
+  GET    /api/v1/tenant/scope3/travel/{id}                           Requires: READ on CAT6 or CAT7
+  POST   /api/v1/tenant/scope3/travel/calculate                      Requires: READ on CAT6 or CAT7
+  POST   /api/v1/tenant/scope3/travel                                Requires: WRITE on CAT6 or CAT7
+  PUT    /api/v1/tenant/scope3/travel/{id}                           Requires: WRITE on CAT6 or CAT7
+  DELETE /api/v1/tenant/scope3/travel/{id}                           Requires: WRITE on CAT6 or CAT7
+
+--------------------------------------------------------------------------------
+5.9. SCOPE 3 CATEGORY 9 (DOWNSTREAM TRANSPORTATION & DISTRIBUTION)
+Component FeatureKey: "scope_3_cat9"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/scope3/category9/transport                   Requires: READ
+  GET    /api/v1/tenant/scope3/category9/transport/{id}              Requires: READ
+  POST   /api/v1/tenant/scope3/category9/transport                   Requires: WRITE
+  PATCH  /api/v1/tenant/scope3/category9/transport/{id}              Requires: WRITE
+  DELETE /api/v1/tenant/scope3/category9/transport/{id}              Requires: WRITE
+  POST   /api/v1/tenant/scope3/category9/transport/{id}/submit       Requires: WRITE
+  POST   /api/v1/tenant/scope3/category9/transport/{id}/amend        Requires: WRITE
+  POST   /api/v1/tenant/scope3/category9/transport/{id}/verify       Requires: ADMIN
+  POST   /api/v1/tenant/scope3/category9/transport/{id}/reject       Requires: ADMIN
+
+--------------------------------------------------------------------------------
+5.10. SCOPE 3 CATEGORY 15 (INVESTMENTS & FINANCED EMISSIONS)
+Component FeatureKey: "scope_3_cat15"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/scope3/category15/investments                Requires: READ
+  GET    /api/v1/tenant/scope3/category15/investments/{id}           Requires: READ
+  GET    /api/v1/tenant/scope3/category15/investments/asset-classes  Requires: READ
+  POST   /api/v1/tenant/scope3/category15/investments                Requires: WRITE
+  PATCH  /api/v1/tenant/scope3/category15/investments/{id}           Requires: WRITE
+  DELETE /api/v1/tenant/scope3/category15/investments/{id}           Requires: WRITE
+  POST   /api/v1/tenant/scope3/category15/investments/{id}/submit    Requires: WRITE
+  POST   /api/v1/tenant/scope3/category15/investments/{id}/amend     Requires: WRITE
+  POST   /api/v1/tenant/scope3/category15/investments/{id}/verify    Requires: ADMIN
+  POST   /api/v1/tenant/scope3/category15/investments/{id}/reject    Requires: ADMIN
+
+--------------------------------------------------------------------------------
+5.11. SCOPE 3 ACTIVITY DOCUMENTS
+Component FeatureKeys: Any Scope 3 Category (Cat 1..15)
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/scope3/documents                             Requires: READ on any Scope 3 Cat
+  GET    /api/v1/tenant/scope3/documents/{id}                        Requires: READ on any Scope 3 Cat
+  GET    /api/v1/tenant/scope3/documents/{id}/download               Requires: READ on any Scope 3 Cat
+  POST   /api/v1/tenant/scope3/documents/presign                     Requires: READ on any Scope 3 Cat
+  POST   /api/v1/tenant/scope3/documents                             Requires: WRITE on any Scope 3 Cat
+  DELETE /api/v1/tenant/scope3/documents/{id}                        Requires: WRITE on any Scope 3 Cat
+
+--------------------------------------------------------------------------------
+5.12. BRSR REPORTING & DISCLOSURES
+Component FeatureKey: "brsr"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/brsr/*                                       Requires: READ
+  POST   /api/v1/tenant/brsr/*                                       Requires: WRITE / ADMIN
+  PUT    /api/v1/tenant/brsr/*                                       Requires: WRITE / ADMIN
+
+--------------------------------------------------------------------------------
+5.13. EU CBAM (INSTALLATION & SOURCE STREAMS)
+Component FeatureKey: "cbam"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/cbam/installation                            Requires: READ
+  GET    /api/v1/tenant/cbam/installation/{id}                       Requires: READ
+  GET    /api/v1/tenant/cbam/installation/{id}/export-excel          Requires: READ
+  GET    /api/v1/tenant/cbam/installation/{id}/source-streams        Requires: READ
+  GET    /api/v1/tenant/cbam/installation/{id}/source-streams/summary Requires: READ
+  POST   /api/v1/tenant/cbam/installation                            Requires: WRITE
+  PUT    /api/v1/tenant/cbam/installation/{id}                       Requires: WRITE
+  POST   /api/v1/tenant/cbam/installation/{id}/source-streams        Requires: WRITE
+  POST   /api/v1/tenant/cbam/installation/{id}/source-streams/bulk   Requires: WRITE
+  PUT    /api/v1/tenant/cbam/installation/{id}/source-streams/{s_id} Requires: WRITE
+  DELETE /api/v1/tenant/cbam/installation/{id}/source-streams/{s_id} Requires: WRITE
+
+--------------------------------------------------------------------------------
+5.14. INDUSTRIAL STACK AIR EMISSIONS (EIA)
+Component FeatureKey: "eia"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/eia/air-emissions                            Requires: READ
+  GET    /api/v1/tenant/eia/air-emissions/presets                    Requires: READ
+  POST   /api/v1/tenant/eia/air-emissions/compute                    Requires: READ
+  POST   /api/v1/tenant/eia/air-emissions/export/excel               Requires: READ
+  PUT    /api/v1/tenant/eia/air-emissions                            Requires: WRITE
+
+--------------------------------------------------------------------------------
+5.15. FACILITIES & METERS
+Component FeatureKey: "facilities"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/facility/*                                   Requires: READ
+  POST   /api/v1/tenant/facility/*                                   Requires: WRITE
+  PATCH  /api/v1/tenant/facility/*                                   Requires: WRITE
+  DELETE /api/v1/tenant/facility/*                                   Requires: ADMIN
+
+--------------------------------------------------------------------------------
+5.16. REPORTING ACCOUNTING PERIODS
+Component FeatureKey: "reporting_periods"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/reporting-period                             Requires: READ
+  GET    /api/v1/tenant/reporting-period/{id}                        Requires: READ
+  POST   /api/v1/tenant/reporting-period                             Requires: WRITE
+  PATCH  /api/v1/tenant/reporting-period/{id}                        Requires: WRITE
+  POST   /api/v1/tenant/reporting-period/{id}/lock                   Requires: ADMIN
+  POST   /api/v1/tenant/reporting-period/{id}/unlock                 Requires: ADMIN
+  POST   /api/v1/tenant/reporting-period/{id}/archive                Requires: ADMIN
+
+--------------------------------------------------------------------------------
+5.17. ANALYTICS (GHG PROTOCOLS & ENERGY CONSUMPTION DASHBOARDS)
+Component FeatureKey: "analytics"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/ghg/dashboard                                Requires: READ
+  GET    /api/v1/tenant/ghg/scope-1-report                           Requires: READ
+  GET    /api/v1/tenant/ghg/scope-2-report                           Requires: READ
+  GET    /api/v1/tenant/energy/dashboard                             Requires: READ
+
+--------------------------------------------------------------------------------
+5.18. AUDIT TRAILS & ACTIVITY LOGS
+Component FeatureKey: "audit_trails"
+--------------------------------------------------------------------------------
+  GET    /api/v1/tenant/audit-trail                                  Requires: READ
+  GET    /api/v1/tenant/audit-trail/{id}                             Requires: READ
+  GET    /api/v1/tenant/audit-trail/export                           Requires: READ
+
+================================================================================
+END OF SPECIFICATION FILE
+================================================================================

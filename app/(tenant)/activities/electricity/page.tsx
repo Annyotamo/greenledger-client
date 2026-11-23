@@ -6,9 +6,11 @@ import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { ElectricityActivitySummary } from "@/components/activity/ElectricityActivitySummary";
 import { ElectricityActivityTable } from "@/components/activity/ElectricityActivityTable";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
+import { Authorize } from "@/components/rbac/Authorize";
 import { useElectricityActivities } from "@/lib/activity/hooks";
 
-export default function ElectricityActivitiesPage() {
+function ElectricityActivitiesContent() {
     const [status, setStatus] = useState("");
     const [accountingMethod, setAccountingMethod] = useState("");
     const [electricityActivityType, setElectricityActivityType] = useState("");
@@ -48,14 +50,12 @@ export default function ElectricityActivitiesPage() {
     const filteredActivities = activities;
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 animate-fade-up">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <h2 className="font-headline-lg text-headline-lg text-primary tracking-tight">
-                        Electricity Activity Log
-                    </h2>
+                    <h2 className="font-headline-lg text-headline-lg text-primary tracking-tight">Electricity Activity Log</h2>
                     <p className="mt-1 text-body-md text-on-surface-variant">
-                        Review, filter and manage location-based and market-based electricity activity emissions.
+                        Review, filter and manage purchased electricity activity emissions.
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
@@ -63,69 +63,72 @@ export default function ElectricityActivitiesPage() {
                         <MaterialIcon name="filter_list" size="sm" />
                         Filter
                     </Button>
-                    <Link href="/activities/electricity/create">
-                        <button className="bg-primary text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm">
-                            <MaterialIcon name="add" size="sm" />
-                            <span className="font-label-md text-label-md uppercase">New Activity</span>
-                        </button>
-                    </Link>
+
+                    <Authorize
+                        feature="scope_2"
+                        level="write"
+                        disabledTooltip="Requires Write permission on Scope 2 to add electricity entries">
+                        <Link href="/activities/electricity/create">
+                            <button className="bg-primary text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm">
+                                <MaterialIcon name="add" size="sm" />
+                                <span className="font-label-md text-label-md uppercase">New Electricity Activity</span>
+                            </button>
+                        </Link>
+                    </Authorize>
                 </div>
             </div>
 
+            {/* Filter Drawer */}
             {showFilters ? (
-                <div className="w-full grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
+                <div className="grid grid-cols-1 gap-3 rounded-lg border border-outline-variant bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-6">
                     <select
-                        className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
-                        aria-label="Status"
+                        aria-label="Filter by facility"
+                        className="rounded-md border border-outline-variant bg-transparent px-3 py-2 text-sm text-on-surface"
+                        value={selectedFacility}
+                        onChange={(e) => setSelectedFacility(e.target.value)}>
+                        <option value="">All facilities</option>
+                        {facilityOptions.map((facilityId) => (
+                            <option key={facilityId} value={facilityId}>
+                                {facilityId}
+                            </option>
+                        ))}
+                    </select>
+
+                    <select
+                        aria-label="Filter by status"
+                        className="rounded-md border border-outline-variant bg-transparent px-3 py-2 text-sm text-on-surface"
                         value={status}
                         onChange={(e) => setStatus(e.target.value)}>
                         <option value="">All statuses</option>
                         <option value="draft">Draft</option>
-                        <option value="submitted">Submitted</option>
-                        <option value="approved">Approved</option>
+                        <option value="pending">Pending</option>
+                        <option value="verified">Verified</option>
                         <option value="rejected">Rejected</option>
                     </select>
+
                     <select
-                        className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
-                        aria-label="Accounting Method"
+                        aria-label="Filter by accounting method"
+                        className="rounded-md border border-outline-variant bg-transparent px-3 py-2 text-sm text-on-surface"
                         value={accountingMethod}
                         onChange={(e) => setAccountingMethod(e.target.value)}>
                         <option value="">All accounting methods</option>
-                        <option value="location_based">Location-Based</option>
-                        <option value="market_based">Market-Based</option>
+                        <option value="location_based">Location Based</option>
+                        <option value="market_based">Market Based</option>
                     </select>
+
                     <select
-                        className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
-                        aria-label="Activity Type"
+                        aria-label="Filter by electricity activity type"
+                        className="rounded-md border border-outline-variant bg-transparent px-3 py-2 text-sm text-on-surface"
                         value={electricityActivityType}
                         onChange={(e) => setElectricityActivityType(e.target.value)}>
                         <option value="">All activity types</option>
-                        <option value="grid_import">Grid Import</option>
-                        <option value="market_instruments">Market Instruments</option>
+                        <option value="grid">Grid</option>
                         <option value="renewable">Renewable</option>
-                        <option value="captive">Captive</option>
-                        <option value="other">Other</option>
                     </select>
+
                     <select
-                        className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
-                        aria-label="Source Type"
-                        value={sourceType}
-                        onChange={(e) => setSourceType(e.target.value)}>
-                        <option value="">All source types</option>
-                        <option value="national_grid">National Grid</option>
-                        <option value="renewable_ppa">Renewable PPA</option>
-                        <option value="non_renewable_ppa">Non-Renewable PPA</option>
-                        <option value="rec_backed_electricity">REC Backed Electricity</option>
-                        <option value="irec_backed_electricity">I-REC Backed Electricity</option>
-                        <option value="solar">Solar</option>
-                        <option value="wind">Wind</option>
-                        <option value="hydro">Hydro</option>
-                        <option value="whrb">WHRB</option>
-                        <option value="fbc">FBC</option>
-                    </select>
-                    <select
-                        className="h-10 w-full rounded-md border border-outline-variant bg-surface px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
-                        aria-label="Data Quality"
+                        aria-label="Filter by data quality tier"
+                        className="rounded-md border border-outline-variant bg-transparent px-3 py-2 text-sm text-on-surface"
                         value={dataQualityTier}
                         onChange={(e) => setDataQualityTier(e.target.value)}>
                         <option value="">All quality tiers</option>
@@ -168,3 +171,10 @@ export default function ElectricityActivitiesPage() {
     );
 }
 
+export default function ElectricityActivitiesPage() {
+    return (
+        <ProtectedRoute feature="scope_2" requiredLevel="read" featureTitle="Scope 2: Purchased Electricity">
+            <ElectricityActivitiesContent />
+        </ProtectedRoute>
+    );
+}

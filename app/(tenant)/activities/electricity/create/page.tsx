@@ -28,6 +28,7 @@ import { FormErrorSummary } from "@/components/ui/FormErrorSummary";
 import { getErrorMessage } from "@/lib/utils/error";
 import { CustomFuelSection } from "@/components/activity/CustomFuelSection";
 import { useCustomFuelUnits } from "@/lib/customFuel/hooks";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
 
 const activityTypeOptions = [
     { label: "Grid Import (Scope 2 Dual Accounting)", value: "grid_import" },
@@ -769,7 +770,8 @@ export default function LogElectricityActivityPage() {
     const availableSources = sourceTypesByActivity[form.electricityActivityType] || [];
 
     return (
-        <div className="max-w-4xl mx-auto py-12 px-container-margin">
+        <ProtectedRoute feature="scope_2" requiredLevel="write" featureTitle="Log Electricity Activity">
+            <div className="max-w-4xl mx-auto py-12 px-container-margin">
             <div className="flex items-center gap-2 mb-6 text-on-surface-variant font-label-md text-label-md">
                 <Link href="/activities/electricity" className="hover:text-primary transition-colors">
                     Activities
@@ -1671,5 +1673,6 @@ export default function LogElectricityActivityPage() {
                 </footer>
             </form>
         </div>
+        </ProtectedRoute>
     );
 }

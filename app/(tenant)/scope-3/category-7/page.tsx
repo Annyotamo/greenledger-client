@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Category7View } from "@/components/scope3/category7/Category7View";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
 
 export const metadata: Metadata = {
     title: "Scope 3 Cat 7: Employee Commuting | GreenLedger ESG",
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function Scope3Category7Page() {
-    return <Category7View />;
+    return (
+        <ProtectedRoute feature="scope_3_cat7" requiredLevel="read" featureTitle="Scope 3 Cat 7: Employee Commuting">
+            <Category7View />
+        </ProtectedRoute>
+    );
 }

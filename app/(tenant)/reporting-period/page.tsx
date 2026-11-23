@@ -6,14 +6,14 @@ import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { ReportingPeriodSummary } from "@/components/reportingPeriod/ReportingPeriodSummary";
 import { ReportingPeriodTable } from "@/components/reportingPeriod/ReportingPeriodTable";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
+import { Authorize } from "@/components/rbac/Authorize";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
 
-export default function ReportingPeriodsPage() {
+function ReportingPeriodsContent() {
     const { data: periods = [], isPending, isError } = useReportingPeriods();
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedStatus, setSelectedStatus] = useState("");
-
-    const statusOptions = useMemo(() => Array.from(new Set(periods.map((p) => p.periodStatus))).sort(), [periods]);
 
     const filteredPeriods = useMemo(() => {
         return periods.filter((period) => {
@@ -29,7 +29,7 @@ export default function ReportingPeriodsPage() {
     }, [periods, searchTerm, selectedStatus]);
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 animate-fade-up">
             {/* Header Section */}
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
@@ -43,12 +43,17 @@ export default function ReportingPeriodsPage() {
                         <MaterialIcon name="filter_list" size="sm" />
                         Filter
                     </Button>
-                    <Link href="/reporting-period/create">
-                        <button className="bg-primary text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm">
-                            <MaterialIcon name="add" size="sm" />
-                            <span className="font-label-md text-label-md uppercase">New Period</span>
-                        </button>
-                    </Link>
+                    <Authorize
+                        feature="reporting_periods"
+                        level="write"
+                        disabledTooltip="Requires Write permission on Reporting Periods to add periods">
+                        <Link href="/reporting-period/create">
+                            <button className="bg-primary text-on-primary px-6 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity rounded shadow-sm">
+                                <MaterialIcon name="add" size="sm" />
+                                <span className="font-label-md text-label-md uppercase">New Period</span>
+                            </button>
+                        </Link>
+                    </Authorize>
                 </div>
             </div>
 
@@ -58,5 +63,13 @@ export default function ReportingPeriodsPage() {
             {/* Table Section */}
             <ReportingPeriodTable periods={filteredPeriods} isLoading={isPending} isError={isError} />
         </div>
+    );
+}
+
+export default function ReportingPeriodsPage() {
+    return (
+        <ProtectedRoute feature="reporting_periods" requiredLevel="read" featureTitle="Reporting Periods">
+            <ReportingPeriodsContent />
+        </ProtectedRoute>
     );
 }

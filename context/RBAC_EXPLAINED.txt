@@ -1,0 +1,376 @@
+================================================================================
+                    GREENLEDGER ESG SERVER - RBAC EXPLAINED
+                         (In Simple, Plain Words)
+================================================================================
+Document: RBAC_EXPLAINED.txt
+Date: 2026-11-20
+System: Fine-Grained Role-Based Access Control & Component Permission Architecture
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+1. INTRODUCTION: WHAT IS THIS AND WHY DO WE NEED IT?
+2. THE THREE CORE CONCEPTS (ROLES, COMPONENTS, ACCESS LEVELS)
+3. HOW DEFAULT ROLES WORK OUT OF THE BOX
+4. CUSTOM PERMISSIONS: HOW OVERRIDES WORK
+5. THE SHOW/HIDE UI NAVIGATION MANIFEST (FOR FRONTEND)
+6. STEP-BY-STEP CODE FLOW: WHAT HAPPENS ON AN API CALL
+7. HOW AN ADMIN MANAGES TEAM MEMBERS & PERMISSIONS
+8. AUDIT LOGGING & SECURITY GUARANTEES
+9. WHERE EVERY PIECE OF CODE LIVES (FILE DIRECTORY MAP)
+
+================================================================================
+1. INTRODUCTION: WHAT IS THIS AND WHY DO WE NEED IT?
+================================================================================
+In a real enterprise ESG (Environmental, Social, and Governance) application,
+different team members have very different jobs:
+  - An ESG Analyst needs to enter fuel and electricity receipts, but shouldn't be
+    able to view internal employee salaries or delete audit logs.
+  - A Plant / Facility Manager only needs to log fuel for their own factory, not
+    mess with corporate investments or CBAM European exports.
+  - An External Auditor needs to inspect and verify everything, but should NEVER
+    be allowed to edit or delete any numbers.
+  - An Executive / Admin needs total control to manage everything and invite users.
+
+Instead of hardcoding rigid roles where everyone in "ESG_TEAM" has identical access,
+GreenLedger ESG Server uses a "Fine-Grained Role-Based Access Control" (RBAC) system.
+
+It gives organization administrators complete freedom:
+  1. Every user has a base role with sensible defaults.
+  2. Any user can be given specific "custom permissions" on any single feature
+     (for example: "User Bob is ESG Team, but give him access to manage Team Members,
+     and revoke his ability to edit Fuel").
+  3. The backend automatically tells the frontend exactly what buttons, sidebars,
+     and tabs to SHOW or HIDE for that specific user.
+
+================================================================================
+2. THE THREE CORE CONCEPTS (ROLES, COMPONENTS, ACCESS LEVELS)
+================================================================================
+Everything in this permission system is built on 3 simple ideas:
+
+--------------------------------------------------------------------------------
+CONCEPT 1: ROLES (Who is the user?)
+--------------------------------------------------------------------------------
+Every user has one primary role:
+  - TENANT_OWNER:  The creator/owner of the organization account.
+  - TENANT_ADMIN:  An administrator of the organization.
+  - ESG_TEAM:      Core sustainability staff who enter and calculate emissions.
+  - FACILITY_HEAD: Site or factory managers who report site-level data.
+  - AUDITOR:       External or internal auditors reviewing compliance data.
+
+--------------------------------------------------------------------------------
+CONCEPT 2: COMPONENTS / FEATURE KEYS (What parts of the app exist?)
+--------------------------------------------------------------------------------
+The application is split into 19 distinct components:
+  1.  "scope_1"            - Direct Fuel Combustion (boilers, generators, vehicles)
+  2.  "scope_2"            - Purchased Electricity & Renewable Power
+  3.  "scope_3_cat1"       - Purchased Goods and Services (Spend-based)
+  4.  "scope_3_cat2"       - Capital Goods (Machinery, buildings, IT assets)
+  5.  "scope_3_cat3"       - Fuel and Energy Related Activities (Well-to-Tank)
+  6.  "scope_3_cat4"       - Upstream Transportation & Distribution (Freighting)
+  7.  "scope_3_cat5"       - Waste Generated in Operations (Landfill, recycling)
+  8.  "scope_3_cat6"       - Business Travel (Air, Rail, Car, Hotel stays)
+  9.  "scope_3_cat7"       - Employee Commuting
+  10. "scope_3_cat9"       - Downstream Transportation & Distribution
+  11. "scope_3_cat15"      - Investments & Financed Emissions (PCAF Standard)
+  12. "brsr"               - India BRSR Sustainability Reports & Disclosures
+  13. "cbam"               - European Union Carbon Border Adjustment Mechanism
+  14. "eia"                - Industrial Chimney Stack Air Emissions Monitoring
+  15. "facilities"         - Factories, Offices, Sub-Units, and Meters
+  16. "reporting_periods"  - Financial/Reporting Accounting Periods
+  17. "analytics"          - GHG Protocol & Energy Dashboards and Charts
+  18. "team_members"       - User Management (inviting, editing, deleting users)
+  19. "audit_trails"       - Immutable Compliance & Action Audit Logs
+
+--------------------------------------------------------------------------------
+CONCEPT 3: ACCESS LEVELS (How much power does the user have?)
+--------------------------------------------------------------------------------
+On each of the 19 components, a user can have one of 4 power levels:
+
+  LEVEL 0: "none"
+    - The user cannot see this feature at all.
+    - It is completely hidden from their menu.
+    - If they attempt to call any API for this feature, they receive 403 Forbidden.
+
+  LEVEL 1: "read"
+    - The user can view data, list items, search, and download/export reports.
+    - They CANNOT create new items, edit existing items, or delete anything.
+
+  LEVEL 2: "write"
+    - The user has everything in "read", PLUS:
+    - Can create new activities, update draft records, delete drafts, and submit
+      records for manager review.
+
+  LEVEL 3: "admin"
+    - The user has everything in "write", PLUS:
+    - Can formally VERIFY, APPROVE, or REJECT submitted activities.
+    - Can lock or archive accounting periods.
+    - Can grant/revoke permissions for other team members.
+
+Comparison Rule:
+  admin (30) > write (20) > read (10) > none (0)
+  If an API requires "write", having "write" or "admin" succeeds; "read" fails.
+
+================================================================================
+3. HOW DEFAULT ROLES WORK OUT OF THE BOX
+================================================================================
+When a user is created with a role, they immediately inherit default permissions
+so administrators don't have to manually configure 19 checkboxes every time:
+
+1. TENANT_OWNER & TENANT_ADMIN:
+   - Gets "admin" on ALL 19 components.
+   - Complete superuser power within their organization.
+
+2. ESG_TEAM:
+   - "write" on Scope 1, Scope 2, all Scope 3 categories, BRSR, CBAM, EIA,
+     Facilities, Analytics.
+   - "read" on Reporting Periods.
+   - "read" on Audit Trails.
+   - "none" on Team Members (cannot manage users).
+
+3. FACILITY_HEAD:
+   - "write" on Scope 1, Scope 2, and Facilities.
+   - "read" on Reporting Periods and Analytics.
+   - "none" on Scope 3, BRSR, CBAM, EIA, Team Members, and Audit Trails.
+
+4. AUDITOR:
+   - "read" on ALL operational modules (Scope 1, 2, 3, BRSR, CBAM, EIA, Facilities,
+     Periods, Analytics, and Audit Trails).
+   - "none" on Team Members.
+   - "none" write power anywhere (strictly read-only).
+
+================================================================================
+4. CUSTOM PERMISSIONS: HOW OVERRIDES WORK
+================================================================================
+Every User record in the database has a special column:
+  `custom_permissions` (stored in JSONB format)
+
+By default, this is empty or null (meaning the user just uses their role defaults).
+
+When an Admin wants to change a user's permissions, they store custom overrides:
+  Example 1: Downgrade an ESG Team member
+  ---------------------------------------
+  User Alice has role `ESG_TEAM`. Normally, she can edit Scope 1 fuel activities.
+  If the admin sets:
+    custom_permissions = { "scope_1": "none" }
+  Then Alice's effective permission for `scope_1` becomes "none"!
+  She can no longer see or touch Scope 1, but all her other features remain normal.
+
+  Example 2: Elevate an ESG Team member
+  -------------------------------------
+  User Bob has role `ESG_TEAM`. Normally, he cannot see or edit Team Members.
+  If the admin sets:
+    custom_permissions = { "team_members": "write" }
+  Then Bob can now view and invite team members!
+
+Calculation Formula:
+  Effective Permission = Role Default Matrix + Custom Overrides
+  (Tenant Owner and Tenant Admin always bypass this and get full Admin everywhere).
+
+================================================================================
+5. THE SHOW/HIDE UI NAVIGATION MANIFEST (FOR FRONTEND)
+================================================================================
+A big problem in many web apps is:
+  "The backend has permissions, but the frontend frontend-developer has to write
+   hundreds of complicated if/else statements to hide sidebar links."
+
+To solve this completely, GreenLedger ESG Server generates a clean, boolean
+"UI Navigation Manifest" directly from the backend.
+
+When the frontend calls:
+  `GET /api/v1/user/auth/me`  OR  `GET /api/v1/user/auth/permissions`
+
+The server responds with a simple boolean map:
+{
+  "scope_1": false,       <-- HIDE the Scope 1 Fuel menu!
+  "scope_2": true,        <-- SHOW the Scope 2 Electricity menu!
+  "scope_3": true,        <-- SHOW the Scope 3 parent menu!
+  "scope_3_categories": {
+    "cat1_spend": true,   <-- SHOW Category 1 in dropdown
+    "cat6_travel": true,  <-- SHOW Business Travel
+    "cat15_investments": false <-- HIDE Investments
+  },
+  "brsr": true,
+  "cbam": false,          <-- HIDE CBAM tab
+  "team_members": false,  <-- HIDE Team Members tab
+  ...
+}
+
+The frontend simply does:
+  `if (manifest.scope_1) renderMenu("Fuel Activities")`
+Clean, bulletproof, and zero risk of frontend-backend mismatch!
+
+================================================================================
+6. STEP-BY-STEP CODE FLOW: WHAT HAPPENS ON AN API CALL
+================================================================================
+Let's follow a real request from start to finish.
+
+Scenario:
+  User Sarah (ESG Team) clicks "Save Fuel Activity" in the web UI.
+  The browser sends:
+    POST /api/v1/tenant/activity/fuel
+    Header: Authorization: Bearer <JWT_TOKEN>
+    Body:   { "fuel_id": "...", "quantity": 500, ... }
+
+Here is exactly what happens on the server, millisecond by millisecond:
+
+  [1. INCOMING HTTP REQUEST]
+      FastAPI receives the request and matches the route in:
+      `app/api/v1/tenant/activities/fuel.py` -> `create_fuel_activity`
+
+  [2. AUTH GUARD RUNS (Dependency: get_current_user)]
+      - Validates JWT signature, expiration, and claims.
+      - Finds user's active session in PostgreSQL table `user_auth_sessions`.
+      - Verifies user is active and email verified.
+      - Returns the `User` object for Sarah.
+
+  [3. TENANT GUARD RUNS (Dependency: get_current_tenant)]
+      - Verifies Sarah's organization is active.
+      - Returns the `Tenant` object.
+
+  [4. RBAC GUARD RUNS (Dependency: require_write(FeatureKey.SCOPE_1))]
+      This is our custom guard from `app/api/v1/tenant/rbac_deps.py`:
+      a. Checks: Is Sarah a TENANT_OWNER or TENANT_ADMIN?
+         -> No, Sarah is ESG_TEAM.
+      b. Looks up Sarah's effective permissions for `FeatureKey.SCOPE_1`.
+      c. Checks: Does Sarah's level satisfy `AccessLevel.WRITE`?
+         - If Sarah has custom_permissions={"scope_1": "none"}:
+           -> Permission denied!
+           -> Server stops immediately and returns HTTP 403 Forbidden:
+              {
+                "success": false,
+                "status_code": 403,
+                "message": "You do not have 'write' permission for component 'scope_1'",
+                "error": { "error_code": "AUTH_PERMISSION_DENIED" }
+              }
+         - If Sarah has "write" or "admin":
+           -> Permission approved! Execution continues.
+
+  [5. PYDANTIC BODY VALIDATION]
+      FastAPI validates the JSON request against `FuelActivityCreate`.
+      If fields are missing or invalid types -> returns 422 Unprocessable Content.
+
+  [6. SERVICE BUSINESS LOGIC]
+      The route calls `FuelActivityService.create(...)`:
+      - Checks that the accounting period is open (not locked or archived).
+      - Looks up the official emission factor for the fuel for that date.
+      - Computes emissions: kg CO2e, tonnes CO2e, and gas breakdowns (CO2, CH4, N2O).
+      - Creates a row in table `fuel_activities`.
+      - Flushes to database using `session.flush()`.
+      - Emits an audit trail log event.
+
+  [7. DATABASE COMMIT IN ROUTE]
+      Per GreenLedger architecture rules, the Route (not the service) calls:
+      `await session.commit()`
+      The transaction is committed safely to PostgreSQL.
+
+  [8. ENVELOPE RESPONSE WRAPPING]
+      The route passes the result through `wrap_response(request, data, status_code=201)`.
+      The server returns:
+      {
+        "success": true,
+        "status_code": 201,
+        "message": "Fuel activity created successfully.",
+        "data": { ... activity details ... },
+        "method": "POST",
+        "path": "/api/v1/tenant/activity/fuel",
+        "timestamp": "2026-11-20T10:00:00Z"
+      }
+
+================================================================================
+7. HOW AN ADMIN MANAGES TEAM MEMBERS & PERMISSIONS
+================================================================================
+Admins have dedicated endpoints to inspect and change permissions in real-time:
+
+1. View a member's permissions:
+   `GET /api/v1/tenant/user/{user_id}/permissions`
+   Returns the user's role, their custom overrides, their resolved effective
+   permissions, and the navigation manifest.
+
+2. Update a member's permissions:
+   `PATCH /api/v1/tenant/user/{user_id}/permissions`
+   Body:
+   {
+     "custom_permissions": {
+       "scope_1": "none",
+       "cbam": "write",
+       "team_members": "read"
+     }
+   }
+   The server sanitizes all keys and values, updates the JSONB column in the database,
+   and records an audit event.
+
+3. Resetting back to default:
+   Sending an empty dictionary:
+   {
+     "custom_permissions": {}
+   }
+   Instantly removes all overrides and restores the user to their standard role defaults.
+
+================================================================================
+8. AUDIT LOGGING & SECURITY GUARANTEES
+================================================================================
+1. Zero Accidental Privilege Escalation:
+   Only a user with `ADMIN` permission on `TEAM_MEMBERS` can alter permissions.
+   Regular team members cannot call the permission endpoints.
+
+2. Complete Auditability:
+   Whenever an admin updates permissions, the system emits:
+   `AuditLogEventType.USER_PERMISSIONS_MODIFIED`
+   Recorded in the `audit_logs` table with actor email, actor user ID, tenant ID,
+   target user ID, timestamp, and IP address.
+
+3. Protection Against Self-Lockout:
+   A tenant admin or owner cannot deactivate or delete the last active administrator
+   or the account owner.
+
+4. Guaranteed Original Data Integrity:
+   Once an activity is VERIFIED, it cannot be modified. Any changes require creating
+   an amendment activity (`is_amendment=True`, `amended_from_id=original.id`),
+   ensuring strict compliance for audits and ESG certifications.
+
+================================================================================
+9. WHERE EVERY PIECE OF CODE LIVES (FILE DIRECTORY MAP)
+================================================================================
+All RBAC components are organized cleanly across the 6 vertical architectural layers:
+
+1. ENUMS (Definitions & Ordering):
+   `app/models/enums/permission_enum.py`
+   -> Contains `FeatureKey` (all 19 components) and `AccessLevel` (with ranking comparisons).
+
+2. DATABASE MODEL (Storage):
+   `app/models/user/user_model.py`
+   -> Contains `User.custom_permissions` (JSONB column).
+   `alembic/versions/73a543dbd602_add_user_custom_permissions.py`
+   -> Database migration applied to PostgreSQL.
+
+3. CORE SERVICE (Logic & Evaluation):
+   `app/services/rbac_service.py`
+   -> Contains `RBACService`, default matrices, effective permission calculator,
+      and UI navigation manifest builder.
+
+4. ROUTE GUARDS (FastAPI Dependencies):
+   `app/api/v1/tenant/rbac_deps.py`
+   -> Contains `require_permission()`, `require_read()`, `require_write()`,
+      `require_admin()`, and `require_any_permission()`.
+
+5. SCHEMAS (Validation & DTOs):
+   `app/schemas/tenant_user_schema.py`
+   -> Contains `UserPermissionsUpdateRequest`, `UserPermissionsResponse`, etc.
+   `app/schemas/user_schema.py`
+   -> Contains `UserProfileResponse` with `permissions` and `ui_navigation`.
+
+6. TEAM MEMBER & USER ROUTES:
+   `app/api/v1/tenant/users.py`
+   -> Endpoints for listing, inviting, updating users and permissions.
+   `app/api/v1/user/routes.py`
+   -> `/user/auth/me` and `/user/auth/permissions`.
+
+7. AUTOMATED TESTS:
+   `app/tests/test_rbac_permissions.py`
+   -> 22 comprehensive tests verifying ordering, matrices, overrides, sanitization,
+      route dependencies, and end-to-end FastAPI HTTP calls.
+
+================================================================================
+END OF RBAC EXPLAINED
+================================================================================

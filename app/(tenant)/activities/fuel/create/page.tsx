@@ -19,6 +19,7 @@ import { FormErrorSummary } from "@/components/ui/FormErrorSummary";
 import { getErrorMessage } from "@/lib/utils/error";
 import { CustomFuelSection } from "@/components/activity/CustomFuelSection";
 import { useCustomFuelUnits } from "@/lib/customFuel/hooks";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
 
 const emissionTypeOptions = [
     { label: "Stationary", value: "stationary" },
@@ -367,7 +368,8 @@ export default function LogFuelActivityPage() {
         })) || [];
 
     return (
-        <div className="max-w-4xl mx-auto py-12 px-container-margin">
+        <ProtectedRoute feature="scope_1" requiredLevel="write" featureTitle="Log Fuel Activity">
+            <div className="max-w-4xl mx-auto py-12 px-container-margin">
             {/* Breadcrumbs */}
             <div className="flex items-center gap-2 mb-6 text-on-surface-variant font-label-md text-label-md">
                 <Link href="/activities/fuel" className="hover:text-primary">
@@ -694,5 +696,6 @@ export default function LogFuelActivityPage() {
                 </footer>
             </form>
         </div>
+        </ProtectedRoute>
     );
 }

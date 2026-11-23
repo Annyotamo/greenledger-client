@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Category1View } from "@/components/scope3/category1/Category1View";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
 
 export const metadata: Metadata = {
     title: "Scope 3 Cat 1: Purchased Goods & Services | GreenLedger ESG",
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function Scope3Category1Page() {
-    return <Category1View />;
+    return (
+        <ProtectedRoute feature="scope_3_cat1" requiredLevel="read" featureTitle="Scope 3 Cat 1: Purchased Goods & Services">
+            <Category1View />
+        </ProtectedRoute>
+    );
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Category5View } from "@/components/scope3/category5/Category5View";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
 
 export const metadata: Metadata = {
     title: "Scope 3 Cat 5: Waste in Operations | GreenLedger ESG",
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function Scope3Category5Page() {
-    return <Category5View />;
+    return (
+        <ProtectedRoute feature="scope_3_cat5" requiredLevel="read" featureTitle="Scope 3 Cat 5: Waste in Operations">
+            <Category5View />
+        </ProtectedRoute>
+    );
 }

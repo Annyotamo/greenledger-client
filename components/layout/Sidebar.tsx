@@ -3,15 +3,16 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { logoutUser } from "@/lib/auth/api";
 import { clearAuthToken } from "@/lib/auth/token";
-import { getCurrentUser, UserProfile } from "@/lib/user/api";
 import { cn } from "@/lib/utils/cn";
 import { useSidebarStore } from "@/stores/sidebar-store";
+import { useCurrentUser } from "@/lib/rbac/hooks";
+import type { FeatureKey, UINavigationManifest } from "@/lib/rbac/types";
 import {
     BOTTOM_NAV,
     MAIN_NAV,
@@ -28,10 +29,22 @@ function isRouteActive(pathname: string | null, href: string) {
     return pathname.startsWith(href.endsWith("/") ? href : `${href}/`);
 }
 
+function isNavVisible(item: { featureKey?: FeatureKey }, nav?: UINavigationManifest): boolean {
+    if (!item.featureKey) return true;
+    if (!nav) return true;
+    if (item.featureKey === "scope_3_cat1") {
+        return !!nav.scope_3;
+    }
+    const val = nav[item.featureKey];
+    return typeof val === "boolean" ? val : true;
+}
+
 export function Sidebar() {
     const collapsed = useSidebarStore((s) => s.collapsed);
     const toggle = useSidebarStore((s) => s.toggle);
     const pathname = usePathname();
+
+    const { data: user } = useCurrentUser();
 
     const isActivitiesActive = Boolean(
         pathname && (pathname === "/activities" || pathname.startsWith("/activities/")),
@@ -42,20 +55,18 @@ export function Sidebar() {
 
     const [activitiesOpen, setActivitiesOpen] = useState(isActivitiesActive);
     const [brsrOpen, setBrsrOpen] = useState(isBrsrActive);
-    const [user, setUser] = useState<UserProfile | null>(null);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-    useEffect(() => {
+    const [prevPathname, setPrevPathname] = useState(pathname);
+    if (pathname !== prevPathname) {
+        setPrevPathname(pathname);
         if (isActivitiesActive) {
             setActivitiesOpen(true);
         }
-    }, [isActivitiesActive]);
-
-    useEffect(() => {
         if (isBrsrActive) {
             setBrsrOpen(true);
         }
-    }, [isBrsrActive]);
+    }
 
     const handleLogout = async () => {
         if (isLoggingOut) return;
@@ -70,28 +81,31 @@ export function Sidebar() {
         }
     };
 
+    const navManifest = user?.ui_navigation;
+
     const beforeActivities = MAIN_NAV.filter(
-        (i) => i.label === "Dashboard" || i.label === "Facilities" || i.label === "EU CBAM",
+        (i) => (i.label === "Dashboard" || i.label === "Facilities" || i.label === "EU CBAM") && isNavVisible(i, navManifest),
     );
     const valueChainItem = MAIN_NAV.find((i) => i.label === "Value Chain");
+    const showValueChain = valueChainItem ? isNavVisible(valueChainItem, navManifest) : false;
+
     const afterActivities = MAIN_NAV.filter(
-        (i) => i.label === "Reporting Periods" || i.label === "Team Members" || i.label === "Tenant Profile",
+        (i) => (i.label === "Reporting Periods" || i.label === "Team Members" || i.label === "Tenant Profile") && isNavVisible(i, navManifest),
     );
 
-    useEffect(() => {
-        let mounted = true;
-        (async () => {
-            try {
-                const profile = await getCurrentUser();
-                if (mounted) setUser(profile);
-            } catch (error) {
-                // intentionally silent; sidebar still renders
-            }
-        })();
-        return () => {
-            mounted = false;
-        };
-    }, []);
+    const visibleScopeChildren = SCOPE_NAV_CHILDREN.filter((child) => {
+        if (!navManifest) return true;
+        return navManifest[child.featureKey] !== false;
+    });
+    const showActivitiesGroup = visibleScopeChildren.length > 0;
+
+    const visibleBrsrChildren = BRSR_NAV_CHILDREN.filter((child) => {
+        if (!navManifest) return true;
+        return navManifest[child.featureKey] !== false;
+    });
+    const showBrsrGroup = visibleBrsrChildren.length > 0;
+
+    const visibleBottomNav = BOTTOM_NAV.filter((item) => isNavVisible(item, navManifest));
 
     return (
         <motion.aside
@@ -113,7 +127,9 @@ export function Sidebar() {
                     animate={{ opacity: collapsed ? 0 : 1 }}
                     className={cn("mb-4 px-4 py-6", collapsed && "pointer-events-none")}>
                     <h1 className="text-lg font-bold tracking-tight text-primary font-display">GreenLedger</h1>
-                    <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant/70">GHG Accounting</p>
+                    <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant/70">
+                        GHG Accounting
+                    </p>
                 </motion.div>
 
                 <nav className="flex-1 space-y-1">
@@ -122,157 +138,161 @@ export function Sidebar() {
                     ))}
 
                     {/* Activities Menu */}
-                    <div className="relative">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                if (collapsed) {
-                                    toggle();
-                                    setActivitiesOpen(true);
-                                } else {
-                                    setActivitiesOpen((o) => !o);
-                                }
-                            }}
-                            title={collapsed ? "Activities" : undefined}
-                            className={cn(
-                                "flex w-full items-center justify-between px-4 py-2.5 transition-[transform,colors] duration-150 active:scale-[0.98] rounded-lg cursor-pointer",
-                                collapsed && "justify-center px-2",
-                                isActivitiesActive
-                                    ? "bg-secondary-container font-semibold text-on-secondary-container"
-                                    : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
-                            )}>
-                            <span className="flex items-center gap-3">
-                                <MaterialIcon name="energy_savings_leaf" className="shrink-0" />
-                                {!collapsed && <span className="font-sans text-[13px] font-medium">Activities</span>}
-                            </span>
-                            {!collapsed && (
-                                <MaterialIcon
-                                    name={activitiesOpen ? "keyboard_arrow_down" : "keyboard_arrow_right"}
-                                    size="sm"
-                                    className="!text-[18px] shrink-0"
-                                />
-                            )}
-                        </button>
+                    {showActivitiesGroup && (
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (collapsed) {
+                                        toggle();
+                                        setActivitiesOpen(true);
+                                    } else {
+                                        setActivitiesOpen((o) => !o);
+                                    }
+                                }}
+                                title={collapsed ? "Activities" : undefined}
+                                className={cn(
+                                    "flex w-full items-center justify-between px-4 py-2.5 transition-[transform,colors] duration-150 active:scale-[0.98] rounded-lg cursor-pointer",
+                                    collapsed && "justify-center px-2",
+                                    isActivitiesActive
+                                        ? "bg-secondary-container font-semibold text-on-secondary-container"
+                                        : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
+                                )}>
+                                <span className="flex items-center gap-3">
+                                    <MaterialIcon name="energy_savings_leaf" className="shrink-0" />
+                                    {!collapsed && <span className="font-sans text-[13px] font-medium">Activities</span>}
+                                </span>
+                                {!collapsed && (
+                                    <MaterialIcon
+                                        name={activitiesOpen ? "keyboard_arrow_down" : "keyboard_arrow_right"}
+                                        size="sm"
+                                        className="!text-[18px] shrink-0"
+                                    />
+                                )}
+                            </button>
 
-                        <AnimatePresence initial={false}>
-                            {activitiesOpen && !collapsed && (
-                                <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: "auto" }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ duration: 0.2, ease: "easeInOut" }}
-                                    className="overflow-hidden">
-                                    <div className="relative ml-[1.625rem]">
-                                        <div className="nav-connector nav-connector-glow absolute bottom-3.5 left-0 top-0 w-[2px]" />
-                                        <div className="space-y-1 py-1">
-                                            {SCOPE_NAV_CHILDREN.map((child) => {
-                                                const childActive = isRouteActive(pathname, child.href);
-                                                return (
-                                                    <Link
-                                                        key={child.label}
-                                                        href={child.href}
-                                                        className={cn(
-                                                            "relative flex items-center gap-3 py-1.5 pl-6 transition-colors rounded-md text-xs font-sans",
-                                                            childActive
-                                                                ? "text-primary font-medium bg-emerald-600/[0.07]"
-                                                                : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low",
-                                                        )}>
-                                                        <div
+                            <AnimatePresence initial={false}>
+                                {activitiesOpen && !collapsed && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: "auto" }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        transition={{ duration: 0.2, ease: "easeInOut" }}
+                                        className="overflow-hidden">
+                                        <div className="relative ml-[1.625rem]">
+                                            <div className="nav-connector nav-connector-glow absolute bottom-3.5 left-0 top-0 w-[2px]" />
+                                            <div className="space-y-1 py-1">
+                                                {visibleScopeChildren.map((child) => {
+                                                    const childActive = isRouteActive(pathname, child.href);
+                                                    return (
+                                                        <Link
+                                                            key={child.label}
+                                                            href={child.href}
                                                             className={cn(
-                                                                "absolute left-0 top-1/2 h-[1.5px] w-4 -translate-y-1/2 transition-colors",
-                                                                childActive ? "bg-emerald-700/70" : "bg-secondary opacity-40",
-                                                            )}
-                                                        />
-                                                        <span>{child.label}</span>
-                                                    </Link>
-                                                );
-                                            })}
+                                                                "relative flex items-center gap-3 py-1.5 pl-6 transition-colors rounded-md text-xs font-sans",
+                                                                childActive
+                                                                    ? "text-primary font-medium bg-emerald-600/[0.07]"
+                                                                    : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low",
+                                                            )}>
+                                                            <div
+                                                                className={cn(
+                                                                    "absolute left-0 top-1/2 h-[1.5px] w-4 -translate-y-1/2 transition-colors",
+                                                                    childActive ? "bg-emerald-700/70" : "bg-secondary opacity-40",
+                                                                )}
+                                                            />
+                                                            <span>{child.label}</span>
+                                                        </Link>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    )}
 
-                    {valueChainItem && (
+                    {valueChainItem && showValueChain && (
                         <SidebarLink key={valueChainItem.label} item={valueChainItem} collapsed={collapsed} />
                     )}
 
                     {/* BRSR Menu */}
-                    <div className="relative">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                if (collapsed) {
-                                    toggle();
-                                    setBrsrOpen(true);
-                                } else {
-                                    setBrsrOpen((o) => !o);
-                                }
-                            }}
-                            title={collapsed ? "BRSR" : undefined}
-                            className={cn(
-                                "flex w-full items-center justify-between px-4 py-2.5 transition-[transform,colors] duration-150 active:scale-[0.98] rounded-lg cursor-pointer",
-                                collapsed && "justify-center px-2",
-                                isBrsrActive
-                                    ? "bg-secondary-container font-semibold text-on-secondary-container"
-                                    : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
-                            )}>
-                            <span className="flex items-center gap-3">
-                                <MaterialIcon name="analytics" className="shrink-0" />
-                                {!collapsed && <span className="font-sans text-[13px] font-medium">BRSR</span>}
-                            </span>
-                            {!collapsed && (
-                                <MaterialIcon
-                                    name={brsrOpen ? "keyboard_arrow_down" : "keyboard_arrow_right"}
-                                    size="sm"
-                                    className="!text-[18px] shrink-0"
-                                />
-                            )}
-                        </button>
+                    {showBrsrGroup && (
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (collapsed) {
+                                        toggle();
+                                        setBrsrOpen(true);
+                                    } else {
+                                        setBrsrOpen((o) => !o);
+                                    }
+                                }}
+                                title={collapsed ? "BRSR" : undefined}
+                                className={cn(
+                                    "flex w-full items-center justify-between px-4 py-2.5 transition-[transform,colors] duration-150 active:scale-[0.98] rounded-lg cursor-pointer",
+                                    collapsed && "justify-center px-2",
+                                    isBrsrActive
+                                        ? "bg-secondary-container font-semibold text-on-secondary-container"
+                                        : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
+                                )}>
+                                <span className="flex items-center gap-3">
+                                    <MaterialIcon name="analytics" className="shrink-0" />
+                                    {!collapsed && <span className="font-sans text-[13px] font-medium">BRSR</span>}
+                                </span>
+                                {!collapsed && (
+                                    <MaterialIcon
+                                        name={brsrOpen ? "keyboard_arrow_down" : "keyboard_arrow_right"}
+                                        size="sm"
+                                        className="!text-[18px] shrink-0"
+                                    />
+                                )}
+                            </button>
 
-                        <AnimatePresence initial={false}>
-                            {brsrOpen && !collapsed && (
-                                <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: "auto" }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ duration: 0.2, ease: "easeInOut" }}
-                                    className="overflow-hidden">
-                                    <div className="relative ml-[1.625rem]">
-                                        <div className="nav-connector nav-connector-glow absolute bottom-3.5 left-0 top-0 w-[2px]" />
-                                        <div className="space-y-1 py-1">
-                                            {BRSR_NAV_CHILDREN.map((child) => {
-                                                const childActive =
-                                                    child.href === "/brsr"
-                                                        ? pathname === "/brsr"
-                                                        : pathname?.startsWith(child.href);
-                                                return (
-                                                    <Link
-                                                        key={child.label}
-                                                        href={child.href}
-                                                        className={cn(
-                                                            "relative flex items-center gap-3 py-1.5 pl-6 transition-colors rounded-md text-xs font-sans",
-                                                            childActive
-                                                                ? "text-primary font-medium bg-emerald-600/[0.07]"
-                                                                : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low",
-                                                        )}>
-                                                        <div
+                            <AnimatePresence initial={false}>
+                                {brsrOpen && !collapsed && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: "auto" }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        transition={{ duration: 0.2, ease: "easeInOut" }}
+                                        className="overflow-hidden">
+                                        <div className="relative ml-[1.625rem]">
+                                            <div className="nav-connector nav-connector-glow absolute bottom-3.5 left-0 top-0 w-[2px]" />
+                                            <div className="space-y-1 py-1">
+                                                {visibleBrsrChildren.map((child) => {
+                                                    const childActive =
+                                                        child.href === "/brsr"
+                                                            ? pathname === "/brsr"
+                                                            : pathname?.startsWith(child.href);
+                                                    return (
+                                                        <Link
+                                                            key={child.label}
+                                                            href={child.href}
                                                             className={cn(
-                                                                "absolute left-0 top-1/2 h-[1.5px] w-4 -translate-y-1/2 transition-colors",
-                                                                childActive ? "bg-emerald-700/70" : "bg-secondary opacity-40",
-                                                            )}
-                                                        />
-                                                        <span>{child.label}</span>
-                                                    </Link>
-                                                );
-                                            })}
+                                                                "relative flex items-center gap-3 py-1.5 pl-6 transition-colors rounded-md text-xs font-sans",
+                                                                childActive
+                                                                    ? "text-primary font-medium bg-emerald-600/[0.07]"
+                                                                    : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low",
+                                                            )}>
+                                                            <div
+                                                                className={cn(
+                                                                    "absolute left-0 top-1/2 h-[1.5px] w-4 -translate-y-1/2 transition-colors",
+                                                                    childActive ? "bg-emerald-700/70" : "bg-secondary opacity-40",
+                                                                )}
+                                                            />
+                                                            <span>{child.label}</span>
+                                                        </Link>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    )}
 
                     {afterActivities.map((item) => (
                         <SidebarLink key={item.label} item={item} collapsed={collapsed} />
@@ -280,7 +300,7 @@ export function Sidebar() {
                 </nav>
 
                 <div className="mt-auto border-t border-outline-variant pt-4">
-                    {BOTTOM_NAV.map((item) => (
+                    {visibleBottomNav.map((item) => (
                         <SidebarLink key={item.label} item={item} collapsed={collapsed} compact />
                     ))}
                     <button
@@ -303,11 +323,11 @@ export function Sidebar() {
 
                     {!collapsed && (
                         <Link href="/user" className="mx-1 block">
-                            <div className={cn(
-                                "flex items-center gap-3 rounded-xl bg-surface-container p-3 transition-colors hover:shadow-sm",
-                                isRouteActive(pathname, "/user") && "ring-1 ring-primary/40 bg-surface-container-high",
-                            )}>
-                                {/** client fetch will populate `user` state; render placeholder until loaded */}
+                            <div
+                                className={cn(
+                                    "flex items-center gap-3 rounded-xl bg-surface-container p-3 transition-colors hover:shadow-sm",
+                                    isRouteActive(pathname, "/user") && "ring-1 ring-primary/40 bg-surface-container-high",
+                                )}>
                                 {user?.avatar ? (
                                     <Image
                                         src={user.avatar}

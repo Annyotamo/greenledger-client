@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
-import { CBAMExecutiveView } from "@/components/cbam/CBAMExecutiveView";
+"use client";
 
-export const metadata: Metadata = {
-    title: "EU CBAM Declaration & GHG Accounting | GreenLedger ESG",
-    description:
-        "Official EU Carbon Border Adjustment Mechanism (CBAM) Communication Template reporting across Sheet A_InstData and Sheet B_EmInst.",
-};
+import { CBAMExecutiveView } from "@/components/cbam/CBAMExecutiveView";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
 
 export default function CBAMExecutivePage() {
-    return <CBAMExecutiveView />;
+    return (
+        <ProtectedRoute feature="cbam" requiredLevel="read" featureTitle="EU CBAM Reporting">
+            <CBAMExecutiveView />
+        </ProtectedRoute>
+    );
 }

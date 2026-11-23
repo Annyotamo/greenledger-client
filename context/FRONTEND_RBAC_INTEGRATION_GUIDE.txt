@@ -1,0 +1,915 @@
+================================================================================
+          GREENLEDGER ESG PLATFORM - FRONTEND RBAC INTEGRATION GUIDE
+================================================================================
+Document: FRONTEND_RBAC_INTEGRATION_GUIDE.txt
+Target Audience: Frontend Engineering Team (React / Vue / Next.js / TypeScript)
+Backend Architecture: FastAPI Async, PostgreSQL, JWT Session Auth
+Scope: Complete Fine-Grained Role-Based Access Control (RBAC), UI Show/Hide
+       Navigation Manifest, Route Guarding, URL Forcing & Auto-Redirect,
+       Action Button Controls, and Permissions Management Modal.
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+1. EXECUTIVE SUMMARY & ARCHITECTURAL PHILOSOPHY
+2. CORE CONCEPTS: ROLES, FEATURE KEYS (19 COMPONENTS), ACCESS LEVELS (4 POWERS)
+3. BACKEND API CONTRACT & BOOTSTRAP FLOW
+   - 3.1. Authentication Bootstrap (GET /api/v1/user/auth/me)
+   - 3.2. Dedicated Permissions Endpoint (GET /api/v1/user/auth/permissions)
+   - 3.3. Response Payload Structure (permissions vs ui_navigation)
+4. HOW TO HANDLE ROLE-BASED & PERMISSION-BASED BLOCKING
+   - 4.1. Navigation Menu Rendering (Preventive Layer)
+   - 4.2. Route Guards & URL Forcing (Proactive Layer)
+   - 4.3. The Access Denied Dialog & Auto-Redirect (Reactive Layer - User's Model)
+   - 4.4. Comparison: Dialog with Countdown vs Instant Redirect
+5. BUTTON & ACTION-LEVEL PERMISSIONS (SHOW / HIDE VS. DISABLE)
+   - 5.1. Behavior per Access Level (none / read / write / admin)
+   - 5.2. Tooltips & UX Best Practices
+6. GLOBAL API CLIENT & 403 ERROR INTERCEPTOR
+   - 6.1. Backend 403 Envelope Structure
+   - 6.2. Axios / Fetch Interceptor Setup
+7. TEAM MEMBERS MANAGEMENT UI (ADMIN PERMISSION DRAWER SPECIFICATION)
+   - 7.1. User Table & Role Badges
+   - 7.2. "Manage Permissions" Modal / Drawer Layout
+   - 7.3. Component Grouping (5 Logical Sections)
+   - 7.4. Saving & Resetting Overrides
+8. COMPLETE PRODUCTION-READY CODE EXAMPLES (TYPESCRIPT)
+   - 8.1. TypeScript Type Definitions (rbac.types.ts)
+   - 8.2. Permission Checking Utilities (rbac.utils.ts)
+   - 8.3. React Hook (usePermission.ts) & Guard Component (Authorize.tsx)
+   - 8.4. Protected Route & Access Denied Countdown Dialog (ProtectedRoute.tsx)
+   - 8.5. Axios Interceptor (apiClient.ts)
+9. FRONTEND DEVELOPER IMPLEMENTATION CHECKLIST
+
+================================================================================
+1. EXECUTIVE SUMMARY & ARCHITECTURAL PHILOSOPHY
+================================================================================
+GreenLedger ESG Server uses a production-grade dual-tier authorization model:
+  Tier 1: High-level User Roles (TENANT_OWNER, TENANT_ADMIN, ESG_TEAM,
+          FACILITY_HEAD, AUDITOR).
+  Tier 2: Fine-grained Component Permissions across 19 individual features
+          with 4 hierarchical access levels (NONE < READ < WRITE < ADMIN).
+
+Backend Security Rule:
+  The backend is the ultimate gatekeeper. Every single API route is protected by
+  FastAPI dependency injection (`require_read`, `require_write`, `require_admin`).
+  If a user lacks permission, the backend immediately halts execution and returns:
+    HTTP 403 Forbidden -> error_code: "AUTH_PERMISSION_DENIED"
+
+Frontend UX Rule:
+  The frontend must NEVER let a user stumble upon a broken page or raw 403 error.
+  Instead, the frontend provides a seamless 3-layer defense:
+    1. Do not show restricted navigation links in the sidebar or navbar.
+    2. If the user manually types a restricted URL in the browser address bar,
+       intercept it BEFORE the page content mounts.
+    3. Show a polished "Access Restricted" dialog explaining why they cannot enter,
+       and automatically redirect them after a short countdown (e.g., 5 seconds)
+       back to their previous page or to the main Dashboard.
+
+================================================================================
+2. CORE CONCEPTS: ROLES, FEATURE KEYS (19 COMPONENTS), ACCESS LEVELS (4 POWERS)
+================================================================================
+
+--------------------------------------------------------------------------------
+A. ROLES (User's Primary Persona)
+--------------------------------------------------------------------------------
+Every user in the tenant has one primary role:
+  - TENANT_OWNER:  Organization account creator. Permanent full superuser.
+  - TENANT_ADMIN:  Organization administrator. Full superuser.
+  - ESG_TEAM:      Sustainability officer entering emissions data across modules.
+  - FACILITY_HEAD: Site/plant manager reporting on-site electricity and fuel.
+  - AUDITOR:       Internal/external compliance auditor reviewing reports.
+
+--------------------------------------------------------------------------------
+B. THE 19 FEATURE KEYS (Components)
+--------------------------------------------------------------------------------
+All application modules are mapped to 19 standard string keys:
+  GHG PROTOCOL MODULES:
+    1.  "scope_1"            -> Scope 1 Direct Combustion (Fuel, Boilers, Fleet)
+    2.  "scope_2"            -> Scope 2 Indirect Electricity & Renewable Power
+    3.  "scope_3_cat1"       -> Scope 3 Cat 1: Purchased Goods and Services
+    4.  "scope_3_cat2"       -> Scope 3 Cat 2: Capital Goods
+    5.  "scope_3_cat3"       -> Scope 3 Cat 3: Fuel & Energy Related (WTT)
+    6.  "scope_3_cat4"       -> Scope 3 Cat 4: Upstream Transportation & Freighting
+    7.  "scope_3_cat5"       -> Scope 3 Cat 5: Waste Generated in Operations
+    8.  "scope_3_cat6"       -> Scope 3 Cat 6: Business Travel (Air, Rail, Hotel)
+    9.  "scope_3_cat7"       -> Scope 3 Cat 7: Employee Commuting
+    10. "scope_3_cat9"       -> Scope 3 Cat 9: Downstream Transportation
+    11. "scope_3_cat15"      -> Scope 3 Cat 15: Investments & Financed Emissions
+
+  STANDARDS & DISCLOSURES:
+    12. "brsr"               -> India BRSR Sustainability Reports (Principles 1-9)
+    13. "cbam"               -> European Union CBAM Setup & Communication Reports
+    14. "eia"                -> Industrial Chimney Stack Air Emissions Monitoring
+
+  ORGANIZATION INFRASTRUCTURE:
+    15. "facilities"         -> Plants, Offices, Sub-Units, and Meters
+    16. "reporting_periods"  -> Accounting Periods & Period Locking
+
+  PERFORMANCE & GOVERNANCE:
+    17. "analytics"          -> GHG Protocol Dashboards & Energy Consumption Analytics
+    18. "team_members"       -> User & Team Member Management (Invites, Roles, Permissions)
+    19. "audit_trails"       -> Immutable Regulatory Audit Logs
+
+--------------------------------------------------------------------------------
+C. THE 4 ACCESS LEVELS (Power Hierarchy)
+--------------------------------------------------------------------------------
+Each of the 19 features has one assigned level for the user:
+  LEVEL 0: "none"   (Rank 0)  -> No access. Module hidden. Route blocked.
+  LEVEL 1: "read"   (Rank 10) -> Can view tables, search, filter, export Excel/PDF.
+                                 Cannot add, edit, or delete anything.
+  LEVEL 2: "write"  (Rank 20) -> Can view + create activities, edit drafts,
+                                 delete drafts, submit for approval.
+                                 Cannot formally verify/approve or lock periods.
+  LEVEL 3: "admin"  (Rank 30) -> Can view + write + approve/verify/reject activities,
+                                 lock/archive periods, and edit team permissions.
+
+Hierarchy Formula:
+  ADMIN (30) >= WRITE (20) >= READ (10) >= NONE (0)
+  If a page or button requires "write", a user with "write" or "admin" has access.
+  A user with "read" or "none" does NOT have access.
+
+================================================================================
+3. BACKEND API CONTRACT & BOOTSTRAP FLOW
+================================================================================
+When the user logs in or refreshes their browser, the frontend calls the auth
+bootstrap endpoint.
+
+--------------------------------------------------------------------------------
+3.1. AUTHENTICATION BOOTSTRAP (GET /api/v1/user/auth/me)
+--------------------------------------------------------------------------------
+Request Headers:
+  Authorization: Bearer <JWT_ACCESS_TOKEN>
+
+Response Envelope (200 OK):
+{
+  "success": true,
+  "status_code": 200,
+  "data": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "tenant_id": "8bb98a28-1f19-4a41-8664-5d5e56d78891",
+    "first_name": "Sarah",
+    "last_name": "Jenkins",
+    "full_name": "Sarah Jenkins",
+    "email": "sarah.jenkins@company.com",
+    "role": "ESG_TEAM",
+    "user_status": "ACTIVE",
+    "is_active": true,
+    "is_verified": true,
+    "permissions": {
+      "scope_1": "write",
+      "scope_2": "write",
+      "scope_3_cat1": "write",
+      "scope_3_cat2": "write",
+      "scope_3_cat3": "write",
+      "scope_3_cat4": "write",
+      "scope_3_cat5": "write",
+      "scope_3_cat6": "write",
+      "scope_3_cat7": "write",
+      "scope_3_cat9": "write",
+      "scope_3_cat15": "write",
+      "brsr": "write",
+      "cbam": "write",
+      "eia": "write",
+      "facilities": "write",
+      "reporting_periods": "read",
+      "analytics": "read",
+      "team_members": "none",
+      "audit_trails": "none"
+    },
+    "ui_navigation": {
+      "scope_1": true,
+      "scope_2": true,
+      "scope_3": true,
+      "scope_3_categories": {
+        "cat1_spend": true,
+        "cat2_spend": true,
+        "cat3_wtt": true,
+        "cat4_transport": true,
+        "cat5_waste": true,
+        "cat6_travel": true,
+        "cat7_commute": true,
+        "cat9_transport": true,
+        "cat15_investments": true
+      },
+      "brsr": true,
+      "cbam": true,
+      "eia": true,
+      "facilities": true,
+      "reporting_periods": true,
+      "analytics": true,
+      "team_members": false,
+      "audit_trails": false
+    }
+  }
+}
+
+--------------------------------------------------------------------------------
+3.2. DEDICATED PERMISSIONS BOOTSTRAP (GET /api/v1/user/auth/permissions)
+--------------------------------------------------------------------------------
+Lightweight endpoint for refreshing permissions without reloading the full user
+profile:
+Response Envelope (200 OK):
+{
+  "success": true,
+  "status_code": 200,
+  "data": {
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "role": "ESG_TEAM",
+    "is_admin": false,
+    "custom_permissions": {
+      "team_members": "read"
+    },
+    "effective_permissions": {
+      "scope_1": "write",
+      "scope_2": "write",
+      "team_members": "read",
+      ...
+    },
+    "ui_navigation": {
+      "scope_1": true,
+      "team_members": true,
+      ...
+    }
+  }
+}
+
+--------------------------------------------------------------------------------
+3.3. HOW FRONTEND CONSUMES THIS DATA
+--------------------------------------------------------------------------------
+Store both in your global auth store (Zustand, Pinia, Redux, or React Context):
+1. `ui_navigation`: Directly controls sidebar / navbar rendering.
+   - Example: `if (ui_navigation.team_members) renderMenuItem("/team-members")`
+   - Example: `if (ui_navigation.scope_3_categories.cat1_spend) renderSubMenu(...)`
+2. `permissions` (or `effective_permissions`): Controls route guards and button states.
+   - Example: `canWrite("scope_1")` -> checks `permissions["scope_1"] >= "write"`
+   - Example: `canAdmin("team_members")` -> checks `permissions["team_members"] >= "admin"`
+
+================================================================================
+4. HOW TO HANDLE ROLE-BASED & PERMISSION-BASED BLOCKING
+================================================================================
+When a user does not have permission for a module (e.g. `team_members` is "none"),
+here is the complete production workflow for the frontend:
+
+--------------------------------------------------------------------------------
+4.1. NAVIGATION MENU RENDERING (PREVENTIVE LAYER)
+--------------------------------------------------------------------------------
+- Never show a link to a page the user cannot access.
+- In your Sidebar/Navbar component, filter navigation items using `ui_navigation`:
+  const navItems = [
+    { title: "Dashboard", path: "/dashboard", visible: true },
+    { title: "Scope 1 - Fuel", path: "/activities/fuel", visible: uiNav.scope_1 },
+    { title: "Scope 2 - Electricity", path: "/activities/electricity", visible: uiNav.scope_2 },
+    { title: "BRSR Reports", path: "/reports/brsr", visible: uiNav.brsr },
+    { title: "EU CBAM", path: "/reports/cbam", visible: uiNav.cbam },
+    { title: "Team Members", path: "/team-members", visible: uiNav.team_members },
+    { title: "Audit Trail", path: "/audit-logs", visible: uiNav.audit_trails },
+  ];
+- If `visible === false`, the link is NOT rendered in the DOM.
+
+--------------------------------------------------------------------------------
+4.2. ROUTE GUARDS & URL FORCING (PROACTIVE LAYER)
+--------------------------------------------------------------------------------
+What if user Bob (who has "none" on `team_members`) types:
+  `https://app.greenledger.com/team-members` directly in the address bar?
+
+OR clicks an old bookmark / copy-pasted link?
+
+DO NOT:
+  - Do NOT render the Team Members page.
+  - Do NOT let the page fire API requests (which will fail with 403 anyway).
+  - Do NOT show a flash of content before redirecting.
+
+DO:
+  - The Frontend Route Guard (e.g. `<ProtectedRoute feature="team_members" minLevel="read">`)
+    inspects the user's `permissions["team_members"]`.
+  - It detects `permissions["team_members"] === "none"`.
+  - It IMMEDIATELY blocks the route component from mounting.
+  - It renders the Access Denied Dialog with an auto-redirect timer.
+
+--------------------------------------------------------------------------------
+4.3. THE ACCESS DENIED DIALOG & AUTO-REDIRECT (REACTIVE LAYER - RECOMMENDED)
+--------------------------------------------------------------------------------
+The user's suggestion of showing a dialog message and auto-redirecting is an
+exceptional UX pattern because:
+  1. It avoids confusing the user (an instant silent redirect makes users think
+     the app is broken or lagging).
+  2. It explicitly informs the user that their role/permissions do not grant
+     access to this section.
+  3. It gives them immediate action choices ("Go Back", "Go to Dashboard")
+     while also auto-redirecting after 5 seconds if they do nothing.
+
+Specification for the Access Denied Dialog:
+  +-------------------------------------------------------------------------+
+  |  [ ! ] Access Restricted                                                |
+  +-------------------------------------------------------------------------+
+  |  You do not have permission to view the Team Members management module. |
+  |                                                                         |
+  |  Your role (ESG_TEAM) does not have access granted for this component.  |
+  |  If you need access, please contact your organization administrator.    |
+  |                                                                         |
+  |  Redirecting to Dashboard in 5 seconds... [||||||||||||||||----]        |
+  +-------------------------------------------------------------------------+
+  |           [ Go Back to Previous Page ]     [ Go to Dashboard Now ]      |
+  +-------------------------------------------------------------------------+
+
+Key Engineering Details for this Dialog:
+  1. Countdown Timer: Start a 5-second interval timer (`setInterval`).
+  2. Progress Bar: Animate a progress bar or show `(Redirecting in X seconds...)`.
+  3. Safe Navigation:
+     - If the user has a valid previous page in browser history (e.g. was on `/dashboard`
+       or `/activities/fuel`), clicking "Go Back" calls `router.back()`.
+     - When the 5-second timer runs out, navigate to `/dashboard`.
+  4. Cleanup: ALWAYS clear the timer (`clearInterval`) in the component unmount
+     lifecycle to prevent memory leaks and zombie redirects!
+
+--------------------------------------------------------------------------------
+4.4. COMPARISON: DIALOG WITH TIMER VS. INSTANT TOAST REDIRECT
+--------------------------------------------------------------------------------
+Approach A: Access Denied Dialog with Countdown (User's Suggestion)
+  - Pros: Cleanest enterprise UX. Clear, educational, allows the user to read why
+    they were blocked, offers explicit buttons.
+  - Recommended for: Main modules and sensitive settings pages (Team Members,
+    Audit Logs, CBAM, BRSR).
+
+Approach B: Instant Silent Redirect + Notification Toast
+  - Pros: Very fast, fewer clicks.
+  - Cons: Can feel jarring or disorienting if the user intentionally typed the URL.
+  - Recommended for: Minor deep-link tabs or child sub-routes.
+
+Verdict: Implement Approach A (Access Denied Dialog with countdown) for all top-level
+page routes. It provides the highest quality enterprise grade experience.
+
+================================================================================
+5. BUTTON & ACTION-LEVEL PERMISSIONS (SHOW / HIDE VS. DISABLE)
+================================================================================
+Within pages that the user CAN see (e.g., user has "read" on Scope 1), their
+experience on individual buttons must match their AccessLevel.
+
+--------------------------------------------------------------------------------
+5.1. BEHAVIOR MATRIX BY ACCESS LEVEL
+--------------------------------------------------------------------------------
+Component Feature: "scope_1" (Fuel Activities)
+
+| Action / Button            | Level: NONE  | Level: READ   | Level: WRITE  | Level: ADMIN  |
+|----------------------------|--------------|---------------|---------------|---------------|
+| View Table / Search / Filter| BLOCKED (403)| ENABLED       | ENABLED       | ENABLED       |
+| Export to Excel / PDF       | BLOCKED (403)| ENABLED       | ENABLED       | ENABLED       |
+| "Add Activity" Button      | BLOCKED (403)| DISABLED/HIDE | ENABLED       | ENABLED       |
+| "Edit Activity" (Draft)    | BLOCKED (403)| DISABLED/HIDE | ENABLED       | ENABLED       |
+| "Delete Activity" (Draft)  | BLOCKED (403)| DISABLED/HIDE | ENABLED       | ENABLED       |
+| "Submit for Verification"  | BLOCKED (403)| DISABLED/HIDE | ENABLED       | ENABLED       |
+| "Verify / Approve" Button  | BLOCKED (403)| DISABLED/HIDE | DISABLED/HIDE | ENABLED       |
+| "Reject" Button            | BLOCKED (403)| DISABLED/HIDE | DISABLED/HIDE | ENABLED       |
+
+--------------------------------------------------------------------------------
+5.2. HIDE VS. DISABLE GUIDELINES
+--------------------------------------------------------------------------------
+- Recommendation:
+  * For PRIMARY actions (e.g. "+ Add Activity", "Export Excel"): Keep the button
+    VISIBLE but DISABLED with a Tooltip:
+      Tooltip: "Your access level (read-only) does not allow creating activities."
+    Why? It prevents users from wondering "Where did the Add button go? Is this a bug?".
+  * For ADMINISTRATIVE actions (e.g. "Verify", "Reject", "Lock Period"): HIDE the
+    button completely for non-admin users to keep the interface clutter-free.
+
+================================================================================
+6. GLOBAL API CLIENT & 403 ERROR INTERCEPTOR
+================================================================================
+Even with frontend guards, network latency or stale tabs could cause an API request
+to fail with 403. The frontend HTTP client (Axios or Fetch wrapper) must handle
+this globally.
+
+--------------------------------------------------------------------------------
+6.1. BACKEND 403 RESPONSE PAYLOAD
+--------------------------------------------------------------------------------
+When any API call is blocked by RBAC, the backend returns:
+{
+  "success": false,
+  "status_code": 403,
+  "message": "You do not have 'write' permission for component 'scope_1'",
+  "data": null,
+  "error": {
+    "error_code": "AUTH_PERMISSION_DENIED",
+    "detail": "Action prohibited by access control policy.",
+    "validation": null
+  },
+  "method": "POST",
+  "path": "/api/v1/tenant/activity/fuel",
+  "timestamp": "2026-11-23T04:00:00Z"
+}
+
+--------------------------------------------------------------------------------
+6.2. AXIOS INTERCEPTOR LOGIC
+--------------------------------------------------------------------------------
+In your global Axios instance:
+  api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 403) {
+        const errorCode = error.response.data?.error?.error_code;
+        const message = error.response.data?.message || "Permission Denied";
+
+        if (errorCode === "AUTH_PERMISSION_DENIED") {
+          // Trigger global notification or modal dialog
+          NotificationService.error({
+            title: "Access Restricted",
+            description: message,
+            duration: 6000,
+          });
+        }
+      }
+      return Promise.reject(error);
+    }
+  );
+
+================================================================================
+7. TEAM MEMBERS MANAGEMENT UI (ADMIN PERMISSION DRAWER SPECIFICATION)
+================================================================================
+When an Admin opens the "Team Members" section (`/team-members`), they should have
+a clean interface to view and edit custom permissions for any user.
+
+--------------------------------------------------------------------------------
+7.1. USER LIST TABLE
+--------------------------------------------------------------------------------
+Columns:
+  1. Name & Avatar (Full name, email)
+  2. Role Badge (e.g., `TENANT_ADMIN` [Blue], `ESG_TEAM` [Green], `AUDITOR` [Purple])
+  3. Custom Permissions Badge:
+     - If `user.custom_permissions === null` or empty `{}`:
+       Badge: `Default Matrix` (Gray)
+     - If custom overrides exist:
+       Badge: `Custom Overrides (3)` (Orange / Warning highlight)
+  4. Status (Active, Pending Verification, Suspended)
+  5. Actions Menu (Dropdown):
+     - "Edit User Details"
+     - "Manage Permissions"  <-- Clicking this opens the Permissions Drawer
+     - "Deactivate / Activate"
+     - "Delete User"
+
+--------------------------------------------------------------------------------
+7.2. "MANAGE PERMISSIONS" MODAL / SLIDE-OVER DRAWER
+--------------------------------------------------------------------------------
+When the Admin clicks "Manage Permissions" for a user:
+  1. Fetch current permissions:
+     `GET /api/v1/tenant/user/{user_id}/permissions`
+  2. The drawer opens with:
+     - Header: "Manage Permissions: Sarah Jenkins (ESG_TEAM)"
+     - Subtitle: "Assign custom component overrides. Overrides take precedence over role defaults."
+     - Quick Action Button: "Reset All to Role Defaults"
+  3. Render 19 rows organized into 5 logical categories:
+
+  Category 1: GHG Scopes (Greenhouse Gas Accounting)
+    - Scope 1: Fuel Combustion          [ None | Read | Write | Admin ]
+    - Scope 2: Electricity              [ None | Read | Write | Admin ]
+    - Scope 3 Cat 1: Purchased Goods    [ None | Read | Write | Admin ]
+    - Scope 3 Cat 2: Capital Goods      [ None | Read | Write | Admin ]
+    - Scope 3 Cat 3: Fuel & Energy WTT  [ None | Read | Write | Admin ]
+    - Scope 3 Cat 4: Upstream Freight   [ None | Read | Write | Admin ]
+    - Scope 3 Cat 5: Waste              [ None | Read | Write | Admin ]
+    - Scope 3 Cat 6: Business Travel    [ None | Read | Write | Admin ]
+    - Scope 3 Cat 7: Employee Commute   [ None | Read | Write | Admin ]
+    - Scope 3 Cat 9: Downstream Freight [ None | Read | Write | Admin ]
+    - Scope 3 Cat 15: Investments       [ None | Read | Write | Admin ]
+
+  Category 2: Frameworks & Disclosures
+    - India BRSR Reporting              [ None | Read | Write | Admin ]
+    - EU CBAM Export Accounting         [ None | Read | Write | Admin ]
+    - Industrial Stack EIA Monitoring   [ None | Read | Write | Admin ]
+
+  Category 3: Facilities & Operations
+    - Facilities & Meter Management     [ None | Read | Write | Admin ]
+    - Reporting Periods & Locking       [ None | Read | Write | Admin ]
+
+  Category 4: Performance Analytics
+    - GHG Protocols & Dashboards        [ None | Read | Write | Admin ]
+
+  Category 5: Administration & Governance
+    - Team Members & User Management    [ None | Read | Write | Admin ]
+    - Regulatory Audit Trails           [ None | Read | Write | Admin ]
+
+--------------------------------------------------------------------------------
+7.3. INTERACTION CONTROLS PER ROW
+--------------------------------------------------------------------------------
+Each feature row has:
+  1. Feature Name & Short Description.
+  2. 4-Segment Toggle: `[ None ] [ Read ] [ Write ] [ Admin ]`.
+  3. State Indicator:
+     - If the selected value EQUALS the role default:
+       Label: "(Default)" in muted text.
+     - If the selected value DIFFERS from role default:
+       Label: "(Custom Override)" in amber highlight.
+
+--------------------------------------------------------------------------------
+7.4. SAVING & RESETTING
+--------------------------------------------------------------------------------
+Saving:
+  Call: `PATCH /api/v1/tenant/user/{user_id}/permissions`
+  Body:
+  {
+    "custom_permissions": {
+      "scope_1": "none",
+      "cbam": "write",
+      "team_members": "read"
+    }
+  }
+
+Resetting to Defaults:
+  Clicking "Reset All to Defaults" sends:
+  {
+    "custom_permissions": {}
+  }
+  Instantly clears all overrides and resets user back to their clean role defaults.
+
+================================================================================
+8. COMPLETE PRODUCTION-READY CODE EXAMPLES (TYPESCRIPT)
+================================================================================
+
+--------------------------------------------------------------------------------
+8.1. TYPESCRIPT TYPE DEFINITIONS (src/types/rbac.types.ts)
+--------------------------------------------------------------------------------
+```typescript
+export type UserRole =
+  | "TENANT_OWNER"
+  | "TENANT_ADMIN"
+  | "ESG_TEAM"
+  | "FACILITY_HEAD"
+  | "AUDITOR";
+
+export type FeatureKey =
+  | "scope_1"
+  | "scope_2"
+  | "scope_3_cat1"
+  | "scope_3_cat2"
+  | "scope_3_cat3"
+  | "scope_3_cat4"
+  | "scope_3_cat5"
+  | "scope_3_cat6"
+  | "scope_3_cat7"
+  | "scope_3_cat9"
+  | "scope_3_cat15"
+  | "brsr"
+  | "cbam"
+  | "eia"
+  | "facilities"
+  | "reporting_periods"
+  | "analytics"
+  | "team_members"
+  | "audit_trails";
+
+export type AccessLevel = "none" | "read" | "write" | "admin";
+
+export interface UINavigationManifest {
+  scope_1: boolean;
+  scope_2: boolean;
+  scope_3: boolean;
+  scope_3_categories: {
+    cat1_spend: boolean;
+    cat2_spend: boolean;
+    cat3_wtt: boolean;
+    cat4_transport: boolean;
+    cat5_waste: boolean;
+    cat6_travel: boolean;
+    cat7_commute: boolean;
+    cat9_transport: boolean;
+    cat15_investments: boolean;
+  };
+  brsr: boolean;
+  cbam: boolean;
+  eia: boolean;
+  facilities: boolean;
+  reporting_periods: boolean;
+  analytics: boolean;
+  team_members: boolean;
+  audit_trails: boolean;
+}
+
+export interface UserProfile {
+  id: string;
+  tenant_id: string;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  email: string;
+  role: UserRole;
+  is_active: boolean;
+  permissions: Record<FeatureKey, AccessLevel>;
+  ui_navigation: UINavigationManifest;
+}
+
+export interface UserPermissionsPayload {
+  user_id: string;
+  role: UserRole;
+  is_admin: boolean;
+  custom_permissions: Record<string, string> | null;
+  effective_permissions: Record<FeatureKey, AccessLevel>;
+  ui_navigation: UINavigationManifest;
+}
+```
+
+--------------------------------------------------------------------------------
+8.2. PERMISSION CHECKING UTILITIES (src/utils/rbac.utils.ts)
+--------------------------------------------------------------------------------
+```typescript
+import { AccessLevel, FeatureKey, UserProfile } from "../types/rbac.types";
+
+const ACCESS_RANK: Record<AccessLevel, number> = {
+  none: 0,
+  read: 10,
+  write: 20,
+  admin: 30,
+};
+
+/**
+ * Compare two access levels.
+ * Returns true if userLevel meets or exceeds requiredLevel.
+ */
+export function hasAccess(userLevel: AccessLevel | undefined, requiredLevel: AccessLevel): boolean {
+  const current = ACCESS_RANK[userLevel || "none"] ?? 0;
+  const target = ACCESS_RANK[requiredLevel] ?? 0;
+  return current >= target;
+}
+
+/**
+ * Check if the current user has permission for a specific feature.
+ * Automatically grants access if the user is TENANT_OWNER or TENANT_ADMIN.
+ */
+export function checkPermission(
+  user: UserProfile | null,
+  feature: FeatureKey,
+  requiredLevel: AccessLevel = "read"
+): boolean {
+  if (!user) return false;
+  if (user.role === "TENANT_OWNER" || user.role === "TENANT_ADMIN") return true;
+
+  const currentLevel = user.permissions?.[feature] ?? "none";
+  return hasAccess(currentLevel, requiredLevel);
+}
+```
+
+--------------------------------------------------------------------------------
+8.3. REACT HOOK & GUARD COMPONENT
+--------------------------------------------------------------------------------
+```typescript
+// src/hooks/usePermission.ts
+import { useAuth } from "../context/AuthContext";
+import { FeatureKey, AccessLevel } from "../types/rbac.types";
+import { checkPermission } from "../utils/rbac.utils";
+
+export function usePermission(feature: FeatureKey, requiredLevel: AccessLevel = "read") {
+  const { user } = useAuth();
+  const allowed = checkPermission(user, feature, requiredLevel);
+  const currentLevel = user?.permissions?.[feature] ?? "none";
+
+  return {
+    allowed,
+    currentLevel,
+    canRead: checkPermission(user, feature, "read"),
+    canWrite: checkPermission(user, feature, "write"),
+    canAdmin: checkPermission(user, feature, "admin"),
+  };
+}
+
+// src/components/rbac/Authorize.tsx
+import React from "react";
+import { FeatureKey, AccessLevel } from "../../types/rbac.types";
+import { usePermission } from "../../hooks/usePermission";
+
+interface AuthorizeProps {
+  feature: FeatureKey;
+  level: AccessLevel;
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+export const Authorize: React.FC<AuthorizeProps> = ({
+  feature,
+  level,
+  children,
+  fallback = null,
+}) => {
+  const { allowed } = usePermission(feature, level);
+  if (!allowed) return <>{fallback}</>;
+  return <>{children}</>;
+};
+```
+
+--------------------------------------------------------------------------------
+8.4. PROTECTED ROUTE & ACCESS DENIED COUNTDOWN DIALOG
+--------------------------------------------------------------------------------
+```tsx
+// src/components/rbac/ProtectedRoute.tsx
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { FeatureKey, AccessLevel } from "../../types/rbac.types";
+import { usePermission } from "../../hooks/usePermission";
+
+interface ProtectedRouteProps {
+  feature: FeatureKey;
+  requiredLevel?: AccessLevel;
+  featureTitle: string; // e.g. "Team Members"
+  children: React.ReactNode;
+}
+
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  feature,
+  requiredLevel = "read",
+  featureTitle,
+  children,
+}) => {
+  const { allowed } = usePermission(feature, requiredLevel);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [secondsLeft, setSecondsLeft] = useState(5);
+
+  useEffect(() => {
+    if (allowed) return;
+
+    // Countdown interval
+    const interval = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          navigate("/dashboard", { replace: true });
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [allowed, navigate]);
+
+  // If user has permission, render the actual page
+  if (allowed) {
+    return <>{children}</>;
+  }
+
+  // If user does not have permission, show the Access Denied Dialog
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900">
+        <div className="flex items-center gap-3 text-amber-600 dark:text-amber-400">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950">
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+              Access Restricted
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              HTTP 403 Forbidden - Role Policy
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 text-sm text-slate-600 dark:text-slate-300">
+          <p>
+            You do not have permission to view the <strong className="text-slate-900 dark:text-white">{featureTitle}</strong> section.
+          </p>
+          <p className="mt-2 text-xs text-slate-500">
+            Please contact your organization administrator if you believe this is in error.
+          </p>
+        </div>
+
+        {/* Progress bar countdown */}
+        <div className="mt-5 rounded-lg bg-slate-100 p-3 dark:bg-slate-800">
+          <div className="flex justify-between text-xs font-medium text-slate-600 dark:text-slate-300">
+            <span>Redirecting to Dashboard</span>
+            <span>{secondsLeft}s</span>
+          </div>
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+            <div
+              className="h-full bg-amber-500 transition-all duration-1000 ease-linear"
+              style={{ width: `${(secondsLeft / 5) * 100}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-6 flex gap-3">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+          >
+            Go Back
+          </button>
+          <button
+            onClick={() => navigate("/dashboard", { replace: true })}
+            className="flex-1 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700"
+          >
+            Go to Dashboard
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+--------------------------------------------------------------------------------
+8.5. AXIOS GLOBAL 403 INTERCEPTOR
+--------------------------------------------------------------------------------
+```typescript
+// src/api/apiClient.ts
+import axios from "axios";
+
+export const apiClient = axios.create({
+  baseURL: "/api/v1",
+  timeout: 15000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 403) {
+      const errorData = error.response.data;
+      const errorCode = errorData?.error?.error_code;
+      const message = errorData?.message || "You do not have permission to perform this action.";
+
+      if (errorCode === "AUTH_PERMISSION_DENIED") {
+        console.warn(`[RBAC] Access denied: ${message}`);
+        // Dispatch custom global event or trigger your UI Toast notification
+        window.dispatchEvent(
+          new CustomEvent("app:access-denied", {
+            detail: { message },
+          })
+        );
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+```
+
+================================================================================
+9. FRONTEND DEVELOPER IMPLEMENTATION CHECKLIST
+================================================================================
+Before shipping the frontend, verify these 10 items:
+
+[ ] 1. Auth Store Initialization:
+       Ensure `GET /api/v1/user/auth/me` populates `user`, `user.permissions`,
+       and `user.ui_navigation` immediately upon app load.
+
+[ ] 2. Dynamic Navigation:
+       Verify that the Sidebar and Navbar dynamically read `user.ui_navigation`
+       and completely hide links for modules with `false` visibility.
+
+[ ] 3. Top-Level Route Guarding:
+       Wrap all sensitive routes (`/team-members`, `/reports/cbam`, `/audit-logs`,
+       etc.) with `<ProtectedRoute feature="..." featureTitle="...">`.
+
+[ ] 4. Direct URL Navigation Test:
+       Log in as an `ESG_TEAM` user (who has `team_members: none`). Type
+       `http://localhost:3000/team-members` in the browser URL bar.
+       -> Verify that the Access Denied modal appears.
+       -> Verify that the countdown reaches 0 and safely redirects to `/dashboard`.
+       -> Verify that clicking "Go Back" returns to the previous page.
+
+[ ] 5. Action Button Disabling / Hiding:
+       Log in as an `AUDITOR` user (read-only). Navigate to Scope 1 Fuel Activities.
+       -> Verify that "+ Add Fuel Activity" is either disabled with a tooltip or hidden.
+       -> Verify that table view and Excel exports are fully functional.
+
+[ ] 6. Manager Approval Actions:
+       Log in as an `ESG_TEAM` user (write access). Navigate to submitted activities.
+       -> Verify that "Verify / Approve" and "Reject" buttons are hidden.
+
+[ ] 7. Team Members Management UI:
+       Log in as `TENANT_ADMIN`. Navigate to `/team-members`.
+       -> Verify the user list loads.
+       -> Click "Manage Permissions" on a team member.
+       -> Verify the 19 feature toggles load their current state.
+
+[ ] 8. Permission Overrides Saving:
+       In the permissions drawer, change `cbam` from `none` to `write` and save.
+       -> Verify `PATCH /api/v1/tenant/user/{id}/permissions` succeeds with 200 OK.
+       -> Verify the badge updates to "Custom Overrides".
+
+[ ] 9. Resetting Overrides:
+       In the permissions drawer, click "Reset All to Defaults".
+       -> Verify it sends `{ "custom_permissions": {} }`.
+       -> Verify the badge returns to "Default Matrix".
+
+[ ] 10. Global 403 Interceptor:
+        Simulate an unauthorized POST call.
+        -> Verify that the global notification/toast pops up with the backend message
+           rather than crashing the UI.
+
+================================================================================
+END OF FRONTEND RBAC INTEGRATION GUIDE
+================================================================================

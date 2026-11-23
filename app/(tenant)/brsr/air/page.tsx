@@ -13,6 +13,7 @@ import {
 } from "@/lib/eia/hooks";
 import { BrsrAirReportModal } from "@/components/brsr/BrsrAirReportModal";
 import { BrsrDocumentUploadSection } from "@/components/brsr/BrsrDocumentUploadSection";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardHeader, CardBody } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -243,7 +244,7 @@ function DatePickerInput({
     );
 }
 
-export default function EiaAirEmissionsPage() {
+function EiaAirEmissionsContent() {
     // 1. Reporting Periods & Facilities
     const { data: periods = [] } = useReportingPeriods();
     const { data: facilities = [] } = useFacilities();
@@ -2136,5 +2137,13 @@ export default function EiaAirEmissionsPage() {
                 onDownload={handleDownloadExcel}
             />
         </div>
+    );
+}
+
+export default function EiaAirEmissionsPage() {
+    return (
+        <ProtectedRoute feature="eia" requiredLevel="read" featureTitle="Industrial Stack Air Emissions (EIA)">
+            <EiaAirEmissionsContent />
+        </ProtectedRoute>
     );
 }

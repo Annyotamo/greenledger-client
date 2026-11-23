@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
-import { Scope3DashboardView } from "@/components/scope3/Scope3DashboardView";
+"use client";
 
-export const metadata: Metadata = {
-    title: "Scope 3 Value Chain Emissions | GreenLedger ESG",
-    description: "GHG Protocol Scope 3 indirect value chain accounting across all 15 categories.",
-};
+import { Scope3DashboardView } from "@/components/scope3/Scope3DashboardView";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
 
 export default function Scope3Page() {
-    return <Scope3DashboardView />;
+    return (
+        <ProtectedRoute feature="scope_3_cat1" requiredLevel="read" featureTitle="Scope 3 Value Chain">
+            <Scope3DashboardView />
+        </ProtectedRoute>
+    );
 }

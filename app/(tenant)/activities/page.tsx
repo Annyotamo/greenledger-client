@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { FuelActivitySummary } from "@/components/activity/FuelActivitySummary";
 import { FuelActivityTable } from "@/components/activity/FuelActivityTable";
 import { useFuelActivities } from "@/lib/activity/hooks";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
 
 export default function ActivitiesPage() {
     const { data: activities = [], isPending, isError } = useFuelActivities();
@@ -42,26 +43,28 @@ export default function ActivitiesPage() {
     }, [activities, searchTerm, selectedFacility, selectedFuel]);
 
     return (
-        <div className="space-y-8">
-            <FuelActivitySummary activities={filteredActivities} />
+        <ProtectedRoute feature="scope_1" requiredLevel="read" featureTitle="Fuel Activities">
+            <div className="space-y-8">
+                <FuelActivitySummary activities={filteredActivities} />
 
-            <FuelActivityTable
-                activities={filteredActivities}
-                isLoading={isPending}
-                isError={isError}
-                searchTerm={searchTerm}
-                selectedFacility={selectedFacility}
-                selectedFuel={selectedFuel}
-                status={status}
-                emissionType={emissionType}
-                onSearchChange={setSearchTerm}
-                onFacilityChange={setSelectedFacility}
-                onFuelChange={setSelectedFuel}
-                onStatusChange={setStatus}
-                onEmissionTypeChange={setEmissionType}
-                facilityOptions={facilityOptions}
-                fuelOptions={fuelOptions}
-            />
-        </div>
+                <FuelActivityTable
+                    activities={filteredActivities}
+                    isLoading={isPending}
+                    isError={isError}
+                    searchTerm={searchTerm}
+                    selectedFacility={selectedFacility}
+                    selectedFuel={selectedFuel}
+                    status={status}
+                    emissionType={emissionType}
+                    onSearchChange={setSearchTerm}
+                    onFacilityChange={setSelectedFacility}
+                    onFuelChange={setSelectedFuel}
+                    onStatusChange={setStatus}
+                    onEmissionTypeChange={setEmissionType}
+                    facilityOptions={facilityOptions}
+                    fuelOptions={fuelOptions}
+                />
+            </div>
+        </ProtectedRoute>
     );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useSyncExternalStore, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { DashboardTab } from "@/lib/dashboard/types";
 import { cn } from "@/lib/utils/cn";
@@ -19,21 +19,30 @@ const tabPathMap: Record<DashboardTab, string> = {
     energy: "/energy-dashboard",
 };
 
+function subscribe() {
+    return () => {};
+}
+
+function getSnapshot() {
+    return typeof window !== "undefined" && !!getAuthToken();
+}
+
+function getServerSnapshot() {
+    return null;
+}
+
 export function TenantShell({ children }: TenantShellProps) {
     const collapsed = useSidebarStore((s) => s.collapsed);
     const pathname = usePathname();
     const router = useRouter();
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+    const isAuthenticated = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
     useEffect(() => {
-        const token = getAuthToken();
-        if (!token) {
-            setIsAuthenticated(false);
+        if (isAuthenticated === false) {
             router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
-        } else {
-            setIsAuthenticated(true);
         }
-    }, [pathname, router]);
+    }, [isAuthenticated, pathname, router]);
 
     const activeTab = useMemo<DashboardTab>(() => {
         return pathname === "/energy-dashboard" ? "energy" : "emissions";

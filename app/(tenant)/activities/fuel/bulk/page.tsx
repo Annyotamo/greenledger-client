@@ -2,7 +2,6 @@
 
 import { useState, useRef, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { CustomSelect } from "@/components/ui/select";
 import { useReportingPeriods } from "@/lib/reportingPeriods/hooks";
@@ -10,6 +9,7 @@ import { useEmissionSources } from "@/lib/emissionSource/hooks";
 import { privateApi } from "@/lib/http/client";
 import { getErrorMessage } from "@/lib/utils/error";
 import { motion, AnimatePresence } from "framer-motion";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
 
 interface SuccessItem {
     row: number;
@@ -46,7 +46,6 @@ interface BulkUploadResponseData {
 }
 
 export default function BulkUploadFuelPage() {
-    const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Queries
@@ -177,7 +176,7 @@ export default function BulkUploadFuelPage() {
             } else {
                 setErrorMsg(responseData.message || "Failed to process the uploaded file.");
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error(err);
             const errMsg = getErrorMessage(err, "Failed to upload file. Please verify parameters and check server status.");
             setErrorMsg(errMsg);
@@ -187,7 +186,8 @@ export default function BulkUploadFuelPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto py-12 px-container-margin">
+        <ProtectedRoute feature="scope_1" requiredLevel="write" featureTitle="Bulk Upload Fuel Activities">
+            <div className="max-w-4xl mx-auto py-12 px-container-margin">
             {/* Breadcrumbs */}
             <div className="flex items-center gap-2 mb-6 text-on-surface-variant font-label-md text-label-md">
                 <Link href="/activities/fuel" className="hover:text-primary transition-colors">
@@ -267,7 +267,7 @@ export default function BulkUploadFuelPage() {
                                     </label>
                                     <CustomSelect
                                         options={
-                                            reportingPeriodsQuery.data?.map((p: any) => ({
+                                            reportingPeriodsQuery.data?.map((p) => ({
                                                 label: p.name,
                                                 value: String(p.id),
                                             })) || []
@@ -582,5 +582,6 @@ export default function BulkUploadFuelPage() {
                 </div>
             </div>
         </div>
+        </ProtectedRoute>
     );
 }

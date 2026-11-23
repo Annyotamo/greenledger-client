@@ -1,14 +1,12 @@
-import { AuditLogsMainView } from "@/components/audit-logs/AuditLogsMainView";
+"use client";
 
-/**
- * Tenant Audit Logs & Forensic System
- * Displays lightweight activity trails, deep forensic diffs, and compliance logs.
- */
-export const metadata = {
-    title: "Audit Logs & Activity Trails | GreenLedger ESG Reporting",
-    description: "Immutable activity trails, forensic state diffs, and compliance history.",
-};
+import { AuditLogsMainView } from "@/components/audit-logs/AuditLogsMainView";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
 
 export default function AuditLogsPage() {
-    return <AuditLogsMainView />;
+    return (
+        <ProtectedRoute feature="audit_trails" requiredLevel="read" featureTitle="Compliance Audit Trails">
+            <AuditLogsMainView />
+        </ProtectedRoute>
+    );
 }

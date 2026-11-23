@@ -2,12 +2,12 @@
 
 import { use } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FuelActivityDetailView } from "@/components/activity/FuelActivityDetailView";
 import { useFuelActivity } from "@/lib/activity/hooks";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
 
 export default function FuelActivityDetailPage({
     params,
@@ -80,5 +80,9 @@ export default function FuelActivityDetailPage({
         );
     }
 
-    return <FuelActivityDetailView activity={activity} />;
+    return (
+        <ProtectedRoute feature="scope_1" requiredLevel="read" featureTitle="Fuel Activity Details">
+            <FuelActivityDetailView activity={activity} />
+        </ProtectedRoute>
+    );
 }

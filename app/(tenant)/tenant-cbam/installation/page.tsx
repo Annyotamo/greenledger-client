@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CBAMInstallationView } from "@/components/cbam/CBAMInstallationView";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
 
 export const metadata: Metadata = {
     title: "Installation Setup (Sheet A_InstData) | EU CBAM | GreenLedger ESG",
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function CBAMInstallationPage() {
-    return <CBAMInstallationView />;
+    return (
+        <ProtectedRoute feature="cbam" requiredLevel="read" featureTitle="EU CBAM Installation">
+            <CBAMInstallationView />
+        </ProtectedRoute>
+    );
 }

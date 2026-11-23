@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Category9View } from "@/components/scope3/category9/Category9View";
+import { ProtectedRoute } from "@/components/rbac/ProtectedRoute";
 
 export const metadata: Metadata = {
     title: "Scope 3 Cat 9: Downstream Transportation | GreenLedger ESG",
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function Scope3Category9Page() {
-    return <Category9View />;
+    return (
+        <ProtectedRoute feature="scope_3_cat9" requiredLevel="read" featureTitle="Scope 3 Cat 9: Downstream Transportation">
+            <Category9View />
+        </ProtectedRoute>
+    );
 }

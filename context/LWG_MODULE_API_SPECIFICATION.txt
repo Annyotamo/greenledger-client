@@ -1,0 +1,1183 @@
+================================================================================
+                      GREENLEDGER ESG PLATFORM
+           LEATHER WORKING GROUP (LWG) MVP MODULE — API SPECIFICATION
+================================================================================
+Document Version : 1.0.0
+Release Target   : Production Grade LWG MVP (Protocol Issue 7.x Compliance)
+Base Route       : /api/v1/tenant/lwg
+Auth Required    : Yes (JWT Bearer Token with Tenant Admin / ESG Team / Auditor roles)
+RBAC Feature Key : "lwg" (require_read, require_write)
+Format           : JSON (UTF-8) for REST APIs; XLSX for template & data pack exports
+================================================================================
+
+
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+1. GLOBAL ARCHITECTURE & CONVENTIONS
+   1.1 Standard Response Envelope (APIResponse[T])
+   1.2 Standard Error Structure (APIError)
+   1.3 Authentication & Authorization Headers
+   1.4 Decimal & Number Serialization Rules
+   1.5 Date & Timestamp Formats
+
+2. DOMAIN ENUMS & ALLOWED VALUE DICTIONARIES
+   2.1 LwgStage (Tannery Production Stages)
+   2.2 LwgDepartmentStage (Department Categorization)
+   2.3 LwgOutputUnit (Leather Area Units)
+   2.4 LwgEffluentType (Effluent Treatment Configurations)
+   2.5 LwgInputMaterial (Material Classification)
+   2.6 LwgEnergySource (Energy Source Taxonomy)
+   2.7 LwgEnergyUnit (Allowed Measurement Units)
+   2.8 Energy Source to Unit Mapping Matrix
+   2.9 LwgWaterSource (Water Intake Classifications)
+   2.10 LwgDocumentType (Evidence Vault Document Classifications)
+   2.11 LwgMedalRating (Audit Medal Tiers & Scoring Thresholds)
+   2.12 LwgSectionStatus (Audit Readiness Statuses)
+   2.13 LwgGapSeverity (Deficiency Alert Levels)
+   2.14 LwgSectionNumber (All 17 LWG Protocol Sections & Critical Sets)
+
+3. REST ENDPOINT REFERENCE (ALL 25 ENDPOINTS)
+   3.1 TANNERY PROFILE APIS
+       - GET    /api/v1/tenant/lwg/profile
+       - POST   /api/v1/tenant/lwg/profile
+       - PUT    /api/v1/tenant/lwg/profile
+   3.2 FACTORY DEPARTMENTS APIS
+       - GET    /api/v1/tenant/lwg/departments
+       - POST   /api/v1/tenant/lwg/departments
+       - PUT    /api/v1/tenant/lwg/departments/{department_id}
+       - DELETE /api/v1/tenant/lwg/departments/{department_id}
+   3.3 MONTHLY PRODUCTION DATA APIS (SECTION 5)
+       - GET    /api/v1/tenant/lwg/production
+       - POST   /api/v1/tenant/lwg/production
+       - DELETE /api/v1/tenant/lwg/production/{production_id}
+   3.4 MONTHLY ENERGY CONSUMPTION APIS (SECTION 10)
+       - GET    /api/v1/tenant/lwg/energy
+       - POST   /api/v1/tenant/lwg/energy
+       - DELETE /api/v1/tenant/lwg/energy/{energy_id}
+   3.5 MONTHLY WATER USAGE APIS (SECTION 11)
+       - GET    /api/v1/tenant/lwg/water
+       - POST   /api/v1/tenant/lwg/water
+       - DELETE /api/v1/tenant/lwg/water/{water_id}
+   3.6 EVIDENCE VAULT APIS (SECTIONS 1–17)
+       - GET    /api/v1/tenant/lwg/evidence
+       - POST   /api/v1/tenant/lwg/evidence
+       - DELETE /api/v1/tenant/lwg/evidence/{evidence_id}
+   3.7 PREVIOUS AUDIT RESULT & MEDAL EVALUATION APIS
+       - GET    /api/v1/tenant/lwg/audit-result
+       - POST   /api/v1/tenant/lwg/audit-result
+   3.8 COMPLIANCE & READINESS DASHBOARD APIS
+       - GET    /api/v1/tenant/lwg/dashboard
+   3.9 BULK EXCEL INGESTION & DATA PACK EXPORT APIS
+       - GET    /api/v1/tenant/lwg/excel/template
+       - POST   /api/v1/tenant/lwg/excel/upload
+       - GET    /api/v1/tenant/lwg/excel/export
+
+4. DOMAIN EXCEPTIONS & HTTP ERROR CODES DICTIONARY
+5. CORE BUSINESS LOGIC & CONVERSION RULES
+
+
+================================================================================
+1. GLOBAL ARCHITECTURE & CONVENTIONS
+================================================================================
+
+1.1 Standard Response Envelope (APIResponse[T])
+------------------------------------------------
+Every single API response emitted by the server (whether 200, 201, 400, 404, 422,
+or 500) wraps its payload in the standardized GreenLedger `APIResponse[T]` format:
+
+{
+  "success": true,               // boolean: true for 2xx codes, false for 4xx/5xx
+  "status_code": 200,            // integer: HTTP status code
+  "message": "Operation message",// string: Human-readable status description
+  "data": { ... } | [ ... ] | null, // generic payload or null on deletion/error
+  "error": null,                 // null on success, or APIError object on error
+  "method": "POST",              // string: HTTP method executed
+  "path": "/api/v1/tenant/lwg/production", // string: Request path
+  "timestamp": "2026-11-24T09:15:30.123456Z" // string: ISO-8601 UTC timestamp
+}
+
+1.2 Standard Error Structure (APIError)
+----------------------------------------
+When `success` is false, `data` is null and `error` contains structured diagnostics:
+
+{
+  "success": false,
+  "status_code": 422,
+  "message": "Month '2023-01-01' is outside the 24-month audit window (2024-11-01 to 2026-10-31).",
+  "data": null,
+  "error": {
+    "error_code": "LWG_MONTH_OUTSIDE_WINDOW",
+    "detail": "Month '2023-01-01' is outside the 24-month audit window (2024-11-01 to 2026-10-31).",
+    "validation": null // array of field validation objects on 422 RequestValidationError
+  },
+  "method": "POST",
+  "path": "/api/v1/tenant/lwg/production",
+  "timestamp": "2026-11-24T09:15:30.123456Z"
+}
+
+When Pydantic request validation fails, `error.validation` provides an array of:
+[
+  {
+    "loc": ["body", "output_quantity"],
+    "msg": "Input should be greater than or equal to 0",
+    "type": "greater_than_equal"
+  }
+]
+
+1.3 Authentication & Authorization Headers
+-------------------------------------------
+- Header: `Authorization: Bearer <access_jwt_token>`
+- Token claims verified by backend:
+  - `sub`: User ID
+  - `tenant_id`: Scoped Tenant ID (enforces strict multi-tenant isolation)
+  - `sid`: UserAuthSession identifier (verified not revoked)
+- Permissions:
+  - All `GET` endpoints require read permission: `require_read(FeatureKey.LWG)`
+  - All `POST`, `PUT`, `DELETE` endpoints require write permission: `require_write(FeatureKey.LWG)`
+  - Default permitted roles: `TENANT_ADMIN`, `TENANT_OWNER`, `ESG_TEAM`. Read-only: `AUDITOR`, `FACILITY_HEAD`.
+
+1.4 Decimal & Number Serialization Rules
+-----------------------------------------
+- All environmental metrics (energy quantities, volumes, areas, GJ, intensities)
+  are calculated using pure Python Decimal arithmetic to eliminate binary float rounding drift.
+- In JSON responses, Decimal values are serialized as formatted numeric decimals or strings
+  (e.g., `36.0`, `9290.3`, `65.9`).
+- The frontend should parse them via `parseFloat(val)` or `Number(val)` for display or charts.
+
+1.5 Date Formats
+-----------------
+- Monthly records use the first calendar day of the month: `"YYYY-MM-01"` (e.g. `"2025-03-01"`).
+- ISO-8601 UTC strings for creation and update timestamps: `"2026-11-24T08:30:00Z"`.
+
+
+================================================================================
+2. DOMAIN ENUMS & ALLOWED VALUE DICTIONARIES
+================================================================================
+
+2.1 LwgStage (Tannery Production Stages)
+----------------------------------------
+Specifies the production stages operated by the facility:
+- "stage_1_raw_to_wetblue"        : Stage 1: Raw hide to Wet Blue (tanning)
+- "stage_2_wetblue_to_crust"       : Stage 2: Wet Blue to Crust (re-tanning)
+- "stage_3_crust_to_finish"        : Stage 3: Crust to Finished Leather (finishing)
+- "stage_1_to_3_raw_to_finish"     : Stage 1 to 3: Fully Integrated Tannery
+- "stage_2_to_3_wetblue_to_finish" : Stage 2 to 3: Processing from Wet Blue to Finish
+
+*Note*: Per LWG Section 10/11 rules, when calculating facility-wide Energy and
+Water intensity, the denominator production stage used is:
+  1. `stage_3_crust_to_finish` (if run at the facility), or
+  2. `stage_2_wetblue_to_crust` (if no finishing), or
+  3. `stage_1_raw_to_wetblue` (beamhouse only).
+
+2.2 LwgDepartmentStage (Department Categorization)
+--------------------------------------------------
+- "stage_1" : Allocated strictly to Stage 1 operations
+- "stage_2" : Allocated strictly to Stage 2 operations
+- "stage_3" : Allocated strictly to Stage 3 operations
+- "common"  : Common / Site-wide infrastructure (ETP, Boiler, Admin, Utilities)
+
+2.3 LwgOutputUnit (Leather Area Units)
+--------------------------------------
+- "sq_ft" : Square feet (standard commercial trade unit in India/Asia)
+- "m2"    : Square meters (official LWG protocol metric unit)
+*Conversion factor*: 1 m² = 10.7639 sq ft (1 sq ft = 0.092903 m²).
+
+2.4 LwgEffluentType (Effluent Treatment Configurations)
+-------------------------------------------------------
+- "direct_discharge_own_etp" : Facility operates an on-site full ETP with treated discharge
+- "discharge_to_cetp"        : Pre-treated effluent discharged to Common ETP (CETP)
+- "both"                     : Combined on-site treatment and CETP connection
+
+2.5 LwgInputMaterial (Material Classification)
+----------------------------------------------
+- "raw_hide_skin" : Raw animal hides / skins (salted, fresh)
+- "wet_blue"      : Chrome tanned wet blue leather
+- "wet_white"     : Chrome-free wet white leather
+- "crust"         : Dried crust leather ready for finishing
+
+2.6 LwgEnergySource (Energy Source Taxonomy)
+--------------------------------------------
+Grid & Fossil Sources:
+- "grid_electricity" : State / municipal power grid
+- "diesel_hsd"       : High Speed Diesel for generators/boilers
+- "furnace_oil"      : Heavy Fuel Oil / Furnace oil
+- "natural_gas_png"  : Piped Natural Gas
+- "lpg"              : Liquefied Petroleum Gas
+- "coal"             : Industrial coal
+
+Renewable Energy Sources (Counted toward Renewable Energy Share %):
+- "solar_onsite"                     : On-site rooftop or ground-mount solar PV (is_onsite=True, is_renewable=True)
+- "purchased_renewable_electricity"  : Off-site green tariff or Power Purchase Agreement (PPA) (is_onsite=False, is_renewable=True)
+- "biomass_or_briquettes"            : Agricultural briquettes, wood pellets, or biomass (is_onsite=True, is_renewable=True)
+
+2.7 LwgEnergyUnit (Allowed Measurement Units)
+---------------------------------------------
+- "kwh"    : Kilowatt-hours (Electricity)
+- "mwh"    : Megawatt-hours (Large electricity)
+- "litres" : Litres (Liquid fuels: Diesel, Furnace Oil, LPG)
+- "tonnes" : Metric tonnes (Solid fuels: Coal, Biomass briquettes)
+- "kg"     : Kilograms (LPG cylinders, chemicals)
+- "scm"    : Standard cubic meters (Natural Gas PNG)
+- "gj"     : Gigajoules (Direct heat / steam)
+
+2.8 Energy Source to Unit Mapping Matrix
+-----------------------------------------
+The API strictly validates unit compatibility upon POST/PUT:
+| Energy Source                     | Allowed Units          | Multiplier to GJ (std) |
+|-----------------------------------|------------------------|------------------------|
+| grid_electricity                  | kwh, mwh               | 0.0036 per kWh         |
+| purchased_renewable_electricity   | kwh, mwh               | 0.0036 per kWh         |
+| solar_onsite                      | kwh, mwh               | 0.0036 per kWh         |
+| diesel_hsd                        | litres                 | 0.0386 per Litre       |
+| furnace_oil                       | litres                 | 0.0418 per Litre       |
+| natural_gas_png                   | scm                    | 0.0385 per SCM         |
+| lpg                               | kg, litres             | 0.0461 per kg / 0.026  |
+| coal                              | tonnes                 | 20.0000 per Tonne      |
+| biomass_or_briquettes             | tonnes                 | 15.0000 per Tonne      |
+
+2.9 LwgWaterSource (Water Intake Classifications)
+-------------------------------------------------
+Fresh Water Sources:
+- "borewell"            : Ground water extraction (Borewell / Tube well) -> Requires meter_id
+- "municipal_supply"    : Piped municipal / corporation water -> Requires meter_id
+- "tanker"              : Purchased private tanker water
+- "rainwater_harvested" : Harvested on-site rainwater
+
+Recycled Water Sources (Counted toward Recycled Water Share %):
+- "recycled_own_etp" : Treated effluent recycled from on-site ETP / RO plant
+- "recycled_cetp"    : Treated water received back from CETP
+
+2.10 LwgDocumentType (Evidence Vault Document Classifications)
+--------------------------------------------------------------
+- "consent_to_operate"            : State Pollution Control Board Consent (Air/Water) -> Requires expiry_date
+- "hazardous_waste_authorisation" : SPCB Hazardous Waste Authorization -> Requires expiry_date
+- "electricity_bill"              : Monthly utility power bill
+- "fuel_invoice"                  : Fuel purchase delivery challan or invoice
+- "meter_photo"                   : Photographic proof of water/energy meter reading
+- "lab_report"                    : ETP discharge or test lab analysis report
+- "other"                         : Other supporting audit evidence
+
+2.11 LwgMedalRating (Audit Medal Tiers & Scoring Thresholds)
+------------------------------------------------------------
+- "gold"    : Score >= 85.0%
+- "silver"  : Score >= 75.0% and < 85.0%
+- "bronze"  : Score >= 65.0% and < 75.0%
+- "audited" : Score >= 50.0% and < 65.0%
+- "fail"    : Score < 50.0%
+
+2.12 LwgSectionStatus (Audit Readiness Statuses)
+------------------------------------------------
+- "ready"       : Data completeness 100%, valid permits attached, no critical gaps (Green)
+- "gaps"        : Data entered but contains missing months, missing meter IDs, or expiring permits (Amber/Red)
+- "not_started" : No data entered for this section in the 24-month window (Gray)
+- "not_in_mvp"  : Protocol section outside current MVP tracking (Sections 1, 2, 3, 6, 7, 8, 9, 12, 13, 14, 15, 16, 17)
+
+2.13 LwgGapSeverity (Deficiency Alert Levels)
+---------------------------------------------
+- "red"   : Critical compliance failure (e.g., missing production data for a month, missing water meter ID, expired SPCB consent).
+- "amber" : Warning or quality issue (e.g., unmetered water source, purchased green power without PPA uploaded, permit expiring within 60 days).
+
+2.14 LwgSectionNumber (All 17 LWG Protocol Sections)
+----------------------------------------------------
+Section 1 : General Information (Non-critical, Non-scoring)
+Section 2 : Traceability: Subcontracted Operations (Critical)
+Section 3 : Social Audit (Non-critical)
+Section 4 : Operating Permits & Environment Approvals (Critical, MVP Section)
+Section 5 : Production Data (Critical, MVP Section)
+Section 6 : Incoming Traceability (Non-critical)
+Section 7 : Outgoing Traceability (Non-critical)
+Section 8 : Environmental Management Systems (Critical)
+Section 9 : Restricted Substances & Compliance (Critical)
+Section 10: Energy Consumption (Critical, MVP Section)
+Section 11: Water Usage (Critical, MVP Section)
+Section 12: Air & Noise Emissions (Critical)
+Section 13: Waste Management (Critical)
+Section 14: Effluent Treatment (Critical)
+Section 15: Health, Safety & Emergency Preparedness (Critical)
+Section 16: Chemical Management & Storage (Critical)
+Section 17: Operations & Housekeeping (Critical)
+
+*Critical Section Rule*: The facility's overall medal is capped at the MINIMUM
+medal achieved across any CRITICAL section. (Non-critical sections do not drag down
+the medal).
+
+
+================================================================================
+3. REST ENDPOINT REFERENCE (ALL 25 ENDPOINTS)
+================================================================================
+
+--------------------------------------------------------------------------------
+3.1 TANNERY PROFILE APIS
+--------------------------------------------------------------------------------
+
+[API 1] GET /api/v1/tenant/lwg/profile
+--------------------------------------
+Summary     : Retrieve the configured LWG tannery profile for the current tenant.
+Permission  : require_read("lwg")
+Query Params: None
+Response 200 (Profile exists):
+{
+  "success": true,
+  "status_code": 200,
+  "message": "LWG tannery profile retrieved.",
+  "data": {
+    "id": "e4b5f922-8172-4a0b-9df0-98319e72877a",
+    "tenant_id": "7b05cadc-9ab3-441a-9120-95f15d4ea883",
+    "facility_id": "8f319ab4-1a22-44df-b452-fbc216d29191",
+    "tannery_name": "Evergreen Tannery Pvt Ltd",
+    "state": "Tamil Nadu",
+    "city": "Ranipet",
+    "stages_run": ["stage_3_crust_to_finish"],
+    "effluent_treatment_type": "both",
+    "uses_subcontractors": false,
+    "output_unit": "sq_ft",
+    "data_window_start": "2024-11-01",
+    "data_window_end": "2026-10-31",
+    "departments": [
+      {
+        "id": "11111111-2222-3333-4444-555555555555",
+        "tenant_id": "7b05cadc-9ab3-441a-9120-95f15d4ea883",
+        "tannery_profile_id": "e4b5f922-8172-4a0b-9df0-98319e72877a",
+        "name": "Finishing",
+        "stage": "stage_3",
+        "description": "Buffing, coating and milling",
+        "is_active": true,
+        "created_at": "2026-11-24T08:00:00Z",
+        "updated_at": "2026-11-24T08:00:00Z"
+      }
+    ],
+    "created_at": "2026-11-24T08:00:00Z",
+    "updated_at": "2026-11-24T08:00:00Z"
+  },
+  "error": null,
+  "method": "GET",
+  "path": "/api/v1/tenant/lwg/profile",
+  "timestamp": "2026-11-24T09:00:00Z"
+}
+
+Response 200 (No profile configured yet):
+{
+  "success": true,
+  "status_code": 200,
+  "message": "No LWG profile configured.",
+  "data": null,
+  "error": null,
+  "method": "GET",
+  "path": "/api/v1/tenant/lwg/profile",
+  "timestamp": "2026-11-24T09:00:00Z"
+}
+
+
+[API 2] POST /api/v1/tenant/lwg/profile
+---------------------------------------
+Summary     : Create a new LWG Tannery Profile and auto-seed default factory departments.
+Permission  : require_write("lwg")
+Request Body: (ConfigDict extra="forbid")
+{
+  "facility_id": "8f319ab4-1a22-44df-b452-fbc216d29191", // UUID, required
+  "tannery_name": "Evergreen Tannery Pvt Ltd",           // string(1..255), required
+  "state": "Tamil Nadu",                                 // string(1..100), required
+  "city": "Ranipet",                                     // string(1..100), required
+  "stages_run": ["stage_3_crust_to_finish"],             // list[LwgStage], min_length=1, required
+  "effluent_treatment_type": "both",                     // LwgEffluentType, required
+  "uses_subcontractors": false,                          // boolean, default=false
+  "output_unit": "sq_ft"                                 // LwgOutputUnit, default="sq_ft"
+}
+Response 201 Created:
+Returns the created `LwgTanneryProfileResponse` (same as GET).
+Errors:
+- 409 Conflict: `LWG_PROFILE_ALREADY_EXISTS` (facility already has an LWG profile)
+- 422 Unprocessable: `LWG_AT_LEAST_ONE_STAGE_REQUIRED`
+
+
+[API 3] PUT /api/v1/tenant/lwg/profile
+--------------------------------------
+Summary     : Update an existing LWG Tannery Profile (e.g. modify stages, output unit, effluent type).
+Permission  : require_write("lwg")
+Request Body: (All fields optional, extra="forbid")
+{
+  "tannery_name": "Evergreen Leather International",
+  "state": "Tamil Nadu",
+  "city": "Ranipet",
+  "stages_run": ["stage_2_wetblue_to_crust", "stage_3_crust_to_finish"],
+  "effluent_treatment_type": "both",
+  "uses_subcontractors": true,
+  "output_unit": "m2"
+}
+Response 200 OK:
+Returns the updated `LwgTanneryProfileResponse`.
+Errors:
+- 404 Not Found: `No LWG profile exists to update.`
+
+
+--------------------------------------------------------------------------------
+3.2 FACTORY DEPARTMENTS APIS
+--------------------------------------------------------------------------------
+
+[API 4] GET /api/v1/tenant/lwg/departments
+------------------------------------------
+Summary     : List all factory departments configured under the tannery profile.
+Permission  : require_read("lwg")
+Query Params:
+- `active_only` (boolean, default=true): Filter only active departments.
+Response 200 OK:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Retrieved 3 LWG department(s).",
+  "data": [
+    {
+      "id": "22222222-3333-4444-5555-666666666666",
+      "tenant_id": "7b05cadc-9ab3-441a-9120-95f15d4ea883",
+      "tannery_profile_id": "e4b5f922-8172-4a0b-9df0-98319e72877a",
+      "name": "Beamhouse",
+      "stage": "stage_1",
+      "description": "Soaking, liming, de-hairing, and tanning",
+      "is_active": true,
+      "created_at": "2026-11-24T08:00:00Z",
+      "updated_at": "2026-11-24T08:00:00Z"
+    }
+  ]
+}
+
+
+[API 5] POST /api/v1/tenant/lwg/departments
+-------------------------------------------
+Summary     : Add a custom factory department (subunit) for sub-metering energy or water.
+Permission  : require_write("lwg")
+Request Body:
+{
+  "name": "Effluent Treatment Plant (RO Plant)", // string(1..150), required
+  "stage": "common",                             // LwgDepartmentStage, required
+  "description": "On-site wastewater recovery"   // string(max 500), optional
+}
+Response 201 Created:
+Returns the created `LwgDepartmentResponse`.
+Errors:
+- 404 Not Found: `LWG_PROFILE_NOT_FOUND`
+
+
+[API 6] PUT /api/v1/tenant/lwg/departments/{department_id}
+----------------------------------------------------------
+Summary     : Update an existing department's name, stage, description, or active status.
+Permission  : require_write("lwg")
+Path Params : `department_id` (UUID, required)
+Request Body: (All optional)
+{
+  "name": "Advanced ETP & ZLD Plant",
+  "stage": "common",
+  "description": "Zero liquid discharge unit",
+  "is_active": true
+}
+Response 200 OK:
+Returns the updated `LwgDepartmentResponse`.
+Errors:
+- 404 Not Found: `LWG_DEPARTMENT_NOT_FOUND`
+
+
+[API 7] DELETE /api/v1/tenant/lwg/departments/{department_id}
+-------------------------------------------------------------
+Summary     : Soft-delete a factory department.
+Permission  : require_write("lwg")
+Path Params : `department_id` (UUID, required)
+Response 200 OK:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Department deleted successfully.",
+  "data": null
+}
+
+
+--------------------------------------------------------------------------------
+3.3 MONTHLY PRODUCTION DATA APIS (SECTION 5)
+--------------------------------------------------------------------------------
+
+[API 8] GET /api/v1/tenant/lwg/production
+-----------------------------------------
+Summary     : List production throughput records for the tannery within the 24-month window.
+Permission  : require_read("lwg")
+Query Params:
+- `start_date` (date string "YYYY-MM-DD", optional): Filter start month.
+- `end_date`   (date string "YYYY-MM-DD", optional): Filter end month.
+Response 200 OK:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Retrieved 24 production record(s).",
+  "data": [
+    {
+      "id": "33333333-4444-5555-6666-777777777777",
+      "tenant_id": "7b05cadc-9ab3-441a-9120-95f15d4ea883",
+      "tannery_profile_id": "e4b5f922-8172-4a0b-9df0-98319e72877a",
+      "month": "2025-01-01",
+      "stage": "stage_3_crust_to_finish",
+      "input_quantity_tonnes": 12.5,
+      "input_material": "crust",
+      "output_quantity_m2": 9290.3,
+      "output_quantity_sqft": 100000.0,
+      "sold_at_stage_m2": 0.0,
+      "sold_at_stage_sqft": 0.0,
+      "notes": "January finishing run",
+      "created_at": "2026-11-24T08:00:00Z",
+      "updated_at": "2026-11-24T08:00:00Z"
+    }
+  ]
+}
+
+
+[API 9] POST /api/v1/tenant/lwg/production
+------------------------------------------
+Summary     : Log or upsert a monthly production record. Auto-converts area to m² and sq ft.
+Permission  : require_write("lwg")
+Behavior    : If an entry already exists for the same `(month, stage)`, it is automatically updated in place.
+Request Body: (ConfigDict extra="forbid")
+{
+  "month": "2025-01-01",                   // date, first day of month, required
+  "stage": "stage_3_crust_to_finish",      // LwgStage, required
+  "input_quantity_tonnes": 12.5,           // Decimal >= 0, required
+  "input_material": "crust",               // LwgInputMaterial, required
+  "output_quantity": 100000.0,             // Decimal >= 0, in user's profile output_unit
+  "sold_at_stage": 0.0,                    // Decimal >= 0, optional
+  "notes": "January export lot"            // string(max 2000), optional
+}
+Response 201 Created:
+Returns the created/upserted `LwgProductionResponse`.
+Errors:
+- 404 Not Found: `LWG_PROFILE_NOT_FOUND`
+- 422 Unprocessable: `LWG_MONTH_OUTSIDE_WINDOW` (month is outside sliding 24-month audit window)
+- 422 Unprocessable: `LWG_STAGE_NOT_CONFIGURED` (stage is not one of tannery's active stages)
+
+
+[API 10] DELETE /api/v1/tenant/lwg/production/{production_id}
+-------------------------------------------------------------
+Summary     : Soft-delete a monthly production record.
+Permission  : require_write("lwg")
+Path Params : `production_id` (UUID, required)
+Response 200 OK:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Production record deleted successfully.",
+  "data": null
+}
+
+
+--------------------------------------------------------------------------------
+3.4 MONTHLY ENERGY CONSUMPTION APIS (SECTION 10)
+--------------------------------------------------------------------------------
+
+[API 11] GET /api/v1/tenant/lwg/energy
+--------------------------------------
+Summary     : List monthly energy consumption records across sources and departments.
+Permission  : require_read("lwg")
+Query Params:
+- `start_date` (date string "YYYY-MM-DD", optional)
+- `end_date`   (date string "YYYY-MM-DD", optional)
+Response 200 OK:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Retrieved 12 energy consumption record(s).",
+  "data": [
+    {
+      "id": "44444444-5555-6666-7777-888888888888",
+      "tenant_id": "7b05cadc-9ab3-441a-9120-95f15d4ea883",
+      "tannery_profile_id": "e4b5f922-8172-4a0b-9df0-98319e72877a",
+      "month": "2025-01-01",
+      "source": "grid_electricity",
+      "quantity": 10000.0,
+      "unit": "kwh",
+      "energy_gj": 36.0,
+      "department_id": null,
+      "department_name": "Whole site",
+      "is_renewable": false,
+      "is_onsite": false,
+      "bill_proof_file_key": "tenants/7b05/lwg/electricity_bill_jan.pdf",
+      "created_at": "2026-11-24T08:00:00Z",
+      "updated_at": "2026-11-24T08:00:00Z"
+    }
+  ]
+}
+
+
+[API 12] POST /api/v1/tenant/lwg/energy
+---------------------------------------
+Summary     : Log or upsert monthly energy consumption. Auto-computes energy in GJ.
+Permission  : require_write("lwg")
+Behavior    : Upserts on `(month, source, department_id)`.
+Request Body: (ConfigDict extra="forbid")
+{
+  "month": "2025-01-01",                                      // date, required
+  "source": "solar_onsite",                                   // LwgEnergySource, required
+  "quantity": 5000.0,                                         // Decimal >= 0, required
+  "unit": "kwh",                                              // string, must be valid for source
+  "department_id": null,                                      // UUID or null for Whole Site
+  "bill_proof_file_key": "tenants/7b05/lwg/solar_log_jan.pdf" // S3 key, optional
+}
+Response 201 Created:
+Returns the created/upserted `LwgEnergyResponse`.
+Errors:
+- 404 Not Found: `LWG_PROFILE_NOT_FOUND`
+- 404 Not Found: `LWG_DEPARTMENT_NOT_FOUND` (if department_id specified and invalid)
+- 422 Unprocessable: `LWG_MONTH_OUTSIDE_WINDOW`
+- 422 Unprocessable: `LWG_INVALID_UNIT_FOR_SOURCE` (e.g. trying to enter "litres" for grid_electricity)
+- 422 Unprocessable: `LWG_RENEWABLE_PROOF_REQUIRED` (if purchased_renewable without proof document)
+
+
+[API 13] DELETE /api/v1/tenant/lwg/energy/{energy_id}
+-----------------------------------------------------
+Summary     : Soft-delete an energy record.
+Permission  : require_write("lwg")
+Path Params : `energy_id` (UUID, required)
+Response 200 OK:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Energy record deleted successfully.",
+  "data": null
+}
+
+
+--------------------------------------------------------------------------------
+3.5 MONTHLY WATER USAGE APIS (SECTION 11)
+--------------------------------------------------------------------------------
+
+[API 14] GET /api/v1/tenant/lwg/water
+-------------------------------------
+Summary     : List monthly water intake records across sources and meters.
+Permission  : require_read("lwg")
+Query Params:
+- `start_date` (date string, optional)
+- `end_date`   (date string, optional)
+Response 200 OK:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Retrieved 12 water record(s).",
+  "data": [
+    {
+      "id": "55555555-6666-7777-8888-999999999999",
+      "tenant_id": "7b05cadc-9ab3-441a-9120-95f15d4ea883",
+      "tannery_profile_id": "e4b5f922-8172-4a0b-9df0-98319e72877a",
+      "month": "2025-01-01",
+      "source": "borewell",
+      "volume_m3": 1500.0,
+      "meter_id": "BW-METER-01",
+      "department_id": null,
+      "department_name": "Whole site",
+      "meter_photo_file_key": "tenants/7b05/lwg/meter_bw_01.jpg",
+      "is_fresh_water": true,
+      "is_recycled": false,
+      "created_at": "2026-11-24T08:00:00Z",
+      "updated_at": "2026-11-24T08:00:00Z"
+    }
+  ]
+}
+
+
+[API 15] POST /api/v1/tenant/lwg/water
+--------------------------------------
+Summary     : Log or upsert monthly water intake. Auto-classifies fresh vs. recycled water.
+Permission  : require_write("lwg")
+Behavior    : Upserts on `(month, source, department_id)`.
+Request Body: (ConfigDict extra="forbid")
+{
+  "month": "2025-01-01",                                      // date, required
+  "source": "borewell",                                       // LwgWaterSource, required
+  "volume_m3": 1500.0,                                        // Decimal >= 0 (1 kL = 1 m3), required
+  "meter_id": "BW-METER-01",                                  // string, required for borewell & municipal
+  "department_id": null,                                      // UUID or null for Whole Site
+  "meter_photo_file_key": "tenants/7b05/lwg/meter_bw_01.jpg"  // S3 key, required for borewell
+}
+Response 201 Created:
+Returns the created/upserted `LwgWaterResponse`.
+Errors:
+- 404 Not Found: `LWG_PROFILE_NOT_FOUND`
+- 422 Unprocessable: `LWG_MONTH_OUTSIDE_WINDOW`
+- 422 Unprocessable: `LWG_METER_ID_REQUIRED` (if borewell/municipal intake logged without meter ID)
+- 422 Unprocessable: `LWG_METER_PHOTO_REQUIRED` (if borewell logged without meter photo)
+
+
+[API 16] DELETE /api/v1/tenant/lwg/water/{water_id}
+---------------------------------------------------
+Summary     : Soft-delete a water record.
+Permission  : require_write("lwg")
+Path Params : `water_id` (UUID, required)
+Response 200 OK:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Water record deleted successfully.",
+  "data": null
+}
+
+
+--------------------------------------------------------------------------------
+3.6 EVIDENCE VAULT APIS (SECTIONS 1–17)
+--------------------------------------------------------------------------------
+
+[API 17] GET /api/v1/tenant/lwg/evidence
+----------------------------------------
+Summary     : List uploaded compliance evidence documents tagged to LWG Protocol Sections 1 to 17.
+Permission  : require_read("lwg")
+Query Params:
+- `section_number` (integer 1..17, optional): Filter documents tagged to a specific protocol section.
+Response 200 OK:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Retrieved 1 evidence document(s).",
+  "data": [
+    {
+      "id": "66666666-7777-8888-9999-000000000000",
+      "tenant_id": "7b05cadc-9ab3-441a-9120-95f15d4ea883",
+      "tannery_profile_id": "e4b5f922-8172-4a0b-9df0-98319e72877a",
+      "file_key": "tenants/7b05/lwg/spcb_consent_2025.pdf",
+      "file_name": "SPCB_Consent_To_Operate_2025_2026.pdf",
+      "file_size_bytes": 524288,
+      "mime_type": "application/pdf",
+      "lwg_section": 4,
+      "document_type": "consent_to_operate",
+      "period_from": "2025-01-01",
+      "period_to": "2025-12-31",
+      "expiry_date": "2026-12-31",
+      "meter_id": null,
+      "notes": "Valid state pollution control board CTO certificate",
+      "created_at": "2026-11-24T08:00:00Z",
+      "updated_at": "2026-11-24T08:00:00Z"
+    }
+  ]
+}
+
+
+[API 18] POST /api/v1/tenant/lwg/evidence
+-----------------------------------------
+Summary     : Register and tag an uploaded evidence document to an LWG audit section.
+Permission  : require_write("lwg")
+Request Body: (ConfigDict extra="forbid")
+{
+  "file_key": "tenants/7b05/lwg/spcb_consent_2025.pdf", // string(1..500), S3 object key, required
+  "file_name": "SPCB_Consent_To_Operate.pdf",          // string(1..255), original filename, required
+  "file_size_bytes": 524288,                            // integer > 0 and <= 20971520 (20MB), required
+  "mime_type": "application/pdf",                       // string(1..100), required
+  "lwg_section": 4,                                     // integer 1..17, required
+  "document_type": "consent_to_operate",                // LwgDocumentType, required
+  "period_from": "2025-01-01",                          // date, optional
+  "period_to": "2025-12-31",                            // date, optional
+  "expiry_date": "2026-12-31",                          // date, required for consent & haz waste
+  "meter_id": null,                                     // string(max 100), optional
+  "notes": "State PCB Consent to Operate"               // string(max 2000), optional
+}
+Response 201 Created:
+Returns the created `LwgEvidenceResponse`.
+Errors:
+- 404 Not Found: `LWG_PROFILE_NOT_FOUND`
+- 422 Unprocessable: `LWG_EXPIRY_DATE_REQUIRED` (if consent_to_operate or hazardous_waste uploaded without expiry date)
+
+
+[API 19] DELETE /api/v1/tenant/lwg/evidence/{evidence_id}
+---------------------------------------------------------
+Summary     : Soft-delete an evidence record.
+Permission  : require_write("lwg")
+Path Params : `evidence_id` (UUID, required)
+Response 200 OK:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Evidence document deleted successfully.",
+  "data": null
+}
+
+
+--------------------------------------------------------------------------------
+3.7 PREVIOUS AUDIT RESULT & MEDAL EVALUATION APIS
+--------------------------------------------------------------------------------
+
+[API 20] GET /api/v1/tenant/lwg/audit-result
+--------------------------------------------
+Summary     : Get the latest recorded LWG audit scores, overall medal, and holding-down sections.
+Permission  : require_read("lwg")
+Query Params: None
+Response 200 OK:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Latest LWG audit result retrieved.",
+  "data": {
+    "id": "77777777-8888-9999-0000-111111111111",
+    "tenant_id": "7b05cadc-9ab3-441a-9120-95f15d4ea883",
+    "tannery_profile_id": "e4b5f922-8172-4a0b-9df0-98319e72877a",
+    "audit_date": "2024-06-15",
+    "overall_medal": "bronze",
+    "section_scores": {
+      "4": 92.0,
+      "5": 90.0,
+      "10": 88.0,
+      "11": 72.0
+    },
+    "holding_down_sections": [11],
+    "audit_report_file_key": "tenants/7b05/lwg/previous_audit_report.pdf",
+    "notes": "Section 11 held down overall medal from Gold to Bronze",
+    "created_at": "2026-11-24T08:00:00Z",
+    "updated_at": "2026-11-24T08:00:00Z"
+  }
+}
+
+
+[API 21] POST /api/v1/tenant/lwg/audit-result
+---------------------------------------------
+Summary     : Record previous audit scores (Sections 2 to 17) and compute medal ranking with holding-down penalties.
+Permission  : require_write("lwg")
+Request Body: (ConfigDict extra="forbid")
+{
+  "audit_date": "2024-06-15",                   // date, required
+  "section_scores": {                           // dict[string, float], required
+    "4": 92.0,                                  // Key: section number string "2".."17"
+    "5": 90.0,                                  // Value: score percentage 0.0 to 100.0
+    "10": 88.0,
+    "11": 72.0
+  },
+  "audit_report_file_key": "tenants/7b05/lwg/report.pdf", // S3 key, optional
+  "notes": "Audited by John Doe, Lead Auditor"  // string(max 2000), optional
+}
+Response 201 Created:
+{
+  "success": true,
+  "status_code": 201,
+  "message": "Audit scores saved. Predicted Medal: BRONZE.",
+  "data": {
+    "id": "77777777-8888-9999-0000-111111111111",
+    "tenant_id": "7b05cadc-9ab3-441a-9120-95f15d4ea883",
+    "tannery_profile_id": "e4b5f922-8172-4a0b-9df0-98319e72877a",
+    "audit_date": "2024-06-15",
+    "overall_medal": "bronze",
+    "section_scores": { "4": 92.0, "5": 90.0, "10": 88.0, "11": 72.0 },
+    "holding_down_sections": [11],
+    "audit_report_file_key": "tenants/7b05/lwg/report.pdf",
+    "notes": "Audited by John Doe, Lead Auditor",
+    "created_at": "2026-11-24T08:00:00Z",
+    "updated_at": "2026-11-24T08:00:00Z"
+  }
+}
+Errors:
+- 404 Not Found: `LWG_PROFILE_NOT_FOUND`
+- 422 Unprocessable: Validation error if score < 0 or > 100, or section key < 2 or > 17.
+
+
+--------------------------------------------------------------------------------
+3.8 COMPLIANCE & READINESS DASHBOARD APIS
+--------------------------------------------------------------------------------
+
+[API 22] GET /api/v1/tenant/lwg/dashboard
+-----------------------------------------
+Summary     : Get the complete, aggregated LWG Compliance Dashboard:
+              - Readiness tile % (overall, production, energy, water)
+              - Energy Intensity tile (MJ/m², L12 vs P12, YoY % change, favorable flag)
+              - Water Intensity tile (L/m², L12 vs P12, YoY % change, favorable flag)
+              - Renewable energy share % and on-site solar share %
+              - Recycled water share %
+              - 24-month grid completeness array (24 month cells)
+              - Actionable gap items with direct deep-link fix URLs
+              - 17 LWG section readiness status breakdown
+              - Previous audit medal status and critical bottlenecks
+Permission  : require_read("lwg")
+Query Params: None
+Response 200 OK:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "LWG compliance dashboard generated successfully.",
+  "data": {
+    "readiness": {
+      "overall_percent": 95.8,
+      "production_percent": 100.0,
+      "energy_percent": 100.0,
+      "water_percent": 87.5,
+      "status": "gaps"
+    },
+    "energy_intensity": {
+      "title": "Energy Intensity",
+      "unit": "MJ/m²",
+      "current_l12": 59.9,
+      "previous_p12": 65.9,
+      "yoy_change_percent": -9.1,
+      "is_favorable": true
+    },
+    "water_intensity": {
+      "title": "Water Intensity",
+      "unit": "L/m²",
+      "current_l12": 148.0,
+      "previous_p12": 161.5,
+      "yoy_change_percent": -8.4,
+      "is_favorable": true
+    },
+    "renewable_share": {
+      "title": "Renewable Energy Share",
+      "percentage": 8.0,
+      "detail": "8.0% of total energy from solar & biomass"
+    },
+    "onsite_renewable_share": {
+      "title": "On-site Renewable Share",
+      "percentage": 6.5,
+      "detail": "Rooftop solar PV generation"
+    },
+    "recycled_water_share": {
+      "title": "Recycled Water Share",
+      "percentage": 15.0,
+      "detail": "15.0% intake from on-site ETP / RO recycling"
+    },
+    "month_grid": [
+      {
+        "month": "2024-11-01",
+        "month_label": "Nov 2024",
+        "production_complete": true,
+        "energy_complete": true,
+        "water_complete": true,
+        "is_fully_complete": true
+      },
+      {
+        "month": "2025-05-01",
+        "month_label": "May 2025",
+        "production_complete": true,
+        "energy_complete": true,
+        "water_complete": false,
+        "is_fully_complete": false
+      }
+      // ... 24 items in chronological order
+    ],
+    "gap_list": [
+      {
+        "severity": "red",
+        "check_code": "GAP_WATER_MISSING_MONTH",
+        "message": "Water consumption missing for May 2025.",
+        "fix_url": "/tenant/lwg/water?month=2025-05-01",
+        "section_number": 11,
+        "month": "2025-05-01"
+      },
+      {
+        "severity": "amber",
+        "check_code": "GAP_PERMIT_EXPIRING",
+        "message": "State PCB Consent to Operate expires on 2026-12-31 (within 60 days).",
+        "fix_url": "/tenant/lwg/evidence?section=4",
+        "section_number": 4,
+        "month": null
+      }
+    ],
+    "section_statuses": [
+      {
+        "section_number": 4,
+        "section_name": "Operating Permits & Environmental Approvals",
+        "status": "ready",
+        "is_in_mvp": true,
+        "is_critical": true
+      },
+      {
+        "section_number": 5,
+        "section_name": "Production Data",
+        "status": "ready",
+        "is_in_mvp": true,
+        "is_critical": true
+      },
+      {
+        "section_number": 10,
+        "section_name": "Energy Consumption",
+        "status": "ready",
+        "is_in_mvp": true,
+        "is_critical": true
+      },
+      {
+        "section_number": 11,
+        "section_name": "Water Usage",
+        "status": "gaps",
+        "is_in_mvp": true,
+        "is_critical": true
+      },
+      {
+        "section_number": 8,
+        "section_name": "Environmental Management Systems",
+        "status": "not_in_mvp",
+        "is_in_mvp": false,
+        "is_critical": true
+      }
+      // ... all 17 sections
+    ],
+    "medal_status": {
+      "overall_medal": "bronze",
+      "section_ratings": {
+        "4": "gold",
+        "5": "gold",
+        "10": "gold",
+        "11": "bronze"
+      },
+      "holding_down_sections": [11],
+      "holding_down_section_names": ["Water Usage (Section 11)"],
+      "message": "Critical Section 11 (Water Usage) has score 72.0% which caps overall tannery medal at Bronze."
+    }
+  }
+}
+
+
+--------------------------------------------------------------------------------
+3.9 BULK EXCEL INGESTION & DATA PACK EXPORT APIS
+--------------------------------------------------------------------------------
+
+[API 23] GET /api/v1/tenant/lwg/excel/template
+---------------------------------------------
+Summary     : Download the official 3-sheet blank Excel template (.xlsx) for 24-month back-data entry:
+              Sheet 1: "Production" (Month, Stage, Input Tonnes, Input Material, Output Area, Sold Area, Notes)
+              Sheet 2: "Energy" (Month, Source, Quantity, Unit, Department, Proof Key)
+              Sheet 3: "Water" (Month, Source, Volume m3, Meter ID, Department, Photo Key)
+Permission  : require_read("lwg")
+Response 200:
+- Headers:
+  - `Content-Type`: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+  - `Content-Disposition`: `attachment; filename="LWG_Bulk_Back_Data_Template.xlsx"`
+- Binary file content (.xlsx)
+
+
+[API 24] POST /api/v1/tenant/lwg/excel/upload
+--------------------------------------------
+Summary     : Upload a filled 3-sheet Excel template to bulk import back data.
+              Performs atomic row validation, detailed error reporting, and upserts valid records.
+Permission  : require_write("lwg")
+Content-Type: `multipart/form-data`
+Form Fields :
+- `file`: UploadFile (binary .xlsx file, required)
+Response 200 OK:
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Excel import completed: 72 row(s) imported, 0 error(s).",
+  "data": {
+    "success": true,
+    "production_rows_imported": 24,
+    "energy_rows_imported": 24,
+    "water_rows_imported": 24,
+    "total_imported": 72,
+    "total_failed": 0,
+    "errors": []
+  }
+}
+
+Response 200 with row errors (Partial or full failure):
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Excel import completed: 70 row(s) imported, 2 error(s).",
+  "data": {
+    "success": false,
+    "production_rows_imported": 24,
+    "energy_rows_imported": 23,
+    "water_rows_imported": 23,
+    "total_imported": 70,
+    "total_failed": 2,
+    "errors": [
+      {
+        "sheet_name": "Energy",
+        "row_number": 15,
+        "field": "unit",
+        "error_message": "Unit 'litres' is not allowed for energy source 'grid_electricity'. Allowed units: kwh, mwh.",
+        "raw_data": { "month": "2025-06-01", "source": "grid_electricity", "quantity": 12000, "unit": "litres" }
+      },
+      {
+        "sheet_name": "Water",
+        "row_number": 8,
+        "field": "meter_id",
+        "error_message": "A meter ID is required for water source 'borewell'.",
+        "raw_data": { "month": "2024-12-01", "source": "borewell", "volume_m3": 1400, "meter_id": "" }
+      }
+    ]
+  }
+}
+Errors:
+- 422 Unprocessable: `Invalid file format. Please upload an Excel (.xlsx) file.`
+- 422 Unprocessable: `The uploaded file is empty.`
+
+
+[API 25] GET /api/v1/tenant/lwg/excel/export
+-------------------------------------------
+Summary     : Download the official 6-sheet LWG Auditor Data Pack formatted per LWG Issue 7.x standards:
+              Sheet 1: "Tannery Profile" (URN, Name, Control, Stages, Effluent, Subcontractors, Window bounds)
+              Sheet 2: "Executive Summary" (Readiness %, L12 vs P12 Intensity, YoY change, Medal standing)
+              Sheet 3: "Production 24M" (Full 24-month throughput in m² and sq ft, material classifications)
+              Sheet 4: "Energy 24M" (Monthly breakdown by fuel source, kWh, litres, tonnes, total GJ, renewable %)
+              Sheet 5: "Water 24M" (Monthly breakdown by source, m³, fresh vs. recycled, meter IDs)
+              Sheet 6: "Evidence Index" (Audit vault documents tagged to Sections 1 to 17, permit expiry dates)
+Permission  : require_read("lwg")
+Response 200:
+- Headers:
+  - `Content-Type`: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+  - `Content-Disposition`: `attachment; filename="LWG_Auditor_Data_Pack_URN-8819_20261124.xlsx"`
+- Binary file content (.xlsx with professional headers, formatting, auto-fit columns)
+
+
+================================================================================
+4. DOMAIN EXCEPTIONS & HTTP ERROR CODES DICTIONARY
+================================================================================
+
+The table below lists every typed exception raised by the LWG module:
+
+| Exception Class                      | HTTP Code | Error Code String                 | Description / Trigger Cause                                                   |
+|--------------------------------------|-----------|-----------------------------------|-------------------------------------------------------------------------------|
+| LwgProfileNotFoundException          | 404       | LWG_PROFILE_NOT_FOUND             | No tannery profile exists for the tenant. Must complete initial profile setup.|
+| LwgProfileAlreadyExistsException     | 409       | LWG_PROFILE_ALREADY_EXISTS        | An LWG profile is already registered for this facility ID.                    |
+| LwgDepartmentNotFoundException       | 404       | LWG_DEPARTMENT_NOT_FOUND          | Department ID does not exist or belongs to another tenant.                    |
+| LwgProductionNotFoundException       | 404       | LWG_PRODUCTION_NOT_FOUND          | Production record ID does not exist.                                          |
+| LwgEnergyNotFoundException           | 404       | LWG_ENERGY_NOT_FOUND              | Energy consumption record ID does not exist.                                  |
+| LwgWaterNotFoundException            | 404       | LWG_WATER_NOT_FOUND               | Water intake record ID does not exist.                                        |
+| LwgEvidenceNotFoundException         | 404       | LWG_EVIDENCE_NOT_FOUND            | Evidence vault document ID does not exist.                                    |
+| LwgAuditResultNotFoundException      | 404       | LWG_AUDIT_RESULT_NOT_FOUND         | No previous audit result recorded for this tannery profile.                   |
+| LwgMonthOutsideWindowException       | 422       | LWG_MONTH_OUTSIDE_WINDOW          | Month date entered is before window start or after window end date.           |
+| LwgStageNotConfiguredException       | 422       | LWG_STAGE_NOT_CONFIGURED          | Attempted to log production for a stage not configured in tannery stages_run. |
+| LwgAtLeastOneStageRequiredException  | 422       | LWG_AT_LEAST_ONE_STAGE_REQUIRED   | Tannery profile must have at least one valid manufacturing stage selected.    |
+| LwgInvalidUnitForSourceException     | 422       | LWG_INVALID_UNIT_FOR_SOURCE       | Unit entered does not match allowed units for the energy source.              |
+| LwgMeterIdRequiredException          | 422       | LWG_METER_ID_REQUIRED             | Borewell or Municipal water intake was logged without a meter ID.             |
+| LwgMeterPhotoRequiredException       | 422       | LWG_METER_PHOTO_REQUIRED          | Borewell water entry logged without photographic proof.                       |
+| LwgRenewableProofRequiredException   | 422       | LWG_RENEWABLE_PROOF_REQUIRED      | Purchased renewable electricity entered without PPA / green tariff file key.  |
+| LwgExpiryDateRequiredException       | 422       | LWG_EXPIRY_DATE_REQUIRED          | SPCB Consent or Haz Waste document uploaded without an expiry date.           |
+| LwgExcelImportException              | 422       | LWG_EXCEL_IMPORT_ERROR            | Malformed Excel file, missing sheets, or missing mandatory header columns.    |
+
+
+================================================================================
+5. CORE BUSINESS LOGIC & CONVERSION RULES
+================================================================================
+
+5.1 The 24-Month Audit Data Window
+-----------------------------------
+- The LWG Protocol Issue 7 requires exactly 24 continuous calendar months of audited data.
+- The 24 months are partitioned into two 12-month periods:
+  - Previous 12 Months (P12): Months 1 through 12 of the window.
+  - Latest 12 Months (L12)  : Months 13 through 24 of the window.
+- The window is defined by `data_window_start` (first day of Month 1) and `data_window_end`
+  (last day of Month 24).
+- Logging data outside this window triggers `LwgMonthOutsideWindowException`.
+
+5.2 Leather Area Normalization
+------------------------------
+- Input values in square feet are normalized: `Area_m2 = Area_sqft * 0.092903`
+- Input values in square meters are normalized: `Area_sqft = Area_m2 * 10.7639`
+- Both fields (`output_quantity_m2`, `output_quantity_sqft`) are stored in the DB row
+  and returned in responses.
+
+5.3 Energy & Water Intensity Math
+----------------------------------
+- Energy Intensity ($MJ/m²$):
+  $$Intensity_{Energy} = \frac{\text{Total Energy in GJ} \times 1000}{\text{Denominator Stage Area in } m²}$$
+- Water Intensity ($L/m²$):
+  $$Intensity_{Water} = \frac{\text{Total Fresh Water in } m³ \times 1000}{\text{Denominator Stage Area in } m²}$$
+- Year-over-Year (YoY) Change %:
+  $$YoY\% = \frac{Intensity_{L12} - Intensity_{P12}}{Intensity_{P12}} \times 100$$
+- A NEGATIVE YoY percentage means intensity decreased (efficiency improved), marked as
+  `is_favorable = true` (Green).
+
+5.4 Renewable & Recycled Share
+------------------------------
+- Renewable Energy Share %:
+  $$Share_{Renewable} = \frac{GJ_{\text{solar}} + GJ_{\text{purchased renewable}} + GJ_{\text{biomass}}}{\text{Total Energy } GJ} \times 100$$
+- Recycled Water Share %:
+  $$Share_{Recycled} = \frac{Volume_{\text{own ETP}} + Volume_{\text{CETP recycled}}}{\text{Total Water Intake } m³} \times 100$$
+
+================================================================================
+END OF API SPECIFICATION
+================================================================================

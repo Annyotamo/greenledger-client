@@ -23,6 +23,7 @@ export type FeatureKey =
     | "brsr"
     | "cbam"
     | "eia"
+    | "lwg"
     // Organization Infrastructure
     | "facilities"
     | "reporting_periods"
@@ -53,6 +54,7 @@ export interface UINavigationManifest {
     brsr: boolean;
     cbam: boolean;
     eia: boolean;
+    lwg: boolean;
     facilities: boolean;
     reporting_periods: boolean;
     analytics: boolean;

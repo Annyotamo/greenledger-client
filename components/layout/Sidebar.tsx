@@ -84,7 +84,7 @@ export function Sidebar() {
     const navManifest = user?.ui_navigation;
 
     const beforeActivities = MAIN_NAV.filter(
-        (i) => (i.label === "Dashboard" || i.label === "Facilities" || i.label === "EU CBAM") && isNavVisible(i, navManifest),
+        (i) => (i.label === "Dashboard" || i.label === "Facilities" || i.label === "EU CBAM" || i.label === "Leather (LWG)") && isNavVisible(i, navManifest),
     );
     const valueChainItem = MAIN_NAV.find((i) => i.label === "Value Chain");
     const showValueChain = valueChainItem ? isNavVisible(valueChainItem, navManifest) : false;

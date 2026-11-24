@@ -1,0 +1,735 @@
+================================================================================
+                      GREENLEDGER ESG PLATFORM
+   LEATHER WORKING GROUP (LWG) MVP MODULE — FRONTEND INTEGRATION & ARCHITECTURE
+================================================================================
+Document Version : 1.0.0
+Audience         : Frontend Engineering Team, UI Developers, and AI Coding Agents
+Target Module    : Leather Working Group (LWG) Tannery Audit Certification MVP
+Protocol Version : LWG Environmental Audit Protocol Issue 7.x
+Backend Base API : /api/v1/tenant/lwg
+================================================================================
+
+
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+1. EXECUTIVE SUMMARY & DOMAIN CONTEXT
+   1.1 Purpose of the LWG Module
+   1.2 Core LWG Protocol Issue 7 Concepts
+   1.3 The 24-Month Audit Data Window (P12 vs. L12)
+   1.4 Critical Sections & Medal Rating Hierarchy
+
+2. FRONTEND ARCHITECTURE & GLOBAL NAVIGATION
+   2.1 Route Structure & URL Hierarchy
+   2.2 Global State & Initial Profile Guard
+   2.3 Master Layout & Tannery Header Bar
+
+3. SCREEN-BY-SCREEN UI LAYOUT & PANEL ARCHITECTURE
+   3.1 Screen 1: Tannery Profile & Factory Departments Setup
+   3.2 Screen 2: Compliance & Readiness Executive Dashboard
+   3.3 Screen 3: Monthly Production Data Entry (Section 5)
+   3.4 Screen 4: Monthly Energy Consumption (Section 10)
+   3.5 Screen 5: Monthly Water Usage (Section 11)
+   3.6 Screen 6: Evidence Vault & Document Tagging (Sections 1–17)
+   3.7 Screen 7: Previous Audit Scoring & Medal Simulation (Section 9)
+   3.8 Screen 8: Excel Bulk Ingestion & Auditor Data Pack Export
+
+4. STEP-BY-STEP USER FLOWS & TRANSITIONS
+   4.1 Flow A: First-Time Tannery Onboarding & Configuration
+   4.2 Flow B: Routine Monthly Data Ingestion (Manual Entry)
+   4.3 Flow C: Historic 24-Month Data Ingestion via Excel
+   4.4 Flow D: Audit Readiness Gap Resolution
+   4.5 Flow E: Medal Simulation & Bottleneck Elimination
+   4.6 Flow F: Official Auditor Data Pack Export
+
+5. FRONTEND STATE MANAGEMENT & QUERY INVALIDATION
+   5.1 Query Keys Hierarchy (TanStack Query / SWR)
+   5.2 Cache Invalidation Rules on Mutations
+
+6. CLIENT-SIDE VALIDATION & DYNAMIC FORM BEHAVIORS
+   6.1 Output Area Conversion (sq ft <-> m²)
+   6.2 Dynamic Energy Unit Filtering
+   6.3 Water Meter Enforcement Rules
+   6.4 24-Month Date Picker Constraints
+   6.5 S3 Direct File Upload Workflow
+
+7. COMPREHENSIVE API CONTRACT CHEAT SHEET
+
+
+================================================================================
+1. EXECUTIVE SUMMARY & DOMAIN CONTEXT
+================================================================================
+
+1.1 Purpose of the LWG Module
+------------------------------
+The Leather Working Group (LWG) is the premier global environmental certification
+standard for leather manufacturing facilities (tanneries). Achieving an LWG Medal
+(Gold, Silver, Bronze, or Audited) is a prerequisite for supplying major global
+brands (e.g., Nike, Adidas, Timberland, Puma, Coach).
+
+The GreenLedger LWG MVP Module provides tannery compliance teams with an end-to-end
+solution to:
+1. Configure facility parameters, operated stages, and factory departments.
+2. Maintain a continuous 24-month sliding window of monthly operational data.
+3. Track and normalize production throughput (in m² and sq ft).
+4. Monitor monthly energy consumption and compute energy intensity in MJ/m².
+5. Monitor monthly fresh and recycled water intake and compute water intensity in L/m².
+6. Calculate renewable energy share % and recycled water share %.
+7. Compare Latest 12 Months (L12) against Previous 12 Months (P12) for Year-over-Year (YoY) progress.
+8. Securely store and tag compliance evidence documents across all 17 LWG sections.
+9. Simulate previous and predicted audit scores, identifying "holding-down" bottleneck sections.
+10. Download blank 3-sheet bulk back-data Excel templates and ingest them with row-level error reporting.
+11. Export the official 6-sheet LWG Auditor Data Pack formatted to Issue 7.x standards.
+
+1.2 Core LWG Protocol Issue 7 Concepts
+--------------------------------------
+- Issue 7 evaluates 17 audit sections. Sections 4 (Permits), 5 (Production), 10 (Energy),
+  and 11 (Water) represent the core quantitative operational backbone managed in this MVP.
+- Section 4: Operating permits (e.g., SPCB Consent to Operate, Hazardous Waste Authorization).
+  Permits must be non-expired throughout the audit window.
+- Section 5: Monthly leather production area and material inputs.
+- Section 10: Monthly energy consumption by source, conversion to GJ, and intensity per m².
+- Section 11: Monthly fresh vs. recycled water intake, meter readings, and intensity per m².
+
+1.3 The 24-Month Audit Data Window (P12 vs. L12)
+------------------------------------------------
+- LWG audits require 24 continuous calendar months of audited data.
+- The 24 months are anchored to the tannery profile's `data_window_start` (first day of Month 1)
+  and `data_window_end` (last day of Month 24).
+- The window is partitioned into two 12-month periods:
+  * Previous 12 Months (P12): Months 1 through 12.
+  * Latest 12 Months (L12)  : Months 13 through 24.
+- Metrics are calculated separately for P12 and L12, and then compared for YoY trajectory:
+  * Energy Intensity YoY %: If negative, efficiency has improved (favorable/green).
+  * Water Intensity YoY % : If negative, efficiency has improved (favorable/green).
+
+1.4 Critical Sections & Medal Rating Hierarchy
+----------------------------------------------
+- Protocol Issue 7 defines CRITICAL sections: 2, 4, 5, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17.
+- NON-CRITICAL sections: 1, 3, 6, 7.
+- Scoring Tiers:
+  * Gold    : >= 85.0%
+  * Silver  : 75.0% to 84.9%
+  * Bronze  : 65.0% to 74.9%
+  * Audited : 50.0% to 64.9%
+  * Fail    : < 50.0%
+- Holding-Down Rule: The facility's overall medal CANNOT exceed the rating of its lowest
+  scoring CRITICAL section!
+  Example: If Section 10 (Energy) is 88% (Gold), Section 4 (Permits) is 90% (Gold), but
+  Section 11 (Water) is 72% (Bronze), the facility's OVERALL MEDAL IS CAPPED AT BRONZE.
+  The frontend must explicitly highlight Section 11 as the "Holding-Down Section".
+
+
+================================================================================
+2. FRONTEND ARCHITECTURE & GLOBAL NAVIGATION
+================================================================================
+
+2.1 Route Structure & URL Hierarchy
+-----------------------------------
+We recommend the following clean route hierarchy under the tenant portal:
+
+/tenant/lwg
+  ├── /onboarding             -> Screen 1 (First-time profile setup wizard)
+  ├── /dashboard              -> Screen 2 (Executive Compliance & Readiness Overview)
+  ├── /production             -> Screen 3 (Monthly Production Grid & Form)
+  ├── /energy                 -> Screen 4 (Monthly Energy Grid, Sources & Subunits)
+  ├── /water                  -> Screen 5 (Monthly Water Grid, Sources & Meters)
+  ├── /evidence               -> Screen 6 (Evidence Vault across Sections 1–17)
+  ├── /audit-simulation       -> Screen 7 (Previous Audit Scoring & Medal Simulator)
+  ├── /departments            -> Screen 1b (Factory Departments / Subunits Settings)
+  └── /excel-tools            -> Screen 8 (Template Download, Bulk Ingestion & Export)
+
+2.2 Global State & Initial Profile Guard
+----------------------------------------
+Before rendering any operational view:
+1. Fire: `GET /api/v1/tenant/lwg/profile`
+2. Conditional Rendering:
+   - If `res.data === null`: The tenant has not onboarded their tannery yet.
+     -> Automatically redirect to `/tenant/lwg/onboarding`.
+   - If `res.data !== null`: The profile exists. Store profile in state/context:
+     - `tannery_name`, `lwg_urn`, `output_unit` ("sq_ft" | "m2")
+     - `data_window_start`, `data_window_end`
+     - `stages_run`, `effluent_treatment_type`
+     - `departments` list
+     -> Allow navigation to all sub-routes.
+
+2.3 Master Layout & Tannery Header Bar
+---------------------------------------
+Every screen in `/tenant/lwg/*` (except Onboarding) should render a persistent,
+top Master Header Bar displaying:
+- Tannery Name & City/State badge (e.g., "Evergreen Tannery Pvt Ltd • Ranipet, Tamil Nadu")
+- Active 24-Month Data Window Badge (e.g., "Audit Window: Nov 2024 – Oct 2026")
+- Configured Preferred Area Unit (e.g., "Default Unit: sq ft")
+- Quick Action Buttons:
+  * "Download Auditor Pack" (Triggers `GET /api/v1/tenant/lwg/excel/export`)
+  * "Bulk Excel Import" (Opens Excel upload drawer/modal)
+- Tab Navigation Bar:
+  [ Dashboard ]  [ Production ]  [ Energy ]  [ Water ]  [ Evidence Vault ]  [ Medal Simulator ]  [ Settings ]
+
+
+================================================================================
+3. SCREEN-BY-SCREEN UI LAYOUT & PANEL ARCHITECTURE
+================================================================================
+
+--------------------------------------------------------------------------------
+3.1 Screen 1: Tannery Profile & Factory Departments Setup
+--------------------------------------------------------------------------------
+Primary Purpose: Initial facility onboarding and ongoing settings management.
+API Endpoints  :
+- `GET  /api/v1/tenant/lwg/profile`
+- `POST /api/v1/tenant/lwg/profile` (Create)
+- `PUT  /api/v1/tenant/lwg/profile` (Update)
+- `GET  /api/v1/tenant/lwg/departments`
+- `POST /api/v1/tenant/lwg/departments`
+- `PUT  /api/v1/tenant/lwg/departments/{id}`
+- `DELETE /api/v1/tenant/lwg/departments/{id}`
+
+Layout & Panels:
+Panel 1: Tannery Profile Form (Left Panel or Top Section)
+- Facility Selector Dropdown: Populated from existing GreenLedger tenant facilities (`GET /api/v1/tenant/facilities`).
+- Tannery Registered Name Input (Text field, required).
+- State and City Inputs (Text fields, required).
+- Production Stages Run (Multi-select Checkbox Group, at least 1 required):
+  [ ] Stage 1: Raw hide to Wet Blue (Beamhouse & Tanning)
+  [ ] Stage 2: Wet Blue to Crust (Re-tanning & Dyeing)
+  [ ] Stage 3: Crust to Finished Leather (Coating & Finishing)
+  [ ] Stage 1 to 3: Fully Integrated Tannery
+  [ ] Stage 2 to 3: Wet Blue to Finished Leather
+- Preferred Leather Area Unit (Radio Button):
+  (•) Square Feet (sq ft)   ( ) Square Meters (m²)
+- Effluent Treatment Configuration (Dropdown / Segmented Control):
+  * "Direct discharge with own on-site ETP" (`direct_discharge_own_etp`)
+  * "Pre-treatment with discharge to CETP" (`discharge_to_cetp`)
+  * "Both on-site ETP and CETP" (`both`)
+- Subcontractor Operations: Toggle switch ("Facility uses external subcontracting").
+
+Panel 2: Factory Departments / Subunits (Right Panel or Bottom Section)
+- Displays table of active departments for energy/water allocation.
+- Auto-seeded upon profile creation (e.g. Beamhouse, Tan yard, Re-tanning, Finishing, ETP, Boiler house).
+- "Add Department" button: Opens modal with Name, Stage (`stage_1`, `stage_2`, `stage_3`, `common`), and Description.
+- Actions per row: Edit department, Deactivate / Delete department.
+
+
+--------------------------------------------------------------------------------
+3.2 Screen 2: Compliance & Readiness Executive Dashboard
+--------------------------------------------------------------------------------
+Primary Purpose: Central command center for audit readiness, intensity benchmarking,
+                 24-month grid completeness, actionable gap scanning, and medal standing.
+API Endpoint   : `GET /api/v1/tenant/lwg/dashboard`
+
+Layout & Panels:
+Panel 1: Top Metric Cards (4 Key Metrics)
+- Card 1: Audit Readiness Gauge / Progress Bar
+  * Percentage: `data.readiness.overall_percent` (e.g., 95.8%)
+  * Sub-bars: Production (100%), Energy (100%), Water (87.5%)
+  * Badge: "Ready" (Green) or "Action Required: Gaps" (Amber/Red)
+- Card 2: Energy Intensity (MJ/m²)
+  * Primary value: `data.energy_intensity.current_l12` (e.g., 59.9 MJ/m²)
+  * Comparison: P12 benchmark (65.9 MJ/m²)
+  * Trajectory badge: "-9.1% YoY" (Green arrow down = Favorable efficiency gain)
+- Card 3: Water Intensity (L/m²)
+  * Primary value: `data.water_intensity.current_l12` (e.g., 148.0 L/m²)
+  * Comparison: P12 benchmark (161.5 L/m²)
+  * Trajectory badge: "-8.4% YoY" (Green arrow down = Favorable efficiency gain)
+- Card 4: Environmental Shares & Renewables
+  * Renewable Energy: `data.renewable_share.percentage`% (with breakdown e.g. "6.5% on-site solar")
+  * Recycled Water: `data.recycled_water_share.percentage`% (e.g. "15.0% treated ETP water")
+
+Panel 2: 24-Month Audit Data Matrix (The Month Grid)
+- Visual 24-month timeline matrix spanning Month 1 through Month 24.
+- Split visually into two 12-month blocks: [ Previous 12 Months (P12) ] and [ Latest 12 Months (L12) ].
+- Each month column displays 3 status dots/indicators:
+  * Dot 1: Production (Green check if logged, Red cross if missing)
+  * Dot 2: Energy (Green check if logged, Red cross if missing)
+  * Dot 3: Water (Green check if logged, Red cross if missing)
+- Hovering/clicking a month cell opens a quick flyout with recorded figures or a direct link to log that month.
+
+Panel 3: Actionable Audit Gaps Scanner (Two-column: Left = Gaps, Right = Medal Status)
+- Left Column: Active Gaps List (`data.gap_list`)
+  * Lists every compliance deficiency detected across the 24 months.
+  * Tagged by Severity: Red (Critical blocker) or Amber (Warning).
+  * Each gap row has:
+    - Code & Message (e.g., "Water consumption missing for May 2025")
+    - Protocol Section tag (e.g., "Section 11")
+    - "Resolve Now" Action Button linking directly to `gap.fix_url`.
+- Right Column: Predicted Medal Standing & Critical Bottleneck Card (`data.medal_status`)
+  * Large Medal Icon: Gold, Silver, Bronze, Audited, or Fail.
+  * Holding-Down Alert: If a critical section score drags down the medal, display a prominent
+    callout box:
+    "⚠️ Medal Capped at BRONZE due to Section 11 (Water Usage: 72%). All other critical sections achieved Gold."
+
+Panel 4: All 17 LWG Protocol Sections Status Table
+- A complete collapsible table listing all 17 LWG protocol sections:
+  * Columns: Section #, Section Name, Critical/Non-Critical, MVP Tracking, Status Badge (Ready, Gaps, Not Started, Not in MVP).
+
+
+--------------------------------------------------------------------------------
+3.3 Screen 3: Monthly Production Data Entry (Section 5)
+--------------------------------------------------------------------------------
+Primary Purpose: Log monthly leather throughput, track input hides/wet blue/crust,
+                 and view normalized output in both m² and sq ft.
+API Endpoints  :
+- `GET    /api/v1/tenant/lwg/production` (Query: `start_date`, `end_date`)
+- `POST   /api/v1/tenant/lwg/production` (Upsert monthly entry)
+- `DELETE /api/v1/tenant/lwg/production/{id}`
+
+Layout & Panels:
+Panel 1: Log / Update Production Entry (Top Drawer or Modal Form)
+- Month Picker: Year & Month picker (constrained to 24-month window start/end).
+- Production Stage: Dropdown filtered to tannery's active stages (`stages_run`).
+- Input Quantity (Tonnes): Number input, min=0 (e.g., 12.5 tonnes).
+- Input Material Classification: Dropdown:
+  * Raw Hide/Skin (`raw_hide_skin`)
+  * Wet Blue (`wet_blue`)
+  * Wet White (`wet_white`)
+  * Crust (`crust`)
+- Output Quantity Produced:
+  * Label dynamically displays preferred unit (e.g., "Output Quantity (sq ft)").
+  * Helper text displays real-time auto-conversion to m² (e.g., "≈ 9,290.3 m²").
+- Sold at this Stage (Optional Area): Quantity of leather sold prior to next stage.
+- Notes / Batch Identifier: Optional text area.
+- "Save Production Entry" Button: Calls `POST /api/v1/tenant/lwg/production`.
+  *Note*: If the user selects a month & stage that was already logged, the backend automatically
+  UPSERTS (updates) the existing record rather than creating a duplicate.
+
+Panel 2: 24-Month Production Master Data Table
+- Columns: Month, Stage, Input Material, Input Tonnes, Output (Entered Unit), Output ($m^2$), Output ($sq\ ft$), Sold Area, Actions (Edit, Delete).
+- Summary Footer Row: Sum total production in $m^2$ and $sq\ ft$ across L12 and P12.
+
+
+--------------------------------------------------------------------------------
+3.4 Screen 4: Monthly Energy Consumption (Section 10)
+--------------------------------------------------------------------------------
+Primary Purpose: Record energy consumption across fuels and electricity, manage utility
+                 bills, track on-site renewables, and compute Gigajoule (GJ) metrics.
+API Endpoints  :
+- `GET    /api/v1/tenant/lwg/energy`
+- `POST   /api/v1/tenant/lwg/energy` (Upsert monthly entry)
+- `DELETE /api/v1/tenant/lwg/energy/{id}`
+
+Layout & Panels:
+Panel 1: Log Monthly Energy Entry (Drawer / Modal Form)
+- Month Picker: Month & Year (constrained to 24-month window).
+- Energy Source Dropdown:
+  * Grid Electricity (`grid_electricity`)
+  * Diesel HSD (`diesel_hsd`)
+  * Natural Gas PNG (`natural_gas_png`)
+  * LPG (`lpg`)
+  * Furnace Oil (`furnace_oil`)
+  * Coal (`coal`)
+  * Solar PV On-site (`solar_onsite`)
+  * Purchased Renewable Power (`purchased_renewable_electricity`)
+  * Biomass / Agricultural Briquettes (`biomass_or_briquettes`)
+- Dynamic Unit Dropdown (Strictly filtered based on selected source):
+  * If Grid / Solar / Renewable: Only "kwh", "mwh".
+  * If Diesel / Furnace Oil: Only "litres".
+  * If Natural Gas: Only "scm".
+  * If Coal / Biomass: Only "tonnes".
+  * If LPG: "kg", "litres".
+- Quantity Input: Numeric input >= 0.
+- Live GJ Preview: As user types quantity, display live calculated GJ (e.g., "10,000 kWh = 36.00 GJ").
+- Allocation Department (Optional Dropdown): Default is "Whole site", or assign to specific department.
+- Bill / Proof Document Upload:
+  * If `purchased_renewable_electricity` is selected, bill proof (PPA or green certificate) is MANDATORY.
+  * Displays file upload dropzone. Uploads file to S3, populates `bill_proof_file_key`.
+- "Save Energy Entry" Button: Calls `POST /api/v1/tenant/lwg/energy`.
+
+Panel 2: Monthly Energy Master Table & Source Breakdown
+- Filter by month range and fuel source.
+- Table Columns: Month, Energy Source, Renewable?, On-site?, Quantity, Unit, Energy (GJ), Department, Proof Attached?, Actions.
+- Summary Chart / Cards:
+  * Total Site Energy: Total GJ
+  * Renewable Share % (Solar + Green Tariff + Biomass)
+  * On-site Solar Generation %
+
+
+--------------------------------------------------------------------------------
+3.5 Screen 5: Monthly Water Usage (Section 11)
+--------------------------------------------------------------------------------
+Primary Purpose: Log fresh water extraction vs. recycled water intake, enforce meter
+                 readings and photographic evidence, and compute total water consumption.
+API Endpoints  :
+- `GET    /api/v1/tenant/lwg/water`
+- `POST   /api/v1/tenant/lwg/water` (Upsert monthly entry)
+- `DELETE /api/v1/tenant/lwg/water/{id}`
+
+Layout & Panels:
+Panel 1: Log Monthly Water Entry (Drawer / Modal Form)
+- Month Picker: Month & Year (within 24-month window).
+- Water Source Dropdown:
+  * Fresh: Borewell / Ground water (`borewell`)
+  * Fresh: Municipal Piped Supply (`municipal_supply`)
+  * Fresh: Private Tanker (`tanker`)
+  * Fresh: Rainwater Harvested (`rainwater_harvested`)
+  * Recycled: Treated effluent from own on-site ETP (`recycled_own_etp`)
+  * Recycled: Water received back from CETP (`recycled_cetp`)
+- Volume ($m³$ / kL) Input: Numeric input >= 0 (Note: $1\ kL = 1\ m³$).
+- Meter ID Input:
+  * MANDATORY if Source is `borewell` or `municipal_supply`.
+  * Optional for tanker/rainwater.
+- Meter Photographic Proof Upload:
+  * MANDATORY if Source is `borewell`.
+  * Direct file dropzone uploading meter photo to S3, returning `meter_photo_file_key`.
+- Department Allocation (Optional Dropdown): Default "Whole site".
+- "Save Water Entry" Button: Calls `POST /api/v1/tenant/lwg/water`.
+
+Panel 2: Monthly Water Consumption Master Table
+- Columns: Month, Water Source, Fresh vs. Recycled Badge, Volume ($m³$), Meter ID, Meter Photo Badge (with preview modal), Department, Actions.
+- Summary Cards:
+  * Total Fresh Water Intake ($m³$)
+  * Total Recycled Water Intake ($m³$)
+  * Overall Water Recycling Ratio (% Recycled)
+
+
+--------------------------------------------------------------------------------
+3.6 Screen 6: Evidence Vault & Document Tagging (Sections 1–17)
+--------------------------------------------------------------------------------
+Primary Purpose: Audit document management system tagged to all 17 LWG protocol sections
+                 with expiry tracking for regulatory approvals.
+API Endpoints  :
+- `GET    /api/v1/tenant/lwg/evidence` (Query: `section_number`)
+- `POST   /api/v1/tenant/lwg/evidence`
+- `DELETE /api/v1/tenant/lwg/evidence/{id}`
+
+Layout & Panels:
+Panel 1: LWG Section Accordion / Navigation Sidebar (Left)
+- List of all 17 Protocol Sections with badge count of attached documents.
+- Clicking a section filters the documents table to that section.
+- Section 4 (Operating Permits) highlighted with warning badges if permits expire soon.
+
+Panel 2: Upload Evidence Document (Drawer or Modal)
+- File Dropzone: Drag-and-drop PDF, JPG, PNG (up to 20MB). Uploads to S3 -> sets `file_key`, `file_name`, `file_size_bytes`, `mime_type`.
+- Target LWG Section Dropdown (Sections 1 to 17).
+- Document Type Classification:
+  * Consent to Operate (CTO Air/Water) -> Sets `document_type = "consent_to_operate"`
+  * Hazardous Waste Authorization -> Sets `document_type = "hazardous_waste_authorisation"`
+  * Electricity Utility Bill -> Sets `document_type = "electricity_bill"`
+  * Fuel Delivery Challan / Invoice -> Sets `document_type = "fuel_invoice"`
+  * Meter Reading Photo -> Sets `document_type = "meter_photo"`
+  * Lab / Effluent Test Report -> Sets `document_type = "lab_report"`
+  * Other Evidence -> Sets `document_type = "other"`
+- Validity Period: `period_from` and `period_to` date pickers.
+- Expiry Date Picker (`expiry_date`):
+  * MANDATORY for Consent to Operate and Hazardous Waste Authorization.
+- Notes / Reference Number: Text field.
+- "Save Evidence Document" Button: Calls `POST /api/v1/tenant/lwg/evidence`.
+
+Panel 3: Documents Table (Right Panel)
+- Displays file cards or table: Filename, Section #, Type, File Size, Expiry Date with countdown alert (< 60 days = Amber, Expired = Red), Download action, Delete action.
+
+
+--------------------------------------------------------------------------------
+3.7 Screen 7: Previous Audit Scoring & Medal Simulation (Section 9)
+--------------------------------------------------------------------------------
+Primary Purpose: Benchmark against previous official audit scores and simulate projected
+                 medal ratings across all 17 sections, identifying critical bottlenecks.
+API Endpoints  :
+- `GET  /api/v1/tenant/lwg/audit-result`
+- `POST /api/v1/tenant/lwg/audit-result`
+
+Layout & Panels:
+Panel 1: Previous Audit Metadata Header
+- Displays last audit date (e.g. "June 15, 2024") and overall medal achieved.
+- "Re-evaluate Scores" / "Record New Audit" button to open score editor.
+
+Panel 2: Section Scores Interactive Matrix (16 Scoring Sections: 2 through 17)
+- Grid or list of sliders / percentage number inputs for Sections 2 through 17.
+- Visual distinction: CRITICAL sections (Sections 2, 4, 5, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17)
+  have a distinct "Critical for Medal" badge.
+- As the user types scores or moves sliders, the UI runs client-side medal calculation in real time.
+- Each section displays its individual medal tier badge (Gold >= 85%, Silver >= 75%, Bronze >= 65%, Audited >= 50%, Fail < 50%).
+
+Panel 3: Medal Determination & Holding-Down Bottleneck Card
+- Big Banner: Overall Projected Medal (e.g., BRONZE).
+- Holding-Down Explainer:
+  * If a critical section has a lower score than others, display an alert box:
+    "Bottleneck Identified: Section 11 (Water Usage) has score 72.0% (Bronze).
+    Even though Sections 4, 5, and 10 achieved Gold (88–92%), the overall medal is capped at Bronze.
+    Increase Section 11 score to 75% to unlock SILVER, or 85% to unlock GOLD."
+- "Save Audit Result" Button: Calls `POST /api/v1/tenant/lwg/audit-result` to persist the record.
+
+
+--------------------------------------------------------------------------------
+3.8 Screen 8: Excel Bulk Ingestion & Auditor Data Pack Export
+--------------------------------------------------------------------------------
+Primary Purpose: High-volume data operations: template download, bulk upload with error
+                 reporting, and official 6-sheet Auditor Data Pack export.
+API Endpoints  :
+- `GET  /api/v1/tenant/lwg/excel/template` (Blank 3-sheet template download)
+- `POST /api/v1/tenant/lwg/excel/upload`   (Bulk upload with validation errors)
+- `GET  /api/v1/tenant/lwg/excel/export`   (Auditor Data Pack download)
+
+Layout & Panels:
+Panel 1: Bulk 24-Month Back-Data Ingestion Wizard
+- Step 1: Download Empty Template
+  * Button: "Download 3-Sheet Excel Template (.xlsx)" -> Calls `GET /api/v1/tenant/lwg/excel/template`.
+  * Explains the 3 sheets: `Production`, `Energy`, `Water`.
+- Step 2: Upload Filled Template
+  * Drag-and-drop zone for `.xlsx` file.
+  * Button: "Import Excel Back-Data" -> Calls `POST /api/v1/tenant/lwg/excel/upload` with FormData `file`.
+- Step 3: Ingestion Results & Row Errors Drawer
+  * On Success: Displays success notification: "Imported 72 rows successfully (24 Production, 24 Energy, 24 Water). Total errors: 0."
+  * On Errors: Displays structured table of failed rows:
+    - Sheet Name (e.g., "Energy")
+    - Row # (e.g., Row 15)
+    - Field with issue (e.g., "unit")
+    - Exact Error Description (e.g., "Unit 'litres' is not allowed for energy source 'grid_electricity'. Allowed units: kwh, mwh.")
+    - Raw Data snippet for quick reference.
+
+Panel 2: Official Auditor Data Pack Export
+- Card detailing the 6 official audit sheets:
+  1. Tannery Profile & URN
+  2. Executive Summary (Readiness, L12 vs P12 Intensity, YoY change)
+  3. Production 24-Month Throughput ($m^2$ and $sq\ ft$)
+  4. Energy 24-Month Breakdown by Source & GJ
+  5. Water 24-Month Breakdown by Source ($m^3$, Fresh vs Recycled, Meters)
+  6. Evidence Vault Document Index
+- Button: "Export Auditor Data Pack (.xlsx)" -> Calls `GET /api/v1/tenant/lwg/excel/export`.
+  * Browser downloads file: `LWG_Auditor_Data_Pack_<URN>_<Date>.xlsx`.
+
+
+================================================================================
+4. STEP-BY-STEP USER FLOWS & TRANSITIONS
+================================================================================
+
+4.1 Flow A: First-Time Tannery Onboarding & Configuration
+--------------------------------------------------------
+1. Compliance officer clicks "LWG Module" in the main navigation sidebar.
+2. Frontend queries `GET /api/v1/tenant/lwg/profile`.
+3. Backend returns `data: null`.
+4. Frontend displays Onboarding Wizard (Screen 1):
+   - User selects Facility ID from dropdown.
+   - User enters registered Tannery Name, State ("Tamil Nadu"), City ("Ranipet").
+   - User selects stages run: `stage_3_crust_to_finish`.
+   - User chooses area unit: `sq_ft`.
+   - User selects effluent treatment: `both`.
+   - User clicks "Complete Setup".
+5. Frontend calls `POST /api/v1/tenant/lwg/profile`.
+6. Backend creates profile, seeds default departments, sets 24-month window bounds, and returns 201 Created.
+7. Frontend updates global profile cache and redirects user to Screen 2 (Dashboard).
+
+4.2 Flow B: Routine Monthly Data Ingestion (Manual Entry)
+--------------------------------------------------------
+1. At the end of each calendar month, compliance officer opens LWG workspace.
+2. Logs Production: Navigates to `/tenant/lwg/production` -> clicks "Log Production" ->
+   enters Month `2025-03-01`, input material `crust`, input tonnes `14.2`, output `110,000 sq ft` ->
+   submits -> Backend stores entry, auto-calculates $10,219.3\ m^2$, returns 201.
+3. Logs Energy: Navigates to `/tenant/lwg/energy` -> clicks "Log Energy" ->
+   selects Month `2025-03-01`, source `grid_electricity`, quantity `12,000 kWh` ->
+   submits -> Backend computes $43.20\ GJ$, returns 201.
+4. Logs Water: Navigates to `/tenant/lwg/water` -> clicks "Log Water" ->
+   selects Month `2025-03-01`, source `borewell`, volume `1,600 m3`, meter ID `BW-01`, uploads meter photo ->
+   submits -> Backend tags fresh water, returns 201.
+5. Officer returns to Dashboard (`/tenant/lwg/dashboard`):
+   - Month Grid shows March 2025 as fully complete (3 green checks).
+   - Intensity metrics and renewable/recycled percentages recompute automatically.
+
+4.3 Flow C: Historic 24-Month Data Ingestion via Excel
+-----------------------------------------------------
+1. New customer onboarding 2 years of back data navigates to `/tenant/lwg/excel-tools`.
+2. Clicks "Download 3-Sheet Excel Template" -> downloads `LWG_Bulk_Back_Data_Template.xlsx`.
+3. Customer pastes 24 rows of production, energy, and water data into the 3 sheets.
+4. Customer drags the filled workbook into the upload dropzone and clicks "Upload & Process".
+5. Frontend sends multipart/form-data POST to `/api/v1/tenant/lwg/excel/upload`.
+6. Backend parses all 3 sheets atomically, runs validation, upserts valid records, and returns summary JSON.
+7. If errors exist: Frontend displays error table highlighting row numbers and reasons.
+   Customer fixes the workbook and re-uploads until `total_failed === 0`.
+8. Dashboard readiness immediately jumps to 100% "Ready".
+
+4.4 Flow D: Audit Readiness Gap Resolution
+------------------------------------------
+1. Compliance officer views the Dashboard and notices the Readiness Tile shows "Status: Gaps (95.8%)".
+2. In the "Actionable Audit Gaps" list, officer sees:
+   "Water consumption missing for May 2025 (Section 11) [Resolve Now]".
+3. Officer clicks "[Resolve Now]", which navigates directly to `/tenant/lwg/water?month=2025-05-01`.
+4. Water entry drawer opens pre-filled with `month = 2025-05-01`.
+5. Officer inputs missing meter volume and submits.
+6. Frontend invalidates Dashboard query -> gap disappears -> Readiness status transitions to "Ready (100%)" with green badge.
+
+4.5 Flow E: Medal Simulation & Bottleneck Elimination
+-----------------------------------------------------
+1. Tannery manager opens `/tenant/lwg/audit-simulation`.
+2. Manager reviews scores from last official audit.
+3. Manager sees Overall Medal is capped at "BRONZE" because Section 11 (Water) is 72%,
+   even though Sections 4, 5, and 10 are Gold (88–92%).
+4. Manager moves Section 11 slider to 76%:
+   - Client-side simulator immediately updates Overall Medal badge to "SILVER".
+5. Manager moves Section 11 slider to 86%:
+   - Simulator updates Overall Medal badge to "GOLD".
+6. Manager clicks "Save Audit Simulation" -> calls `POST /api/v1/tenant/lwg/audit-result`.
+
+4.6 Flow F: Official Auditor Data Pack Export
+---------------------------------------------
+1. Lead auditor arrives on-site or requests digital submission for LWG certification.
+2. Compliance head navigates to `/tenant/lwg/excel-tools` or clicks "Export Auditor Pack" in header.
+3. Browser calls `GET /api/v1/tenant/lwg/excel/export`.
+4. Backend builds a multi-tab formatted Excel workbook with 6 sheets, corporate styles,
+   and dynamic URN filenames (`LWG_Auditor_Data_Pack_URN-8819_20261124.xlsx`).
+5. Browser saves the file. Auditor opens workbook to verify complete 24-month compliance.
+
+
+================================================================================
+5. FRONTEND STATE MANAGEMENT & QUERY INVALIDATION
+================================================================================
+
+5.1 Query Keys Hierarchy (TanStack Query / SWR)
+-----------------------------------------------
+We recommend structuring query keys consistently:
+
+export const lwgQueryKeys = {
+  all: ['lwg'] as const,
+  profile: () => [...lwgQueryKeys.all, 'profile'] as const,
+  departments: (activeOnly = true) => [...lwgQueryKeys.all, 'departments', { activeOnly }] as const,
+  dashboard: () => [...lwgQueryKeys.all, 'dashboard'] as const,
+  production: (filters?: { start_date?: string; end_date?: string }) =>
+    [...lwgQueryKeys.all, 'production', filters] as const,
+  energy: (filters?: { start_date?: string; end_date?: string }) =>
+    [...lwgQueryKeys.all, 'energy', filters] as const,
+  water: (filters?: { start_date?: string; end_date?: string }) =>
+    [...lwgQueryKeys.all, 'water', filters] as const,
+  evidence: (sectionNumber?: number) =>
+    [...lwgQueryKeys.all, 'evidence', { sectionNumber }] as const,
+  auditResult: () => [...lwgQueryKeys.all, 'audit-result'] as const,
+};
+
+5.2 Cache Invalidation Rules on Mutations
+-----------------------------------------
+Whenever a mutation occurs, invalidate dependent caches to keep the UI in sync:
+
+1. On `createProfile` or `updateProfile`:
+   - `queryClient.invalidateQueries({ queryKey: lwgQueryKeys.profile() })`
+   - `queryClient.invalidateQueries({ queryKey: lwgQueryKeys.departments() })`
+   - `queryClient.invalidateQueries({ queryKey: lwgQueryKeys.dashboard() })`
+
+2. On `createOrUpsertProduction` or `deleteProduction`:
+   - `queryClient.invalidateQueries({ queryKey: lwgQueryKeys.production() })`
+   - `queryClient.invalidateQueries({ queryKey: lwgQueryKeys.dashboard() })`
+
+3. On `createOrUpsertEnergy` or `deleteEnergy`:
+   - `queryClient.invalidateQueries({ queryKey: lwgQueryKeys.energy() })`
+   - `queryClient.invalidateQueries({ queryKey: lwgQueryKeys.dashboard() })`
+
+4. On `createOrUpsertWater` or `deleteWater`:
+   - `queryClient.invalidateQueries({ queryKey: lwgQueryKeys.water() })`
+   - `queryClient.invalidateQueries({ queryKey: lwgQueryKeys.dashboard() })`
+
+5. On `createEvidence` or `deleteEvidence`:
+   - `queryClient.invalidateQueries({ queryKey: lwgQueryKeys.evidence() })`
+   - `queryClient.invalidateQueries({ queryKey: lwgQueryKeys.dashboard() })`
+
+6. On `recordAuditResult`:
+   - `queryClient.invalidateQueries({ queryKey: lwgQueryKeys.auditResult() })`
+   - `queryClient.invalidateQueries({ queryKey: lwgQueryKeys.dashboard() })`
+
+7. On `uploadExcelTemplate`:
+   - Invalidate EVERYTHING under `lwgQueryKeys.all`:
+     `queryClient.invalidateQueries({ queryKey: lwgQueryKeys.all })`
+
+
+================================================================================
+6. CLIENT-SIDE VALIDATION & DYNAMIC FORM BEHAVIORS
+================================================================================
+
+6.1 Output Area Conversion (sq ft <-> m²)
+-----------------------------------------
+- In the Production entry form, the user enters `output_quantity` in their profile's preferred unit.
+- If `profile.output_unit === "sq_ft"`:
+  * Form label: "Output Quantity (sq ft)"
+  * Live helper text: `(val * 0.092903).toFixed(1) + " m²"`
+- If `profile.output_unit === "m2"`:
+  * Form label: "Output Quantity (m²)"
+  * Live helper text: `(val * 10.7639).toFixed(1) + " sq ft"`
+- Pass `output_quantity` directly in the payload. The backend computes and stores both values.
+
+6.2 Dynamic Energy Unit Filtering
+---------------------------------
+When the user selects an energy source, filter the unit dropdown choices:
+```typescript
+const ALLOWED_UNITS_BY_SOURCE: Record<string, string[]> = {
+  grid_electricity: ['kwh', 'mwh'],
+  purchased_renewable_electricity: ['kwh', 'mwh'],
+  solar_onsite: ['kwh', 'mwh'],
+  diesel_hsd: ['litres'],
+  furnace_oil: ['litres'],
+  natural_gas_png: ['scm'],
+  lpg: ['kg', 'litres'],
+  coal: ['tonnes'],
+  biomass_or_briquettes: ['tonnes'],
+};
+
+// In form:
+const availableUnits = ALLOWED_UNITS_BY_SOURCE[selectedSource] || ['kwh'];
+```
+- If `selectedSource === 'purchased_renewable_electricity'`, mark the Bill / Proof upload
+  as a REQUIRED field.
+
+6.3 Water Meter Enforcement Rules
+---------------------------------
+```typescript
+const requiresMeterId = (source: string) =>
+  source === 'borewell' || source === 'municipal_supply';
+
+const requiresMeterPhoto = (source: string) =>
+  source === 'borewell';
+```
+- If `requiresMeterId(source)` is true, render the Meter ID text field with a red asterisk `*`
+  and client-side required validation.
+- If `requiresMeterPhoto(source)` is true, render the photo upload dropzone with a red asterisk `*`.
+
+6.4 24-Month Date Picker Constraints
+-------------------------------------
+- Read `profile.data_window_start` (e.g. `2024-11-01`) and `profile.data_window_end` (e.g. `2026-10-31`).
+- Restrict month pickers in Production, Energy, and Water entry forms so users cannot pick
+  months prior to `data_window_start` or after `data_window_end`.
+- Always set the day of month to `01`: `YYYY-MM-01`.
+
+6.5 S3 Direct File Upload Workflow
+-----------------------------------
+For evidence documents, energy bill proofs, and water meter photos:
+1. User drops file into frontend upload dropzone.
+2. Frontend requests presigned upload URL or uses standard tenant storage endpoint
+   `POST /api/v1/tenant/storage/upload`.
+3. S3 upload completes and returns the permanent storage path `file_key`
+   (e.g., `tenants/<tenant_id>/lwg/<uuid>_<filename>.pdf`).
+4. Frontend attaches `file_key` into the payload sent to:
+   - `POST /api/v1/tenant/lwg/evidence` (`file_key`, `file_name`, `file_size_bytes`, `mime_type`)
+   - `POST /api/v1/tenant/lwg/energy` (`bill_proof_file_key`)
+   - `POST /api/v1/tenant/lwg/water` (`meter_photo_file_key`)
+
+
+================================================================================
+7. COMPREHENSIVE API CONTRACT CHEAT SHEET
+================================================================================
+
+Below is the fast-lookup reference table for every endpoint in the LWG module:
+
+| Action / Description             | Method | Endpoint Path                                 | Payload Schema               | Response Schema                 |
+|----------------------------------|--------|-----------------------------------------------|------------------------------|---------------------------------|
+| Get Tannery Profile              | GET    | `/api/v1/tenant/lwg/profile`                  | None                         | `LwgTanneryProfileResponse?`    |
+| Create Tannery Profile           | POST   | `/api/v1/tenant/lwg/profile`                  | `LwgTanneryProfileCreate`    | `LwgTanneryProfileResponse`     |
+| Update Tannery Profile           | PUT    | `/api/v1/tenant/lwg/profile`                  | `LwgTanneryProfileUpdate`    | `LwgTanneryProfileResponse`     |
+| List Factory Departments         | GET    | `/api/v1/tenant/lwg/departments`              | Query: `active_only=true`    | `list[LwgDepartmentResponse]`   |
+| Create Department                | POST   | `/api/v1/tenant/lwg/departments`              | `LwgDepartmentCreate`        | `LwgDepartmentResponse`         |
+| Update Department                | PUT    | `/api/v1/tenant/lwg/departments/{id}`         | `LwgDepartmentUpdate`        | `LwgDepartmentResponse`         |
+| Delete Department                | DELETE | `/api/v1/tenant/lwg/departments/{id}`         | None                         | `null`                          |
+| List Monthly Production          | GET    | `/api/v1/tenant/lwg/production`               | Query: `start_date`, `end`   | `list[LwgProductionResponse]`   |
+| Upsert Monthly Production        | POST   | `/api/v1/tenant/lwg/production`               | `LwgProductionCreate`        | `LwgProductionResponse`         |
+| Delete Monthly Production        | DELETE | `/api/v1/tenant/lwg/production/{id}`          | None                         | `null`                          |
+| List Monthly Energy              | GET    | `/api/v1/tenant/lwg/energy`                   | Query: `start_date`, `end`   | `list[LwgEnergyResponse]`       |
+| Upsert Monthly Energy            | POST   | `/api/v1/tenant/lwg/energy`                   | `LwgEnergyCreate`            | `LwgEnergyResponse`             |
+| Delete Monthly Energy            | DELETE | `/api/v1/tenant/lwg/energy/{id}`              | None                         | `null`                          |
+| List Monthly Water               | GET    | `/api/v1/tenant/lwg/water`                    | Query: `start_date`, `end`   | `list[LwgWaterResponse]`        |
+| Upsert Monthly Water             | POST   | `/api/v1/tenant/lwg/water`                    | `LwgWaterCreate`             | `LwgWaterResponse`              |
+| Delete Monthly Water             | DELETE | `/api/v1/tenant/lwg/water/{id}`               | None                         | `null`                          |
+| List Evidence Documents          | GET    | `/api/v1/tenant/lwg/evidence`                 | Query: `section_number`      | `list[LwgEvidenceResponse]`     |
+| Upload / Tag Evidence Document   | POST   | `/api/v1/tenant/lwg/evidence`                 | `LwgEvidenceCreate`          | `LwgEvidenceResponse`           |
+| Delete Evidence Document         | DELETE | `/api/v1/tenant/lwg/evidence/{id}`            | None                         | `null`                          |
+| Get Latest Audit Result          | GET    | `/api/v1/tenant/lwg/audit-result`             | None                         | `LwgAuditResultResponse?`       |
+| Record Audit Result & Medal      | POST   | `/api/v1/tenant/lwg/audit-result`             | `LwgAuditResultCreate`       | `LwgAuditResultResponse`        |
+| Get Compliance Dashboard         | GET    | `/api/v1/tenant/lwg/dashboard`                | None                         | `LwgDashboardResponse`          |
+| Download Blank Excel Template    | GET    | `/api/v1/tenant/lwg/excel/template`           | None                         | Binary File (.xlsx)             |
+| Bulk Upload Filled Excel         | POST   | `/api/v1/tenant/lwg/excel/upload`             | FormData (`file`)            | `LwgExcelImportSummaryResponse` |
+| Export Official Auditor Pack     | GET    | `/api/v1/tenant/lwg/excel/export`             | None                         | Binary File (.xlsx, 6 sheets)   |
+
+================================================================================
+END OF FRONTEND INTEGRATION & ARCHITECTURE SPECIFICATION
+================================================================================

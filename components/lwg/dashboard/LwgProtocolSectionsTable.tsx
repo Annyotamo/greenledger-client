@@ -163,8 +163,8 @@ export function LwgProtocolSectionsTable({
 
             {!isCollapsed && (
                 <CardBody className="p-0">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs">
+                    <div className="overflow-x-auto gl-dashboard-scroll">
+                        <table className="w-full text-left text-xs min-w-[700px]">
                             <thead>
                                 <tr className="border-b border-outline-variant/60 bg-surface-container-low text-on-surface-variant font-semibold">
                                     <th className="py-2.5 px-4 w-16">Sec #</th>

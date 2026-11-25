@@ -76,7 +76,7 @@ export function LwgWaterTable({ initialMonth }: LwgWaterTableProps) {
         <div className="space-y-5">
             {/* Top KPI Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="rounded-2xl border border-outline-variant bg-surface p-4 shadow-2xs">
+                <div className="rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-3.5 sm:p-4 shadow-2xs">
                     <span className="font-sans text-[11px] font-medium text-on-surface-variant">
                         Total Water Intake (m³)
                     </span>
@@ -88,7 +88,7 @@ export function LwgWaterTable({ initialMonth }: LwgWaterTableProps) {
                     </p>
                 </div>
 
-                <div className="rounded-2xl border border-outline-variant bg-surface p-4 shadow-2xs">
+                <div className="rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-3.5 sm:p-4 shadow-2xs">
                     <span className="font-sans text-[11px] font-medium text-on-surface-variant">
                         Fresh Water Intake (m³)
                     </span>
@@ -100,7 +100,7 @@ export function LwgWaterTable({ initialMonth }: LwgWaterTableProps) {
                     </p>
                 </div>
 
-                <div className="rounded-2xl border border-outline-variant bg-surface p-4 shadow-2xs">
+                <div className="rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-3.5 sm:p-4 shadow-2xs">
                     <span className="font-sans text-[11px] font-medium text-on-surface-variant">
                         Recycled Water Share
                     </span>
@@ -112,7 +112,7 @@ export function LwgWaterTable({ initialMonth }: LwgWaterTableProps) {
                     </p>
                 </div>
 
-                <div className="rounded-2xl border border-outline-variant bg-surface p-4 shadow-2xs">
+                <div className="rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-3.5 sm:p-4 shadow-2xs">
                     <span className="font-sans text-[11px] font-medium text-on-surface-variant">
                         Logged Water Records
                     </span>

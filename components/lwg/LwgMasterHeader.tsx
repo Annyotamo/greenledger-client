@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { downloadLwgAuditorPack } from "@/lib/lwg/api";
@@ -55,9 +56,24 @@ function formatWindowMonth(dateStr: string): string {
 
 export function LwgMasterHeader({ activeTab }: LwgMasterHeaderProps) {
     const { data: profile } = useLwgProfile();
+    const queryClient = useQueryClient();
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [isDownloadingPack, setIsDownloadingPack] = useState(false);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [downloadError, setDownloadError] = useState<string | null>(null);
+
+    const handleRefresh = async () => {
+        try {
+            setIsRefreshing(true);
+            await queryClient.refetchQueries({ queryKey: ["lwg"] });
+        } catch (err) {
+            console.error("Failed to refresh LWG data", err);
+        } finally {
+            setTimeout(() => {
+                setIsRefreshing(false);
+            }, 600);
+        }
+    };
 
     const handleDownloadAuditorPack = async () => {
         try {
@@ -87,53 +103,62 @@ export function LwgMasterHeader({ activeTab }: LwgMasterHeaderProps) {
         <>
             <div className="space-y-4 mb-6">
                 {/* Master Metadata & Action Row */}
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-2xs">
-                    {/* Tannery Info & Badges */}
-                    <div className="space-y-1.5">
-                        <div className="flex flex-wrap items-center gap-2.5">
-                            <h2 className="font-display text-lg font-bold text-primary tracking-tight">
-                                {profile?.tanneryName || "LWG Tannery Certification"}
-                            </h2>
-                            {profile?.city && profile?.state && (
-                                <span className="inline-flex items-center gap-1 rounded-md border border-outline-variant bg-surface-container-low px-2 py-0.5 font-sans text-xs font-medium text-on-surface-variant">
-                                    <MaterialIcon name="location_on" size="xs" className="text-outline" />
-                                    {profile.city}, {profile.state}
-                                </span>
-                            )}
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-4 sm:px-5 sm:py-3.5 shadow-2xs">
+                    {/* Facility Identity & Meta */}
+                    <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+                        {/* Facility Emblem */}
+                        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs shrink-0 mt-0.5 sm:mt-0">
+                            <MaterialIcon name="domain" size="sm" className="text-emerald-700" />
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-2">
-                            {/* 24-Month Window Badge */}
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-600/30 bg-emerald-50 px-2.5 py-0.5 font-sans text-xs font-semibold text-emerald-800">
-                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
-                                Audit Window: {windowStartLabel} – {windowEndLabel}
-                            </span>
+                        <div className="space-y-1.5 min-w-0">
+                            {/* Line 1: Tannery Name & Location Pin */}
+                            <div className="flex flex-wrap items-center gap-2.5">
+                                <h1 className="font-display text-lg font-bold text-primary tracking-tight">
+                                    {profile?.tanneryName || "GreenLedger Leather Facility"}
+                                </h1>
+                                {profile?.city && profile?.state && (
+                                    <span className="inline-flex items-center gap-1 rounded-md border border-outline-variant/60 bg-surface-container-low px-2 py-0.5 font-sans text-xs font-medium text-on-surface-variant">
+                                        <MaterialIcon name="location_on" size="xs" className="text-outline" />
+                                        <span>{profile.city}, {profile.state}</span>
+                                    </span>
+                                )}
+                            </div>
 
-                            {/* Preferred Unit Badge */}
-                            <span className="inline-flex items-center gap-1 rounded-full border border-outline-variant bg-surface-container-high px-2 py-0.5 font-mono text-[11px] font-medium text-on-surface-variant">
-                                <MaterialIcon name="straighten" size="xs" />
-                                Unit: {profile?.outputUnit === "sq_ft" ? "Square Feet (sq ft)" : "Square Meters (m²)"}
-                            </span>
-
-                            {/* Subcontractor indicator */}
-                            {profile?.usesSubcontractors && (
-                                <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 font-sans text-[11px] font-semibold text-amber-800">
-                                    Subcontracted Operations
+                            {/* Line 2: Audit Window & Preferred Unit Badges */}
+                            <div className="flex flex-wrap items-center gap-2">
+                                {/* 24-Month Window Badge */}
+                                <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-600/30 bg-emerald-50 px-2.5 py-0.5 font-sans text-xs font-semibold text-emerald-800 shadow-2xs">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                                    <span>Audit Window: {windowStartLabel} – {windowEndLabel}</span>
                                 </span>
-                            )}
+
+                                {/* Preferred Unit Badge */}
+                                <span className="inline-flex items-center gap-1.5 rounded-md border border-outline-variant/60 bg-surface-container-low px-2.5 py-0.5 font-mono text-[11px] font-medium text-on-surface-variant">
+                                    <MaterialIcon name="straighten" size="xs" />
+                                    <span>Unit: {profile?.outputUnit === "sq_ft" ? "Square Feet (sq ft)" : "Square Meters (m²)"}</span>
+                                </span>
+
+                                {/* Subcontractor indicator */}
+                                {profile?.usesSubcontractors && (
+                                    <span className="inline-flex items-center rounded-md border border-amber-300/80 bg-amber-50 px-2 py-0.5 font-sans text-[11px] font-medium text-amber-800">
+                                        Subcontracted Operations
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
                         <Button
                             variant="secondary"
                             size="sm"
                             type="button"
                             onClick={() => setIsUploadModalOpen(true)}
-                            className="text-xs">
+                            className="h-8.5 px-3 text-xs gap-1.5 font-medium">
                             <MaterialIcon name="table_chart" size="xs" />
-                            Bulk Excel Ingest
+                            <span>Bulk Excel Ingest</span>
                         </Button>
 
                         <Button
@@ -142,9 +167,26 @@ export function LwgMasterHeader({ activeTab }: LwgMasterHeaderProps) {
                             type="button"
                             onClick={handleDownloadAuditorPack}
                             disabled={isDownloadingPack}
-                            className="text-xs">
+                            className="h-8.5 px-3.5 text-xs gap-1.5 font-semibold shadow-2xs">
                             <MaterialIcon name="download" size="xs" />
-                            {isDownloadingPack ? "Generating Pack..." : "Export Auditor Pack"}
+                            <span>{isDownloadingPack ? "Generating Pack..." : "Export Auditor Pack"}</span>
+                        </Button>
+
+                        {/* Fully Functional Refresh Icon Button */}
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            type="button"
+                            onClick={handleRefresh}
+                            disabled={isRefreshing}
+                            title="Refresh All LWG Data & Metrics"
+                            aria-label="Refresh All LWG Data"
+                            className="h-8.5 w-8.5 p-0 flex items-center justify-center rounded-md border border-outline-variant/70 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-all">
+                            <MaterialIcon
+                                name="refresh"
+                                size="xs"
+                                className={cn("transition-transform duration-500", isRefreshing && "animate-spin text-emerald-700")}
+                            />
                         </Button>
                     </div>
                 </div>
@@ -166,7 +208,7 @@ export function LwgMasterHeader({ activeTab }: LwgMasterHeaderProps) {
                 )}
 
                 {/* Clean Tab Bar */}
-                <div className="flex items-center overflow-x-auto rounded-xl border border-outline-variant/60 bg-surface-container-low p-1 gl-dashboard-scroll">
+                <div className="flex items-center overflow-x-auto rounded-lg border border-outline-variant/60 bg-surface-container-low/70 p-1 gl-dashboard-scroll">
                     <div className="flex items-center gap-1 min-w-max">
                         {TABS.map((tab) => {
                             const isActive = activeTab === tab.id;
@@ -175,10 +217,10 @@ export function LwgMasterHeader({ activeTab }: LwgMasterHeaderProps) {
                                     key={tab.id}
                                     href={tab.href}
                                     className={cn(
-                                        "inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-sans font-medium transition-all select-none cursor-pointer",
+                                        "inline-flex items-center gap-2 rounded-md px-3.5 py-1.5 text-xs font-sans font-medium transition-all select-none cursor-pointer",
                                         isActive
-                                            ? "bg-white text-primary font-semibold shadow-2xs border border-outline-variant/60"
-                                            : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high",
+                                            ? "bg-surface-container-lowest text-primary font-semibold shadow-2xs border border-outline-variant/60"
+                                            : "text-on-surface-variant hover:text-primary hover:bg-surface-container-high/60",
                                     )}>
                                     <MaterialIcon
                                         name={tab.icon}

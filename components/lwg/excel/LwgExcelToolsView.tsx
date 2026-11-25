@@ -115,14 +115,14 @@ export function LwgExcelToolsView() {
     return (
         <div className="space-y-6">
             {/* Top Overview Card */}
-            <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-2xs">
+            <div className="rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-4 sm:p-5 shadow-2xs">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
-                            <MaterialIcon name="table_view" size="md" />
+                    <div className="flex items-center gap-3.5">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-2xs shrink-0">
+                            <MaterialIcon name="table_view" size="sm" />
                         </div>
                         <div>
-                            <h2 className="font-display text-lg font-bold text-primary tracking-tight">
+                            <h2 className="font-display text-base font-bold text-primary tracking-tight">
                                 Excel Bulk Ingestion & Official Auditor Pack
                             </h2>
                             <p className="font-sans text-xs text-on-surface-variant max-w-2xl mt-0.5 leading-relaxed">

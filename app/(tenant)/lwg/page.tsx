@@ -5,7 +5,11 @@ import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { LwgActionableGapsCard } from "@/components/lwg/dashboard/LwgActionableGapsCard";
-import { LwgIntensityKpiCards } from "@/components/lwg/dashboard/LwgIntensityKpiCards";
+import {
+    LwgEnergyIntensityCard,
+    LwgEnvironmentalSharesCard,
+    LwgWaterIntensityCard,
+} from "@/components/lwg/dashboard/LwgIntensityKpiCards";
 import { LwgMedalStandingCard } from "@/components/lwg/dashboard/LwgMedalStandingCard";
 import { LwgMonthMatrixGrid } from "@/components/lwg/dashboard/LwgMonthMatrixGrid";
 import { LwgProtocolSectionsTable } from "@/components/lwg/dashboard/LwgProtocolSectionsTable";
@@ -58,31 +62,27 @@ function LwgDashboardContent() {
 
     return (
         <div className="space-y-6">
-            {/* Panel 1: Top Metrics (Readiness Gauge + Intensity KPIs) */}
-            <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
-                <div className="lg:col-span-4">
-                    <LwgReadinessGaugeCard readiness={dashboard.readiness} />
-                </div>
-                <div className="lg:col-span-8">
-                    <LwgIntensityKpiCards
-                        energyIntensity={dashboard.energyIntensity}
-                        waterIntensity={dashboard.waterIntensity}
-                        renewableShare={dashboard.renewableShare}
-                        onsiteRenewableShare={dashboard.onsiteRenewableShare}
-                        recycledWaterShare={dashboard.recycledWaterShare}
-                    />
-                </div>
+            {/* Panel 1: Top Metrics (Unified Balanced 4-Column Grid) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
+                <LwgReadinessGaugeCard readiness={dashboard.readiness} />
+                <LwgEnergyIntensityCard energyIntensity={dashboard.energyIntensity} />
+                <LwgWaterIntensityCard waterIntensity={dashboard.waterIntensity} />
+                <LwgEnvironmentalSharesCard
+                    renewableShare={dashboard.renewableShare}
+                    onsiteRenewableShare={dashboard.onsiteRenewableShare}
+                    recycledWaterShare={dashboard.recycledWaterShare}
+                />
             </div>
 
             {/* Panel 2: 24-Month Audit Data Matrix Grid */}
             <LwgMonthMatrixGrid monthGrid={dashboard.monthGrid} />
 
             {/* Panel 3: Actionable Audit Gaps Scanner & Medal Standing */}
-            <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
-                <div className="lg:col-span-7">
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 items-stretch">
+                <div className="lg:col-span-7 flex flex-col">
                     <LwgActionableGapsCard gapList={dashboard.gapList} />
                 </div>
-                <div className="lg:col-span-5">
+                <div className="lg:col-span-5 flex flex-col">
                     <LwgMedalStandingCard medalStatus={dashboard.medalStatus} />
                 </div>
             </div>
@@ -96,27 +96,25 @@ function LwgDashboardContent() {
 function LwgDashboardSkeleton() {
     return (
         <div className="space-y-6 animate-pulse">
-            {/* Top Row Skeleton */}
-            <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
-                <div className="lg:col-span-4 h-64 rounded-2xl bg-surface-container-high" />
-                <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <div className="h-64 rounded-2xl bg-surface-container-high" />
-                    <div className="h-64 rounded-2xl bg-surface-container-high" />
-                    <div className="h-64 rounded-2xl bg-surface-container-high" />
-                </div>
+            {/* Top Row 4-Card Skeleton */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
+                <div className="h-64 rounded-lg border border-outline-variant/60 bg-surface-container-high" />
+                <div className="h-64 rounded-lg border border-outline-variant/60 bg-surface-container-high" />
+                <div className="h-64 rounded-lg border border-outline-variant/60 bg-surface-container-high" />
+                <div className="h-64 rounded-lg border border-outline-variant/60 bg-surface-container-high" />
             </div>
 
             {/* 24-Month Matrix Skeleton */}
-            <div className="h-72 rounded-2xl bg-surface-container-high" />
+            <div className="h-72 rounded-lg border border-outline-variant/60 bg-surface-container-high" />
 
             {/* Gaps and Medal Skeleton */}
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
-                <div className="lg:col-span-7 h-80 rounded-2xl bg-surface-container-high" />
-                <div className="lg:col-span-5 h-80 rounded-2xl bg-surface-container-high" />
+                <div className="lg:col-span-7 h-80 rounded-lg border border-outline-variant/60 bg-surface-container-high" />
+                <div className="lg:col-span-5 h-80 rounded-lg border border-outline-variant/60 bg-surface-container-high" />
             </div>
 
             {/* Sections Skeleton */}
-            <div className="h-96 rounded-2xl bg-surface-container-high" />
+            <div className="h-96 rounded-lg border border-outline-variant/60 bg-surface-container-high" />
         </div>
     );
 }

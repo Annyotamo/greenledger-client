@@ -164,7 +164,7 @@ export function LwgMedalSimulatorView() {
 
             {/* Previous Audit Info Banner (if exists) */}
             {previousAudit && (
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-outline-variant bg-surface p-4 shadow-2xs">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-3.5 sm:p-4 shadow-2xs">
                     <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-700 border border-purple-200">
                             <MaterialIcon name="history_edu" size="sm" />

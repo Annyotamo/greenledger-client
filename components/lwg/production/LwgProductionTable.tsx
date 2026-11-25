@@ -69,7 +69,7 @@ export function LwgProductionTable({ initialMonth }: LwgProductionTableProps) {
         <div className="space-y-5">
             {/* Top KPI Summary Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="rounded-2xl border border-outline-variant bg-surface p-4 shadow-2xs">
+                <div className="rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-3.5 sm:p-4 shadow-2xs">
                     <span className="font-sans text-[11px] font-medium text-on-surface-variant">
                         Total 24M Normalized Area (m²)
                     </span>
@@ -81,7 +81,7 @@ export function LwgProductionTable({ initialMonth }: LwgProductionTableProps) {
                     </p>
                 </div>
 
-                <div className="rounded-2xl border border-outline-variant bg-surface p-4 shadow-2xs">
+                <div className="rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-3.5 sm:p-4 shadow-2xs">
                     <span className="font-sans text-[11px] font-medium text-on-surface-variant">
                         Total 24M Output (sq ft)
                     </span>
@@ -93,7 +93,7 @@ export function LwgProductionTable({ initialMonth }: LwgProductionTableProps) {
                     </p>
                 </div>
 
-                <div className="rounded-2xl border border-outline-variant bg-surface p-4 shadow-2xs">
+                <div className="rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-3.5 sm:p-4 shadow-2xs">
                     <span className="font-sans text-[11px] font-medium text-on-surface-variant">
                         Raw Material Input (Tonnes)
                     </span>
@@ -105,11 +105,11 @@ export function LwgProductionTable({ initialMonth }: LwgProductionTableProps) {
                     </p>
                 </div>
 
-                <div className="rounded-2xl border border-outline-variant bg-surface p-4 shadow-2xs">
+                <div className="rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-3.5 sm:p-4 shadow-2xs">
                     <span className="font-sans text-[11px] font-medium text-on-surface-variant">
                         Logged Audit Records
                     </span>
-                    <p className="font-mono text-2xl font-bold text-blue-700 mt-1 tabular-nums">
+                    <p className="font-mono text-2xl font-bold text-primary mt-1 tabular-nums">
                         {records.length} / 24
                     </p>
                     <p className="font-sans text-[11px] text-on-surface-variant/70 mt-0.5">

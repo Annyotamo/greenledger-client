@@ -1,0 +1,782 @@
+================================================================================
+           GREENLEDGER ESG COMPLIANCE & AUDIT DOCUMENTATION
+  LEATHER WORKING GROUP (LWG) ENVIRONMENTAL AUDIT PROTOCOL ISSUE 7.X
+               END-TO-END ESG ANALYST & AUDITOR USER GUIDE
+================================================================================
+
+Target Audience : ESG Analysts, Sustainability Directors, EHS Compliance Officers,
+                  Facility Environmental Managers, and Accredited LWG Lead Auditors.
+System Version  : GreenLedger LWG Enterprise Module v1.0
+Protocol Base   : Leather Working Group (LWG) Environmental Audit Protocol Issue 7.x
+Date of Release : November 2026
+Standard Units  : Metric Area (m²), Commercial Area (sq ft), Energy (Gigajoules - GJ),
+                  Water Volume (Cubic Meters - m³ / Litres), Mass (Metric Tonnes).
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+1. REGULATORY FRAMEWORK & PROTOCOL ISSUE 7.X OVERVIEW
+   1.1 The Leather Working Group (LWG) Standard
+   1.2 Certification Medal Tiers & Scoring Benchmarks
+   1.3 The 24-Month Sliding Audit Window (P12 vs L12)
+   1.4 Core Protocol Mathematical Rules & Denominators
+   1.5 The LWG "Holding-Down Rule" (Critical Section Principle)
+   1.6 Complete 17-Section Protocol Taxonomy (Critical vs Non-Critical)
+
+2. FIRST-TIME TANNERY ONBOARDING & BASELINE CONFIGURATION
+   2.1 Navigating to the LWG Module
+   2.2 Facility Linking & Registered Tannery Details
+   2.3 Manufacturing Stage Classification & Audit Denominators
+   2.4 Measurement Unit Preference Configuration
+   2.5 Wastewater Treatment & Effluent Disposal Architecture
+   2.6 Subcontracted Operations & Scope 3 Traceability Boundary
+   2.7 Automated Baseline Initialization & Default Seedings
+
+3. FACTORY DEPARTMENTS & METERING SUBUNITS MANAGEMENT
+   3.1 Objectives of Physical Sub-metering under Issue 7.x
+   3.2 Adding and Categorizing Tannery Departments
+   3.3 Allocation Stages: Stage 1, Stage 2, Stage 3, and Common Units
+   3.4 Ongoing Department Lifecycle & Deactivation Rules
+
+4. NAVIGATING THE COMPLIANCE & READINESS EXECUTIVE DASHBOARD
+   4.1 The Master Tannery Header Bar
+   4.2 Panel 1: Audit Readiness Gauge & Stream Completeness
+   4.3 Panel 2: Specific Energy & Water Intensity KPI Benchmarking
+   4.4 Panel 3: Environmental Shares (Renewable Energy & Water Recycling)
+   4.5 Panel 4: The 24-Month Audit Data Matrix (Interactive Month Grid)
+   4.6 Panel 5: Actionable Audit Gaps Scanner & One-Click Fixes
+   4.7 Panel 6: Predicted Medal Standing & Bottleneck Explainer
+   4.8 Panel 7: All 17 LWG Protocol Sections Status Table
+
+5. ROUTINE MONTHLY DATA LOGGING (OPERATIONAL DATA STREAMS)
+   5.1 Screen 3: Monthly Production Throughput Data Entry (Section 5)
+       - Raw Material Taxonomy (Raw Hide, Wet Blue, Wet White, Crust)
+       - Entering Throughput & Live Area Auto-Conversion
+       - Inter-stage Leather Dispatches (Sold at Stage)
+       - Seamless In-Place Upsert Architecture
+   5.2 Screen 4: Monthly Energy Consumption Logging (Section 10)
+       - 9-Source Energy Taxonomy (Grid, Fuels, Renewables)
+       - Strict Source-to-Unit Compatibility Rules
+       - Live Gigajoule (GJ) Conversion Calculator
+       - Mandatory Verification Proof for Purchased Renewable Power (PPA)
+   5.3 Screen 5: Monthly Water Usage & Balance Logging (Section 11)
+       - Water Intake Sources (Fresh Ground/Muni vs Recycled ETP/CETP)
+       - Volume Logging in Cubic Meters (m³) and Litres
+       - Mandatory Flow Meter ID Rules
+       - Mandatory Borewell Meter Dial Photographic Proof Workflow
+
+6. STATUTORY PERMITS & EVIDENCE VAULT (SECTIONS 1–17)
+   6.1 17-Section Evidence Repository Architecture
+   6.2 17-Section Interactive Navigation Sidebar & Badge Alerts
+   6.3 Vaulting Documents: Classification Taxonomy
+   6.4 Mandatory Statutory Expiry Tracking (CTO Air/Water & Haz Waste)
+   6.5 The Dynamic Expiry Countdown Alert Engine (Active, Warning, Expired)
+   6.6 Document Audit Trail, Download Streams, and Purge Rules
+
+7. AUDIT MEDAL SIMULATOR & SCENARIO MODELING (SECTION 9)
+   7.1 Purpose of the Issue 7.x 16-Section Scoring Simulator
+   7.2 Interactive Matrix Sliders (Sections 2 through 17)
+   7.3 Live Client-Side Medal Evaluation Engine
+   7.4 The Bottleneck Identification & Holding-Down Explainer Box
+   7.5 Simulation Presets (All Gold, Silver, Bronze, Audited)
+   7.6 Recording & Archiving Official On-Site Audit Results
+
+8. BULK EXCEL INGESTION & AUDITOR DATA PACK GENERATION
+   8.1 Purpose of Bulk Ingestion for 2-Year Historical Records
+   8.2 Step 1: Downloading the Blank 3-Sheet Excel Template
+   8.3 Step 2: Populating Multi-Sheet Historical Data
+   8.4 Step 3: Atomic Workbook Parsing & Ingestion
+   8.5 Step 4: Interpreting Row-Level Error Diagnostics & Resolving Issues
+   8.6 Exporting the Official Publication-Ready 6-Sheet Auditor Data Pack
+
+9. ESG AUDIT READINESS CHECKLIST & ACCREDITATION BEST PRACTICES
+   9.1 60 Days Prior to Audit: Statutory & Permit Checks
+   9.2 30 Days Prior to Audit: Data Completeness & Proof Reconciliation
+   9.3 7 Days Prior to Audit: Final Data Pack Generation & Verification
+   9.4 Auditor Verification Day: On-Site Walkthrough & Live System Access
+
+================================================================================
+1. REGULATORY FRAMEWORK & PROTOCOL ISSUE 7.X OVERVIEW
+================================================================================
+
+1.1 The Leather Working Group (LWG) Standard
+--------------------------------------------
+The Leather Working Group (LWG) Environmental Audit Protocol is the global
+benchmark for environmental, chemical, social, and operational compliance across
+leather manufacturing facilities. Protocol Issue 7.x establishes rigorous
+quantitative thresholds for resource efficiency, hazardous waste containment,
+air/effluent discharges, and full traceability across supply tiers.
+
+1.2 Certification Medal Tiers & Scoring Benchmarks
+--------------------------------------------------
+Upon completion of an official on-site audit, tanneries are classified into five
+standardized certification tiers based on percentage scores:
+
+  Tier             Minimum Score Threshold   Protocol Criteria
+  -----------------------------------------------------------------------------
+  GOLD MEDAL       >= 85.0%                  Exemplary world-class sustainability
+  SILVER MEDAL     >= 75.0%                  Strong environmental performance
+  BRONZE MEDAL     >= 65.0%                  Compliant baseline ESG performance
+  AUDITED          >= 50.0%                  Audited without meeting medal cutoff
+  FAIL / NON-COMPL < 50.0%                   Non-compliant; accreditation withheld
+
+1.3 The 24-Month Sliding Audit Window (P12 vs L12)
+--------------------------------------------------
+Per LWG Issue 7.x rules, an environmental audit requires 24 continuous calendar
+months of contiguous operational data. The system automatically partitions this
+24-month audit window into two distinct 12-month periods:
+
+  1. Previous 12 Months (P12: Months 1 to 12):
+     Acts as the historical facility baseline. Used to establish consumption
+     benchmarks for energy, water, and raw material throughput.
+  2. Latest 12 Months (L12: Months 13 to 24):
+     Acts as the active audit evaluation period. All final intensity calculations,
+     specific consumption figures, and Year-over-Year (YoY) trajectories are
+     judged based on L12 performance relative to P12.
+
+*Note for ESG Analysts*: Every monthly operational entry must fall strictly on the
+first day of the calendar month ("YYYY-MM-01") within `[data_window_start, data_window_end]`.
+Dates outside this boundary are rejected by protocol rules.
+
+1.4 Core Protocol Mathematical Rules & Denominators
+---------------------------------------------------
+In leather environmental auditing, intensities are normalized against leather
+surface area. GreenLedger continuously computes and stores dual units:
+  - Metric Standard      : Square Meters (m²)
+  - Asian Trade Standard : Square Feet (sq ft)
+  - Official Conversion  : 1 m² = 10.7639 sq ft (1 sq ft = 0.092903 m²)
+
+Denominators for Facility-Wide Intensity:
+When computing facility-wide Specific Energy Consumption (MJ/m²) and Specific
+Water Intake (L/m²), the production denominator is derived from the highest
+completed manufacturing stage operated on-site:
+  - Stage 3 (Crust to Finish) : Denominator is finished leather area.
+  - Stage 2 (Wet Blue to Crust): Denominator is crust leather area.
+  - Stage 1 (Raw to Wet Blue)  : Denominator is wet blue leather area.
+
+1.5 The LWG "Holding-Down Rule" (Critical Section Principle)
+-----------------------------------------------------------
+The single most vital principle an ESG analyst must understand is the
+"Holding-Down Rule" (Protocol Issue 7 Section 9.3):
+
+  "The overall facility medal rating cannot exceed the score achieved in any
+   single Critical Section."
+
+Example Scenario:
+A facility achieves a 92% score (Gold) in Section 4 (Permits), 89% (Gold) in
+Section 5 (Production), and 88% (Gold) in Section 10 (Energy). However, in
+Section 11 (Water Usage), the facility achieves 72% (Bronze).
+Even though the facility's mathematical weighted average across all sections
+exceeds 86% (Gold), the Holding-Down Rule forces the overall tannery rating to
+be CAPPED AT BRONZE. Section 11 acts as a "Holding-Down Bottleneck."
+GreenLedger's engine automatically highlights this bottleneck in red/amber alerts
+across the Dashboard and Simulator.
+
+1.6 Complete 17-Section Protocol Taxonomy
+=========================================
+LWG Protocol Issue 7.x comprises 17 sections, categorized into Critical (must meet
+medal threshold) and Non-Critical:
+
+  Section # | Section Title                                | Class        | MVP Tracking
+  ----------|----------------------------------------------|--------------|-------------
+  Sec 1     | General Information & Facility Background    | Non-Critical | Full Scope
+  Sec 2     | Traceability: Subcontracted Operations       | Critical     | Full Scope
+  Sec 3     | Social Audit Compliance & Labor Standards    | Non-Critical | Full Scope
+  Sec 4     | Operating Permits & Environmental Approvals  | Critical     | ACTIVE MVP
+  Sec 5     | Monthly Production Data Throughput           | Critical     | ACTIVE MVP
+  Sec 6     | Incoming Raw Material Traceability           | Non-Critical | Full Scope
+  Sec 7     | Outgoing Finished Product Traceability       | Non-Critical | Full Scope
+  Sec 8     | Environmental Management Systems (ISO 14001) | Critical     | Full Scope
+  Sec 9     | Restricted Substances Compliance (MRSL/RSL)  | Critical     | Full Scope
+  Sec 10    | Energy Consumption & Carbon Intensity        | Critical     | ACTIVE MVP
+  Sec 11    | Water Usage, Flow Meters & Recycling         | Critical     | ACTIVE MVP
+  Sec 12    | Air & Noise Emissions Monitoring             | Critical     | Full Scope
+  Sec 13    | Waste Management & Hazardous Sludge Handling | Critical     | Full Scope
+  Sec 14    | Effluent Treatment Plant (ETP/CETP)          | Critical     | Full Scope
+  Sec 15    | Occupational Health, Safety & Emergency Resp | Critical     | Full Scope
+  Sec 16    | Chemical Management, Bunding & Secondary Con | Critical     | Full Scope
+  Sec 17    | Housekeeping & Factory Operations            | Critical     | Full Scope
+
+
+================================================================================
+2. FIRST-TIME TANNERY ONBOARDING & BASELINE CONFIGURATION
+================================================================================
+
+2.1 Navigating to the LWG Module
+--------------------------------
+1. Log in to the GreenLedger ESG Platform.
+2. In the primary left-hand navigation sidebar, locate the "Leather (LWG)" entry
+   (identifiable by the golden `workspace_premium` medal icon).
+3. Click "Leather (LWG)".
+4. If your organization has not yet configured its tannery profile, the system
+   Global Profile Guard will automatically direct you to the Onboarding Wizard
+   at `/tenant/lwg/onboarding`.
+
+2.2 Facility Linking & Registered Tannery Details
+-------------------------------------------------
+Step 1: Primary Operational Facility
+  - Select your physical operating facility from the dropdown. This links LWG
+    auditing data to your existing GreenLedger tenant facility asset.
+Step 2: Tannery Registered Business Name
+  - Enter the exact registered legal entity name as shown on statutory SPCB/PCC
+    environmental consents (e.g., "Evergreen Tannery Pvt Ltd").
+Step 3: City and State / Province
+  - Enter the manufacturing location (e.g., "Ranipet", "Tamil Nadu").
+
+2.3 Manufacturing Stage Classification & Audit Denominators
+-----------------------------------------------------------
+Under Section 2 of the onboarding wizard, check all production stages operated:
+  [ ] Stage 1: Raw hide to Wet Blue (Beamhouse & Tanning operations)
+  [ ] Stage 2: Wet Blue to Crust (Re-tanning, Retanning Drums & Dyeing)
+  [ ] Stage 3: Crust to Finished Leather (Coating, Spraying, Milling, Finishing)
+  [ ] Stage 1 to 3: Fully Integrated Tannery (Raw hide to finished leather)
+  [ ] Stage 2 to 3: Processing from Wet Blue to Finish
+
+*ESG Auditor Note*: You must select at least one stage. The highest stage checked
+will automatically serve as the denominator for all energy (MJ/m²) and water
+(L/m²) performance metrics.
+
+2.4 Measurement Unit Preference Configuration
+---------------------------------------------
+Select your organization's primary working leather area unit:
+  (•) Square Feet (sq ft) - Traditional commercial trade unit across India/Asia.
+  ( ) Square Meters (m²)   - Official international metric unit per LWG standard.
+*Note*: Whichever unit you select as primary, the GreenLedger platform auto-converts
+every single entry into both units simultaneously in the database.
+
+2.5 Wastewater Treatment & Effluent Disposal Architecture
+---------------------------------------------------------
+Select your facility's wastewater effluent treatment topology:
+  - "Direct discharge with own on-site ETP": Complete primary, secondary, and tertiary
+    treatment on-site with direct treated surface discharge.
+  - "Pre-treatment with discharge to CETP": On-site primary screening/equalization
+    with conveyance to a Common Effluent Treatment Plant cluster.
+  - "Both on-site ETP and CETP": Hybrid operations with Zero Liquid Discharge (ZLD)
+    or RO permeate reuse combined with CETP reject discharge.
+
+2.6 Subcontracted Operations & Scope 3 Traceability Boundary
+------------------------------------------------------------
+Toggle the "Facility uses external subcontracting" switch if your tannery sends
+hides off-site for intermediate processing steps (e.g., contract splitting, custom
+shaving, embossing, or toll tanning).
+*Compliance Impact*: Enabling this flag activates Protocol Section 2 audit rules,
+requiring subcontractor audit certifications to prevent certification loss.
+
+2.7 Automated Baseline Initialization & Default Seedings
+--------------------------------------------------------
+Click "Complete Setup & Launch LWG Workspace".
+Upon submission:
+  1. The backend automatically calculates your active 24-month sliding window:
+     - `data_window_end`: First day of previous calendar month.
+     - `data_window_start`: Exactly 23 months prior (24 total months).
+  2. The system auto-seeds your default factory departments:
+     - Beamhouse (Stage 1)
+     - Tan Yard (Stage 1)
+     - Re-tanning & Dye house (Stage 2)
+     - Finishing Department (Stage 3)
+     - Effluent Treatment Plant / RO (Common)
+     - Boiler House & Utilities (Common)
+  3. You are redirected immediately to the Executive Dashboard (`/tenant/lwg`).
+
+
+================================================================================
+3. FACTORY DEPARTMENTS & METERING SUBUNITS MANAGEMENT
+================================================================================
+Route: `/tenant/lwg/departments`
+
+3.1 Objectives of Physical Sub-metering under Issue 7.x
+-------------------------------------------------------
+LWG Protocol Issue 7 awards significant bonus points for facilities that have
+isolated electric sub-meters, thermal flow meters, and water meters installed on
+individual production lines rather than relying exclusively on a single site-wide
+master meter.
+
+3.2 Adding and Categorizing Tannery Departments
+-----------------------------------------------
+Click "Add Factory Department" to register physical subunits:
+  1. Department Name: Enter equipment grouping (e.g., "Finishing Spray Tunnel #3",
+     "Chrome Recovery Unit", "Liming Paddles Yard").
+  2. Stage Allocation:
+     - `stage_1`: Allocated strictly to Beamhouse/Tannery operations.
+     - `stage_2`: Allocated strictly to Re-tanning/Dyeing operations.
+     - `stage_3`: Allocated strictly to Finishing operations.
+     - `common` : Site-wide infrastructure (ETP, Boiler room, Compressor, Admin).
+  3. Metering Scope Description: Record meter IDs or physical equipment covered.
+
+3.3 Ongoing Department Lifecycle & Deactivation Rules
+-----------------------------------------------------
+- To edit an existing subunit, click the edit icon on the department row.
+- If a production drum line is decommissioned, do not delete historical records.
+  Instead, toggle the "Active Status" switch to Inactive. Inactive departments
+  preserve 24-month historical audit records while preventing accidental new
+  meter allocations.
+
+
+================================================================================
+4. NAVIGATING THE COMPLIANCE & READINESS EXECUTIVE DASHBOARD
+================================================================================
+Route: `/tenant/lwg`
+
+The Executive Dashboard functions as the mission-control center for the compliance
+officer and lead auditor. It continuously aggregates all 24 months of production,
+energy, water, and statutory permits into real-time audit intelligence.
+
+4.1 The Master Tannery Header Bar
+---------------------------------
+Visible at the top of every operational screen:
+  - Facility Name, City & State badge (e.g., "Evergreen Tannery Pvt Ltd • Ranipet, Tamil Nadu").
+  - 24-Month Active Audit Window (e.g., "Audit Window: Nov 2024 – Oct 2026").
+  - Default Measurement Unit badge ("Unit: Square Feet (sq ft)").
+  - Quick Action Buttons:
+    * "Download Auditor Pack": Generates the official multi-sheet Excel file.
+    * "Bulk Excel Import": Opens the quick-upload modal for 24-month back data.
+  - Tab Switcher: Seamless switching between Dashboard, Production, Energy, Water,
+    Evidence Vault, Simulator, Departments, and Excel Tools.
+
+4.2 Panel 1: Audit Readiness Gauge & Stream Completeness
+--------------------------------------------------------
+Located at the top left:
+  - Large Circular Gauge: Visualizes `readiness.overall_percent` (0% to 100%).
+    * Emerald (>= 90%) : Audit Ready.
+    * Amber (75% - 89%): Action Required (Gaps present).
+    * Rose (< 75%)     : Incomplete.
+  - Status Badge: Displays "Audit Ready" or "Action Required: Gaps".
+  - Three Granular Sub-bars:
+    1. Production Completeness (Section 5): % of 24 months with logged throughput.
+    2. Energy Completeness (Section 10)  : % of 24 months with logged power/fuels.
+    3. Water Completeness (Section 11)   : % of 24 months with logged water intake.
+
+4.3 Panel 2: Specific Energy & Water Intensity KPI Benchmarking
+---------------------------------------------------------------
+Card 1: Specific Energy Intensity (MJ/m²)
+  - Current L12 Value: Specific energy consumption in Megajoules per m² of leather.
+  - Baseline P12 Benchmark: Energy rate during the previous 12 months.
+  - Trajectory Badge: Year-over-Year (YoY) percentage shift.
+    * Green Down-Arrow (e.g., "-9.1% YoY"): Favorable energy efficiency gain.
+    * Red Up-Arrow (e.g., "+4.2% YoY")   : Unfavorable energy efficiency loss.
+
+Card 2: Specific Water Intensity (L/m²)
+  - Current L12 Value: Specific total water consumption in Litres per m² of leather.
+  - Baseline P12 Benchmark: Water rate during the previous 12 months.
+  - Trajectory Badge: Year-over-Year (YoY) percentage shift.
+    * Green Down-Arrow (e.g., "-8.4% YoY"): Favorable water conservation gain.
+
+4.4 Panel 3: Environmental Shares (Renewable Energy & Water Recycling)
+----------------------------------------------------------------------
+Card 3: Clean Energy & Water Recovery
+  - Renewable Energy Share (%): Proportion of total facility energy derived from
+    clean sources (On-site rooftop Solar PV, Purchased Renewable PPA, Biomass).
+  - Recycled Water Share (%): Percentage of total factory intake sourced from
+    treated effluent recycling (own ETP / RO plant or recycled CETP water).
+
+4.5 Panel 4: The 24-Month Audit Data Matrix (Interactive Month Grid)
+-------------------------------------------------------------------
+A visual matrix mapping all 24 months of the audit window:
+  - Top Block: Previous 12 Months (P12 - Months 1 to 12).
+  - Bottom Block: Latest 12 Months (L12 - Months 13 to 24).
+  - Each Month Cell Features 3 Independent Status Dots:
+    * Dot 1 [P]: Production Log (Green = Complete, Red = Missing).
+    * Dot 2 [E]: Energy Log (Green = Complete, Red = Missing).
+    * Dot 3 [W]: Water Log (Green = Complete, Red = Missing).
+  - Interactive Cell Flyout: Click any month cell to reveal an instant popover
+    displaying recorded figures with direct deep-links to log missing streams.
+
+4.6 Panel 5: Actionable Audit Gaps Scanner & One-Click Fixes
+------------------------------------------------------------
+Scans your entire 24-month database and statutory permit registry to surface
+every non-compliance issue that could cap or fail your audit:
+  - Severity Tagging:
+    * "Critical Blocker" (Red): Missing monthly operational data, expired SPCB Consent
+      to Operate, or missing mandatory borewell meter photo.
+    * "Warning" (Amber): SPCB Consent to Operate expiring within 60 days.
+  - Section Tag: Points directly to the affected LWG Section (e.g., "Section 11").
+  - "Resolve Now" Action Button: Click to navigate directly to the specific form,
+    pre-filled with the exact month or section required.
+
+4.7 Panel 6: Predicted Medal Standing & Bottleneck Explainer
+------------------------------------------------------------
+Displays your projected official LWG Medal:
+  - Large Medal Banner: Gold, Silver, Bronze, Audited, or Non-Compliant.
+  - Minimum Threshold Score indicator.
+  - Holding-Down Bottleneck Alert: If a critical section score restricts the overall
+    rating, an alert box identifies the bottleneck section and explains the required
+    score increment to unlock the next medal tier.
+  - Section Rating Pills: Displays individual ratings for tracked critical sections.
+
+4.8 Panel 7: All 17 LWG Protocol Sections Status Table
+------------------------------------------------------
+A complete breakdown of all 17 LWG protocol sections with quick-filter tabs:
+  - "All (17)": Complete issue 7.x protocol.
+  - "Critical (13)": The 13 sections governed by the Holding-Down Rule.
+  - "MVP Active (4)": The 4 primary data streams actively calculated by the engine.
+
+
+================================================================================
+5. ROUTINE MONTHLY DATA LOGGING (OPERATIONAL DATA STREAMS)
+================================================================================
+
+5.1 Screen 3: Monthly Production Throughput Data Entry (Section 5)
+------------------------------------------------------------------
+Route: `/tenant/lwg/production`
+
+Compliance Objective:
+Maintain a contiguous 24-month record of raw material inputs and normalized finished
+leather throughput to serve as the denominator for environmental intensities.
+
+Step-by-Step Logging Procedure:
+1. Click "Log Month Entry" to open the production drawer.
+2. Select Audit Month: Pick from the 24-month dropdown (e.g., "May 2025 (P12)").
+3. Select Production Stage: Pick the relevant stage operated (e.g., "Stage 3: Crust to Finished Leather").
+4. Select Input Material Classification:
+   - `raw_hide_skin`: Raw salted or fresh hides.
+   - `wet_blue`     : Chrome tanned wet blue.
+   - `wet_white`    : Chrome-free wet white.
+   - `crust`        : Dried crust leather ready for finishing.
+5. Input Quantity (Tonnes): Enter total mass of material processed (e.g., `12.50`).
+6. Leather Output Quantity:
+   - Enter output in your preferred unit (e.g., `100,000` sq ft).
+   - Real-Time Helper Text: The system immediately calculates and displays the
+     metric equivalent: `≈ 9,290.3 m²`.
+7. Sold at this Stage (Optional): If leather was sold as crust prior to finishing,
+   record the intermediate area dispatched.
+8. Notes / Lot Tracking ID: Enter tannery batch or lot reference (e.g., "Lot B-104").
+9. Click "Save Production Entry".
+
+*In-Place Upsert Architecture*:
+If you select a Month and Stage that has already been recorded, GreenLedger will
+seamlessly update the existing entry in place without creating duplicate records.
+
+5.2 Screen 4: Monthly Energy Consumption Logging (Section 10)
+-------------------------------------------------------------
+Route: `/tenant/lwg/energy`
+
+Compliance Objective:
+Record all fossil fuel combustion, utility electricity intake, and on-site clean
+generation, converting all values to standardized Gigajoules (GJ).
+
+Step-by-Step Logging Procedure:
+1. Click "Log Energy Entry".
+2. Select Audit Month: Choose month within the 24-month sliding window.
+3. Select Energy Source (9 Taxonomy Classifications):
+   - `grid_electricity`                 : Municipal / State electric grid.
+   - `diesel_hsd`                        : High Speed Diesel for generators/boilers.
+   - `furnace_oil`                       : Heavy Fuel Oil / Boiler furnace oil.
+   - `natural_gas_png`                   : Piped Natural Gas.
+   - `lpg`                               : Liquefied Petroleum Gas.
+   - `coal`                              : Industrial boiler coal.
+   - `solar_onsite`                      : On-site rooftop or ground-mount Solar PV.
+   - `purchased_renewable_electricity`   : Off-site Power Purchase Agreement (PPA).
+   - `biomass_or_briquettes`             : Agricultural waste briquettes / pellets.
+4. Select Unit (Strict Dynamic Filtering):
+   The unit dropdown dynamically filters based on your selected energy source:
+   - Grid / Solar / PPA Renewable : Restricted strictly to `kwh` or `mwh`.
+   - Diesel / Furnace Oil         : Restricted strictly to `litres`.
+   - Natural Gas PNG              : Restricted strictly to `scm` (standard cubic meters).
+   - Coal / Biomass               : Restricted strictly to `tonnes`.
+   - LPG                          : Restricted to `kg` or `litres`.
+5. Enter Quantity Consumed: Enter the numerical meter consumption.
+6. Live Gigajoule (GJ) Preview Calculator:
+   Observe the live calculated energy output displayed in amber:
+   - Formula: `Quantity * Energy GJ Factor = Live GJ`
+   - Example: `10,000 kWh * 0.0036 GJ/kWh = 36.00 GJ`.
+7. Subunit Allocation: Assign to a specific factory department or "Whole Site".
+8. Mandatory Proof for Purchased Renewable Power:
+   - If `purchased_renewable_electricity` is chosen, the upload dropzone becomes
+     MANDATORY. You must upload your PPA agreement or monthly green tariff invoice.
+9. Click "Save Energy Entry".
+
+5.3 Screen 5: Monthly Water Usage & Balance Logging (Section 11)
+----------------------------------------------------------------
+Route: `/tenant/lwg/water`
+
+Compliance Objective:
+Track fresh water extraction, municipal piped intake, and treated wastewater recycling
+to compute facility water balance and water recycling share.
+
+Step-by-Step Logging Procedure:
+1. Click "Log Water Intake".
+2. Select Audit Month: Choose month within the 24-month sliding window.
+3. Select Water Source:
+   - Fresh Water Sources    : `borewell`, `municipal_supply`, `tanker`, `rainwater_harvested`
+   - Recycled Water Sources : `recycled_own_etp`, `recycled_cetp`
+4. Enter Volume Consumed: Enter intake in cubic meters (m³).
+   - Note: 1 m³ = 1,000 Litres.
+5. Flow Meter Device ID (Mandatory Rule):
+   - If `borewell` or `municipal_supply` is selected, Flow Meter ID is MANDATORY.
+     Enter the calibrated device serial number (e.g., "BW-METER-01").
+6. Borewell Dial Photo Upload (Mandatory Rule):
+   - If `borewell` is selected, you MUST upload a photographic image of the water
+     flow meter odometer dial with the date/time visible.
+7. Subunit Allocation: Assign intake to ETP, Beamhouse, Finishing, or Whole Site.
+8. Click "Save Water Entry".
+
+
+================================================================================
+6. STATUTORY PERMITS & EVIDENCE VAULT (SECTIONS 1–17)
+================================================================================
+Route: `/tenant/lwg/evidence`
+
+Compliance Objective:
+Maintain a secure, cloud-backed repository of all environmental authorizations,
+operating permits, laboratory effluent test certificates, utility bills, and meter
+photos mapped across all 17 LWG protocol sections.
+
+6.1 17-Section Evidence Repository Architecture
+-----------------------------------------------
+The Evidence Vault features a two-column operational layout:
+  - Left Column : 17-Section Navigation Sidebar displaying document counts and
+    active expiry alerts.
+  - Right Column: Master Filterable Evidence Documents Table with file metadata,
+    validity dates, and one-click downloads.
+
+6.2 17-Section Interactive Navigation Sidebar & Badge Alerts
+------------------------------------------------------------
+- Click "All Evidence Documents" to view the facility-wide master index.
+- Click any individual section (e.g., "Section 4: Operating Permits") to isolate
+  documents uploaded for that specific audit criteria.
+- Visual Alert Dots:
+  * Red Pulsating Dot : Section contains one or more EXPIRED documents.
+  * Amber Dot         : Section contains documents EXPIRING WITHIN 60 DAYS.
+
+6.3 Vaulting Documents: Classification Taxonomy
+-----------------------------------------------
+Click "Vault File" to upload compliance evidence:
+  1. Select File: Drag & drop PDF, JPG, PNG, XLSX, or DOCX (up to 25MB).
+  2. Target LWG Section: Choose from Sections 1 to 17.
+  3. Document Type Classification:
+     - `consent_to_operate`            : SPCB Consent to Operate (Air / Water).
+     - `hazardous_waste_authorisation` : SPCB Hazardous Waste Authorization.
+     - `electricity_bill`              : Monthly electricity utility invoice.
+     - `fuel_invoice`                  : Fuel delivery challan or invoice.
+     - `meter_photo`                   : Water/energy flow meter reading photo.
+     - `lab_report`                    : Effluent BOD, COD, TDS, or Cr lab analysis.
+     - `other`                         : Environmental policy, ISO 14001, PPE logs.
+  4. Validity Period: Record `periodFrom` and `periodTo` dates.
+  5. Reference Number / Notes: Enter statutory consent order number.
+
+6.4 Mandatory Statutory Expiry Tracking (Section 4 Rules)
+---------------------------------------------------------
+Per LWG Protocol Section 4 rules, if you select `consent_to_operate` or
+`hazardous_waste_authorisation`, the Expiry Date field is STRICTLY MANDATORY.
+The system will block submission if an expiry date is omitted.
+
+6.5 The Dynamic Expiry Countdown Alert Engine
+---------------------------------------------
+The system automatically compares document expiry dates against the current date:
+  - Status "valid" (Green Badge):
+    Document is active with > 60 days remaining.
+  - Status "warning" (Amber Badge):
+    `0 <= days_remaining <= 60`. Triggers warning on Dashboard:
+    "SPCB Consent to Operate expires on YYYY-MM-DD (within 60 days)."
+  - Status "expired" (Red Badge):
+    `days_remaining < 0`. Triggers Critical Blocker on Dashboard:
+    "SPCB Consent to Operate EXPIRED. LWG accreditation cannot proceed."
+
+6.6 Document Audit Trail, Download Streams, and Purge Rules
+-----------------------------------------------------------
+- Every vaulted file is assigned a permanent immutable S3 key.
+- Auditors can click the download icon to retrieve the original binary document.
+- Deleting an evidence record requires two-step confirmation to prevent accidental
+  data loss during audits.
+
+
+================================================================================
+7. AUDIT MEDAL SIMULATOR & SCENARIO MODELING (SECTION 9)
+================================================================================
+Route: `/tenant/lwg/audit-simulation`
+
+Compliance Objective:
+Simulate hypothetical protocol scoring scenarios across all 16 scoring sections
+(Sections 2 through 17), identify Holding-Down bottlenecks, and formulate
+actionable remediation plans before the official auditor arrives on-site.
+
+7.1 Purpose of the Issue 7.x 16-Section Scoring Simulator
+---------------------------------------------------------
+Section 1 of the protocol covers general company background and carries no score.
+The remaining 16 sections (Sections 2 to 17) carry direct percentage scores that
+determine your final accreditation tier.
+
+7.2 Interactive Matrix Sliders (Sections 2 through 17)
+------------------------------------------------------
+The simulator presents 16 responsive slider cards. Each card displays:
+  - Section Number and Full Title.
+  - Classification: "Critical for Medal" (Shield Icon) vs "Non-Critical".
+  - Dual Synchronized Controls:
+    * Drag the visual slider from 0% to 100%.
+    * Or type the exact percentage score in the numerical input box.
+  - Individual Section Tier Badge: Gold (>=85%), Silver (>=75%), Bronze (>=65%),
+    Audited (>=50%), Fail (<50%).
+
+7.3 Live Client-Side Medal Evaluation Engine
+--------------------------------------------
+As you adjust any slider, GreenLedger's client-side calculation engine
+(`calculateMedalFromScores`) re-evaluates your overall standing in real time:
+  - Calculates lowest score achieved among the 13 Critical Sections.
+  - Computes overall projected medal rating (Gold, Silver, Bronze, Audited, Fail).
+  - Updates the master medal crest at the top of the screen instantly.
+
+7.4 The Bottleneck Identification & Holding-Down Explainer Box
+--------------------------------------------------------------
+If any critical section score drags down the facility medal, the system renders a
+prominent amber alert box detailing the exact bottleneck:
+
+  "Bottleneck Identified: Critical Section 11 (Water Usage) has score 72.0%
+   (Bronze). Even though Sections 4, 5, and 10 achieved Gold (88–92%), your overall
+   medal is capped at Bronze. Increase Section 11 score to 75% to unlock SILVER,
+   or 85% to unlock GOLD."
+
+This allows ESG directors to target capital investments (e.g., investing in an RO
+recycling plant to boost Section 11 from 72% to 86%) to unlock a Gold Medal.
+
+7.5 Simulation Presets
+----------------------
+Use the top preset buttons to model standardized targets in one click:
+  - "All Gold (88%)"   : Sets all 16 sections to 88% to verify Gold requirements.
+  - "All Silver (78%)" : Sets all 16 sections to 78% for Silver readiness.
+  - "All Bronze (68%)" : Sets all 16 sections to 68% for Bronze baseline.
+  - "Audited (50%)"    : Sets all sections to the minimum 50% threshold.
+  - "Reset to Saved Audit Scores": Reloads previous official audit results.
+
+7.6 Recording & Archiving Official On-Site Audit Results
+--------------------------------------------------------
+When your official LWG on-site audit concludes:
+1. Adjust all 16 section scores to match the lead auditor's finalized report.
+2. Click "Save As Audit Result".
+3. Record the official Audit Inspection Date and certificate notes.
+4. Click "Confirm & Save".
+5. The result is permanently archived in GreenLedger as the facility benchmark.
+
+
+================================================================================
+8. BULK EXCEL INGESTION & AUDITOR DATA PACK GENERATION
+================================================================================
+Route: `/tenant/lwg/excel-tools`
+
+8.1 Purpose of Bulk Ingestion for 2-Year Historical Records
+-----------------------------------------------------------
+Entering 24 months of production, energy (multiple fuels), and water data manually
+can require over 150 individual form submissions. The Bulk Ingestion Engine allows
+you to populate a standardized 3-sheet Excel workbook offline and ingest your entire
+2-year historical record in under 5 seconds.
+
+8.2 Step 1: Downloading the Blank 3-Sheet Excel Template
+--------------------------------------------------------
+1. Navigate to `/tenant/lwg/excel-tools`.
+2. In Step 1, click "Download 3-Sheet Excel Template (.xlsx)".
+3. Open the downloaded workbook `LWG_Bulk_Back_Data_Template.xlsx`.
+4. Inspect the three pre-formatted worksheets:
+   - Sheet 1 "Production":
+     Headers: `month`, `stage`, `input_quantity_tonnes`, `input_material`,
+              `output_quantity`, `sold_at_stage`, `notes`.
+   - Sheet 2 "Energy":
+     Headers: `month`, `source`, `quantity`, `unit`, `department`,
+              `bill_proof_file_key`.
+   - Sheet 3 "Water":
+     Headers: `month`, `source`, `volume_m3`, `meter_id`, `department`,
+              `meter_photo_file_key`.
+
+8.3 Step 2: Populating Multi-Sheet Historical Data
+--------------------------------------------------
+Populate the 24 calendar months (Month 1 to Month 24):
+  - Ensure dates follow ISO format: `YYYY-MM-01`.
+  - Use exact enum identifiers:
+    * Stages   : `stage_1_raw_to_wetblue`, `stage_2_wetblue_to_crust`, `stage_3_crust_to_finish`
+    * Materials: `raw_hide_skin`, `wet_blue`, `wet_white`, `crust`
+    * Energy   : `grid_electricity`, `diesel_hsd`, `solar_onsite`, `natural_gas_png`
+    * Water    : `borewell`, `municipal_supply`, `recycled_own_etp`
+  - Ensure energy units match allowed source mappings (`kwh` for grid, `litres` for diesel).
+
+8.4 Step 3: Atomic Workbook Parsing & Ingestion
+-----------------------------------------------
+1. In Step 2, drag your completed `.xlsx` file into the upload dropzone.
+2. Click "Process & Import Workbook".
+3. The GreenLedger backend parses all 3 sheets atomically, executes validation
+   checks against LWG Issue 7 rules, and upserts all valid records.
+
+8.5 Step 4: Interpreting Row-Level Error Diagnostics & Resolving Issues
+-----------------------------------------------------------------------
+If any row contains an invalid unit, date outside the 24-month window, or missing
+mandatory meter ID, the Ingestion Diagnostic Report displays a structured table:
+  - Sheet Name   : Identifies the exact sheet (e.g., "Energy").
+  - Row #        : Highlights the exact spreadsheet row (e.g., "Row 14").
+  - Target Field : Pinpoints the offending column (e.g., "unit").
+  - Reason       : Human-readable diagnostic (e.g., "Unit 'litres' is not allowed for source 'grid_electricity'. Allowed units: kwh, mwh.").
+
+Correct the row in Excel, save, and re-upload. When `total_failed === 0`, your
+Dashboard readiness automatically transitions to 100% "Ready".
+
+8.6 Exporting the Official Publication-Ready 6-Sheet Auditor Data Pack
+----------------------------------------------------------------------
+When preparing for certification audit submission:
+1. Navigate to `/tenant/lwg/excel-tools` or click "Download Auditor Pack" in the
+   master header.
+2. Click "Export Official Auditor Pack (.xlsx)".
+3. The platform streams a formatted, publication-ready Excel workbook:
+   `LWG_Auditor_Data_Pack_<URN>_<Date>.xlsx`.
+
+The Auditor Data Pack contains 6 comprehensive worksheets:
+  - Sheet 1: "Tannery Profile & URN":
+    Facility details, operational address, stages run, effluent treatment setup,
+    subcontracting scope, and 24-month audit window dates.
+  - Sheet 2: "Executive Summary":
+    Readiness % gauge, Specific Energy Intensity (L12 vs P12 benchmark in MJ/m²),
+    Specific Water Intensity (L12 vs P12 benchmark in L/m²), YoY efficiency gains,
+    Renewable Energy Share %, and Recycled Water Share %.
+  - Sheet 3: "Production":
+    Complete 24-month throughput log with raw material inputs (tonnes) and normalized
+    leather surface area in both m² and sq ft.
+  - Sheet 4: "Energy":
+    Complete 24-month fuel & electricity consumption breakdown normalized to Gigajoules
+    (GJ), clean power shares, and PPA proof keys.
+  - Sheet 5: "Water":
+    Complete 24-month water intake balance, fresh vs recycled ratios, borewell extraction,
+    and flow meter register.
+  - Sheet 6: "Evidence Vault Index":
+    Full inventory of vaulted compliance files, statutory SPCB Consent to Operate,
+    Hazardous Waste authorizations, expiry dates, and countdown statuses.
+
+
+================================================================================
+9. ESG AUDIT READINESS CHECKLIST & ACCREDITATION BEST PRACTICES
+================================================================================
+
+9.1 60 Days Prior to Audit: Statutory & Permit Checks
+-----------------------------------------------------
+  [ ] Open Evidence Vault (`/tenant/lwg/evidence`).
+  [ ] Verify Section 4: Confirm Consent to Operate (Air/Water) has > 60 days validity.
+  [ ] Verify Hazardous Waste Authorization is active and not flagged amber/red.
+  [ ] If permits expire within 60 days, file renewal applications with SPCB immediately
+      and upload renewal acknowledgment challans into Section 4.
+
+9.2 30 Days Prior to Audit: Data Completeness & Proof Reconciliation
+--------------------------------------------------------------------
+  [ ] Open Dashboard (`/tenant/lwg`).
+  [ ] Verify Audit Readiness Gauge displays 100.0% "Audit Ready".
+  [ ] Inspect 24-Month Month Grid: Confirm all 24 months have 3 green dots (P, E, W).
+  [ ] Review Actionable Audit Gaps Scanner: Confirm "0 Gaps Detected".
+  [ ] Review Water Master Table (`/tenant/lwg/water`): Confirm all Borewell extraction
+      entries have valid meter reading photos attached.
+  [ ] Review Energy Master Table (`/tenant/lwg/energy`): Confirm all Purchased
+      Renewable Electricity entries have PPA green tariff invoices attached.
+
+9.3 7 Days Prior to Audit: Final Data Pack Generation & Verification
+--------------------------------------------------------------------
+  [ ] Open Audit Simulator (`/tenant/lwg/audit-simulation`).
+  [ ] Run simulation to ensure no critical section bottleneck caps your desired tier.
+  [ ] Open Excel Tools (`/tenant/lwg/excel-tools`).
+  [ ] Click "Export Official Auditor Pack (.xlsx)".
+  [ ] Review the generated 6-sheet workbook to ensure all numbers reconcile with
+      physical utility bills and tannery dispatch registers.
+
+9.4 Auditor Verification Day: On-Site Walkthrough & Live System Access
+----------------------------------------------------------------------
+  [ ] Provide the lead auditor with the exported 6-sheet Auditor Data Pack.
+  [ ] In GreenLedger, grant the auditor Read-Only auditor access (`require_read("lwg")`).
+  [ ] During the physical shop floor walkthrough, utilize the Evidence Vault on tablet
+      or mobile to instantly present calibrated flow meter photos and calibration certs.
+  [ ] Upon audit sign-off, navigate to `/tenant/lwg/audit-simulation` and record the
+      final certified medal score.
+
+================================================================================
+                         END OF USER GUIDE
+================================================================================

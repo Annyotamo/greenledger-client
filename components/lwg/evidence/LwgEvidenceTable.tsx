@@ -102,7 +102,7 @@ export function LwgEvidenceTable({
         <div className="space-y-4">
             {/* Top Stat Tiles */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="rounded-xl border border-outline-variant bg-surface p-3.5 shadow-2xs">
+                <div className="rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-3 sm:p-3.5 shadow-2xs">
                     <span className="font-sans text-[11px] font-medium text-on-surface-variant">
                         Vaulted Documents
                     </span>
@@ -111,7 +111,7 @@ export function LwgEvidenceTable({
                     </p>
                 </div>
 
-                <div className="rounded-xl border border-outline-variant bg-surface p-3.5 shadow-2xs">
+                <div className="rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-3 sm:p-3.5 shadow-2xs">
                     <span className="font-sans text-[11px] font-medium text-on-surface-variant">
                         Statutory Permits
                     </span>
@@ -120,7 +120,7 @@ export function LwgEvidenceTable({
                     </p>
                 </div>
 
-                <div className="rounded-xl border border-outline-variant bg-surface p-3.5 shadow-2xs">
+                <div className="rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-3 sm:p-3.5 shadow-2xs">
                     <span className="font-sans text-[11px] font-medium text-on-surface-variant">
                         Expiring (&lt; 60 Days)
                     </span>
@@ -129,7 +129,7 @@ export function LwgEvidenceTable({
                     </p>
                 </div>
 
-                <div className="rounded-xl border border-outline-variant bg-surface p-3.5 shadow-2xs">
+                <div className="rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-3 sm:p-3.5 shadow-2xs">
                     <span className="font-sans text-[11px] font-medium text-on-surface-variant">
                         Expired Permits
                     </span>

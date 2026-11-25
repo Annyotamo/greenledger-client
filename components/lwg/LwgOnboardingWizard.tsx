@@ -125,9 +125,9 @@ export function LwgOnboardingWizard() {
     return (
         <div className="mx-auto max-w-4xl space-y-6">
             {/* Header intro banner */}
-            <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
+            <div className="rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-5 sm:p-6 shadow-sm">
                 <div className="flex items-center gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-2xs">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-2xs">
                         <MaterialIcon name="workspace_premium" size="lg" />
                     </div>
                     <div>

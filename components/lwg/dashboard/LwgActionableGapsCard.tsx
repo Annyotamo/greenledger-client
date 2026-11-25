@@ -52,6 +52,14 @@ export function LwgActionableGapsCard({ gapList }: LwgActionableGapsCardProps) {
         return url;
     };
 
+    const sanitizeLwgText = (text: string) => {
+        if (!text) return "";
+        return text
+            .replace(/\bLWG Protocol\b/gi, "Leather Protocol")
+            .replace(/\bLWG Issue\b/gi, "Protocol Issue")
+            .replace(/\bLWG\b/g, "Protocol");
+    };
+
     return (
         <Card className="h-full flex flex-col justify-between overflow-hidden">
             <div className="flex-1 flex flex-col min-h-0">
@@ -183,7 +191,7 @@ export function LwgActionableGapsCard({ gapList }: LwgActionableGapsCardProps) {
                             </p>
                             <p className="font-sans text-xs text-on-surface-variant max-w-sm">
                                 {gapList.length === 0
-                                    ? "Zero compliance gaps detected across the 24-month audit window. Your production throughput, energy, water intake, and statutory permits satisfy LWG Issue 7.x criteria."
+                                    ? "Zero compliance gaps detected across the 24-month audit window. Your production throughput, energy, water intake, and statutory permits satisfy Leather Protocol Issue 7.x criteria."
                                     : "All compliance parameters in this specific category are currently satisfied."}
                             </p>
                         </div>
@@ -232,7 +240,7 @@ export function LwgActionableGapsCard({ gapList }: LwgActionableGapsCardProps) {
                                                     )}
                                                 </div>
                                                 <p className="font-sans text-xs font-medium text-primary leading-tight">
-                                                    {gap.message}
+                                                    {sanitizeLwgText(gap.message)}
                                                 </p>
                                             </div>
                                         </div>

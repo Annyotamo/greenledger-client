@@ -126,7 +126,7 @@ export function LwgExcelToolsView() {
                                 Excel Bulk Ingestion & Official Auditor Pack
                             </h2>
                             <p className="font-sans text-xs text-on-surface-variant max-w-2xl mt-0.5 leading-relaxed">
-                                Seamlessly ingest up to 2 years (24 months) of production, energy, and water back-data in one upload, or generate the official 6-sheet audit compilation pack for your LWG accreditation audit.
+                                Seamlessly ingest up to 2 years (24 months) of production, energy, and water back-data in one upload, or generate the official 6-sheet audit compilation pack for your leather accreditation audit.
                             </p>
                         </div>
                     </div>
@@ -417,7 +417,7 @@ export function LwgExcelToolsView() {
                                         Official Auditor Data Pack Export
                                     </h3>
                                     <p className="font-sans text-[11px] text-on-surface-variant">
-                                        LWG Environmental Audit Protocol Issue 7.x Package
+                                        Leather Environmental Audit Protocol Issue 7.x Package
                                     </p>
                                 </div>
                             </div>
@@ -425,7 +425,7 @@ export function LwgExcelToolsView() {
 
                         <CardBody className="space-y-5">
                             <p className="font-sans text-xs text-on-surface-variant leading-relaxed">
-                                Generates an official, publication-ready multi-sheet Microsoft Excel workbook formatted per official LWG auditor requirements for on-site or digital verification.
+                                Generates an official, publication-ready multi-sheet Microsoft Excel workbook formatted per official leather auditor requirements for on-site or digital verification.
                             </p>
 
                             {/* 6 Official Sheets Overview */}

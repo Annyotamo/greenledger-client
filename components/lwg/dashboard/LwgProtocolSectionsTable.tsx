@@ -100,10 +100,10 @@ export function LwgProtocolSectionsTable({
                         </div>
                         <div>
                             <h3 className="font-display text-sm font-bold tracking-tight text-primary">
-                                All 17 LWG Protocol Sections Status
+                                All 17 Protocol Sections Status
                             </h3>
                             <p className="font-sans text-[11px] text-on-surface-variant">
-                                Compliance coverage per LWG Environmental Audit Protocol Issue 7.x
+                                Compliance coverage per Leather Environmental Audit Protocol Issue 7.x
                             </p>
                         </div>
                     </div>

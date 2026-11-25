@@ -125,7 +125,7 @@ export function LwgMedalStandingCard({ medalStatus }: LwgMedalStandingCardProps)
                         <div className="rounded-lg border border-amber-300/80 bg-amber-50/70 p-2.5 sm:p-3 text-xs text-amber-900 animate-fade-in space-y-1">
                             <div className="flex items-center gap-1.5 font-bold text-amber-950">
                                 <MaterialIcon name="warning" size="xs" className="text-amber-700 shrink-0" />
-                                <span>LWG Holding-Down Rule Applied</span>
+                                <span>Protocol Holding-Down Rule Applied</span>
                             </div>
                             <p className="font-sans text-[11px] text-amber-900/90 leading-snug">
                                 Overall medal is capped at <strong className="font-bold uppercase">{medalMeta.label}</strong> because Critical Section {medalStatus.holdingDownSections.join(", ")} scored below higher thresholds.
@@ -198,7 +198,7 @@ export function LwgMedalStandingCard({ medalStatus }: LwgMedalStandingCardProps)
             <div className="px-3.5 py-2.5 border-t border-outline-variant/50 bg-surface-container-low/40 flex items-center justify-between text-xs text-on-surface-variant shrink-0">
                 <span className="font-sans text-[11px] font-medium text-on-surface-variant flex items-center gap-1.5">
                     <MaterialIcon name="verified" size="xs" className="text-emerald-700" />
-                    <span>LWG Protocol Issue 7.x Rating Engine</span>
+                    <span>Leather Protocol Issue 7.x Rating Engine</span>
                 </span>
                 <span className="font-mono text-[11px] text-on-surface-variant/80">
                     Min Score: <strong className="font-bold text-primary">{medalMeta.minScore}%</strong>

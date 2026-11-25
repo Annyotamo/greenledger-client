@@ -360,7 +360,7 @@ export function LwgWaterTable({ initialMonth }: LwgWaterTableProps) {
                                             {(totalM3 * 1000).toLocaleString(undefined, { maximumFractionDigits: 0 })} L
                                         </td>
                                         <td colSpan={4} className="py-3 px-4 text-right text-on-surface-variant text-[11px]">
-                                            LWG Section 11 Total
+                                            Section 11 Total
                                         </td>
                                     </tr>
                                 </tfoot>

@@ -51,7 +51,7 @@ export function LwgProfileGuard({
                     <MaterialIcon name="warning" size="md" />
                 </div>
                 <h3 className="font-display text-base font-semibold text-primary">
-                    Unable to load LWG Profile
+                    Unable to load Leather Profile
                 </h3>
                 <p className="mt-1 text-xs text-on-surface-variant">
                     {error?.message || "An unexpected error occurred while communicating with the server."}
@@ -82,7 +82,7 @@ export function LwgProfileGuard({
             <div className="flex min-h-[60vh] w-full flex-col items-center justify-center gap-2">
                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                 <p className="font-sans text-xs text-on-surface-variant">
-                    Profile already configured. Redirecting to LWG Dashboard...
+                    Profile already configured. Redirecting to Leather Dashboard...
                 </p>
             </div>
         );

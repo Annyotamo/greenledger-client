@@ -77,7 +77,7 @@ export function LwgProductionTable({ initialMonth }: LwgProductionTableProps) {
                         {totalM2.toLocaleString(undefined, { maximumFractionDigits: 1 })}
                     </p>
                     <p className="font-sans text-[11px] text-on-surface-variant/70 mt-0.5">
-                        LWG Issue 7 Audit Metric
+                        Protocol Issue 7 Audit Metric
                     </p>
                 </div>
 
@@ -300,7 +300,7 @@ export function LwgProductionTable({ initialMonth }: LwgProductionTableProps) {
                                             {totalSqft.toLocaleString(undefined, { maximumFractionDigits: 0 })} sq ft
                                         </td>
                                         <td colSpan={3} className="py-3 px-4 text-right text-on-surface-variant text-[11px]">
-                                            LWG Denominator Baseline
+                                            Production Denominator Baseline
                                         </td>
                                     </tr>
                                 </tfoot>

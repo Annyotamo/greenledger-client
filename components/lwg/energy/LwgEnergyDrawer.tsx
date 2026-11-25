@@ -325,7 +325,7 @@ function LwgEnergyDrawerContent({
                                     Normalized Energy Output
                                 </span>
                                 <p className="font-sans text-xs text-amber-900/80">
-                                    Computed per LWG Issue 7 standard conversion matrix
+                                    Computed per Protocol Issue 7 standard conversion matrix
                                 </p>
                             </div>
                         </div>

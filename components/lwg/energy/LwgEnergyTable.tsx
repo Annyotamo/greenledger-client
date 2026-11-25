@@ -337,7 +337,7 @@ export function LwgEnergyTable({ initialMonth }: LwgEnergyTableProps) {
                                             {totalGj.toFixed(2)} GJ
                                         </td>
                                         <td colSpan={3} className="py-3 px-4 text-right text-on-surface-variant text-[11px]">
-                                            LWG Section 10 Total
+                                            Section 10 Total
                                         </td>
                                     </tr>
                                 </tfoot>

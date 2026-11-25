@@ -48,7 +48,7 @@ function LwgDashboardContent() {
                             Failed to Load Compliance Dashboard
                         </h3>
                         <p className="font-sans text-xs text-on-surface-variant max-w-md mt-1">
-                            {error?.message || "An unexpected error occurred while calculating LWG readiness metrics."}
+                            {error?.message || "An unexpected error occurred while calculating leather readiness metrics."}
                         </p>
                     </div>
                     <Button variant="secondary" size="sm" onClick={() => refetch()} className="mt-2">

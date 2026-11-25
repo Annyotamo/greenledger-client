@@ -135,7 +135,7 @@ export function LwgProfileSettingsCard() {
                                 Tannery Profile & Protocol Configuration
                             </h3>
                             <p className="font-sans text-xs text-on-surface-variant">
-                                LWG Issue 7.x facility attributes and operational boundary parameters.
+                                Leather Protocol Issue 7.x facility attributes and operational boundary parameters.
                             </p>
                         </div>
                     </div>

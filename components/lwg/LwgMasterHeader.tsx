@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
@@ -102,92 +103,110 @@ export function LwgMasterHeader({ activeTab }: LwgMasterHeaderProps) {
     return (
         <>
             <div className="space-y-4 mb-6">
-                {/* Master Metadata & Action Row */}
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between rounded-lg border border-outline-variant/70 bg-surface-container-lowest p-4 sm:px-5 sm:py-3.5 shadow-2xs">
-                    {/* Facility Identity & Meta */}
-                    <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-                        {/* Facility Emblem */}
-                        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs shrink-0 mt-0.5 sm:mt-0">
-                            <MaterialIcon name="domain" size="sm" className="text-emerald-700" />
-                        </div>
-
-                        <div className="space-y-1.5 min-w-0">
-                            {/* Line 1: Tannery Name & Location Pin */}
-                            <div className="flex flex-wrap items-center gap-2.5">
-                                <h1 className="font-display text-lg font-bold text-primary tracking-tight">
-                                    {profile?.tanneryName || "GreenLedger Leather Facility"}
-                                </h1>
-                                {profile?.city && profile?.state && (
-                                    <span className="inline-flex items-center gap-1 rounded-md border border-outline-variant/60 bg-surface-container-low px-2 py-0.5 font-sans text-xs font-medium text-on-surface-variant">
-                                        <MaterialIcon name="location_on" size="xs" className="text-outline" />
-                                        <span>{profile.city}, {profile.state}</span>
-                                    </span>
-                                )}
-                            </div>
-
-                            {/* Line 2: Audit Window & Preferred Unit Badges */}
-                            <div className="flex flex-wrap items-center gap-2">
-                                {/* 24-Month Window Badge */}
-                                <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-600/30 bg-emerald-50 px-2.5 py-0.5 font-sans text-xs font-semibold text-emerald-800 shadow-2xs">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
-                                    <span>Audit Window: {windowStartLabel} – {windowEndLabel}</span>
-                                </span>
-
-                                {/* Preferred Unit Badge */}
-                                <span className="inline-flex items-center gap-1.5 rounded-md border border-outline-variant/60 bg-surface-container-low px-2.5 py-0.5 font-mono text-[11px] font-medium text-on-surface-variant">
-                                    <MaterialIcon name="straighten" size="xs" />
-                                    <span>Unit: {profile?.outputUnit === "sq_ft" ? "Square Feet (sq ft)" : "Square Meters (m²)"}</span>
-                                </span>
-
-                                {/* Subcontractor indicator */}
-                                {profile?.usesSubcontractors && (
-                                    <span className="inline-flex items-center rounded-md border border-amber-300/80 bg-amber-50 px-2 py-0.5 font-sans text-[11px] font-medium text-amber-800">
-                                        Subcontracted Operations
-                                    </span>
-                                )}
-                            </div>
-                        </div>
+                {/* Master Metadata & Action Row with Tannery Hero Backdrop */}
+                <div className="relative overflow-hidden rounded-xl border border-slate-800 bg-slate-950 p-6 sm:px-7 sm:py-7 min-h-[160px] sm:min-h-[175px] shadow-sm flex flex-col justify-between">
+                    {/* Industry-specific visual backdrop: LWG Tannery Production */}
+                    <div className="absolute inset-0 pointer-events-none select-none overflow-hidden" aria-hidden="true">
+                        <Image
+                            src="/images/lwg/leather-tannery-banner.webp"
+                            alt="Leather Tannery Operations"
+                            fill
+                            priority
+                            sizes="(max-width: 1024px) 100vw, 1400px"
+                            className="object-cover object-[75%_35%] opacity-90 transition-opacity duration-300"
+                        />
+                        {/* Directional gradient mask ensuring text readability on the left while keeping the craftsman and leather machinery on the right 100% crisp & clear */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 via-48% to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent lg:hidden" />
                     </div>
 
-                    {/* Quick Actions */}
-                    <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            type="button"
-                            onClick={() => setIsUploadModalOpen(true)}
-                            className="h-8.5 px-3 text-xs gap-1.5 font-medium">
-                            <MaterialIcon name="table_chart" size="xs" />
-                            <span>Bulk Excel Ingest</span>
-                        </Button>
+                    {/* Facility Identity & Actions Content Layer */}
+                    <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between h-full">
+                        {/* Facility Identity & Meta */}
+                        <div className="flex items-start sm:items-center gap-4 min-w-0">
+                            {/* Facility Emblem */}
+                            <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-sm shrink-0 backdrop-blur-md">
+                                <MaterialIcon name="domain" size="md" className="text-emerald-400" />
+                            </div>
 
-                        <Button
-                            variant="primary"
-                            size="sm"
-                            type="button"
-                            onClick={handleDownloadAuditorPack}
-                            disabled={isDownloadingPack}
-                            className="h-8.5 px-3.5 text-xs gap-1.5 font-semibold shadow-2xs">
-                            <MaterialIcon name="download" size="xs" />
-                            <span>{isDownloadingPack ? "Generating Pack..." : "Export Auditor Pack"}</span>
-                        </Button>
+                            <div className="space-y-2 min-w-0">
+                                {/* Line 1: Tannery Name & Location Pin */}
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <h1 className="font-display text-xl sm:text-2xl lg:text-3xl font-bold text-white tracking-tight drop-shadow-sm">
+                                        {profile?.tanneryName || "GreenLedger Leather Facility"}
+                                    </h1>
+                                    {profile?.city && profile?.state && (
+                                        <span className="inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/10 px-2.5 py-1 font-sans text-xs font-medium text-slate-200 backdrop-blur-md shadow-2xs">
+                                            <MaterialIcon name="location_on" size="xs" className="text-emerald-400" />
+                                            <span>{profile.city}, {profile.state}</span>
+                                        </span>
+                                    )}
+                                </div>
 
-                        {/* Fully Functional Refresh Icon Button */}
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            type="button"
-                            onClick={handleRefresh}
-                            disabled={isRefreshing}
-                            title="Refresh All LWG Data & Metrics"
-                            aria-label="Refresh All LWG Data"
-                            className="h-8.5 w-8.5 p-0 flex items-center justify-center rounded-md border border-outline-variant/70 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-all">
-                            <MaterialIcon
-                                name="refresh"
-                                size="xs"
-                                className={cn("transition-transform duration-500", isRefreshing && "animate-spin text-emerald-700")}
-                            />
-                        </Button>
+                                {/* Line 2: Audit Window & Preferred Unit Badges */}
+                                <div className="flex flex-wrap items-center gap-2.5">
+                                    {/* 24-Month Window Badge */}
+                                    <span className="inline-flex items-center gap-2 rounded-md border border-emerald-500/40 bg-emerald-950/70 px-3 py-1 font-sans text-xs font-semibold text-emerald-300 backdrop-blur-md shadow-2xs">
+                                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                                        <span>Audit Window: {windowStartLabel} – {windowEndLabel}</span>
+                                    </span>
+
+                                    {/* Preferred Unit Badge */}
+                                    <span className="inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/10 px-3 py-1 font-mono text-xs font-medium text-slate-200 backdrop-blur-md shadow-2xs">
+                                        <MaterialIcon name="straighten" size="xs" className="text-slate-300" />
+                                        <span>Unit: {profile?.outputUnit === "sq_ft" ? "Square Feet (sq ft)" : "Square Meters (m²)"}</span>
+                                    </span>
+
+                                    {/* Subcontractor indicator */}
+                                    {profile?.usesSubcontractors && (
+                                        <span className="inline-flex items-center rounded-md border border-amber-400/30 bg-amber-950/60 px-2.5 py-1 font-sans text-xs font-medium text-amber-300 backdrop-blur-md">
+                                            Subcontracted Operations
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Quick Actions */}
+                        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                type="button"
+                                onClick={() => setIsUploadModalOpen(true)}
+                                className="h-9 px-3.5 text-xs gap-1.5 font-medium bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md shadow-sm transition-all">
+                                <MaterialIcon name="table_chart" size="xs" className="text-slate-200" />
+                                <span>Bulk Excel Ingest</span>
+                            </Button>
+
+                            <Button
+                                variant="primary"
+                                size="sm"
+                                type="button"
+                                onClick={handleDownloadAuditorPack}
+                                disabled={isDownloadingPack}
+                                className="h-9 px-4 text-xs gap-1.5 font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm border border-emerald-500/40 transition-all">
+                                <MaterialIcon name="download" size="xs" />
+                                <span>{isDownloadingPack ? "Generating Pack..." : "Export Auditor Pack"}</span>
+                            </Button>
+
+                            {/* Fully Functional Refresh Icon Button */}
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                type="button"
+                                onClick={handleRefresh}
+                                disabled={isRefreshing}
+                                title="Refresh All Leather Data & Metrics"
+                                aria-label="Refresh All Leather Data"
+                                className="h-9 w-9 p-0 flex items-center justify-center rounded-md border border-white/20 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md shadow-sm transition-all">
+                                <MaterialIcon
+                                    name="refresh"
+                                    size="xs"
+                                    className={cn("transition-transform duration-500", isRefreshing && "animate-spin text-emerald-400")}
+                                />
+                            </Button>
+                        </div>
                     </div>
                 </div>
 

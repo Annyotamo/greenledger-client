@@ -161,7 +161,7 @@ function LwgWaterDrawerContent({
         // LWG Issue 7 Rule: Borewell and Municipal supply mandate meter ID
         if (requiresMeterId && !meterId.trim()) {
             setFormError(
-                `Meter ID is mandatory for ${LWG_WATER_SOURCE_LABELS[source]} per LWG Section 11 audit requirements.`,
+                `Meter ID is mandatory for ${LWG_WATER_SOURCE_LABELS[source]} per Section 11 audit requirements.`,
             );
             return;
         }

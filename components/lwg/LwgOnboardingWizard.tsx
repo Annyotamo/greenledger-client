@@ -132,10 +132,10 @@ export function LwgOnboardingWizard() {
                     </div>
                     <div>
                         <h2 className="font-display text-xl font-bold tracking-tight text-primary">
-                            Leather Working Group (LWG) Tannery Onboarding
+                            Leather Facility Onboarding
                         </h2>
                         <p className="mt-1 font-sans text-xs text-on-surface-variant max-w-2xl leading-relaxed">
-                            Configure your tannery manufacturing parameters per LWG Environmental Audit Protocol Issue 7.x.
+                            Configure your tannery manufacturing parameters per Leather Environmental Audit Protocol Issue 7.x.
                             Upon setup, a continuous 24-month audit sliding window and default factory departments will be initialized.
                         </p>
                     </div>
@@ -177,7 +177,7 @@ export function LwgOnboardingWizard() {
                                     placeholder={isLoadingFacilities ? "Loading facilities..." : "Select registered facility..."}
                                 />
                                 <p className="font-sans text-[11px] text-on-surface-variant/70">
-                                    Link your LWG certification audit workspace to a registered site in GreenLedger.
+                                    Link your leather certification audit workspace to a registered site in GreenLedger.
                                 </p>
                             </div>
 
@@ -229,7 +229,7 @@ export function LwgOnboardingWizard() {
                     </CardHeader>
                     <CardBody className="space-y-4">
                         <p className="font-sans text-xs text-on-surface-variant">
-                            Select all manufacturing stages operated on-site. Per LWG Protocol rules, energy and water intensity denominators will be derived based on the highest completed stage.
+                            Select all manufacturing stages operated on-site. Per Leather Protocol rules, energy and water intensity denominators will be derived based on the highest completed stage.
                         </p>
 
                         <div className="space-y-2.5">
@@ -318,7 +318,7 @@ export function LwgOnboardingWizard() {
                                     />
                                     <div>
                                         <p className="text-xs font-semibold text-primary">Square Meters (m²)</p>
-                                        <p className="text-[11px] text-on-surface-variant">Official LWG Issue 7 Protocol metric unit</p>
+                                        <p className="text-[11px] text-on-surface-variant">Official Leather Protocol Issue 7 metric unit</p>
                                     </div>
                                 </label>
                             </div>
@@ -380,7 +380,7 @@ export function LwgOnboardingWizard() {
                         <MaterialIcon name="check_circle" size="xs" />
                         {createProfileMutation.isPending
                             ? "Configuring Tannery..."
-                            : "Complete Setup & Launch LWG Workspace"}
+                            : "Complete Setup & Launch Leather Workspace"}
                     </Button>
                 </div>
             </form>

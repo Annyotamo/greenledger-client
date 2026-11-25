@@ -30,7 +30,7 @@ export function LwgEnergyIntensityCard({ energyIntensity }: LwgEnergyIntensityCa
                                 Energy Intensity
                             </h3>
                             <p className="font-sans text-[11px] text-on-surface-variant truncate">
-                                LWG Section 10 Benchmark
+                                Section 10 Benchmark
                             </p>
                         </div>
                     </div>
@@ -114,7 +114,7 @@ export function LwgWaterIntensityCard({ waterIntensity }: LwgWaterIntensityCardP
                                 Water Intensity
                             </h3>
                             <p className="font-sans text-[11px] text-on-surface-variant truncate">
-                                LWG Section 11 Benchmark
+                                Section 11 Benchmark
                             </p>
                         </div>
                     </div>

@@ -9,7 +9,15 @@ export default function LwgLayout({ children }: { children: ReactNode }) {
         <ProtectedRoute
             feature="lwg"
             requiredLevel="read"
-            featureTitle="Leather Working Group (LWG)">
+            featureTitle="Leather Module">
+            {/* High-priority browser resource hint for instant banner paint */}
+            <link
+                rel="preload"
+                as="image"
+                href="/images/lwg/leather-tannery-banner.webp"
+                type="image/webp"
+                fetchPriority="high"
+            />
             {children}
         </ProtectedRoute>
     );

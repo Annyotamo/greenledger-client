@@ -130,7 +130,7 @@ function LwgEvidenceDrawerContent({
         // Mandatory expiry check
         if (requiresExpiryDate && !expiryDate) {
             setFormError(
-                `Statutory expiry date is mandatory for ${LWG_DOCUMENT_TYPE_LABELS[documentType]} per LWG Section 4 rules.`,
+                `Statutory expiry date is mandatory for ${LWG_DOCUMENT_TYPE_LABELS[documentType]} per Section 4 rules.`,
             );
             return;
         }
@@ -266,7 +266,7 @@ function LwgEvidenceDrawerContent({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <label className="block font-sans text-xs font-semibold text-primary">
-                                Target LWG Section <span className="text-error">*</span>
+                                Target Protocol Section <span className="text-error">*</span>
                             </label>
                             <CustomSelect
                                 options={sectionOptions}

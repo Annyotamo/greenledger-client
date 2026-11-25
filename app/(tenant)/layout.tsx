@@ -11,6 +11,13 @@ export const metadata: Metadata = {
 export default function TenantLayout({ children }: { children: ReactNode }) {
     return (
         <ThemeProvider>
+            {/* Idle-time background prefetch for LWG tannery banner */}
+            <link
+                rel="prefetch"
+                as="image"
+                href="/images/lwg/leather-tannery-banner.webp"
+                type="image/webp"
+            />
             <TenantShell>{children}</TenantShell>
         </ThemeProvider>
     );

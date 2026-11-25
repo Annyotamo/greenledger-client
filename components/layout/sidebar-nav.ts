@@ -18,7 +18,7 @@ export const MAIN_NAV: NavItem[] = [
     { label: "Dashboard", icon: "dashboard", href: "/dashboard", featureKey: "analytics" },
     { label: "Facilities", icon: "domain", href: "/facilities", featureKey: "facilities" },
     { label: "EU CBAM", icon: "verified", href: "/tenant-cbam", featureKey: "cbam" },
-    { label: "Leather (LWG)", icon: "workspace_premium", href: "/lwg", featureKey: "lwg" },
+    { label: "Leather Module", icon: "workspace_premium", href: "/lwg", featureKey: "lwg" },
     { label: "Value Chain", icon: "hub", href: "/scope-3", featureKey: "scope_3_cat1" },
     { label: "Reporting Periods", icon: "calendar_month", href: "/reporting-period", featureKey: "reporting_periods" },
     { label: "Team Members", icon: "group", href: "/team-members", featureKey: "team_members" },

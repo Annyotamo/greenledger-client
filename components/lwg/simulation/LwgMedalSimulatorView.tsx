@@ -207,7 +207,7 @@ export function LwgMedalSimulatorView() {
                             <div className="flex items-center gap-2">
                                 <MaterialIcon name="military_tech" size="sm" className="text-amber-700" />
                                 <h3 className="font-display text-sm font-bold text-primary">
-                                    Simulated LWG Medal
+                                    Simulated Protocol Medal
                                 </h3>
                             </div>
                             <span
@@ -528,7 +528,7 @@ export function LwgMedalSimulatorView() {
                                 <textarea
                                     value={auditNotes}
                                     onChange={(e) => setAuditNotes(e.target.value)}
-                                    placeholder="e.g., LWG Protocol Issue 7.1.0 on-site assessment by SGS"
+                                    placeholder="e.g., Leather Protocol Issue 7.1.0 on-site assessment by SGS"
                                     rows={3}
                                     className="w-full rounded-xl border border-outline-variant bg-surface px-3 py-2 font-sans text-xs text-primary placeholder:text-on-surface-variant/50 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
                                 />

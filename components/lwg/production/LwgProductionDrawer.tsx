@@ -210,7 +210,7 @@ function LwgProductionDrawerContent({
                                 {isEditing ? "Update Monthly Production" : "Log Monthly Production Entry"}
                             </h3>
                             <p className="font-sans text-xs text-on-surface-variant">
-                                LWG Protocol Section 5: Monthly material throughput & area output.
+                                Leather Protocol Section 5: Monthly material throughput & area output.
                             </p>
                         </div>
                     </div>
@@ -316,7 +316,7 @@ function LwgProductionDrawerContent({
                         />
 
                         <p className="font-sans text-[11px] text-on-surface-variant leading-relaxed">
-                            Area is normalized using standard LWG Issue 7 factor (1 m² = 10.7639 sq ft). Both metric and imperial figures are stored for auditor verification.
+                            Area is normalized using standard leather audit factor (1 m² = 10.7639 sq ft). Both metric and imperial figures are stored for auditor verification.
                         </p>
                     </div>
 

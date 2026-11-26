@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
@@ -13,7 +12,11 @@ export function UserNavMenu() {
     const { data: user } = useCurrentUser();
     const [isOpen, setIsOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | null>(null);
     const menuRef = useRef<HTMLDivElement>(null);
+
+    const avatarUrl = user?.logo || user?.avatar || null;
+    const hasAvatar = Boolean(avatarUrl && failedAvatarUrl !== avatarUrl);
 
     // Close on click outside
     useEffect(() => {
@@ -49,7 +52,6 @@ export function UserNavMenu() {
         }
     };
 
-    const avatarUrl = user?.logo || user?.avatar;
     const initials = user?.first_name || user?.last_name
         ? `${(user.first_name || "").charAt(0)}${(user.last_name || "").charAt(0)}`.toUpperCase()
         : "U";
@@ -69,12 +71,12 @@ export function UserNavMenu() {
                 aria-expanded={isOpen}
                 aria-haspopup="true"
                 aria-label="User account menu">
-                {avatarUrl ? (
-                    <Image
-                        src={avatarUrl}
+                {hasAvatar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                        src={avatarUrl!}
                         alt={fullName}
-                        width={32}
-                        height={32}
+                        onError={() => setFailedAvatarUrl(avatarUrl)}
                         className="h-8 w-8 rounded-full border border-outline-variant object-cover shadow-2xs"
                     />
                 ) : (
@@ -101,12 +103,12 @@ export function UserNavMenu() {
                         className="absolute right-0 top-full mt-2 w-72 rounded-xl border border-outline-variant bg-surface-container-lowest p-2 shadow-lg z-50">
                         {/* Header Identity Block */}
                         <div className="flex items-start gap-3 rounded-lg bg-surface-container-low p-3">
-                            {avatarUrl ? (
-                                <Image
-                                    src={avatarUrl}
+                            {hasAvatar ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                    src={avatarUrl!}
                                     alt={fullName}
-                                    width={40}
-                                    height={40}
+                                    onError={() => setFailedAvatarUrl(avatarUrl)}
                                     className="h-10 w-10 shrink-0 rounded-full border border-outline-variant object-cover"
                                 />
                             ) : (

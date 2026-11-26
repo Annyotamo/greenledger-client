@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
@@ -349,6 +348,14 @@ export default function UserPage() {
     const [saveErrorMessage, setSaveErrorMessage] = useState<string | null>(null);
     const [copiedField, setCopiedField] = useState<string | null>(null);
 
+    // Media asset fallback states
+    const [failedBannerUrl, setFailedBannerUrl] = useState<string | null>(null);
+    const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | null>(null);
+
+    const hasBanner = Boolean(user?.background && failedBannerUrl !== user.background);
+    const avatarUrl = user?.logo || user?.avatar || null;
+    const hasAvatar = Boolean(avatarUrl && failedAvatarUrl !== avatarUrl);
+
     // MFA Modal state
     const [isMfaModalOpen, setIsMfaModalOpen] = useState(false);
     const [targetMfaState, setTargetMfaState] = useState(false);
@@ -477,13 +484,13 @@ export default function UserPage() {
             <Card className="overflow-hidden border border-outline-variant">
                 {/* Banner / Cover Section */}
                 <div className="relative h-48 sm:h-56 w-full bg-slate-900 overflow-hidden">
-                    {user.background ? (
-                        <Image
-                            src={user.background}
+                    {hasBanner ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                            src={user.background!}
                             alt="Profile Cover Banner"
-                            fill
-                            className="object-cover"
-                            priority
+                            onError={() => setFailedBannerUrl(user.background || null)}
+                            className="h-full w-full object-cover select-none"
                         />
                     ) : (
                         <div className="h-full w-full bg-gradient-to-r from-[#003723] via-[#006c49] to-[#0f2f14] relative">
@@ -502,12 +509,12 @@ export default function UserPage() {
                         {/* Avatar */}
                         <div className="relative">
                             <div className="h-28 w-28 rounded-2xl border-4 border-white bg-surface-container-lowest overflow-hidden shadow-md flex items-center justify-center">
-                                {user.logo || user.avatar ? (
-                                    <Image
-                                        src={user.logo || user.avatar!}
+                                {hasAvatar ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={avatarUrl!}
                                         alt={user.full_name}
-                                        width={112}
-                                        height={112}
+                                        onError={() => setFailedAvatarUrl(avatarUrl)}
                                         className="h-full w-full object-cover"
                                     />
                                 ) : (

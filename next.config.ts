@@ -15,6 +15,22 @@ const nextConfig: NextConfig = {
                 protocol: "https",
                 hostname: "lh3.googleusercontent.com",
             },
+            {
+                protocol: "https",
+                hostname: "api.greenledgeresg.com",
+            },
+            {
+                protocol: "https",
+                hostname: "dev.greenledgeresg.com",
+            },
+            {
+                protocol: "https",
+                hostname: "**",
+            },
+            {
+                protocol: "http",
+                hostname: "**",
+            },
         ],
         formats: ["image/avif", "image/webp"],
     },

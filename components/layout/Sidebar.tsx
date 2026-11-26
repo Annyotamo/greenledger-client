@@ -5,10 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import glLogo from "@/assets/GLLogo.png";
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { Button } from "@/components/ui/button";
-import { logoutUser } from "@/lib/auth/api";
-import { clearAuthToken } from "@/lib/auth/token";
 import { cn } from "@/lib/utils/cn";
 import { useSidebarStore } from "@/stores/sidebar-store";
 import { useCurrentUser } from "@/lib/rbac/hooks";
@@ -53,9 +52,8 @@ export function Sidebar() {
         pathname && (pathname === "/brsr" || pathname.startsWith("/brsr/")),
     );
 
-    const [activitiesOpen, setActivitiesOpen] = useState(isActivitiesActive);
-    const [brsrOpen, setBrsrOpen] = useState(isBrsrActive);
-    const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [activitiesOpen, setActivitiesOpen] = useState(true);
+    const [brsrOpen, setBrsrOpen] = useState(true);
 
     const [prevPathname, setPrevPathname] = useState(pathname);
     if (pathname !== prevPathname) {
@@ -68,29 +66,16 @@ export function Sidebar() {
         }
     }
 
-    const handleLogout = async () => {
-        if (isLoggingOut) return;
-        setIsLoggingOut(true);
-        try {
-            await logoutUser();
-        } catch {
-            clearAuthToken();
-            if (typeof window !== "undefined") {
-                window.location.replace("/login");
-            }
-        }
-    };
-
     const navManifest = user?.ui_navigation;
 
     const beforeActivities = MAIN_NAV.filter(
-        (i) => (i.label === "Dashboard" || i.label === "Facilities" || i.label === "EU CBAM" || i.label === "Leather Module" || i.label === "Leather (LWG)") && isNavVisible(i, navManifest),
+        (i) => (i.label === "Dashboard" || i.label === "EU CBAM" || i.label === "Leather Module" || i.label === "Leather (LWG)") && isNavVisible(i, navManifest),
     );
     const valueChainItem = MAIN_NAV.find((i) => i.label === "Value Chain");
     const showValueChain = valueChainItem ? isNavVisible(valueChainItem, navManifest) : false;
 
     const afterActivities = MAIN_NAV.filter(
-        (i) => (i.label === "Reporting Periods" || i.label === "Team Members" || i.label === "Tenant Profile") && isNavVisible(i, navManifest),
+        (i) => i.label === "Team Members" && isNavVisible(i, navManifest),
     );
 
     const visibleScopeChildren = SCOPE_NAV_CHILDREN.filter((child) => {
@@ -123,14 +108,40 @@ export function Sidebar() {
             </Button>
 
             <div className="gl-dashboard-scroll flex h-full flex-col overflow-y-auto px-3 py-4">
-                <motion.div
-                    animate={{ opacity: collapsed ? 0 : 1 }}
-                    className={cn("mb-4 px-4 py-6", collapsed && "pointer-events-none")}>
-                    <h1 className="text-lg font-bold tracking-tight text-primary font-display">GreenLedger</h1>
-                    <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant/70">
-                        GHG Accounting
-                    </p>
-                </motion.div>
+                <div className={cn("mb-6 transition-all duration-200", collapsed ? "px-1 py-3 flex justify-center" : "px-3 py-2")}>
+                    <Link
+                        href="/dashboard"
+                        className={cn(
+                            "group flex items-center transition-colors rounded-xl",
+                            collapsed ? "justify-center" : "gap-3 px-2 py-1.5 hover:bg-surface-container-high/40",
+                        )}>
+                        <div
+                            className={cn(
+                                "relative shrink-0 flex items-center justify-center transition-transform duration-200 group-hover:scale-105",
+                                collapsed ? "h-10 w-10" : "h-12 w-12",
+                            )}>
+                            <Image
+                                src={glLogo}
+                                alt="GreenLedger Logo"
+                                width={48}
+                                height={48}
+                                priority
+                                className="h-full w-full object-contain"
+                            />
+                        </div>
+
+                        {!collapsed && (
+                            <div className="flex flex-col justify-center min-w-0 overflow-hidden text-left">
+                                <h1 className="text-lg font-bold tracking-tight text-primary font-display leading-tight truncate">
+                                    GreenLedger
+                                </h1>
+                                <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.12em] text-on-surface-variant/70 leading-tight mt-0.5 truncate">
+                                    GHG ACCOUNTING
+                                </p>
+                            </div>
+                        )}
+                    </Link>
+                </div>
 
                 <nav className="flex-1 space-y-1">
                     {beforeActivities.map((item) => (
@@ -303,60 +314,6 @@ export function Sidebar() {
                     {visibleBottomNav.map((item) => (
                         <SidebarLink key={item.label} item={item} collapsed={collapsed} compact />
                     ))}
-                    <button
-                        type="button"
-                        onClick={handleLogout}
-                        disabled={isLoggingOut}
-                        title={collapsed ? "Logout" : undefined}
-                        className={cn(
-                            "mb-4 flex w-full items-center gap-3 px-4 py-2 text-error transition-colors duration-200 hover:bg-error-container/20 rounded-lg text-left cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed",
-                            collapsed && "justify-center px-2",
-                        )}
-                        aria-label="Logout">
-                        <MaterialIcon name="logout" className="shrink-0" />
-                        {!collapsed && (
-                            <span className="font-sans text-[13px] font-medium">
-                                {isLoggingOut ? "Logging out..." : "Logout"}
-                            </span>
-                        )}
-                    </button>
-
-                    {!collapsed && (
-                        <Link href="/user" className="mx-1 block">
-                            <div
-                                className={cn(
-                                    "flex items-center gap-3 rounded-xl bg-surface-container p-3 transition-colors hover:shadow-sm",
-                                    isRouteActive(pathname, "/user") && "ring-1 ring-primary/40 bg-surface-container-high",
-                                )}>
-                                {user?.avatar ? (
-                                    <Image
-                                        src={user.avatar}
-                                        alt={user.full_name || `${user.first_name} ${user.last_name}`}
-                                        width={40}
-                                        height={40}
-                                        className="h-10 w-10 rounded-full border border-outline-variant object-cover"
-                                    />
-                                ) : (
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-on-secondary font-semibold font-sans">
-                                        {user
-                                            ? `${(user.first_name || "").charAt(0)}${(user.last_name || "").charAt(0)}`
-                                            : "U"}
-                                    </div>
-                                )}
-
-                                <div className="min-w-0 overflow-hidden">
-                                    <p className="truncate font-sans text-sm font-semibold text-primary">
-                                        {(user?.full_name ?? user?.first_name)
-                                            ? `${user.first_name} ${user.last_name}`
-                                            : "User"}
-                                    </p>
-                                    <p className="font-sans text-[11px] font-medium text-on-surface-variant truncate">
-                                        {user?.job_title ?? user?.role ?? ""}
-                                    </p>
-                                </div>
-                            </div>
-                        </Link>
-                    )}
                 </div>
             </div>
         </motion.aside>

@@ -1,0 +1,1064 @@
+================================================================================
+          GREENLEDGER ESG PLATFORM - USER PROFILE & MFA SPECIFICATION
+                 FRONTEND INTEGRATION & API CONTEXT GUIDE
+================================================================================
+Document: USER_AND_MFA_FRONTEND_INTEGRATION_GUIDE.txt
+Target Audience: Frontend Engineering Team & Frontend Autonomous Agents
+Backend Architecture: FastAPI (Async), PostgreSQL (SQLAlchemy 2.0), JWT Auth
+Scope: Complete documentation of all user-related database changes, new and
+       modified API endpoints, request/response schemas, enums, error contracts,
+       MFA login state machines, and ready-to-use TypeScript interfaces.
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+1. EXECUTIVE SUMMARY & DETAILED DESCRIPTION OF BACKEND CHANGES
+   - 1.1. User Model Schema Enhancements
+   - 1.2. Multi-Factor Authentication (MFA) Production-Grade Architecture
+   - 1.3. Facility Assignment & Tenant Isolation Validation
+2. API RESPONSE ENVELOPE & GLOBAL ERROR SPECIFICATION
+   - 2.1. Standard Success Envelope: APIResponse[T]
+   - 2.2. Standard Error Envelope: APIError
+   - 2.3. Exhaustive Error Codes Reference Table
+3. ENDPOINTS DIRECTORY (NEW & MODIFIED APIS)
+   - 3.1. POST  /api/v1/user/auth/login        [MODIFIED - MFA Handshake]
+   - 3.2. POST  /api/v1/user/auth/mfa/verify   [MODIFIED - Rate-Limited OTP Check]
+   - 3.3. POST  /api/v1/user/auth/mfa/resend   [NEW - Resend 6-Digit OTP]
+   - 3.4. POST  /api/v1/user/auth/mfa/toggle   [NEW - Self-Service MFA Toggle]
+   - 3.5. GET   /api/v1/user/auth/me           [MODIFIED - Returns Full Profile]
+   - 3.6. PATCH /api/v1/user/auth/me           [NEW - Self-Service Profile Update]
+   - 3.7. GET   /api/v1/user                   [MODIFIED - Facility Filter & Customizations]
+   - 3.8. POST  /api/v1/user                   [MODIFIED - Create with Facility & MFA]
+   - 3.9. PATCH /api/v1/user/{user_id}         [MODIFIED - Update Profile, Facility & MFA]
+   - 3.10 GET   /api/v1/user/{user_id}         [MODIFIED - Detail View with Customizations]
+4. ENUMS & DATA TYPES REFERENCE
+   - 4.1. UserRole
+   - 4.2. UserStatus
+   - 4.3. AccessLevel & FeatureKey
+5. FRONTEND UX WORKFLOWS & STATE MACHINES
+   - 5.1. Authentication Flow (Dual-Stage Login with MFA Challenge)
+   - 5.2. Profile Settings View (Avatar, Banner, Bio, MFA Toggle)
+   - 5.3. Tenant User Management View (Facility Assignment, MFA Administration)
+6. READY-TO-USE TYPESCRIPT INTERFACES (COPY-PASTE READY)
+7. FRONTEND DEVELOPER IMPLEMENTATION CHECKLIST
+
+================================================================================
+1. EXECUTIVE SUMMARY & DETAILED DESCRIPTION OF BACKEND CHANGES
+================================================================================
+The GreenLedger ESG platform has undergone major user domain upgrades to support
+rich user profiles, facility-level tenancy assignment, and an enterprise-grade
+Multi-Factor Authentication (MFA) system.
+
+--------------------------------------------------------------------------------
+1.1. User Model Schema Enhancements
+--------------------------------------------------------------------------------
+Four new columns have been added to the `users` table:
+1. `background` (Text, Nullable):
+   - Stores the URL or asset path for the user's custom header/banner image.
+   - Ideal for profile page customization and tenant dashboard cards.
+2. `logo` (Text, Nullable):
+   - Stores the URL or asset path for the user's profile avatar / picture.
+   - If null, the frontend should fall back to user initials or a default avatar.
+3. `bio` (Text, Nullable):
+   - Stores a personal or professional description / biography of the user.
+4. `assigned_facility_id` (UUID, Nullable, Foreign Key -> `facilities.id`):
+   - Associates a user directly with a specific facility within their tenant.
+   - Configured with `ON DELETE SET NULL` so deleting a facility does not delete
+     assigned users.
+   - In Python/SQLAlchemy, `assigned_facility` is mapped as an alias/synonym to
+     `assigned_facility_id`. Both keys are accepted and returned by the APIs.
+   - Relationship `facility` is loaded to allow access to facility metadata.
+
+In the `user_auth_sessions` table:
+1. `mfa_attempts` (Integer, Default 0):
+   - Tracks failed OTP verification attempts to prevent brute-force attacks.
+
+--------------------------------------------------------------------------------
+1.2. Multi-Factor Authentication (MFA) Production-Grade Architecture
+--------------------------------------------------------------------------------
+MFA is now fully functional, secure, and production-ready:
+1. Two-Stage Login Handshake:
+   - When a user logs in via `POST /api/v1/user/auth/login`:
+     * If `user.mfa_enabled == False`: Normal tokens (`access_token`,
+       `refresh_token`) are returned immediately.
+     * If `user.mfa_enabled == True`: Tokens are NOT returned. The backend creates
+       a pending MFA challenge, generates a cryptographically random 6-digit OTP,
+       hashes the OTP using SHA-256 in the database, sets an expiration timestamp
+       (10 minutes), and sends an email to the user.
+     * The response returns `{ "mfa_required": true, "session_identifier": "..." }`.
+2. Professional HTML Email Template:
+   - Dispatches a modern, mobile-responsive HTML email matching GreenLedger's
+     design system (emerald `#10B981` accents, high-contrast monospace 6-digit
+     code card, 10-minute expiration badge, and security advisories).
+3. Brute-Force Rate Limiting (5 Attempts):
+   - In `POST /api/v1/user/auth/mfa/verify`, each invalid code increments
+     `mfa_attempts`.
+   - If failed attempts reach 5, the session is revoked immediately, forcing the
+     user to restart login.
+4. Resend Endpoint:
+   - `POST /api/v1/user/auth/mfa/resend` generates a new 6-digit code, resets
+     attempts to 0, extends validity by 10 minutes, and emails the user.
+5. Self-Service MFA Toggle:
+   - Authenticated users can enable or disable MFA on their own account at
+     `POST /api/v1/user/auth/mfa/toggle`, requiring confirmation of their current
+     account password.
+6. Audit Trail Logging:
+   - Every MFA event (`USER_MFA_ENABLED`, `USER_MFA_DISABLED`,
+     `USER_MFA_VERIFICATION_SUCCESS`, `USER_MFA_VERIFICATION_FAILED`) is logged
+     to the tenant audit trail.
+
+--------------------------------------------------------------------------------
+1.3. Facility Assignment & Tenant Isolation Validation
+--------------------------------------------------------------------------------
+When an admin creates (`POST /api/v1/user`) or updates (`PATCH /api/v1/user/{id}`)
+a user with an `assigned_facility_id`:
+- The backend verifies that the specified facility exists and belongs to the
+  caller's tenant.
+- If the facility does not exist or belongs to another tenant, the backend halts
+  with `HTTP 404 Not Found` (`FACILITY_NOT_FOUND`).
+- The user listing endpoint (`GET /api/v1/user`) supports filtering users by
+  `assigned_facility_id`.
+
+================================================================================
+2. API RESPONSE ENVELOPE & GLOBAL ERROR SPECIFICATION
+================================================================================
+
+--------------------------------------------------------------------------------
+2.1. Standard Success Envelope: APIResponse[T]
+--------------------------------------------------------------------------------
+Every single API endpoint returns data wrapped in the standard `APIResponse[T]`
+envelope. The frontend client should unwrap `.data` from this structure:
+
+```json
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Success",
+  "data": { ... },
+  "error": null,
+  "method": "POST",
+  "path": "/api/v1/user/auth/login",
+  "timestamp": "2026-11-26T07:20:27.123456Z"
+}
+```
+
+Envelope Fields:
+- `success` (boolean): `true` when status_code is in the 2xx range (200-299).
+- `status_code` (integer): HTTP status code (200, 201, etc.).
+- `message` (string): Human-readable confirmation message.
+- `data` (object | array | null): Payload payload containing the requested resource.
+- `error` (null): Null on successful responses.
+- `method` (string): HTTP method of the request ("GET", "POST", "PATCH", etc.).
+- `path` (string): Request URL path.
+- `timestamp` (string ISO-8601): UTC timestamp of response generation.
+
+--------------------------------------------------------------------------------
+2.2. Standard Error Envelope: APIError
+--------------------------------------------------------------------------------
+When an error occurs, the backend returns `success: false` with the `error` object:
+
+```json
+{
+  "success": false,
+  "status_code": 401,
+  "message": "Invalid verification code",
+  "data": null,
+  "error": {
+    "error_code": "AUTH_INVALID_CREDENTIALS",
+    "detail": "Invalid verification code",
+    "validation": null
+  },
+  "method": "POST",
+  "path": "/api/v1/user/auth/mfa/verify",
+  "timestamp": "2026-11-26T07:21:00.000000Z"
+}
+```
+
+For Pydantic validation errors (HTTP 422):
+```json
+{
+  "success": false,
+  "status_code": 422,
+  "message": "Request validation failed",
+  "data": null,
+  "error": {
+    "error_code": "VALIDATION_ERROR",
+    "detail": "Invalid fields in request payload",
+    "validation": [
+      {
+        "field": "password",
+        "message": "String should have at least 8 characters",
+        "type": "string_too_short"
+      }
+    ]
+  },
+  "method": "POST",
+  "path": "/api/v1/user/auth/login",
+  "timestamp": "2026-11-26T07:21:00.000000Z"
+}
+```
+
+--------------------------------------------------------------------------------
+2.3. Exhaustive Error Codes Reference Table
+--------------------------------------------------------------------------------
+| HTTP Status | Error Code (`error_code`) | Trigger Reason & Recommended Frontend Action |
+|-------------|---------------------------|-----------------------------------------------|
+| 400 | `USER_INVALID_ROLE` | The provided role string is not in `UserRole`. |
+| 400 | `USER_LAST_ACTIVE_ADMIN` | Cannot deactivate or demote the last active admin. |
+| 400 | `USER_CANNOT_DELETE_OWNER` | Cannot delete the tenant owner account. |
+| 401 | `AUTH_REQUIRED` | Missing or malformed `Authorization: Bearer <token>` header. |
+| 401 | `AUTH_INVALID_CREDENTIALS` | Invalid email/password, or incorrect MFA OTP code entered. |
+| 401 | `AUTH_TOKEN_EXPIRED` | JWT token expired, MFA code expired, or max OTP attempts (5) reached. |
+| 401 | `AUTH_INVALID_REFRESH_TOKEN` | Invalid refresh token or invalid MFA session identifier. |
+| 401 | `AUTH_SESSION_REVOKED` | User logged out or session was revoked. Redirect to login. |
+| 403 | `AUTH_PERMISSION_DENIED` | User lacks required RBAC permission or is inactive. |
+| 403 | `USER_INACTIVE` | Account has been deactivated. Inform user to contact admin. |
+| 404 | `USER_NOT_FOUND` | User ID was not found in the current tenant. |
+| 404 | `FACILITY_NOT_FOUND` | The provided `assigned_facility_id` does not exist in tenant. |
+| 409 | `USER_ALREADY_EXISTS` | Email address is already registered in the system. |
+| 422 | `VALIDATION_ERROR` | Schema validation error (e.g. empty names, invalid email). |
+
+================================================================================
+3. ENDPOINTS DIRECTORY (NEW & MODIFIED APIS)
+================================================================================
+
+--------------------------------------------------------------------------------
+3.1. POST /api/v1/user/auth/login (MODIFIED - MFA Handshake)
+--------------------------------------------------------------------------------
+Authenticates user credentials. If MFA is enabled, triggers an OTP email and
+returns a challenge token instead of JWT tokens.
+
+- Method: POST
+- URL: `/api/v1/user/auth/login` (trailing slash `/api/v1/user/auth/login/` also supported)
+- Auth: Public (No token required)
+- Headers: `Content-Type: application/json`
+
+Request Body:
+```json
+{
+  "email": "jane.doe@greenledgeresg.com",
+  "password": "SecurePassword123!"
+}
+```
+Field Specifications:
+- `email` (string, required): Valid email address.
+- `password` (string, min_length=8, required): Account password.
+
+Response (Case A: User has MFA DISABLED):
+```json
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Success",
+  "data": {
+    "access_token": "eyJhbGciOiJIUzI1NiIs...",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
+    "expires_in": 86400,
+    "refresh_expires_in": 604800,
+    "mfa_required": false,
+    "session_identifier": null
+  },
+  "error": null,
+  "method": "POST",
+  "path": "/api/v1/user/auth/login",
+  "timestamp": "2026-11-26T07:25:00.000000Z"
+}
+```
+
+Response (Case B: User has MFA ENABLED):
+```json
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Success",
+  "data": {
+    "access_token": null,
+    "refresh_token": null,
+    "expires_in": null,
+    "refresh_expires_in": null,
+    "mfa_required": true,
+    "session_identifier": "aB3_9zQk1mPxRt..."
+  },
+  "error": null,
+  "method": "POST",
+  "path": "/api/v1/user/auth/login",
+  "timestamp": "2026-11-26T07:25:00.000000Z"
+}
+```
+
+Frontend Handling Logic:
+- If `data.mfa_required === true`:
+  * Store `data.session_identifier` in component state (or temporary session store).
+  * Do NOT route to Dashboard. Transition the UI to the "Enter 6-Digit Code" modal.
+- If `data.mfa_required === false`:
+  * Store `access_token` and `refresh_token` in auth storage. Route to Dashboard.
+
+--------------------------------------------------------------------------------
+3.2. POST /api/v1/user/auth/mfa/verify (MODIFIED - Rate-Limited OTP Check)
+--------------------------------------------------------------------------------
+Verifies the 6-digit OTP code received by the user via email.
+
+- Method: POST
+- URL: `/api/v1/user/auth/mfa/verify`
+- Auth: Public (No token required)
+- Headers: `Content-Type: application/json`
+
+Request Body:
+```json
+{
+  "session_identifier": "aB3_9zQk1mPxRt...",
+  "code": "729401"
+}
+```
+Field Specifications:
+- `session_identifier` (string, required): The session identifier received from login.
+- `code` (string, min_length=4, max_length=10, required): The 6-digit OTP code.
+
+Response (Success):
+```json
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Success",
+  "data": {
+    "access_token": "eyJhbGciOiJIUzI1NiIs...",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
+    "expires_in": 86400,
+    "refresh_expires_in": 604800,
+    "mfa_required": false,
+    "session_identifier": null
+  },
+  "error": null,
+  "method": "POST",
+  "path": "/api/v1/user/auth/mfa/verify",
+  "timestamp": "2026-11-26T07:25:30.000000Z"
+}
+```
+
+Potential Errors:
+- `401 AUTH_INVALID_CREDENTIALS`: Incorrect code entered. (Inform user; show attempts left).
+- `401 AUTH_TOKEN_EXPIRED`: Code has expired (>10 min) OR 5 failed attempts reached.
+  (Direct user to click "Resend Code" or re-login).
+- `401 AUTH_INVALID_REFRESH_TOKEN`: Session identifier is invalid or already completed.
+
+--------------------------------------------------------------------------------
+3.3. POST /api/v1/user/auth/mfa/resend (NEW - Resend 6-Digit OTP)
+--------------------------------------------------------------------------------
+Generates and sends a new 6-digit verification code to the user's email, resets
+the attempt counter, and extends code validity by 10 minutes.
+
+- Method: POST
+- URL: `/api/v1/user/auth/mfa/resend`
+- Auth: Public (No token required)
+- Headers: `Content-Type: application/json`
+
+Request Body:
+```json
+{
+  "session_identifier": "aB3_9zQk1mPxRt..."
+}
+```
+
+Response (Success):
+```json
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Verification code resent successfully",
+  "data": {
+    "session_identifier": "aB3_9zQk1mPxRt...",
+    "message": "Verification code has been resent to your registered email address."
+  },
+  "error": null,
+  "method": "POST",
+  "path": "/api/v1/user/auth/mfa/resend",
+  "timestamp": "2026-11-26T07:26:00.000000Z"
+}
+```
+
+Frontend Handling Logic:
+- Disable the "Resend Code" button for 30 or 60 seconds after clicking to prevent
+  accidental spamming, showing a countdown timer.
+
+--------------------------------------------------------------------------------
+3.4. POST /api/v1/user/auth/mfa/toggle (NEW - Self-Service MFA Toggle)
+--------------------------------------------------------------------------------
+Enables or disables MFA on the authenticated user's account. Requires password
+verification for security.
+
+- Method: POST
+- URL: `/api/v1/user/auth/mfa/toggle`
+- Auth: Protected (`Authorization: Bearer <access_token>`)
+- Headers: `Content-Type: application/json`
+
+Request Body:
+```json
+{
+  "password": "CurrentPassword123!",
+  "mfa_enabled": true
+}
+```
+Field Specifications:
+- `password` (string, required): Current account password.
+- `mfa_enabled` (boolean, required): `true` to enable MFA, `false` to disable MFA.
+
+Response (Success):
+```json
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Success",
+  "data": {
+    "mfa_enabled": true,
+    "message": "MFA has been successfully enabled."
+  },
+  "error": null,
+  "method": "POST",
+  "path": "/api/v1/user/auth/mfa/toggle",
+  "timestamp": "2026-11-26T07:27:00.000000Z"
+}
+```
+
+Potential Errors:
+- `401 AUTH_INVALID_CREDENTIALS`: Incorrect password supplied.
+- `401 AUTH_REQUIRED`: Missing or expired access token.
+
+--------------------------------------------------------------------------------
+3.5. GET /api/v1/user/auth/me (MODIFIED - Returns Full Profile)
+--------------------------------------------------------------------------------
+Returns the full profile and permissions of the currently authenticated user,
+including background, logo, bio, assigned facility, and MFA status.
+
+- Method: GET
+- URL: `/api/v1/user/auth/me`
+- Auth: Protected (`Authorization: Bearer <access_token>`)
+
+Response (Success):
+```json
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Success",
+  "data": {
+    "id": "e38f1f22-fea1-4abd-b599-a5b66263b956",
+    "tenant_id": "4b68494d-c47f-4b07-a65c-a5b7c01b446a",
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "full_name": "Jane Doe",
+    "email": "jane.doe@greenledgeresg.com",
+    "phone_number": "+91-9876543210",
+    "job_title": "Head of ESG Reporting",
+    "background": "https://storage.greenledger.com/banners/carbon_header.jpg",
+    "logo": "https://storage.greenledger.com/avatars/jane.png",
+    "bio": "Directing Scope 1, 2, and 3 decarbonization strategy across our manufacturing units.",
+    "assigned_facility_id": "8f3e2b10-6c9a-4d7e-9f0a-1b2c3d4e5f6a",
+    "assigned_facility": "8f3e2b10-6c9a-4d7e-9f0a-1b2c3d4e5f6a",
+    "role": "TENANT_ADMIN",
+    "user_status": "ACTIVE",
+    "is_active": true,
+    "is_verified": true,
+    "mfa_enabled": true,
+    "last_login_at": "2026-11-26T07:20:00Z",
+    "email_verified_at": "2026-05-20T10:00:00Z",
+    "created_at": "2026-05-20T10:00:00Z",
+    "updated_at": "2026-11-26T07:20:00Z",
+    "permissions": {
+      "dashboard": "admin",
+      "scope_1": "admin",
+      "scope_2": "admin",
+      "scope_3": "admin",
+      "team_members": "admin"
+    },
+    "ui_navigation": {
+      "dashboard": true,
+      "scope_1": true,
+      "scope_2": true,
+      "scope_3": true,
+      "team_members": true
+    }
+  },
+  "error": null,
+  "method": "GET",
+  "path": "/api/v1/user/auth/me",
+  "timestamp": "2026-11-26T07:28:00.000000Z"
+}
+```
+
+--------------------------------------------------------------------------------
+3.6. PATCH /api/v1/user/auth/me (NEW - Self-Service Profile Update)
+--------------------------------------------------------------------------------
+Allows any authenticated user to update their own profile details (bio, avatar logo,
+background banner, phone number, job title, name).
+
+- Method: PATCH
+- URL: `/api/v1/user/auth/me`
+- Auth: Protected (`Authorization: Bearer <access_token>`)
+- Headers: `Content-Type: application/json`
+
+Request Body (All fields optional):
+```json
+{
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "phone_number": "+91-9876543210",
+  "job_title": "Chief Sustainability Officer",
+  "bio": "Leading ESG compliance, BRSR disclosures, and renewable integration.",
+  "background": "https://storage.greenledger.com/banners/green_energy.jpg",
+  "logo": "https://storage.greenledger.com/avatars/jane_cso.png"
+}
+```
+
+Response (Success):
+Returns the updated `UserProfileResponse` with `status_code: 200` and message
+`"Profile updated successfully"`.
+
+--------------------------------------------------------------------------------
+3.7. GET /api/v1/user (MODIFIED - List Users in Tenant)
+--------------------------------------------------------------------------------
+Lists all users in the tenant with filtering, pagination, and sorting.
+Now supports filtering by `assigned_facility_id`.
+
+- Method: GET
+- URL: `/api/v1/user`
+- Auth: Protected (`require_read(FeatureKey.TEAM_MEMBERS)`)
+- Query Parameters:
+  * `page` (int, default=1, ge=1)
+  * `page_size` (int, default=50, ge=1, le=200)
+  * `sort_by` (string, default="created_at")
+  * `sort_order` (string, default="desc", "asc"|"desc")
+  * `role` (string, optional, enum: UserRole)
+  * `is_active` (boolean, optional)
+  * `is_verified` (boolean, optional)
+  * `email_contains` (string, optional)
+  * `assigned_facility_id` (UUID, optional) [NEW]
+
+Response (Success):
+```json
+{
+  "success": true,
+  "status_code": 200,
+  "message": "Success",
+  "data": {
+    "items": [
+      {
+        "id": "e38f1f22-fea1-4abd-b599-a5b66263b956",
+        "first_name": "Jane",
+        "last_name": "Doe",
+        "full_name": "Jane Doe",
+        "email": "jane@esg.com",
+        "role": "TENANT_ADMIN",
+        "user_status": "ACTIVE",
+        "logo": "https://storage.greenledger.com/avatars/jane.png",
+        "assigned_facility_id": "8f3e2b10-6c9a-4d7e-9f0a-1b2c3d4e5f6a",
+        "assigned_facility": "8f3e2b10-6c9a-4d7e-9f0a-1b2c3d4e5f6a",
+        "is_active": true,
+        "is_verified": true,
+        "mfa_enabled": true,
+        "last_login_at": "2026-11-26T07:20:00Z",
+        "created_at": "2026-05-20T10:00:00Z"
+      }
+    ],
+    "pagination": {
+      "total": 1,
+      "page": 1,
+      "page_size": 50,
+      "total_pages": 1
+    }
+  },
+  "error": null,
+  "method": "GET",
+  "path": "/api/v1/user",
+  "timestamp": "2026-11-26T07:30:00.000000Z"
+}
+```
+
+--------------------------------------------------------------------------------
+3.8. POST /api/v1/user (MODIFIED - Create User with Facility & MFA)
+--------------------------------------------------------------------------------
+Admin creates a new user within the tenant.
+
+- Method: POST
+- URL: `/api/v1/user`
+- Auth: Protected (Admin level required on `TEAM_MEMBERS`)
+- Headers: `Content-Type: application/json`
+
+Request Body:
+```json
+{
+  "first_name": "Sam",
+  "last_name": "Ray",
+  "email": "sam.ray@greenledgeresg.com",
+  "password": "InitialTempPassword123!",
+  "role": "FACILITY_HEAD",
+  "phone_number": "+91-9876543211",
+  "job_title": "Plant Operations Lead",
+  "background": "https://storage.greenledger.com/banners/factory.jpg",
+  "logo": "https://storage.greenledger.com/avatars/sam.png",
+  "bio": "Managing daily production and energy consumption.",
+  "assigned_facility_id": "8f3e2b10-6c9a-4d7e-9f0a-1b2c3d4e5f6a",
+  "mfa_enabled": true,
+  "custom_permissions": null
+}
+```
+Field Notes:
+- `assigned_facility_id` (or `assigned_facility`): UUID of facility. Validated to ensure
+  the facility exists in the tenant.
+- `mfa_enabled` (boolean, default=false): Allows admins to enforce MFA from day 1.
+
+Response (Success):
+```json
+{
+  "success": true,
+  "status_code": 201,
+  "message": "User sam.ray@greenledgeresg.com created successfully",
+  "data": {
+    "id": "7a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+    "email": "sam.ray@greenledgeresg.com",
+    "full_name": "Sam Ray",
+    "role": "FACILITY_HEAD",
+    "message": "User sam.ray@greenledgeresg.com created successfully"
+  },
+  "error": null,
+  "method": "POST",
+  "path": "/api/v1/user",
+  "timestamp": "2026-11-26T07:31:00.000000Z"
+}
+```
+
+--------------------------------------------------------------------------------
+3.9. PATCH /api/v1/user/{user_id} (MODIFIED - Update Profile, Facility & MFA)
+--------------------------------------------------------------------------------
+Admin updates user attributes, role, status, facility assignment, or MFA flag.
+
+- Method: PATCH
+- URL: `/api/v1/user/{user_id}`
+- Auth: Protected (Admin level required on `TEAM_MEMBERS`)
+- Headers: `Content-Type: application/json`
+
+Request Body (All fields optional):
+```json
+{
+  "first_name": "Samuel",
+  "role": "FACILITY_HEAD",
+  "background": "https://storage.greenledger.com/banners/solar_field.jpg",
+  "logo": "https://storage.greenledger.com/avatars/samuel.png",
+  "bio": "Senior Facility Lead",
+  "assigned_facility_id": "8f3e2b10-6c9a-4d7e-9f0a-1b2c3d4e5f6a",
+  "mfa_enabled": true,
+  "is_active": true
+}
+```
+
+Response (Success):
+Returns `UserDetailResponse` with the updated attributes.
+
+--------------------------------------------------------------------------------
+3.10. GET /api/v1/user/{user_id} (MODIFIED - User Details)
+--------------------------------------------------------------------------------
+Retrieves complete details of a specific user.
+
+- Method: GET
+- URL: `/api/v1/user/{user_id}`
+- Auth: Protected (`require_read(FeatureKey.TEAM_MEMBERS)`)
+
+Response (Success):
+Returns `UserDetailResponse` containing:
+- `id`, `tenant_id`, `first_name`, `last_name`, `full_name`, `email`
+- `phone_number`, `job_title`
+- `background`, `logo`, `bio`
+- `assigned_facility_id`, `assigned_facility`
+- `role`, `user_status`, `is_active`, `is_verified`, `mfa_enabled`
+- `last_login_at`, `email_verified_at`, `created_at`, `updated_at`
+
+================================================================================
+4. ENUMS & DATA TYPES REFERENCE
+================================================================================
+
+--------------------------------------------------------------------------------
+4.1. UserRole Enum
+--------------------------------------------------------------------------------
+String enum representing the primary role of the user within their tenant:
+```typescript
+export enum UserRole {
+  TENANT_OWNER = "TENANT_OWNER",
+  TENANT_ADMIN = "TENANT_ADMIN",
+  ESG_TEAM = "ESG_TEAM",
+  FACILITY_HEAD = "FACILITY_HEAD",
+  AUDITOR = "AUDITOR",
+}
+```
+
+Role Permissions:
+- `TENANT_OWNER`: Full administrative control, billing, destructive actions. Cannot be deleted.
+- `TENANT_ADMIN`: User management, facility management, full read/write/verify on all modules.
+- `ESG_TEAM`: Activity logging, calculations, BRSR and GHG report generation.
+- `FACILITY_HEAD`: Manages operations and logs activities for their assigned facility.
+- `AUDITOR`: Read-only verification access across reporting periods and evidence documents.
+
+--------------------------------------------------------------------------------
+4.2. UserStatus Enum
+--------------------------------------------------------------------------------
+```typescript
+export enum UserStatus {
+  ACTIVE = "active",
+  PENDING_VERIFICATION = "pending_verification",
+  SUSPENDED = "suspended",
+  DEACTIVATED = "deactivated",
+}
+```
+
+--------------------------------------------------------------------------------
+4.3. AccessLevel & FeatureKey
+--------------------------------------------------------------------------------
+Access Levels:
+```typescript
+export enum AccessLevel {
+  NONE = "none",
+  READ = "read",
+  WRITE = "write",
+  ADMIN = "admin",
+}
+```
+
+Feature Keys (19 Sub-systems):
+`DASHBOARD`, `SCOPE_1`, `SCOPE_2`, `SCOPE_3`, `ANALYTICS`, `REPORTS`,
+`FACILITIES`, `TEAM_MEMBERS`, `EMISSION_FACTORS`, `AUDIT_LOGS`, `ORGANIZATION`,
+`CBAM`, `BRSR`, `LWG`, `EIA`, `DOCUMENTS`, `ENERGY_ATTRIBUTION`, `TARGETS`,
+`SUPPLIER_PORTAL`.
+
+================================================================================
+5. FRONTEND UX WORKFLOWS & STATE MACHINES
+================================================================================
+
+--------------------------------------------------------------------------------
+5.1. Authentication Flow (Dual-Stage Login with MFA Challenge)
+--------------------------------------------------------------------------------
+State Machine Flow Diagram:
+
+   [User Enters Email & Password]
+                 │
+                 ▼
+     POST /api/v1/user/auth/login
+                 │
+      ┌──────────┴──────────┐
+      ▼                     ▼
+[mfa_required == false]   [mfa_required == true]
+      │                     │
+      │                     ├── Store session_identifier in state
+      │                     ├── Switch UI: "Enter 6-Digit Code"
+      │                     └── Start 60s countdown for "Resend Code" button
+      │                                    │
+      │                                    ▼
+      │                      [User Submits Code / Resends]
+      │                        ┌───────────┴───────────┐
+      │                        ▼                       ▼
+      │              (User clicks Resend)      (User submits Code)
+      │                        │                       │
+      │             POST .../mfa/resend      POST .../mfa/verify
+      │             (Resets 60s timer)                 │
+      │                                                ▼
+      │                                     [Code Valid? (max 5 tries)]
+      │                                        ┌───────┴───────┐
+      │                                        ▼               ▼
+      │                                     (Valid)       (Invalid/Expired)
+      │                                        │               │
+      │                                        │          Show error banner
+      │                                        │          (If 5 fails -> re-login)
+      ▼                                        ▼
+[Store access_token & refresh_token -> Navigate to Dashboard /me]
+
+Recommended UI Guidelines:
+1. Monospace 6-Digit Input: Use 6 individual input boxes or a single formatted
+   input with `font-family: monospace; letter-spacing: 0.5em; font-size: 24px;`.
+2. Auto-Focus & Auto-Submit: Auto-advance cursor as each digit is typed; auto-submit
+   when the 6th digit is entered.
+3. Resend OTP Button: Disable for 60 seconds with live countdown
+   (`Resend Code in 45s`).
+4. Attempt Feedback: If `401 AUTH_INVALID_CREDENTIALS` is received, alert the user
+   ("Invalid verification code. Please check your email and try again.").
+
+--------------------------------------------------------------------------------
+5.2. Profile Settings View (Avatar, Banner, Bio, MFA Toggle)
+--------------------------------------------------------------------------------
+UI Layout:
+1. Cover Photo / Banner:
+   - Displays `background` URL. A button overlay allows users to paste an image URL
+     or upload via the tenant uploads endpoint.
+2. Avatar / Logo:
+   - Displays `logo` URL in a circular badge. Falls back to user initials if null.
+3. Bio Field:
+   - Multi-line textarea for `bio` with a 500-character counter.
+4. Basic Information:
+   - Inputs for `first_name`, `last_name`, `phone_number`, `job_title`.
+   - Action: "Save Profile Changes" dispatches `PATCH /api/v1/user/auth/me`.
+5. Security & MFA Card:
+   - Displays a badge indicating MFA Status (`Enabled` in green or `Disabled` in gray).
+   - Toggle switch for MFA.
+   - When clicked, opens a Confirmation Modal:
+     * "Enter your current password to enable/disable Multi-Factor Authentication".
+     * Password input.
+     * Submits to `POST /api/v1/user/auth/mfa/toggle`.
+     * On success, updates the toggle and displays a toast notification.
+
+--------------------------------------------------------------------------------
+5.3. Tenant User Management View (Facility Assignment, MFA Administration)
+--------------------------------------------------------------------------------
+1. User Table:
+   - Columns: Avatar (`logo`), Full Name, Email, Role badge, Assigned Facility,
+     MFA status badge, Active status, Actions.
+   - Facility Column: Displays facility name. If `assigned_facility_id` is null,
+     displays `All Facilities` or `Unassigned`.
+   - Filter Bar: Allows filtering the table by facility using a dropdown populated
+     from `GET /api/v1/facility`, which passes `?assigned_facility_id=<id>`.
+2. Add / Edit User Drawer:
+   - Includes dropdown: `Assign Facility` (populated with active tenant facilities).
+   - Includes checkbox/switch: `Enable MFA for this user` (sets `mfa_enabled`).
+   - Includes text fields for `bio`, `logo` URL, and `background` URL.
+
+================================================================================
+6. READY-TO-USE TYPESCRIPT INTERFACES (COPY-PASTE READY)
+================================================================================
+Save the following definitions into your frontend repository (e.g., `src/types/user.ts`):
+
+```typescript
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+export enum UserRole {
+  TENANT_OWNER = "TENANT_OWNER",
+  TENANT_ADMIN = "TENANT_ADMIN",
+  ESG_TEAM = "ESG_TEAM",
+  FACILITY_HEAD = "FACILITY_HEAD",
+  AUDITOR = "AUDITOR",
+}
+
+export enum UserStatus {
+  ACTIVE = "active",
+  PENDING_VERIFICATION = "pending_verification",
+  SUSPENDED = "suspended",
+  DEACTIVATED = "deactivated",
+}
+
+export enum AccessLevel {
+  NONE = "none",
+  READ = "read",
+  WRITE = "write",
+  ADMIN = "admin",
+}
+
+// ============================================================================
+// GENERIC API RESPONSE & ERROR ENVELOPES
+// ============================================================================
+
+export interface APIErrorDetail {
+  error_code: string;
+  detail?: string | null;
+  validation?: Array<{
+    field?: string;
+    message: string;
+    type?: string;
+    [key: string]: any;
+  }> | null;
+}
+
+export interface APIResponse<T> {
+  success: boolean;
+  status_code: number;
+  message: string;
+  data: T;
+  error: APIErrorDetail | null;
+  method: string;
+  path: string;
+  timestamp: string;
+}
+
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
+// ============================================================================
+// AUTH & MFA SCHEMAS
+// ============================================================================
+
+export interface UserLoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface UserAuthResponse {
+  access_token: string | null;
+  refresh_token: string | null;
+  expires_in: number | null;
+  refresh_expires_in: number | null;
+  mfa_required: boolean;
+  session_identifier: string | null;
+}
+
+export interface UserMfaVerifyRequest {
+  session_identifier: string;
+  code: string;
+}
+
+export interface UserMfaResendRequest {
+  session_identifier: string;
+}
+
+export interface UserMfaToggleRequest {
+  password: string;
+  mfa_enabled: boolean;
+}
+
+export interface UserMfaStatusResponse {
+  mfa_enabled: boolean;
+  message: string;
+}
+
+// ============================================================================
+// USER PROFILE SCHEMAS (SELF-SERVICE)
+// ============================================================================
+
+export interface UserProfileResponse {
+  id: string;
+  tenant_id: string | null;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  email: string;
+  phone_number: string | null;
+  job_title: string | null;
+  background: string | null;
+  logo: string | null;
+  bio: string | null;
+  assigned_facility_id: string | null;
+  assigned_facility: string | null;
+  role: UserRole;
+  user_status: UserStatus;
+  is_active: boolean;
+  is_verified: boolean;
+  mfa_enabled: boolean;
+  last_login_at: string | null;
+  email_verified_at: string | null;
+  created_at: string;
+  updated_at: string;
+  permissions?: Record<string, string> | null;
+  ui_navigation?: Record<string, boolean | Record<string, boolean>> | null;
+}
+
+export interface UserProfileUpdateRequest {
+  first_name?: string | null;
+  last_name?: string | null;
+  phone_number?: string | null;
+  job_title?: string | null;
+  bio?: string | null;
+  background?: string | null;
+  logo?: string | null;
+}
+
+// ============================================================================
+// TENANT USER MANAGEMENT SCHEMAS (ADMIN)
+// ============================================================================
+
+export interface UserCreateRequest {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  phone_number?: string | null;
+  job_title?: string | null;
+  background?: string | null;
+  logo?: string | null;
+  bio?: string | null;
+  assigned_facility_id?: string | null;
+  assigned_facility?: string | null;
+  mfa_enabled?: boolean;
+  custom_permissions?: Record<string, AccessLevel> | null;
+}
+
+export interface UserUpdateRequest {
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  role?: UserRole | null;
+  phone_number?: string | null;
+  job_title?: string | null;
+  background?: string | null;
+  logo?: string | null;
+  bio?: string | null;
+  assigned_facility_id?: string | null;
+  assigned_facility?: string | null;
+  mfa_enabled?: boolean | null;
+  is_active?: boolean | null;
+  custom_permissions?: Record<string, AccessLevel> | null;
+}
+
+export interface UserListItemResponse {
+  id: string;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  email: string;
+  role: UserRole;
+  user_status: UserStatus;
+  logo: string | null;
+  assigned_facility_id: string | null;
+  assigned_facility: string | null;
+  is_active: boolean;
+  is_verified: boolean;
+  mfa_enabled: boolean;
+  last_login_at: string | null;
+  created_at: string;
+}
+
+export interface UserListResponse {
+  items: UserListItemResponse[];
+  pagination: PaginationMeta;
+}
+
+export interface UserCreatedResponse {
+  id: string;
+  email: string;
+  full_name: string;
+  role: UserRole;
+  message: string;
+}
+```
+
+================================================================================
+7. FRONTEND DEVELOPER IMPLEMENTATION CHECKLIST
+================================================================================
+Follow this checklist to integrate the user and MFA features cleanly:
+
+[ ] 1. Authentication Client & Login Flow
+    [ ] Inspect response from `POST /api/v1/user/auth/login`.
+    [ ] If `data.mfa_required === true`, halt navigation and render MFA OTP Modal.
+    [ ] Save `data.session_identifier` into component state.
+    [ ] Implement 6-digit OTP input with auto-focus and auto-submit.
+    [ ] Call `POST /api/v1/user/auth/mfa/verify` on submit.
+    [ ] If verify succeeds, store tokens and navigate to `/dashboard`.
+    [ ] Add "Resend Code" button calling `POST /api/v1/user/auth/mfa/resend` with 60s cooldown timer.
+
+[ ] 2. Profile Page (`/settings/profile`)
+    [ ] Fetch user profile via `GET /api/v1/user/auth/me`.
+    [ ] Render Header Banner with `background` URL (fallback to green gradient if null).
+    [ ] Render Avatar with `logo` URL (fallback to user initials if null).
+    [ ] Render `bio` textarea with character counter.
+    [ ] Save profile edits by calling `PATCH /api/v1/user/auth/me`.
+    [ ] Render Security card with MFA status switch.
+    [ ] When MFA switch is toggled, prompt user for current password.
+    [ ] Call `POST /api/v1/user/auth/mfa/toggle` with password and target state.
+
+[ ] 3. Team Members Page (`/settings/team`)
+    [ ] Add `Facility` filter dropdown calling `GET /api/v1/user?assigned_facility_id=<id>`.
+    [ ] Update User Table columns to display user `logo` avatar, `assigned_facility`, and `mfa_enabled` badge.
+    [ ] In Create User Drawer, add Facility dropdown and `Enforce MFA` checkbox.
+    [ ] In Edit User Drawer, allow assigning/reassigning facility and toggling `mfa_enabled`.
+    [ ] Handle `404 FACILITY_NOT_FOUND` gracefully if a deleted facility ID is passed.
+
+================================================================================
+END OF DOCUMENT - GREENLEDGER ESG PLATFORM FRONTEND INTEGRATION GUIDE
+================================================================================

@@ -72,6 +72,19 @@ export interface UserProfile {
     email: string;
     phone_number?: string | null;
     job_title?: string | null;
+    background?: string | null;
+    logo?: string | null;
+    bio?: string | null;
+    assigned_facility_id?: string | null;
+    assigned_facility?: string | null;
+    facility?: {
+        id: string;
+        name: string;
+        facility_code?: string;
+        city?: string;
+        state?: string | null;
+        country?: string;
+    } | null;
     role: UserRole;
     user_status?: string;
     is_active: boolean;

@@ -1,5 +1,18 @@
 import { privateApi, publicApi } from "@/lib/http/client";
 import { clearAuthToken } from "@/lib/auth/token";
+import type {
+    UserAuthResponse,
+    UserLoginRequest,
+    UserMfaResendRequest,
+    UserMfaVerifyRequest,
+} from "@/lib/user/types";
+
+export type {
+    UserAuthResponse,
+    UserLoginRequest,
+    UserMfaResendRequest,
+    UserMfaVerifyRequest,
+};
 
 export type RegisterTenantPayload = {
     companyName: string;
@@ -121,5 +134,50 @@ export async function logoutUser(redirectTo: string = "/login"): Promise<void> {
             window.location.replace(redirectTo);
         }
     }
+}
+
+/**
+ * Authenticates user credentials.
+ * If MFA is enabled, returns { mfa_required: true, session_identifier: "..." }.
+ * If MFA is disabled, returns tokens directly.
+ */
+export async function loginUser(payload: UserLoginRequest): Promise<UserAuthResponse> {
+    const response = await publicApi.post<{ success: boolean; data: UserAuthResponse; message?: string }>(
+        "/user/auth/login",
+        payload,
+    );
+    if (!response?.data?.success || !response.data.data) {
+        throw new Error(response.data?.message ?? "Login failed. Please check your credentials.");
+    }
+    return response.data.data;
+}
+
+/**
+ * Verifies 6-digit MFA OTP code with backend.
+ */
+export async function verifyMfa(payload: UserMfaVerifyRequest): Promise<UserAuthResponse> {
+    const response = await publicApi.post<{ success: boolean; data: UserAuthResponse; message?: string }>(
+        "/user/auth/mfa/verify",
+        payload,
+    );
+    if (!response?.data?.success || !response.data.data) {
+        throw new Error(response.data?.message ?? "Invalid verification code.");
+    }
+    return response.data.data;
+}
+
+/**
+ * Resends 6-digit MFA code to registered user's email.
+ */
+export async function resendMfa(payload: UserMfaResendRequest): Promise<{ session_identifier: string; message: string }> {
+    const response = await publicApi.post<{
+        success: boolean;
+        data: { session_identifier: string; message: string };
+        message?: string;
+    }>("/user/auth/mfa/resend", payload);
+    if (!response?.data?.success || !response.data.data) {
+        throw new Error(response.data?.message ?? "Failed to resend verification code.");
+    }
+    return response.data.data;
 }
 

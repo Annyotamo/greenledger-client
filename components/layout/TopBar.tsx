@@ -6,6 +6,7 @@ import { DASHBOARD_TABS } from "@/lib/dashboard/data";
 import type { DashboardTab } from "@/lib/dashboard/types";
 import { cn } from "@/lib/utils/cn";
 import { useSidebarStore } from "@/stores/sidebar-store";
+import { UserNavMenu } from "./UserNavMenu";
 
 type TopBarProps = {
     activeTab: DashboardTab;
@@ -51,22 +52,26 @@ export function TopBar({ activeTab, onTabChange }: TopBarProps) {
                 )}
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1">
                     <button
                         type="button"
-                        className="relative rounded-full p-2 pb-0 transition-colors hover:bg-surface-container-high"
+                        className="relative rounded-full p-2 pb-0 transition-colors hover:bg-surface-container-high cursor-pointer"
                         aria-label="Notifications">
                         <MaterialIcon name="notifications" className="text-on-surface-variant" />
                         <span className="fab-pulse absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-error" />
                     </button>
                     <button
                         type="button"
-                        className="rounded-full p-2 pb-0 transition-colors hover:bg-surface-container-high"
+                        className="rounded-full p-2 pb-0 transition-colors hover:bg-surface-container-high cursor-pointer"
                         aria-label="Help">
                         <MaterialIcon name="help_outline" className="text-on-surface-variant" />
                     </button>
                 </div>
+
+                <div className="h-6 w-[1px] bg-outline-variant/60" />
+
+                <UserNavMenu />
             </div>
         </header>
     );

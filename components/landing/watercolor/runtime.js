@@ -6,17 +6,6 @@ export function run({ window, document, addEventListener, removeEventListener, s
 const $=s=>document.querySelector(s);
 const PIG=['var(--clay)','var(--ochre)','var(--sage)','var(--indigo)'];
 
-/* ---------- Loader ---------- */
-(()=>{const L=$('#loader'),v=$('#introVid'),cb=$('#dontShow'),KEY='gl_dont_show_intro_video';
-  let skip=false;try{skip=localStorage.getItem(KEY)==='true'}catch(e){}
-  const close=()=>{L.classList.add('hide');setTimeout(()=>L.remove(),420)};
-  if(location.search.includes('nointro')){L.remove();return}
-  if(skip){L.classList.add('quick');v.pause();setTimeout(close,450);return}
-  cb.onchange=()=>{try{cb.checked?localStorage.setItem(KEY,'true'):localStorage.removeItem(KEY)}catch(e){}};
-  $('#closeIntro').onclick=close;v.onended=close;v.onerror=close;v.querySelector('source').onerror=close;
-  v.ontimeupdate=()=>{const p=$('#introProg');if(v.duration&&p)p.style.width=(v.currentTime/v.duration*100)+'%'};
-  addEventListener('keydown',e=>{if((e.key==='Escape'||e.key===' ')&&document.body.contains(L)){e.preventDefault();close()}});
-})();
 
 /* ---------- Hero vertical ticker ---------- */
 const CARDS=[['01','Lab-Grade Chemical Precision'],['02','Full-Spectrum Scope 1, 2, and 3 Depth'],['03','BRSR Principle 6 Resource Intelligence'],['04','Enterprise Audit Governance & Data Control']];
@@ -166,7 +155,13 @@ function vpRender(){const f=VP[vpI],st=$('#vp'),old=st.querySelector('.pf-scene'
 
   $('#vpTabs').innerHTML=VP.map((x,i)=>`<button class="pf-item ${i===vpI?'on':''}" data-i="${i}"><span class="n">0${i+1}</span><span class="ic" data-ic="${i}" aria-hidden="true"></span><span class="l">${x.b}</span><span class="ar">→</span><i></i></button>`).join('');
   mountIcons();
-  clearTimeout(vpT);vpT=setTimeout(()=>{vpI=(vpI+1)%VP.length;vpRender()},6000);}
+  // the tour only advances while the section is on screen (performance). Off screen it waits; back on screen the countdown and
+  // the tab's progress bar restart together, so the bar is always full when the tab changes
+  clearTimeout(vpT);let held=false;
+  const adv=()=>{if($('#value').classList.contains('zz-off')||document.hidden){held=true;vpT=setTimeout(adv,500);return}
+    if(held){held=false;const bar=$('#vpTabs .pf-item.on i');if(bar){bar.style.animation='none';void bar.offsetWidth;bar.style.animation=''}vpT=setTimeout(adv,6000);return}
+    vpI=(vpI+1)%VP.length;vpRender()};
+  vpT=setTimeout(adv,6000);}
 $('#vpTabs').onclick=e=>{const b=e.target.closest('.pf-item');if(b){vpI=+b.dataset.i;vpRender()}};
 vpRender();
 {const q=new URLSearchParams(location.search).get('vp');if(q!==null){vpI=+q;vpRender();setTimeout(()=>{document.querySelector('#value .pf').scrollIntoView({block:'center',behavior:'instant'});document.querySelectorAll('.reveal').forEach(e=>e.classList.add('in'))},50)}} // review hook: ?vp=N opens scene N
@@ -654,7 +649,8 @@ function pixelCard(host,opt){
         for(const u of S.pulses){const bd=(Math.hypot(x-u.x,y-u.y)-u.r)/26,wv=Math.exp(-bd*bd)*u.p;s*=1+wv*1.4;al=Math.min(1,al+wv*.5)}
         if(s<=.05)continue;ctx.globalAlpha=al;ctx.fillRect(x-s/2,y-s/2,s,s)}}
     ctx.globalAlpha=1;return sum};
-  const frame=now=>{S.raf=0;const dt=S.last?Math.min(.05,(now-S.last)/1000):1/60;S.last=now;S.dt=dt;S.t+=dt;build();
+  const frame=now=>{S.raf=0;if(S.last&&now-S.last<31&&S.vis){S.raf=requestAnimationFrame(frame);return} // 30 fps: about 8,000 squares per card
+    const dt=S.last?Math.min(.05,(now-S.last)/1000):1/60;S.last=now;S.dt=dt;S.t+=dt;
     if(S.intro>=0&&S.t>=S.intro){S.intro=-1;if(!S.act){set(true);S.rel=S.t+o.revealDuration/1000+.7}}
     if(S.rel>=0&&S.t>=S.rel&&!S.hov){S.rel=-1;set(false)}
     const want=S.hov&&!reduce?1:0;S.sp+=(want-S.sp)*(1-Math.exp(-(want?6:3)*dt));
@@ -726,6 +722,7 @@ const SX_PAL={ // [ground, colour 1, colour 2, colour 3] as 0-1 RGB from the pag
  team:[[.925,.937,.898],[.722,.812,.71],[.89,.725,.651],[.765,.831,.902]],       // paper · sage · clay · sky
  solutions:[[.937,.906,.847],[.784,.451,.353],[.851,.643,.255],[.31,.427,.604]], // paper · Scope 1 clay · Scope 2 ochre · Scope 3 indigo
  brsr:[[.933,.918,.875],[.918,.839,.678],[.788,.847,.902],[.765,.831,.776]]};     // paper · energy sand · water sky · air sage
+SX_PAL.solutions=[[.937,.918,.875],[.31,.427,.604],[.851,.643,.255],[.247,.42,.333]]; // paper · CBAM indigo · BRSR ochre · GHG moss
 function sxField(sec,mode){
   const host=sec&&sec.querySelector('.sx-bg');if(!host)return;
   const cv=document.createElement('canvas');cv.className='sx-gl';host.prepend(cv);
@@ -739,33 +736,34 @@ function sxField(sec,mode){
   const wc=[1,1,1],wt=[1,1,1]; // per-plume emphasis (Solutions): eased toward the selected scope
   const pal=SX_PAL[sec.id];['C0','C1','C2','C3'].forEach((k,i)=>gl.uniform3fv(U[k],pal[i]));gl.uniform1f(U.M,mode);
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let vis=false,raf=0,last=0,T=8,B=0,px=.5,py=.5,tx=.5,ty=.5,sy=scrollY;
-  const frame=now=>{raf=0;const dt=last?Math.min(.05,(now-last)/1000):0;last=now;if(!reduce)T+=dt;B*=.965;
+  let vis=false,raf=0,last=0,T=8,B=0,px=.5,py=.5,tx=.5,ty=.5,sy=scrollY,FW=Math.max(1,Math.round(host.clientWidth*.5)),FH=Math.max(1,Math.round(host.clientHeight*.5)),shown=false;
+  const frame=now=>{raf=0;if(last&&now-last<31&&vis&&!document.hidden){raf=requestAnimationFrame(frame);return} // 30 fps
+    const dt=last?Math.min(.05,(now-last)/1000):0;last=now;if(!reduce)T+=dt;B*=.965;
+    if(stir){stir=false;const y=scrollY;T+=Math.min(Math.abs(y-sy),240)*.004;sy=y}
     px+=(tx-px)*.035;py+=(ty-py)*.035;
     let moving=false;for(let i=0;i<3;i++){wc[i]+=(wt[i]-wc[i])*(reduce?1:.04);if(Math.abs(wt[i]-wc[i])>.002)moving=true}
     // soft fields render at half resolution: no visible difference, a quarter of the work
-    const w=Math.max(1,Math.round(host.clientWidth*.5)),h=Math.max(1,Math.round(host.clientHeight*.5));
+    const w=FW,h=FH;
     if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;gl.viewport(0,0,w,h)}
     gl.uniform2f(U.R,w,h);gl.uniform2f(U.P,px,py);gl.uniform1f(U.T,T);gl.uniform1f(U.B,B);gl.uniform3f(U.W,wc[0],wc[1],wc[2]);gl.drawArrays(gl.TRIANGLES,0,3);
-    cv.classList.add('on');
+    if(!shown){shown=true;cv.classList.add('on')}
     if((!reduce||moving)&&vis&&!document.hidden)raf=requestAnimationFrame(frame);else last=0};
   const kick=()=>{if(!raf)raf=requestAnimationFrame(frame)};
   new IntersectionObserver(([e])=>{vis=e.isIntersecting;kick()}).observe(sec);
-  document.addEventListener('visibilitychange',kick);new ResizeObserver(kick).observe(host);
+  document.addEventListener('visibilitychange',kick);
+  new ResizeObserver(([e])=>{FW=Math.max(1,Math.round(e.contentRect.width*.5));FH=Math.max(1,Math.round(e.contentRect.height*.5));kick()}).observe(host);
   sec.addEventListener('pointermove',e=>{const b=host.getBoundingClientRect();tx=(e.clientX-b.left)/b.width;ty=1-(e.clientY-b.top)/b.height});
   sec.addEventListener('pointerleave',()=>{tx=.5;ty=.5});
-  addEventListener('scroll',()=>{const d=Math.abs(scrollY-sy);sy=scrollY;if(vis&&!reduce)T+=Math.min(d,120)*.004},{passive:true}); // scrolling stirs it, like turning a page
+  let stir=false;addEventListener('scroll',()=>{if(vis&&!reduce)stir=true},{passive:true}); // scrolling stirs it, like turning a page
   sec.addEventListener('sx:breath',()=>{B=1;kick()});
   kick();
   return{focus(i){for(let k=0;k<3;k++)wt[k]=k===i?1:.25;kick()}}}
-sxField($('#insights'),0);sxField($('#team'),1);sxField($('#brsr'),1);
-/* ---------- BRSR: module tabs switch the Principle 6 sheet (click, arrow keys) ---------- */
-{const sec=$('#brsr'),list=sec&&sec.querySelector('[role=tablist]');
- if(list){const tabs=[...list.querySelectorAll('[role=tab]')],panes=tabs.map(t=>document.getElementById(t.getAttribute('aria-controls')));
-  const set=(i,focus)=>{tabs.forEach((t,k)=>{const on=k===i;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1;panes[k].hidden=!on;if(on&&focus)t.focus()})};
-  list.addEventListener('click',e=>{const t=e.target.closest('[role=tab]');if(t)set(tabs.indexOf(t))});
-  list.addEventListener('keydown',e=>{const d={ArrowDown:1,ArrowRight:1,ArrowUp:-1,ArrowLeft:-1}[e.key];if(!d)return;e.preventDefault();
-    const i=tabs.findIndex(t=>t.getAttribute('aria-selected')==='true');set((i+d+tabs.length)%tabs.length,true)})}}
+sxField($('#insights'),0);sxField($('#team'),1);
+/* ---------- Solutions: one photo panel open at a time (hover on desktop, click or focus everywhere); the field leans to its colour ---------- */
+{const sec=$('#solutions'),field=sxField(sec,1),ps=[...sec.querySelectorAll('.sb2-p')],hover=matchMedia('(hover:hover)').matches;
+ const open=i=>{ps.forEach((p,k)=>{const on=k===i;p.classList.toggle('on',on);p.querySelector('.sb2-open').setAttribute('aria-expanded',on);p.querySelector('.sb2-card').inert=!on});field&&field.focus(i)};
+ ps.forEach((p,i)=>{const b=p.querySelector('.sb2-open');b.addEventListener('click',()=>open(i));b.addEventListener('focus',()=>open(i));if(hover)p.addEventListener('mouseenter',()=>open(i))});
+ open(0)}
 
 
 /* ---------- Pricing field: each edition's card stands on its own step, rising short → middle → tall (up to 5 facilities →
@@ -845,14 +843,16 @@ const ACC=[
  dd.addEventListener('keydown',e=>{if(e.key==='Escape'){ddSet(false);ddT.focus()}});
  dd.querySelectorAll('.dd-menu a').forEach(a=>a.addEventListener('click',()=>ddSet(false)));
  document.addEventListener('click',e=>{if(!dd.contains(e.target))ddSet(false)});
- const spy=()=>{nv.classList.toggle('scrolled',scrollY>24);
+ let sq=0,wasSc=null;
+ const spy=()=>{sq=0;const sc=scrollY>24;if(sc!==wasSc){wasSc=sc;nv.classList.toggle('scrolled',sc)}
    // active = last section whose top has passed 40% of the viewport; none while still in the hero
    const line=innerHeight*.4;let act=null;secs.forEach((s,i)=>{if(s&&s.getBoundingClientRect().top<line&&s.getBoundingClientRect().bottom>0)act=links[i]});
-   if(act!==cur){links.forEach(l=>l.classList.toggle('active',l===act));cur=act}place()};
- addEventListener('scroll',spy,{passive:true});addEventListener('resize',place);
+   if(act!==cur){links.forEach(l=>l.classList.toggle('active',l===act));cur=act;place()}};
+ // performance: at most once per frame, not once per scroll event
+ addEventListener('scroll',()=>{if(!sq)sq=requestAnimationFrame(spy)},{passive:true});addEventListener('resize',place);
  // padding animates during contraction, so keep the pill glued to its link while it transitions
  nv.addEventListener('transitionend',place);box.querySelectorAll('a').forEach(a=>a.addEventListener('transitionend',place));
- spy()}
+ spy();place()}
 
 
 /* ---------- Platform band: pointer leans the colour pools ---------- */
@@ -865,14 +865,17 @@ const ACC=[
 /* ---------- Scroll reveal ---------- */
 {const row=document.querySelector('.sup-row');if(row&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const cs=[...row.children];let k=-1,hold=false;
   row.addEventListener('pointerenter',()=>{hold=true;cs.forEach(c=>c.classList.remove('lit'))});row.addEventListener('pointerleave',()=>hold=false);
-  setInterval(()=>{if(hold||document.hidden)return;cs.forEach(c=>c.classList.remove('lit'));k=(k+1)%cs.length;cs[k].classList.add('lit')},2800)}}
+  setInterval(()=>{if(hold||document.hidden||row.closest('.zz-off'))return;cs.forEach(c=>c.classList.remove('lit'));k=(k+1)%cs.length;cs[k].classList.add('lit')},2800)}}
 document.querySelectorAll('.sup-row a').forEach(a=>a.addEventListener('pointermove',e=>{const r=a.getBoundingClientRect();a.style.setProperty('--bx',((e.clientX-r.left)/r.width*100)+'%');a.style.setProperty('--by',((e.clientY-r.top)/r.height*100)+'%')}));
 {const hd=document.getElementById('fwBand');if(hd&&!matchMedia('(prefers-reduced-motion: reduce)').matches){let q=0;
-  const upd=()=>{q=0;const r=hd.getBoundingClientRect(),vh=innerHeight;hd.style.setProperty('--p',Math.min(1,Math.max(0,(vh*.95-r.top)/(vh*.55))).toFixed(3))};
+  let pv='';const upd=()=>{q=0;const r=hd.getBoundingClientRect(),vh=innerHeight,v=Math.min(1,Math.max(0,(vh*.95-r.top)/(vh*.55))).toFixed(3);if(v!==pv){pv=v;hd.style.setProperty('--p',v)}};
   addEventListener('scroll',()=>{if(!q)q=requestAnimationFrame(upd)},{passive:true});addEventListener('resize',upd);upd()}}
 {const f=document.getElementById('foot');if(f){
   const v=f.querySelector('video'),still=matchMedia('(prefers-reduced-motion: reduce)').matches;v.preload='metadata';
   new IntersectionObserver(([e])=>{if(e.isIntersecting){f.classList.add('in');if(!still)v.play().catch(()=>{})}else v.pause()},{threshold:0,rootMargin:"0px 0px -15% 0px"}).observe(f)}}
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15,rootMargin:'0px 0px -12% 0px'});
+/* performance: mark sections that are more than half a screen out of view (see .zz-off in the CSS) */
+{const off=new IntersectionObserver(es=>es.forEach(e=>e.target.classList.toggle('zz-off',!e.isIntersecting)),{rootMargin:'50% 0px'});
+ document.querySelectorAll('header.hero,body>section,section[id],footer').forEach(s=>off.observe(s))}
 document.querySelectorAll('.reveal,.reveal-stag').forEach(el=>io.observe(el));
 }

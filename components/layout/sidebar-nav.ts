@@ -14,6 +14,7 @@ export const MAIN_NAV: NavItem[] = [
     { label: "Dashboard", icon: "dashboard", href: "/dashboard" },
     { label: "Facilities", icon: "domain", href: "/facilities" },
     { label: "EU CBAM", icon: "verified", href: "/tenant-cbam" },
+    { label: "Risk Assessment", icon: "thunderstorm", href: "/risk-assessment" },
     { label: "Value Chain", icon: "hub", href: "/scope-3" },
     { label: "Team Members", icon: "group", href: "/team-members" },
     { label: "Tenant Profile", icon: "business", href: "/tenant" },

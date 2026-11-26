@@ -63,6 +63,8 @@ const extra = `
 .wl .ring{box-shadow:none}
 /* Lenis drives the scroll while it runs (it adds .lenis to <html>); native smooth scrolling from globals.css would animate each of its frames again */
 html.lenis{scroll-behavior:auto!important}
+/* the intro covers the app-wide cookie banner (z 9999, later in the DOM) until it closes */
+.wl #loader{z-index:10000}
 /* explainer diagrams set font-family as an SVG attribute, which can't read next/font's variable */
 .wl :where(#cx) svg text{font-family:var(--font-inter),system-ui,sans-serif}
 `;
@@ -78,8 +80,10 @@ rep('../assets/standards/${f}', "${ASSET('standards/'+f)}");
 js = js.replace(/'\.\.\/assets\/([^']+)'/g, (_, p) => `ASSET('${p}')`);
 rep(`.font='11px "JetBrains Mono",monospace'`, ".font='11px '+MONO", 1);
 rep('if(!window.lottie)return', 'if(!lottie)return', 1); // lottie arrives as an import, not a CDN global
-// removing the loader pauses the video, which fires one last timeupdate after #introProg has left the DOM
-rep("if(v.duration)$('#introProg').style.width=", "const p=$('#introProg');if(v.duration&&p)p.style.width=", 1);
+// intro loader: WatercolorLanding.tsx runs it at mount instead. Here it would only start after lottie loads, leaving the
+// close button, Esc and "Don't show again" dead for the first seconds (and the loader stuck if the video ended first)
+{ const re = /\/\* -+ Loader -+ \*\/\n\(\(\)=>\{const L=\$\('#loader'\)[\s\S]*?\n\}\)\(\);\n/;
+  if (!re.test(js)) throw new Error('intro loader block not found'); js = js.replace(re, ''); }
 // India map: the bundler can't follow a runtime import of a CDN URL, so India's outline ships as india.json
 // (Natural Earth 1:110m via world-atlas@2.0.2 countries-110m, feature id 356, coordinates rounded to 0.01Â°)
 { const re = /import\('https:\/\/cdn\.jsdelivr\.net\/npm\/topojson-client[^']*'\)\.then\(async topo=>\{\s*const w=await \(await fetch\('[^']*countries-110m\.json'\)\)\.json\(\);\s*const f=topo\.feature\([^;]*;/;

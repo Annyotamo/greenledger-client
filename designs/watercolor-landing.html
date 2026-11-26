@@ -52,6 +52,9 @@ section{position:relative;padding:var(--sec) 0}
 /* reveal (MotionInView: opacity 0→1, y 18→0, .65s, ease .22,1,.36,1) */
 .reveal{opacity:0;transform:translateY(18px);transition:opacity .65s cubic-bezier(.22,1,.36,1),transform .65s cubic-bezier(.22,1,.36,1)}
 .reveal.in{opacity:1;transform:none}
+/* performance: a section well out of view holds every CSS animation inside it (the script adds .zz-off), so off-screen loops
+   (marquee, ticker, photo drift, scene loops, the Platform autoplay timer) stop costing frames until you scroll back */
+.zz-off,.zz-off *,.zz-off *::before,.zz-off *::after{animation-play-state:paused!important}
 .swap{animation:swapIn .45s cubic-bezier(.16,1,.3,1)}
 @keyframes swapIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
 
@@ -577,7 +580,54 @@ body.bg-i .ticker .tcard,body.bg-j .ticker .tcard{background:rgba(251,248,241,.7
 .frame .bar span{width:10px;height:10px;border-radius:50%;filter:url(#watercolor-sm)}
 .frame video{width:100%;aspect-ratio:16/10;object-fit:cover}
 
-/* ================= BRSR: the Principle 6 sheet GreenLedger compiles, one per module ================= */
+/* ================= SOLUTIONS: CBAM, BRSR and GHG Accounting, each with its own page =================
+   Three photo panels side by side. The chosen one (hover, click or focus) opens wide and lifts a paper card with what the
+   solution covers; the others stay as slim photographs carrying their names. The section field leans to its colour. */
+#solutions .sx-bg{background:#eeeadf}
+#solutions>.wrap{position:relative;z-index:1}
+.sol-head{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,.6fr);gap:48px;align-items:end;margin-bottom:var(--head-gap)}
+.sol-head h2{max-width:22ch}
+.sol-head p{color:var(--ink-soft);max-width:40ch;font-size:1.02rem;text-wrap:pretty}
+.sb2{display:flex;gap:12px;height:min(76vh,620px)}
+.sb2-p{position:relative;flex:1 1 0;min-width:0;border-radius:20px;overflow:hidden;background:#26345a;transition:flex-grow .9s cubic-bezier(.22,1,.36,1)}
+.sb2-p.on{flex-grow:3.4}
+.sb2-p>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.06);transition:transform 1.6s cubic-bezier(.22,1,.36,1)}
+.sb2-p.on>img{transform:none}
+.sb2-p:not(.on):hover>img{transform:scale(1.03)}
+/* neutral scrim under the name only */
+.sb2-p::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,20,18,0) 50%,rgba(14,20,18,.6));pointer-events:none;transition:opacity .6s cubic-bezier(.22,1,.36,1)}
+.sb2-p.on::after{opacity:.3}
+.sb2-open{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:6px;padding:24px;text-align:left;color:#fbf8f1;cursor:pointer;transition:opacity .4s cubic-bezier(.22,1,.36,1)}
+.sb2-open b{font:400 clamp(1.4rem,1.9vw,1.8rem)/1.05 Fraunces,serif;letter-spacing:-.02em;text-wrap:balance}
+.sb2-open small{font-size:.88rem;line-height:1.35;opacity:.88;text-wrap:balance}
+/* the solution's colour as a dot that grows into a plus: this panel opens */
+.sb2-open::before{content:"+";position:absolute;top:20px;right:20px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+  font:300 22px/1 Inter,sans-serif;color:#fbf8f1;background:color-mix(in srgb,var(--c) 70%,rgba(14,20,18,.4));transition:transform .5s cubic-bezier(.3,1.6,.5,1)}
+.sb2-p:not(.on):hover .sb2-open::before{transform:scale(1.12) rotate(90deg)}
+.sb2-p.on .sb2-open{opacity:0;pointer-events:none}
+.sb2-open:focus-visible{outline:2px solid #fbf8f1;outline-offset:-6px;border-radius:20px}
+.sb2-card{position:absolute;left:16px;bottom:16px;z-index:3;width:min(500px,calc(100% - 32px));padding:26px 28px;border-radius:14px;background:rgba(251,248,241,.95);
+  box-shadow:0 24px 48px -30px rgba(14,20,18,.6);opacity:0;transform:translateY(16px);transition:opacity .35s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1)}
+.sb2-p.on .sb2-card{opacity:1;transform:none;transition:opacity .6s cubic-bezier(.22,1,.36,1) .35s,transform .8s cubic-bezier(.22,1,.36,1) .35s}
+.sb2-card h3{font-size:2rem}
+.sb2-card>small{display:block;margin-top:4px;font-size:.9rem;color:color-mix(in srgb,var(--c) 75%,#1f2a2a)}
+.sb2-card p{margin:12px 0 8px;font-size:.95rem;line-height:1.55;color:var(--ink-soft);text-wrap:pretty}
+.sol-pts{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 20px}
+.sol-pts li{display:flex;align-items:center;gap:12px;padding:6px 0;font-weight:500;font-size:.95rem;color:var(--ink)}
+.sol-pts li::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--c)}
+.sol-go{margin-top:16px}
+.sol-go svg{width:16px;height:16px;transition:transform .5s cubic-bezier(.22,1,.36,1)}
+.sol-go:hover svg{transform:translateX(3px)}
+@media (max-width:900px){
+  .sol-head{grid-template-columns:1fr;gap:16px}
+  .sb2{flex-direction:column;height:auto}
+  .sb2-p{flex:none;height:116px;transition:height .8s cubic-bezier(.22,1,.36,1)}.sb2-p.on{height:560px}
+  .sb2-open{padding:20px}.sb2-open::before{top:50%;margin-top:-18px}
+}
+@media (max-width:560px){.sol-pts{grid-template-columns:1fr}.sb2-p.on{height:600px}.sb2-card{padding:22px 20px}}
+@media (prefers-reduced-motion:reduce){.sb2-p,.sb2-p>img,.sb2-card,.sb2-open{transition:none}}
+
+/* ================= BRSR Principle 6 sheet (used by the /brsr-reporting page in the app) ================= */
 #brsr .sx-bg{background:#eeeadf}
 #brsr>.wrap{position:relative;z-index:1}
 .br{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(32px,5vw,72px);align-items:start}
@@ -1032,7 +1082,7 @@ footer a:focus-visible{outline:2px solid #4b4f8f;outline-offset:3px;border-radiu
 <!-- ================= NAV ================= -->
 <nav class="top" aria-label="Main">
   <a class="glass logo" href="#"><img src="../assets/GLLogo.png" alt=""><span>GreenLedger</span></a>
-  <div class="glass links"><i class="ind" aria-hidden="true"></i><a href="#value">Platform</a><a href="#industries">Industries</a><div class="dd"><button class="dd-t" type="button" aria-expanded="false" aria-controls="ddSol" data-sec="#brsr">Solutions<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 3.5 3 3 3-3"/></svg></button><div class="dd-menu" id="ddSol"><a href="/cbam" style="--c:var(--indigo)"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span><b>CBAM</b><small>EU carbon border reporting</small></a><a href="#brsr" style="--c:var(--ochre)"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9zM9 13l2 2 4-4"/></svg></span><b>BRSR</b><small>SEBI sustainability disclosures</small></a><a href="/ghg-accounting" style="--c:var(--moss)"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.2 9.1 4.5 4.5 0 0 0 7 18z"/></svg></span><b>GHG Accounting</b><small>Scope 1, 2 and 3 inventory</small></a></div></div><a href="#insights">Insights</a><a href="#team">Team</a><a href="#pricing">Pricing</a></div>
+  <div class="glass links"><i class="ind" aria-hidden="true"></i><a href="#value">Platform</a><a href="#industries">Industries</a><div class="dd"><button class="dd-t" type="button" aria-expanded="false" aria-controls="ddSol" data-sec="#solutions">Solutions<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 3.5 3 3 3-3"/></svg></button><div class="dd-menu" id="ddSol"><a href="/cbam" style="--c:var(--indigo)"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span><b>CBAM</b><small>EU carbon border reporting</small></a><a href="/brsr-reporting" style="--c:var(--ochre)"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9zM9 13l2 2 4-4"/></svg></span><b>BRSR</b><small>SEBI sustainability disclosures</small></a><a href="/ghg-accounting" style="--c:var(--moss)"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.2 9.1 4.5 4.5 0 0 0 7 18z"/></svg></span><b>GHG Accounting</b><small>Scope 1, 2 and 3 inventory</small></a></div></div><a href="#insights">Insights</a><a href="#team">Team</a><a href="#pricing">Pricing</a></div>
   <div class="glass navbtns"><a class="login" href="#">Client login</a><a class="btn" href="#contact">Book demo</a></div>
 </nav>
 
@@ -1153,45 +1203,44 @@ footer a:focus-visible{outline:2px solid #4b4f8f;outline-offset:3px;border-radiu
   </div>
 </section>
 
-<!-- ================= BRSR ================= -->
-<section id="brsr" aria-labelledby="brTitle">
+<!-- ================= SOLUTIONS: CBAM, BRSR and GHG Accounting, each with its own page ================= -->
+<section id="solutions" aria-labelledby="solTitle">
   <div class="sx-bg" aria-hidden="true"></div>
-  <div class="wrap br">
-    <div class="br-head reveal">
-      <h2 id="brTitle">BRSR reporting, ready from the <em>plant floor</em></h2>
-      <p>Pre-configured Principle 6 matrices for SEBI's Business Responsibility and Sustainability Report. Energy, water, waste and air are compiled from the activity data your teams already record, with the supporting documents attached.</p>
-      <div class="br-tabs" role="tablist" aria-label="BRSR environmental modules">
-        <button class="br-tab" role="tab" id="brt-energy" aria-controls="brp-energy" aria-selected="true" style="--c:var(--ochre)"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 3 5 14h6l-1 7 8-11h-6l1-7z"/></svg></span><b>Energy</b><small>Renewable split, captive generation, intensity</small></button>
-        <button class="br-tab" role="tab" id="brt-water" aria-controls="brp-water" aria-selected="false" tabindex="-1" style="--c:var(--indigo)"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s-6 6.6-6 11a6 6 0 0 0 12 0c0-4.4-6-11-6-11z"/></svg></span><b>Water</b><small>Withdrawal by source, consumption, reuse</small></button>
-        <button class="br-tab" role="tab" id="brt-waste" aria-controls="brp-waste" aria-selected="false" tabindex="-1" style="--c:var(--clay)"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13M10 11v6M14 11v6"/></svg></span><b>Waste</b><small>Generated, recovered and disposed</small></button>
-        <button class="br-tab" role="tab" id="brt-air" aria-controls="brp-air" aria-selected="false" tabindex="-1" style="--c:var(--moss)"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h11a3 3 0 1 0-3-3M3 15h15a3 3 0 1 1-3 3M3 12h7"/></svg></span><b>Air</b><small>PM, SOx, NOx, CO and VOCs</small></button>
-      </div>
+  <div class="wrap">
+    <div class="sol-head reveal">
+      <h2 id="solTitle">CBAM, BRSR and GHG accounting on <em>one platform</em></h2>
+      <p>Each is compiled from the activity data your teams already record, with the supporting documents attached.</p>
     </div>
-    <div class="br-sheets reveal">
-      <article class="br-sheet" role="tabpanel" id="brp-energy" aria-labelledby="brt-energy" style="--c:var(--ochre)">
-        <div class="br-sh"><h3>Energy</h3><span>Principle 6 · Environment</span></div>
-        <div class="br-g"><h4>Renewable sources</h4><div class="br-row">Electricity consumption<span class="u">GJ</span></div><div class="br-row">Fuel consumption<span class="u">GJ</span></div><div class="br-row">Other renewable sources<span class="u">GJ</span></div></div>
-        <div class="br-g"><h4>Non-renewable sources</h4><div class="br-row">Grid electricity<span class="u">GJ</span></div><div class="br-row">Fuel consumption<span class="u">GJ</span></div></div>
-        <div class="br-g"><h4>Totals</h4><div class="br-row">Captive generation<span class="u">GJ</span></div><div class="br-row">Total energy consumed<span class="u">GJ</span></div><div class="br-row">Energy intensity per rupee of turnover<span class="u">GJ / ₹</span></div></div>
-        <p class="br-foot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5 12.5 19a5 5 0 0 1-7-7l7.5-7.5a3.3 3.3 0 0 1 4.7 4.7l-7.4 7.4a1.7 1.7 0 0 1-2.4-2.4L14.5 7.5"/></svg>Supporting documents travel with every figure into the report.</p>
+    <div class="sb2 reveal">
+      <article class="sb2-p on" style="--c:var(--indigo)">
+        <img src="../assets/jrf-koki-104-1552.jpg" alt="A container freight train running through a forested valley" loading="lazy">
+        <button class="sb2-open" type="button" aria-expanded="true" aria-controls="sb2-cbam"><b>CBAM</b><small>EU carbon border reporting</small></button>
+        <div class="sb2-card" id="sb2-cbam">
+          <h3>CBAM</h3><small>EU carbon border reporting</small>
+          <p>Installation-level embedded-emissions data for your EU buyers, verified and audit-ready, so your shipments aren't priced on punitive default values.</p>
+          <ul class="sol-pts"><li>Data ingestion</li><li>Emissions logic</li><li>Third-party audit</li><li>Share with buyers</li></ul>
+          <a class="btn sol-go" href="/cbam">Open CBAM<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+        </div>
       </article>
-      <article class="br-sheet" role="tabpanel" id="brp-water" aria-labelledby="brt-water" style="--c:var(--indigo)" hidden>
-        <div class="br-sh"><h3>Water</h3><span>Principle 6 · Environment</span></div>
-        <div class="br-g"><h4>Withdrawal by source</h4><div class="br-row">Surface water<span class="u">kL</span></div><div class="br-row">Groundwater<span class="u">kL</span></div><div class="br-row">Seawater or desalinated water<span class="u">kL</span></div><div class="br-row">Third-party (municipal) water<span class="u">kL</span></div></div>
-        <div class="br-g"><h4>Use</h4><div class="br-row">Total water consumption<span class="u">kL</span></div><div class="br-row">Water recycled and reused<span class="u">kL</span></div></div>
-        <p class="br-foot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5 12.5 19a5 5 0 0 1-7-7l7.5-7.5a3.3 3.3 0 0 1 4.7 4.7l-7.4 7.4a1.7 1.7 0 0 1-2.4-2.4L14.5 7.5"/></svg>Supporting documents travel with every figure into the report.</p>
+      <article class="sb2-p" style="--c:var(--ochre)">
+        <img src="../assets/anchor-pylon-of-high-voltage-overhead-power.jpg" alt="High-voltage transmission pylons carrying power lines across a field" loading="lazy">
+        <button class="sb2-open" type="button" aria-expanded="false" aria-controls="sb2-brsr"><b>BRSR</b><small>SEBI sustainability disclosures</small></button>
+        <div class="sb2-card" id="sb2-brsr" inert>
+          <h3>BRSR</h3><small>SEBI sustainability disclosures</small>
+          <p>Pre-configured Principle 6 matrices for SEBI's Business Responsibility and Sustainability Report, compiled from the activity data your teams already record.</p>
+          <ul class="sol-pts"><li>Energy</li><li>Water</li><li>Waste</li><li>Air</li></ul>
+          <a class="btn sol-go" href="/brsr-reporting">Open BRSR<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+        </div>
       </article>
-      <article class="br-sheet" role="tabpanel" id="brp-waste" aria-labelledby="brt-waste" style="--c:var(--clay)" hidden>
-        <div class="br-sh"><h3>Waste</h3><span>Principle 6 · Environment</span></div>
-        <div class="br-g"><h4>Generated</h4><div class="br-row">Hazardous waste<span class="u">t</span></div><div class="br-row">Non-hazardous waste<span class="u">t</span></div></div>
-        <div class="br-g"><h4>Recovered</h4><div class="br-row">Recycled<span class="u">t</span></div><div class="br-row">Re-used<span class="u">t</span></div><div class="br-row">Other recovery operations<span class="u">t</span></div></div>
-        <div class="br-g"><h4>Disposed</h4><div class="br-row">Incineration<span class="u">t</span></div><div class="br-row">Landfilling<span class="u">t</span></div></div>
-        <p class="br-foot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5 12.5 19a5 5 0 0 1-7-7l7.5-7.5a3.3 3.3 0 0 1 4.7 4.7l-7.4 7.4a1.7 1.7 0 0 1-2.4-2.4L14.5 7.5"/></svg>Supporting documents travel with every figure into the report.</p>
-      </article>
-      <article class="br-sheet" role="tabpanel" id="brp-air" aria-labelledby="brt-air" style="--c:var(--moss)" hidden>
-        <div class="br-sh"><h3>Air</h3><span>Principle 6 · Environment</span></div>
-        <div class="br-g"><h4>Emissions other than GHG</h4><div class="br-row">Particulate matter (PM)<span class="u">mg/Nm³</span></div><div class="br-row">Sulphur oxides (SOx)<span class="u">mg/Nm³</span></div><div class="br-row">Nitrogen oxides (NOx)<span class="u">mg/Nm³</span></div><div class="br-row">Carbon monoxide (CO)<span class="u">mg/Nm³</span></div><div class="br-row">Volatile organic compounds (VOCs)<span class="u">mg/Nm³</span></div></div>
-        <p class="br-foot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5 12.5 19a5 5 0 0 1-7-7l7.5-7.5a3.3 3.3 0 0 1 4.7 4.7l-7.4 7.4a1.7 1.7 0 0 1-2.4-2.4L14.5 7.5"/></svg>Supporting documents travel with every figure into the report.</p>
+      <article class="sb2-p" style="--c:var(--moss)">
+        <img src="../assets/boiler-house.jpg" alt="A boiler house with two red-and-white chimneys venting steam" loading="lazy">
+        <button class="sb2-open" type="button" aria-expanded="false" aria-controls="sb2-ghg"><b>GHG Accounting</b><small>Scope 1, 2 and 3 inventory</small></button>
+        <div class="sb2-card" id="sb2-ghg" inert>
+          <h3>GHG Accounting</h3><small>Scope 1, 2 and 3 inventory</small>
+          <p>Audit-ready accounting under the GHG Protocol Corporate and Scope 3 Standards: direct combustion and process emissions, purchased electricity, heat and steam, and the full value chain.</p>
+          <ul class="sol-pts"><li>Scope 1 · Direct</li><li>Scope 2 · Indirect electricity</li><li>Scope 3 · All 15 categories</li></ul>
+          <a class="btn sol-go" href="/ghg-accounting">Open GHG Accounting<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+        </div>
       </article>
     </div>
   </div>
@@ -1291,7 +1340,7 @@ footer a:focus-visible{outline:2px solid #4b4f8f;outline-offset:3px;border-radiu
         <p class="f-lede f-fade" style="--i:1">ESG reporting, carbon accounting, and supply chain traceability on one platform designed for audit ready enterprises and consumer-trusted brands.</p>
       </div>
       <div class="f-body">
-        <nav class="f-nav f-fade" style="--i:2" aria-label="Footer"><a href="/cbam">CBAM Compliance</a><a href="/ghg-accounting">GHG Accounting</a><a href="#brsr">BRSR Reporting</a><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Security</a><a href="#">Cookie Preferences</a><a href="#contact">Contact</a></nav>
+        <nav class="f-nav f-fade" style="--i:2" aria-label="Footer"><a href="/cbam">CBAM Compliance</a><a href="/ghg-accounting">GHG Accounting</a><a href="/brsr-reporting">BRSR Reporting</a><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Security</a><a href="#">Cookie Preferences</a><a href="#contact">Contact</a></nav>
         <div class="f-right">
           <div class="f-blk f-fade" id="contact" style="--i:3;scroll-margin-top:110px"><h4>Connect &amp; Inquiries</h4><p>Have questions or need enterprise onboarding? Reach out to our advisory team directly.</p>
             <div class="f-reach"><a href="mailto:sayan@redswitchglobal.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>sayan@redswitchglobal.com</a><a href="tel:+919831076943"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>+91 98310 76943</a></div></div>
@@ -1477,7 +1526,13 @@ function vpRender(){const f=VP[vpI],st=$('#vp'),old=st.querySelector('.pf-scene'
 
   $('#vpTabs').innerHTML=VP.map((x,i)=>`<button class="pf-item ${i===vpI?'on':''}" data-i="${i}"><span class="n">0${i+1}</span><span class="ic" data-ic="${i}" aria-hidden="true"></span><span class="l">${x.b}</span><span class="ar">→</span><i></i></button>`).join('');
   mountIcons();
-  clearTimeout(vpT);vpT=setTimeout(()=>{vpI=(vpI+1)%VP.length;vpRender()},6000);}
+  // the tour only advances while the section is on screen (performance). Off screen it waits; back on screen the countdown and
+  // the tab's progress bar restart together, so the bar is always full when the tab changes
+  clearTimeout(vpT);let held=false;
+  const adv=()=>{if($('#value').classList.contains('zz-off')||document.hidden){held=true;vpT=setTimeout(adv,500);return}
+    if(held){held=false;const bar=$('#vpTabs .pf-item.on i');if(bar){bar.style.animation='none';void bar.offsetWidth;bar.style.animation=''}vpT=setTimeout(adv,6000);return}
+    vpI=(vpI+1)%VP.length;vpRender()};
+  vpT=setTimeout(adv,6000);}
 $('#vpTabs').onclick=e=>{const b=e.target.closest('.pf-item');if(b){vpI=+b.dataset.i;vpRender()}};
 vpRender();
 {const q=new URLSearchParams(location.search).get('vp');if(q!==null){vpI=+q;vpRender();setTimeout(()=>{document.querySelector('#value .pf').scrollIntoView({block:'center',behavior:'instant'});document.querySelectorAll('.reveal').forEach(e=>e.classList.add('in'))},50)}} // review hook: ?vp=N opens scene N
@@ -1965,7 +2020,8 @@ function pixelCard(host,opt){
         for(const u of S.pulses){const bd=(Math.hypot(x-u.x,y-u.y)-u.r)/26,wv=Math.exp(-bd*bd)*u.p;s*=1+wv*1.4;al=Math.min(1,al+wv*.5)}
         if(s<=.05)continue;ctx.globalAlpha=al;ctx.fillRect(x-s/2,y-s/2,s,s)}}
     ctx.globalAlpha=1;return sum};
-  const frame=now=>{S.raf=0;const dt=S.last?Math.min(.05,(now-S.last)/1000):1/60;S.last=now;S.dt=dt;S.t+=dt;build();
+  const frame=now=>{S.raf=0;if(S.last&&now-S.last<31&&S.vis){S.raf=requestAnimationFrame(frame);return} // 30 fps: about 8,000 squares per card
+    const dt=S.last?Math.min(.05,(now-S.last)/1000):1/60;S.last=now;S.dt=dt;S.t+=dt;
     if(S.intro>=0&&S.t>=S.intro){S.intro=-1;if(!S.act){set(true);S.rel=S.t+o.revealDuration/1000+.7}}
     if(S.rel>=0&&S.t>=S.rel&&!S.hov){S.rel=-1;set(false)}
     const want=S.hov&&!reduce?1:0;S.sp+=(want-S.sp)*(1-Math.exp(-(want?6:3)*dt));
@@ -2037,6 +2093,7 @@ const SX_PAL={ // [ground, colour 1, colour 2, colour 3] as 0-1 RGB from the pag
  team:[[.925,.937,.898],[.722,.812,.71],[.89,.725,.651],[.765,.831,.902]],       // paper · sage · clay · sky
  solutions:[[.937,.906,.847],[.784,.451,.353],[.851,.643,.255],[.31,.427,.604]], // paper · Scope 1 clay · Scope 2 ochre · Scope 3 indigo
  brsr:[[.933,.918,.875],[.918,.839,.678],[.788,.847,.902],[.765,.831,.776]]};     // paper · energy sand · water sky · air sage
+SX_PAL.solutions=[[.937,.918,.875],[.31,.427,.604],[.851,.643,.255],[.247,.42,.333]]; // paper · CBAM indigo · BRSR ochre · GHG moss
 function sxField(sec,mode){
   const host=sec&&sec.querySelector('.sx-bg');if(!host)return;
   const cv=document.createElement('canvas');cv.className='sx-gl';host.prepend(cv);
@@ -2050,33 +2107,34 @@ function sxField(sec,mode){
   const wc=[1,1,1],wt=[1,1,1]; // per-plume emphasis (Solutions): eased toward the selected scope
   const pal=SX_PAL[sec.id];['C0','C1','C2','C3'].forEach((k,i)=>gl.uniform3fv(U[k],pal[i]));gl.uniform1f(U.M,mode);
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let vis=false,raf=0,last=0,T=8,B=0,px=.5,py=.5,tx=.5,ty=.5,sy=scrollY;
-  const frame=now=>{raf=0;const dt=last?Math.min(.05,(now-last)/1000):0;last=now;if(!reduce)T+=dt;B*=.965;
+  let vis=false,raf=0,last=0,T=8,B=0,px=.5,py=.5,tx=.5,ty=.5,sy=scrollY,FW=Math.max(1,Math.round(host.clientWidth*.5)),FH=Math.max(1,Math.round(host.clientHeight*.5)),shown=false;
+  const frame=now=>{raf=0;if(last&&now-last<31&&vis&&!document.hidden){raf=requestAnimationFrame(frame);return} // 30 fps
+    const dt=last?Math.min(.05,(now-last)/1000):0;last=now;if(!reduce)T+=dt;B*=.965;
+    if(stir){stir=false;const y=scrollY;T+=Math.min(Math.abs(y-sy),240)*.004;sy=y}
     px+=(tx-px)*.035;py+=(ty-py)*.035;
     let moving=false;for(let i=0;i<3;i++){wc[i]+=(wt[i]-wc[i])*(reduce?1:.04);if(Math.abs(wt[i]-wc[i])>.002)moving=true}
     // soft fields render at half resolution: no visible difference, a quarter of the work
-    const w=Math.max(1,Math.round(host.clientWidth*.5)),h=Math.max(1,Math.round(host.clientHeight*.5));
+    const w=FW,h=FH;
     if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;gl.viewport(0,0,w,h)}
     gl.uniform2f(U.R,w,h);gl.uniform2f(U.P,px,py);gl.uniform1f(U.T,T);gl.uniform1f(U.B,B);gl.uniform3f(U.W,wc[0],wc[1],wc[2]);gl.drawArrays(gl.TRIANGLES,0,3);
-    cv.classList.add('on');
+    if(!shown){shown=true;cv.classList.add('on')}
     if((!reduce||moving)&&vis&&!document.hidden)raf=requestAnimationFrame(frame);else last=0};
   const kick=()=>{if(!raf)raf=requestAnimationFrame(frame)};
   new IntersectionObserver(([e])=>{vis=e.isIntersecting;kick()}).observe(sec);
-  document.addEventListener('visibilitychange',kick);new ResizeObserver(kick).observe(host);
+  document.addEventListener('visibilitychange',kick);
+  new ResizeObserver(([e])=>{FW=Math.max(1,Math.round(e.contentRect.width*.5));FH=Math.max(1,Math.round(e.contentRect.height*.5));kick()}).observe(host);
   sec.addEventListener('pointermove',e=>{const b=host.getBoundingClientRect();tx=(e.clientX-b.left)/b.width;ty=1-(e.clientY-b.top)/b.height});
   sec.addEventListener('pointerleave',()=>{tx=.5;ty=.5});
-  addEventListener('scroll',()=>{const d=Math.abs(scrollY-sy);sy=scrollY;if(vis&&!reduce)T+=Math.min(d,120)*.004},{passive:true}); // scrolling stirs it, like turning a page
+  let stir=false;addEventListener('scroll',()=>{if(vis&&!reduce)stir=true},{passive:true}); // scrolling stirs it, like turning a page
   sec.addEventListener('sx:breath',()=>{B=1;kick()});
   kick();
   return{focus(i){for(let k=0;k<3;k++)wt[k]=k===i?1:.25;kick()}}}
-sxField($('#insights'),0);sxField($('#team'),1);sxField($('#brsr'),1);
-/* ---------- BRSR: module tabs switch the Principle 6 sheet (click, arrow keys) ---------- */
-{const sec=$('#brsr'),list=sec&&sec.querySelector('[role=tablist]');
- if(list){const tabs=[...list.querySelectorAll('[role=tab]')],panes=tabs.map(t=>document.getElementById(t.getAttribute('aria-controls')));
-  const set=(i,focus)=>{tabs.forEach((t,k)=>{const on=k===i;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1;panes[k].hidden=!on;if(on&&focus)t.focus()})};
-  list.addEventListener('click',e=>{const t=e.target.closest('[role=tab]');if(t)set(tabs.indexOf(t))});
-  list.addEventListener('keydown',e=>{const d={ArrowDown:1,ArrowRight:1,ArrowUp:-1,ArrowLeft:-1}[e.key];if(!d)return;e.preventDefault();
-    const i=tabs.findIndex(t=>t.getAttribute('aria-selected')==='true');set((i+d+tabs.length)%tabs.length,true)})}}
+sxField($('#insights'),0);sxField($('#team'),1);
+/* ---------- Solutions: one photo panel open at a time (hover on desktop, click or focus everywhere); the field leans to its colour ---------- */
+{const sec=$('#solutions'),field=sxField(sec,1),ps=[...sec.querySelectorAll('.sb2-p')],hover=matchMedia('(hover:hover)').matches;
+ const open=i=>{ps.forEach((p,k)=>{const on=k===i;p.classList.toggle('on',on);p.querySelector('.sb2-open').setAttribute('aria-expanded',on);p.querySelector('.sb2-card').inert=!on});field&&field.focus(i)};
+ ps.forEach((p,i)=>{const b=p.querySelector('.sb2-open');b.addEventListener('click',()=>open(i));b.addEventListener('focus',()=>open(i));if(hover)p.addEventListener('mouseenter',()=>open(i))});
+ open(0)}
 
 
 /* ---------- Pricing field: each edition's card stands on its own step, rising short → middle → tall (up to 5 facilities →
@@ -2399,14 +2457,16 @@ const ACC=[
  dd.addEventListener('keydown',e=>{if(e.key==='Escape'){ddSet(false);ddT.focus()}});
  dd.querySelectorAll('.dd-menu a').forEach(a=>a.addEventListener('click',()=>ddSet(false)));
  document.addEventListener('click',e=>{if(!dd.contains(e.target))ddSet(false)});
- const spy=()=>{nv.classList.toggle('scrolled',scrollY>24);
+ let sq=0,wasSc=null;
+ const spy=()=>{sq=0;const sc=scrollY>24;if(sc!==wasSc){wasSc=sc;nv.classList.toggle('scrolled',sc)}
    // active = last section whose top has passed 40% of the viewport; none while still in the hero
    const line=innerHeight*.4;let act=null;secs.forEach((s,i)=>{if(s&&s.getBoundingClientRect().top<line&&s.getBoundingClientRect().bottom>0)act=links[i]});
-   if(act!==cur){links.forEach(l=>l.classList.toggle('active',l===act));cur=act}place()};
- addEventListener('scroll',spy,{passive:true});addEventListener('resize',place);
+   if(act!==cur){links.forEach(l=>l.classList.toggle('active',l===act));cur=act;place()}};
+ // performance: at most once per frame, not once per scroll event
+ addEventListener('scroll',()=>{if(!sq)sq=requestAnimationFrame(spy)},{passive:true});addEventListener('resize',place);
  // padding animates during contraction, so keep the pill glued to its link while it transitions
  nv.addEventListener('transitionend',place);box.querySelectorAll('a').forEach(a=>a.addEventListener('transitionend',place));
- spy()}
+ spy();place()}
 
 
 /* ---------- Platform band: pointer leans the colour pools ---------- */
@@ -2419,15 +2479,18 @@ const ACC=[
 /* ---------- Scroll reveal ---------- */
 {const row=document.querySelector('.sup-row');if(row&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const cs=[...row.children];let k=-1,hold=false;
   row.addEventListener('pointerenter',()=>{hold=true;cs.forEach(c=>c.classList.remove('lit'))});row.addEventListener('pointerleave',()=>hold=false);
-  setInterval(()=>{if(hold||document.hidden)return;cs.forEach(c=>c.classList.remove('lit'));k=(k+1)%cs.length;cs[k].classList.add('lit')},2800)}}
+  setInterval(()=>{if(hold||document.hidden||row.closest('.zz-off'))return;cs.forEach(c=>c.classList.remove('lit'));k=(k+1)%cs.length;cs[k].classList.add('lit')},2800)}}
 document.querySelectorAll('.sup-row a').forEach(a=>a.addEventListener('pointermove',e=>{const r=a.getBoundingClientRect();a.style.setProperty('--bx',((e.clientX-r.left)/r.width*100)+'%');a.style.setProperty('--by',((e.clientY-r.top)/r.height*100)+'%')}));
 {const hd=document.getElementById('fwBand');if(hd&&!matchMedia('(prefers-reduced-motion: reduce)').matches){let q=0;
-  const upd=()=>{q=0;const r=hd.getBoundingClientRect(),vh=innerHeight;hd.style.setProperty('--p',Math.min(1,Math.max(0,(vh*.95-r.top)/(vh*.55))).toFixed(3))};
+  let pv='';const upd=()=>{q=0;const r=hd.getBoundingClientRect(),vh=innerHeight,v=Math.min(1,Math.max(0,(vh*.95-r.top)/(vh*.55))).toFixed(3);if(v!==pv){pv=v;hd.style.setProperty('--p',v)}};
   addEventListener('scroll',()=>{if(!q)q=requestAnimationFrame(upd)},{passive:true});addEventListener('resize',upd);upd()}}
 {const f=document.getElementById('foot');if(f){
   const v=f.querySelector('video'),still=matchMedia('(prefers-reduced-motion: reduce)').matches;v.preload='metadata';
   new IntersectionObserver(([e])=>{if(e.isIntersecting){f.classList.add('in');if(!still)v.play().catch(()=>{})}else v.pause()},{threshold:0,rootMargin:"0px 0px -15% 0px"}).observe(f)}}
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15,rootMargin:'0px 0px -12% 0px'});
+/* performance: mark sections that are more than half a screen out of view (see .zz-off in the CSS) */
+{const off=new IntersectionObserver(es=>es.forEach(e=>e.target.classList.toggle('zz-off',!e.isIntersecting)),{rootMargin:'50% 0px'});
+ document.querySelectorAll('header.hero,body>section,section[id],footer').forEach(s=>off.observe(s))}
 document.querySelectorAll('.reveal,.reveal-stag').forEach(el=>io.observe(el));
 </script>
 </body>

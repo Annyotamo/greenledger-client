@@ -45,6 +45,9 @@
 /* reveal (MotionInView: opacity 0→1, y 18→0, .65s, ease .22,1,.36,1) */
 .wl .reveal{opacity:0;transform:translateY(18px);transition:opacity .65s cubic-bezier(.22,1,.36,1),transform .65s cubic-bezier(.22,1,.36,1)}
 .wl .reveal.in{opacity:1;transform:none}
+/* performance: a section well out of view holds every CSS animation inside it (the script adds .zz-off), so off-screen loops
+   (marquee, ticker, photo drift, scene loops, the Platform autoplay timer) stop costing frames until you scroll back */
+.wl .zz-off,.wl .zz-off *,.wl .zz-off *::before,.wl .zz-off *::after{animation-play-state:paused!important}
 .wl .swap{animation:swapIn .45s cubic-bezier(.16,1,.3,1)}
 @keyframes swapIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
 
@@ -520,7 +523,54 @@
 .wl .frame .bar span{width:10px;height:10px;border-radius:50%;filter:url(#watercolor-sm)}
 .wl .frame video{width:100%;aspect-ratio:16/10;object-fit:cover}
 
-/* ================= BRSR: the Principle 6 sheet GreenLedger compiles, one per module ================= */
+/* ================= SOLUTIONS: CBAM, BRSR and GHG Accounting, each with its own page =================
+   Three photo panels side by side. The chosen one (hover, click or focus) opens wide and lifts a paper card with what the
+   solution covers; the others stay as slim photographs carrying their names. The section field leans to its colour. */
+.wl #solutions .sx-bg{background:#eeeadf}
+.wl #solutions>.wrap{position:relative;z-index:1}
+.wl .sol-head{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,.6fr);gap:48px;align-items:end;margin-bottom:var(--head-gap)}
+.wl .sol-head h2{max-width:22ch}
+.wl .sol-head p{color:var(--ink-soft);max-width:40ch;font-size:1.02rem;text-wrap:pretty}
+.wl .sb2{display:flex;gap:12px;height:min(76vh,620px)}
+.wl .sb2-p{position:relative;flex:1 1 0;min-width:0;border-radius:20px;overflow:hidden;background:#26345a;transition:flex-grow .9s cubic-bezier(.22,1,.36,1)}
+.wl .sb2-p.on{flex-grow:3.4}
+.wl .sb2-p>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.06);transition:transform 1.6s cubic-bezier(.22,1,.36,1)}
+.wl .sb2-p.on>img{transform:none}
+.wl .sb2-p:not(.on):hover>img{transform:scale(1.03)}
+/* neutral scrim under the name only */
+.wl .sb2-p::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,20,18,0) 50%,rgba(14,20,18,.6));pointer-events:none;transition:opacity .6s cubic-bezier(.22,1,.36,1)}
+.wl .sb2-p.on::after{opacity:.3}
+.wl .sb2-open{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:6px;padding:24px;text-align:left;color:#fbf8f1;cursor:pointer;transition:opacity .4s cubic-bezier(.22,1,.36,1)}
+.wl .sb2-open b{font:400 clamp(1.4rem,1.9vw,1.8rem)/1.05 var(--font-fraunces),serif;letter-spacing:-.02em;text-wrap:balance}
+.wl .sb2-open small{font-size:.88rem;line-height:1.35;opacity:.88;text-wrap:balance}
+/* the solution's colour as a dot that grows into a plus: this panel opens */
+.wl .sb2-open::before{content:"+";position:absolute;top:20px;right:20px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+  font:300 22px/1 Inter,sans-serif;color:#fbf8f1;background:color-mix(in srgb,var(--c) 70%,rgba(14,20,18,.4));transition:transform .5s cubic-bezier(.3,1.6,.5,1)}
+.wl .sb2-p:not(.on):hover .sb2-open::before{transform:scale(1.12) rotate(90deg)}
+.wl .sb2-p.on .sb2-open{opacity:0;pointer-events:none}
+.wl .sb2-open:focus-visible{outline:2px solid #fbf8f1;outline-offset:-6px;border-radius:20px}
+.wl .sb2-card{position:absolute;left:16px;bottom:16px;z-index:3;width:min(500px,calc(100% - 32px));padding:26px 28px;border-radius:14px;background:rgba(251,248,241,.95);
+  box-shadow:0 24px 48px -30px rgba(14,20,18,.6);opacity:0;transform:translateY(16px);transition:opacity .35s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1)}
+.wl .sb2-p.on .sb2-card{opacity:1;transform:none;transition:opacity .6s cubic-bezier(.22,1,.36,1) .35s,transform .8s cubic-bezier(.22,1,.36,1) .35s}
+.wl .sb2-card h3{font-size:2rem}
+.wl .sb2-card>small{display:block;margin-top:4px;font-size:.9rem;color:color-mix(in srgb,var(--c) 75%,#1f2a2a)}
+.wl .sb2-card p{margin:12px 0 8px;font-size:.95rem;line-height:1.55;color:var(--ink-soft);text-wrap:pretty}
+.wl .sol-pts{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 20px}
+.wl .sol-pts li{display:flex;align-items:center;gap:12px;padding:6px 0;font-weight:500;font-size:.95rem;color:var(--ink)}
+.wl .sol-pts li::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--c)}
+.wl .sol-go{margin-top:16px}
+.wl .sol-go svg{width:16px;height:16px;transition:transform .5s cubic-bezier(.22,1,.36,1)}
+.wl .sol-go:hover svg{transform:translateX(3px)}
+@media (max-width:900px){
+  .wl .sol-head{grid-template-columns:1fr;gap:16px}
+  .wl .sb2{flex-direction:column;height:auto}
+  .wl .sb2-p{flex:none;height:116px;transition:height .8s cubic-bezier(.22,1,.36,1)}.wl .sb2-p.on{height:560px}
+  .wl .sb2-open{padding:20px}.wl .sb2-open::before{top:50%;margin-top:-18px}
+}
+@media (max-width:560px){.wl .sol-pts{grid-template-columns:1fr}.wl .sb2-p.on{height:600px}.wl .sb2-card{padding:22px 20px}}
+@media (prefers-reduced-motion:reduce){.wl .sb2-p,.wl .sb2-p>img,.wl .sb2-card,.wl .sb2-open{transition:none}}
+
+/* ================= BRSR Principle 6 sheet (used by the /brsr-reporting page in the app) ================= */
 .wl #brsr .sx-bg{background:#eeeadf}
 .wl #brsr>.wrap{position:relative;z-index:1}
 .wl .br{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(32px,5vw,72px);align-items:start}
@@ -931,5 +981,7 @@
 .wl .ring{box-shadow:none}
 /* Lenis drives the scroll while it runs (it adds .lenis to <html>); native smooth scrolling from globals.css would animate each of its frames again */
 html.lenis{scroll-behavior:auto!important}
+/* the intro covers the app-wide cookie banner (z 9999, later in the DOM) until it closes */
+.wl #loader{z-index:10000}
 /* explainer diagrams set font-family as an SVG attribute, which can't read next/font's variable */
 .wl :where(#cx) svg text{font-family:var(--font-inter),system-ui,sans-serif}

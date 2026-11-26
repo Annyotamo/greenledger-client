@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import Lenis from "lenis";
 import "lenis/dist/lenis.css";
-import { SiteNav, SiteFooter, fraunces, cssVars, navIcon } from "./SiteChrome";
-import { IMG, runtimeAsset } from "./assets";
+import { SiteNav, SiteFooter, fraunces, cssVars } from "./SiteChrome";
+import { IMG, SCOPE_PHOTO, runtimeAsset } from "./assets";
 import { createSandbox } from "./sandbox";
 import { run } from "./runtime";
 import INDIA from "./india.json";
@@ -15,65 +15,45 @@ import "./watercolor.css";
 // lottie-web reads `document` on import, so it can't load during the server render; fetch it as soon as this module runs in the browser
 const lottieReady = typeof window === "undefined" ? null : import("lottie-web").then((m) => m.default);
 
-const INSIGHT_HREF = "/insights/why-reliable-esg-reporting-requires-systems-not-prompts";
-
-/** BRSR section: the Principle 6 indicators GreenLedger compiles per module (mirrors designs/watercolor-landing.html). */
-const BRSR: { id: string; title: string; summary: string; color: string; icon: React.ReactNode; groups: [string, [string, string][]][] }[] = [
+/** Solutions section: one photo panel per solution, each linking to its own page (mirrors designs/watercolor-landing.html). */
+const SOLUTIONS = [
     {
-        id: "energy",
-        title: "Energy",
-        summary: "Renewable split, captive generation, intensity",
-        color: "var(--ochre)",
-        icon: <path d="M13 3 5 14h6l-1 7 8-11h-6l1-7z" />,
-        groups: [
-            ["Renewable sources", [["Electricity consumption", "GJ"], ["Fuel consumption", "GJ"], ["Other renewable sources", "GJ"]]],
-            ["Non-renewable sources", [["Grid electricity", "GJ"], ["Fuel consumption", "GJ"]]],
-            ["Totals", [["Captive generation", "GJ"], ["Total energy consumed", "GJ"], ["Energy intensity per rupee of turnover", "GJ / ₹"]]],
-        ],
-    },
-    {
-        id: "water",
-        title: "Water",
-        summary: "Withdrawal by source, consumption, reuse",
+        id: "cbam",
+        name: "CBAM",
+        note: "EU carbon border reporting",
         color: "var(--indigo)",
-        icon: <path d="M12 3s-6 6.6-6 11a6 6 0 0 0 12 0c0-4.4-6-11-6-11z" />,
-        groups: [
-            ["Withdrawal by source", [["Surface water", "kL"], ["Groundwater", "kL"], ["Seawater or desalinated water", "kL"], ["Third-party (municipal) water", "kL"]]],
-            ["Use", [["Total water consumption", "kL"], ["Water recycled and reused", "kL"]]],
-        ],
+        href: "/cbam",
+        img: SCOPE_PHOTO[3],
+        alt: "A container freight train running through a forested valley",
+        lede: "Installation-level embedded-emissions data for your EU buyers, verified and audit-ready, so your shipments aren't priced on punitive default values.",
+        points: ["Data ingestion", "Emissions logic", "Third-party audit", "Share with buyers"],
     },
     {
-        id: "waste",
-        title: "Waste",
-        summary: "Generated, recovered and disposed",
-        color: "var(--clay)",
-        icon: <path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13M10 11v6M14 11v6" />,
-        groups: [
-            ["Generated", [["Hazardous waste", "t"], ["Non-hazardous waste", "t"]]],
-            ["Recovered", [["Recycled", "t"], ["Re-used", "t"], ["Other recovery operations", "t"]]],
-            ["Disposed", [["Incineration", "t"], ["Landfilling", "t"]]],
-        ],
+        id: "brsr",
+        name: "BRSR",
+        note: "SEBI sustainability disclosures",
+        color: "var(--ochre)",
+        href: "/brsr-reporting",
+        img: SCOPE_PHOTO[2],
+        alt: "High-voltage transmission pylons carrying power lines across a field",
+        lede: "Pre-configured Principle 6 matrices for SEBI's Business Responsibility and Sustainability Report, compiled from the activity data your teams already record.",
+        points: ["Energy", "Water", "Waste", "Air"],
     },
     {
-        id: "air",
-        title: "Air",
-        summary: "PM, SOx, NOx, CO and VOCs",
+        id: "ghg",
+        name: "GHG Accounting",
+        note: "Scope 1, 2 and 3 inventory",
         color: "var(--moss)",
-        icon: <path d="M3 9h11a3 3 0 1 0-3-3M3 15h15a3 3 0 1 1-3 3M3 12h7" />,
-        groups: [
-            [
-                "Emissions other than GHG",
-                [
-                    ["Particulate matter (PM)", "mg/Nm³"],
-                    ["Sulphur oxides (SOx)", "mg/Nm³"],
-                    ["Nitrogen oxides (NOx)", "mg/Nm³"],
-                    ["Carbon monoxide (CO)", "mg/Nm³"],
-                    ["Volatile organic compounds (VOCs)", "mg/Nm³"],
-                ],
-            ],
-        ],
+        href: "/ghg-accounting",
+        img: SCOPE_PHOTO[1],
+        alt: "A boiler house with two red-and-white chimneys venting steam",
+        lede: "Audit-ready accounting under the GHG Protocol Corporate and Scope 3 Standards: direct combustion and process emissions, purchased electricity, heat and steam, and the full value chain.",
+        points: ["Scope 1 · Direct", "Scope 2 · Indirect electricity", "Scope 3 · All 15 categories"],
     },
 ];
+
+const INSIGHT_HREF = "/insights/why-reliable-esg-reporting-requires-systems-not-prompts";
+
 
 /* React StrictMode (dev) mounts, unmounts and remounts effects on the same DOM. The script can't be re-run on
    markup it has already transformed, so a cleanup is deferred one tick and cancelled if the remount follows.
@@ -84,16 +64,72 @@ const mounted: Mounted = (g.__wlMounted ??= new WeakMap());
 
 function start(root: HTMLElement) {
     const { env, dispose } = createSandbox(root);
-    // React doesn't emit the `muted` attribute in server HTML, so the browser blocks autoplay; start it here instead
-    const intro = root.querySelector<HTMLVideoElement>("#introVid");
-    if (intro) {
-        intro.muted = true;
-        intro.play().catch(() => {});
+    const html = document.documentElement;
+    let smooth: Lenis | null = null; // set once Lenis exists, so closing the intro can resume it
+    // Intro loader (the design's "Loader" block, which the port leaves out of runtime.js). It runs here at mount rather than inside
+    // run(), which waits for lottie, so close / Esc / "Don't show again" work from the first frame and a short video can't end unheard.
+    // The page underneath stays locked until it closes.
+    const loader = root.querySelector<HTMLElement>("#loader");
+    const intro = loader?.querySelector<HTMLVideoElement>("#introVid");
+    let introOpen = false;
+    if (loader && intro) {
+        const KEY = "gl_dont_show_intro_video";
+        let skip = false;
+        try {
+            skip = localStorage.getItem(KEY) === "true";
+        } catch {}
+        const close = () => {
+            if (!introOpen) return;
+            introOpen = false;
+            intro.pause();
+            loader.classList.add("hide");
+            html.style.overflow = "";
+            smooth?.start();
+            env.setTimeout(() => loader.remove(), 420);
+        };
+        if (location.search.includes("nointro")) loader.remove();
+        else {
+            introOpen = true;
+            html.style.overflow = "hidden";
+            if (skip) {
+                loader.classList.add("quick");
+                env.setTimeout(close, 450);
+            } else {
+                const box = loader.querySelector<HTMLInputElement>("#dontShow")!;
+                const prog = loader.querySelector<HTMLElement>("#introProg")!;
+                box.onchange = () => {
+                    try {
+                        if (box.checked) localStorage.setItem(KEY, "true");
+                        else localStorage.removeItem(KEY);
+                    } catch {}
+                };
+                loader.querySelector<HTMLElement>("#closeIntro")!.onclick = close;
+                intro.onended = intro.onerror = close;
+                intro.querySelector("source:last-of-type")!.addEventListener("error", close);
+                intro.ontimeupdate = () => {
+                    if (intro.duration) prog.style.width = `${(intro.currentTime / intro.duration) * 100}%`;
+                };
+                env.addEventListener("keydown", (e: Event) => {
+                    const { key } = e as KeyboardEvent;
+                    if (introOpen && (key === "Escape" || key === " ")) {
+                        e.preventDefault();
+                        close();
+                    }
+                });
+                // React doesn't emit the `muted` attribute in server HTML, so autoplay needs it set here; if the browser still
+                // refuses to autoplay, skip the intro rather than leave a frozen frame over the page
+                intro.muted = true;
+                intro.play().catch((e: DOMException) => e.name === "NotAllowedError" && close());
+                if (intro.ended || intro.error) close();
+            }
+        }
     }
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     // smooth scrolling for this page only; anchors routes the nav's #section links through it, and nested scroll areas
     // (pricing card backs) keep their own scroll. Reduced-motion visitors keep native scrolling.
     const lenis = reduced ? null : new Lenis({ anchors: true, allowNestedScroll: true });
+    smooth = lenis;
+    if (lenis && introOpen) lenis.stop();
     if (lenis) {
         // Lenis's autoRaf ticks every frame forever, which kept the page repainting at display rate (~38% main thread when idle).
         // Run frames only from a scroll input (wheel/touch, or a click that may start an anchor scroll) until Lenis settles.
@@ -124,6 +160,7 @@ function start(root: HTMLElement) {
     });
     return () => {
         stopped = true;
+        if (introOpen) html.style.overflow = ""; // leaving the page mid-intro must not leave the next page unscrollable
         lenis?.destroy();
         dispose();
         lottie?.destroy();
@@ -368,66 +405,39 @@ export default function WatercolorLanding() {
                 </div>
             </section>
 
-            <section id="brsr" aria-labelledby="brTitle">
+            <section id="solutions" aria-labelledby="solTitle">
                 <div className="sx-bg" aria-hidden="true"></div>
-                <div className="wrap br">
-                    <div className="br-head reveal">
-                        <h2 id="brTitle">
-                            BRSR reporting, ready from the <em>plant floor</em>
+                <div className="wrap">
+                    <div className="sol-head reveal">
+                        <h2 id="solTitle">
+                            CBAM, BRSR and GHG accounting on <em>one platform</em>
                         </h2>
-                        <p>
-                            Pre-configured Principle 6 matrices for SEBI&apos;s Business Responsibility and Sustainability Report. Energy, water, waste and air are compiled from the
-                            activity data your teams already record, with the supporting documents attached.
-                        </p>
-                        <div className="br-tabs" role="tablist" aria-label="BRSR environmental modules">
-                            {BRSR.map((m, i) => (
-                                <button
-                                    key={m.id}
-                                    className="br-tab"
-                                    role="tab"
-                                    id={`brt-${m.id}`}
-                                    aria-controls={`brp-${m.id}`}
-                                    aria-selected={i === 0}
-                                    tabIndex={i === 0 ? undefined : -1}
-                                    style={cssVars({ "--c": m.color })}>
-                                    <span className="ic">{navIcon(m.icon)}</span>
-                                    <b>{m.title}</b>
-                                    <small>{m.summary}</small>
-                                </button>
-                            ))}
-                        </div>
+                        <p>Each is compiled from the activity data your teams already record, with the supporting documents attached.</p>
                     </div>
-                    <div className="br-sheets reveal">
-                        {BRSR.map((m, i) => (
-                            <article
-                                key={m.id}
-                                className="br-sheet"
-                                role="tabpanel"
-                                id={`brp-${m.id}`}
-                                aria-labelledby={`brt-${m.id}`}
-                                style={cssVars({ "--c": m.color })}
-                                hidden={i !== 0}>
-                                <div className="br-sh">
-                                    <h3>{m.title}</h3>
-                                    <span>Principle 6 · Environment</span>
-                                </div>
-                                {m.groups.map(([label, rows]) => (
-                                    <div className="br-g" key={label}>
-                                        <h4>{label}</h4>
-                                        {rows.map(([name, unit]) => (
-                                            <div className="br-row" key={name}>
-                                                {name}
-                                                <span className="u">{unit}</span>
-                                            </div>
+                    <div className="sb2 reveal">
+                        {SOLUTIONS.map((x, i) => (
+                            <article key={x.id} className={i ? "sb2-p" : "sb2-p on"} style={cssVars({ "--c": x.color })}>
+                                <img src={x.img} alt={x.alt} loading="lazy" />
+                                <button className="sb2-open" type="button" aria-expanded={!i} aria-controls={`sb2-${x.id}`}>
+                                    <b>{x.name}</b>
+                                    <small>{x.note}</small>
+                                </button>
+                                <div className="sb2-card" id={`sb2-${x.id}`} inert={i > 0}>
+                                    <h3>{x.name}</h3>
+                                    <small>{x.note}</small>
+                                    <p>{x.lede}</p>
+                                    <ul className="sol-pts">
+                                        {x.points.map((t) => (
+                                            <li key={t}>{t}</li>
                                         ))}
-                                    </div>
-                                ))}
-                                <p className="br-foot">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                        <path d="M20 11.5 12.5 19a5 5 0 0 1-7-7l7.5-7.5a3.3 3.3 0 0 1 4.7 4.7l-7.4 7.4a1.7 1.7 0 0 1-2.4-2.4L14.5 7.5" />
-                                    </svg>
-                                    Supporting documents travel with every figure into the report.
-                                </p>
+                                    </ul>
+                                    <Link className="btn sol-go" href={x.href}>
+                                        Open {x.name}
+                                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                            <path d="M3 8h10M9 4l4 4-4 4" />
+                                        </svg>
+                                    </Link>
+                                </div>
                             </article>
                         ))}
                     </div>

@@ -17,6 +17,7 @@ import {
     MAIN_NAV,
     SCOPE_NAV_CHILDREN,
     BRSR_NAV_CHILDREN,
+    EIA_NAV_CHILDREN,
 } from "./sidebar-nav";
 
 const SIDEBAR_EXPANDED = 256;
@@ -46,14 +47,29 @@ export function Sidebar() {
     const { data: user } = useCurrentUser();
 
     const isActivitiesActive = Boolean(
-        pathname && (pathname === "/activities" || pathname.startsWith("/activities/")),
+        pathname && (
+            pathname === "/activities" ||
+            pathname.startsWith("/activities/") ||
+            pathname === "/scope-3" ||
+            pathname.startsWith("/scope-3/")
+        ),
     );
     const isBrsrActive = Boolean(
-        pathname && (pathname === "/brsr" || pathname.startsWith("/brsr/")),
+        pathname && (
+            pathname === "/brsr" ||
+            (pathname.startsWith("/brsr/") && !pathname.startsWith("/brsr/air"))
+        ),
+    );
+    const isEiaActive = Boolean(
+        pathname && (
+            pathname === "/brsr/air" ||
+            pathname.startsWith("/brsr/air/")
+        ),
     );
 
     const [activitiesOpen, setActivitiesOpen] = useState(true);
-    const [brsrOpen, setBrsrOpen] = useState(true);
+    const [brsrOpen, setBrsrOpen] = useState(false);
+    const [eiaOpen, setEiaOpen] = useState(false);
 
     const [prevPathname, setPrevPathname] = useState(pathname);
     if (pathname !== prevPathname) {
@@ -64,15 +80,23 @@ export function Sidebar() {
         if (isBrsrActive) {
             setBrsrOpen(true);
         }
+        if (isEiaActive) {
+            setEiaOpen(true);
+        }
     }
 
     const navManifest = user?.ui_navigation;
 
     const beforeActivities = MAIN_NAV.filter(
-        (i) => (i.label === "Dashboard" || i.label === "EU CBAM" || i.label === "Leather Module" || i.label === "Risk Assessment" || i.label === "Leather (LWG)") && isNavVisible(i, navManifest),
+        (i) => (
+            i.label === "Dashboard" ||
+            i.label === "EU CBAM" ||
+            i.label === "Leather" ||
+            i.label === "Leather Module" ||
+            i.label === "Risk Assessment" ||
+            i.label === "Leather (LWG)"
+        ) && isNavVisible(i, navManifest),
     );
-    const valueChainItem = MAIN_NAV.find((i) => i.label === "Value Chain");
-    const showValueChain = valueChainItem ? isNavVisible(valueChainItem, navManifest) : false;
 
     const afterActivities = MAIN_NAV.filter(
         (i) => i.label === "Team Members" && isNavVisible(i, navManifest),
@@ -80,6 +104,9 @@ export function Sidebar() {
 
     const visibleScopeChildren = SCOPE_NAV_CHILDREN.filter((child) => {
         if (!navManifest) return true;
+        if (child.featureKey === "scope_3_cat1") {
+            return !!navManifest.scope_3;
+        }
         return navManifest[child.featureKey] !== false;
     });
     const showActivitiesGroup = visibleScopeChildren.length > 0;
@@ -89,6 +116,12 @@ export function Sidebar() {
         return navManifest[child.featureKey] !== false;
     });
     const showBrsrGroup = visibleBrsrChildren.length > 0;
+
+    const visibleEiaChildren = EIA_NAV_CHILDREN.filter((child) => {
+        if (!navManifest) return true;
+        return navManifest[child.featureKey] !== false;
+    });
+    const showEiaGroup = visibleEiaChildren.length > 0;
 
     const visibleBottomNav = BOTTOM_NAV.filter((item) => isNavVisible(item, navManifest));
 
@@ -223,10 +256,6 @@ export function Sidebar() {
                         </div>
                     )}
 
-                    {valueChainItem && showValueChain && (
-                        <SidebarLink key={valueChainItem.label} item={valueChainItem} collapsed={collapsed} />
-                    )}
-
                     {/* BRSR Menu */}
                     {showBrsrGroup && (
                         <div className="relative">
@@ -274,9 +303,83 @@ export function Sidebar() {
                                             <div className="space-y-1 py-1">
                                                 {visibleBrsrChildren.map((child) => {
                                                     const childActive =
-                                                        child.href === "/brsr"
-                                                            ? pathname === "/brsr"
-                                                            : pathname?.startsWith(child.href);
+                                                        pathname === "/brsr" ||
+                                                        (Boolean(pathname?.startsWith("/brsr/")) && !pathname?.startsWith("/brsr/air"));
+                                                    return (
+                                                        <Link
+                                                            key={child.label}
+                                                            href={child.href}
+                                                            className={cn(
+                                                                "relative flex items-center gap-3 py-1.5 pl-6 transition-colors rounded-md text-xs font-sans",
+                                                                childActive
+                                                                    ? "text-primary font-medium bg-emerald-600/[0.07]"
+                                                                    : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low",
+                                                            )}>
+                                                            <div
+                                                                className={cn(
+                                                                    "absolute left-0 top-1/2 h-[1.5px] w-4 -translate-y-1/2 transition-colors",
+                                                                    childActive ? "bg-emerald-700/70" : "bg-secondary opacity-40",
+                                                                )}
+                                                            />
+                                                            <span>{child.label}</span>
+                                                        </Link>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    )}
+
+                    {/* EIA/NIPL Menu */}
+                    {showEiaGroup && (
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (collapsed) {
+                                        toggle();
+                                        setEiaOpen(true);
+                                    } else {
+                                        setEiaOpen((o) => !o);
+                                    }
+                                }}
+                                title={collapsed ? "EIA/NIPL" : undefined}
+                                className={cn(
+                                    "flex w-full items-center justify-between px-4 py-2.5 transition-[transform,colors] duration-150 active:scale-[0.98] rounded-lg cursor-pointer",
+                                    collapsed && "justify-center px-2",
+                                    isEiaActive
+                                        ? "bg-secondary-container font-semibold text-on-secondary-container"
+                                        : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
+                                )}>
+                                <span className="flex items-center gap-3">
+                                    <MaterialIcon name="air" className="shrink-0" />
+                                    {!collapsed && <span className="font-sans text-[13px] font-medium">EIA/NIPL</span>}
+                                </span>
+                                {!collapsed && (
+                                    <MaterialIcon
+                                        name={eiaOpen ? "keyboard_arrow_down" : "keyboard_arrow_right"}
+                                        size="sm"
+                                        className="!text-[18px] shrink-0"
+                                    />
+                                )}
+                            </button>
+
+                            <AnimatePresence initial={false}>
+                                {eiaOpen && !collapsed && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: "auto" }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        transition={{ duration: 0.2, ease: "easeInOut" }}
+                                        className="overflow-hidden">
+                                        <div className="relative ml-[1.625rem]">
+                                            <div className="nav-connector nav-connector-glow absolute bottom-3.5 left-0 top-0 w-[2px]" />
+                                            <div className="space-y-1 py-1">
+                                                {visibleEiaChildren.map((child) => {
+                                                    const childActive = isRouteActive(pathname, child.href);
                                                     return (
                                                         <Link
                                                             key={child.label}

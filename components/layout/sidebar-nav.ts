@@ -18,19 +18,22 @@ export const MAIN_NAV: NavItem[] = [
     { label: "Dashboard", icon: "dashboard", href: "/dashboard", featureKey: "analytics" },
     { label: "EU CBAM", icon: "verified", href: "/tenant-cbam", featureKey: "cbam" },
     { label: "Risk Assessment", icon: "thunderstorm", href: "/risk-assessment" },
-    { label: "Leather Module", icon: "workspace_premium", href: "/lwg", featureKey: "lwg" },
-    { label: "Value Chain", icon: "hub", href: "/scope-3", featureKey: "scope_3_cat1" },
+    { label: "Leather", icon: "workspace_premium", href: "/lwg", featureKey: "lwg" },
     { label: "Team Members", icon: "group", href: "/team-members", featureKey: "team_members" },
 ];
 
 export const SCOPE_NAV_CHILDREN: NavScopeChild[] = [
     { label: "Fuel", href: "/activities/fuel", featureKey: "scope_1" },
     { label: "Electricity", href: "/activities/electricity", featureKey: "scope_2" },
+    { label: "Value Chain", href: "/scope-3", featureKey: "scope_3_cat1" },
 ];
 
 export const BRSR_NAV_CHILDREN: NavScopeChild[] = [
     { label: "BRSR Reporting", href: "/brsr", featureKey: "brsr" },
-    { label: "EIA/NIPL Air Emissions", href: "/brsr/air", featureKey: "eia" },
+];
+
+export const EIA_NAV_CHILDREN: NavScopeChild[] = [
+    { label: "Air Emissions", href: "/brsr/air", featureKey: "eia" },
 ];
 
 export const BOTTOM_NAV: NavItem[] = [

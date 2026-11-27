@@ -82,7 +82,7 @@ export function BrsrAirReportModal({ isOpen, onClose, payload, onDownload }: Brs
                     <ul className="list-disc pl-4 space-y-1 text-on-surface-variant">
                         <li><strong>Table 1:</strong> Permitted Limits (NOx, SOx, PM10, PM2.5, CO)</li>
                         <li><strong>Table 2:</strong> Sampling Readings Log with Mass Rates (kg/hr)</li>
-                        <li><strong>Table 3:</strong> Stack Totals &amp; Statutory Exceedances (mg/Nm³ and t/yr)</li>
+                        <li><strong>Table 3:</strong> Stack Totals &amp; Statutory Exceedances (mg/Nm3 and t/yr)</li>
                         <li><strong>Table 4:</strong> BRSR Principle 6 Criteria Air Pollutants Summary (t/yr)</li>
                     </ul>
 

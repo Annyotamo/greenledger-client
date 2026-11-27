@@ -1032,13 +1032,13 @@ function EiaAirEmissionsContent() {
                                         {/* 4 x 2 Sleek, Compact & Subtle Switch Grid */}
                                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                             <SubtleGasToggle
-                                                label="PM₁₀"
+                                                label="PM10"
                                                 description="Respirable Dust"
                                                 checked={isPm10}
                                                 onChange={(val) => handleUpdateStackField(stackIdx, "is_pm10_monitored", val)}
                                             />
                                             <SubtleGasToggle
-                                                label="PM₂.₅"
+                                                label="PM2.5"
                                                 description="Fine Particulate"
                                                 checked={isPm25}
                                                 onChange={(val) => handleUpdateStackField(stackIdx, "is_pm25_monitored", val)}
@@ -1068,13 +1068,13 @@ function EiaAirEmissionsContent() {
                                                 onChange={(val) => handleUpdateStackField(stackIdx, "is_hap_monitored", val)}
                                             />
                                             <SubtleGasToggle
-                                                label="CO₂ %"
+                                                label="CO2 %"
                                                 description="Flue Gas Vol %"
                                                 checked={isCo2}
                                                 onChange={(val) => handleUpdateStackField(stackIdx, "is_co2_monitored", val)}
                                             />
                                             <SubtleGasToggle
-                                                label="O₂ %"
+                                                label="O2 %"
                                                 description="Flue Gas Vol %"
                                                 checked={isO2}
                                                 onChange={(val) => handleUpdateStackField(stackIdx, "is_o2_monitored", val)}
@@ -1127,8 +1127,8 @@ function EiaAirEmissionsContent() {
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
                                             {/* Always shown: Permitted Flow Rate */}
                                             <div className="space-y-1 bg-white p-2.5 rounded-lg border border-outline-variant/40">
-                                                <label className="text-[10px] font-bold text-slate-700 block uppercase">
-                                                    Permitted Flow (Nm³/h) <span className="text-error">*</span>
+                                                <label className="text-[10px] font-bold text-slate-700 block">
+                                                    Permitted Flow (Nm3/hr) <span className="text-error">*</span>
                                                 </label>
                                                 <input
                                                     type="number"
@@ -1145,8 +1145,8 @@ function EiaAirEmissionsContent() {
                                             {/* Shown only when NOx is monitored */}
                                             {isNox && (
                                                 <div className="space-y-1 bg-white p-2.5 rounded-lg border border-outline-variant/40">
-                                                    <label className="text-[10px] font-bold text-blue-700 block uppercase">
-                                                        NOx Limit (mg/Nm³) <span className="text-error">*</span>
+                                                    <label className="text-[10px] font-bold text-blue-700 block">
+                                                        NOx Limit (mg/Nm3) <span className="text-error">*</span>
                                                     </label>
                                                     <input
                                                         type="number"
@@ -1164,8 +1164,8 @@ function EiaAirEmissionsContent() {
                                             {/* Shown only when SOx is monitored */}
                                             {isSox && (
                                                 <div className="space-y-1 bg-white p-2.5 rounded-lg border border-outline-variant/40">
-                                                    <label className="text-[10px] font-bold text-amber-700 block uppercase">
-                                                        SOx Limit (mg/Nm³) <span className="text-error">*</span>
+                                                    <label className="text-[10px] font-bold text-amber-700 block">
+                                                        SOx Limit (mg/Nm3) <span className="text-error">*</span>
                                                     </label>
                                                     <input
                                                         type="number"
@@ -1183,8 +1183,8 @@ function EiaAirEmissionsContent() {
                                             {/* Shown only when PM is monitored */}
                                             {isPm && (
                                                 <div className="space-y-1 bg-white p-2.5 rounded-lg border border-outline-variant/40">
-                                                    <label className="text-[10px] font-bold text-emerald-700 block uppercase">
-                                                        PM / SPM Limit (mg/Nm³) <span className="text-error">*</span>
+                                                    <label className="text-[10px] font-bold text-emerald-700 block">
+                                                        PM / SPM Limit (mg/Nm3) <span className="text-error">*</span>
                                                     </label>
                                                     <input
                                                         type="number"
@@ -1202,8 +1202,8 @@ function EiaAirEmissionsContent() {
                                             {/* Shown only when PM10 is monitored */}
                                             {isPm10 && (
                                                 <div className="space-y-1 bg-white p-2.5 rounded-lg border border-outline-variant/40">
-                                                    <label className="text-[10px] font-bold text-emerald-800 block uppercase">
-                                                        PM₁₀ Limit (mg/Nm³)
+                                                    <label className="text-[10px] font-bold text-emerald-800 block">
+                                                        PM10 Limit (mg/Nm3)
                                                     </label>
                                                     <input
                                                         type="number"
@@ -1221,8 +1221,8 @@ function EiaAirEmissionsContent() {
                                             {/* Shown only when PM2.5 is monitored */}
                                             {isPm25 && (
                                                 <div className="space-y-1 bg-white p-2.5 rounded-lg border border-outline-variant/40">
-                                                    <label className="text-[10px] font-bold text-teal-700 block uppercase">
-                                                        PM₂.₅ Limit (mg/Nm³)
+                                                    <label className="text-[10px] font-bold text-teal-700 block">
+                                                        PM2.5 Limit (mg/Nm3)
                                                     </label>
                                                     <input
                                                         type="number"
@@ -1240,8 +1240,8 @@ function EiaAirEmissionsContent() {
                                             {/* Shown only when CO is monitored */}
                                             {isCo && (
                                                 <div className="space-y-1 bg-white p-2.5 rounded-lg border border-outline-variant/40">
-                                                    <label className="text-[10px] font-bold text-purple-700 block uppercase">
-                                                        CO Limit (mg/Nm³)
+                                                    <label className="text-[10px] font-bold text-purple-700 block">
+                                                        CO Limit (mg/Nm3)
                                                     </label>
                                                     <input
                                                         type="number"
@@ -1258,10 +1258,10 @@ function EiaAirEmissionsContent() {
 
                                             {/* Custom Gases Limit Inputs */}
                                             {customGasesList.map((gasKey) => (
-                                                <div key={gasKey} className="space-y-1 bg-white p-2.5 rounded-lg border border-indigo-200 relative">
+                                                <div key={gasKey} className="space-y-1 bg-white p-2.5 rounded-lg border border-outline-variant/40 relative">
                                                     <div className="flex items-center justify-between">
-                                                        <label className="text-[10px] font-bold text-indigo-700 uppercase">
-                                                            {gasKey} Limit (mg/Nm³)
+                                                        <label className="text-[10px] font-bold text-indigo-700">
+                                                            {gasKey.toUpperCase()} Limit (mg/Nm3)
                                                         </label>
                                                         <button
                                                             type="button"
@@ -1392,7 +1392,7 @@ function EiaAirEmissionsContent() {
 
                                                             <div className="space-y-1">
                                                                 <label className="text-[10px] font-semibold text-on-surface-variant block">
-                                                                    Flow (Nm³/h) <span className="text-error">*</span>
+                                                                    Flow (Nm3/hr) <span className="text-error">*</span>
                                                                 </label>
                                                                 <input
                                                                     type="number"
@@ -1412,7 +1412,7 @@ function EiaAirEmissionsContent() {
                                                             {isNox && (
                                                                 <div className="space-y-1">
                                                                     <label className="text-[10px] font-semibold text-blue-700 block">
-                                                                        NOx (mg/Nm³)
+                                                                        NOx (mg/Nm3)
                                                                     </label>
                                                                     <input
                                                                         type="number"
@@ -1433,7 +1433,7 @@ function EiaAirEmissionsContent() {
                                                             {isSox && (
                                                                 <div className="space-y-1">
                                                                     <label className="text-[10px] font-semibold text-amber-700 block">
-                                                                        SOx (mg/Nm³)
+                                                                        SOx (mg/Nm3)
                                                                     </label>
                                                                     <input
                                                                         type="number"
@@ -1454,7 +1454,7 @@ function EiaAirEmissionsContent() {
                                                             {isPm && (
                                                                 <div className="space-y-1">
                                                                     <label className="text-[10px] font-semibold text-emerald-700 block">
-                                                                        PM / SPM (mg/Nm³)
+                                                                        PM / SPM (mg/Nm3)
                                                                     </label>
                                                                     <input
                                                                         type="number"
@@ -1475,7 +1475,7 @@ function EiaAirEmissionsContent() {
                                                             {isPm10 && (
                                                                 <div className="space-y-1">
                                                                     <label className="text-[10px] font-semibold text-emerald-800 block">
-                                                                        PM₁₀ (mg/Nm³)
+                                                                        PM10 (mg/Nm3)
                                                                     </label>
                                                                     <input
                                                                         type="number"
@@ -1496,7 +1496,7 @@ function EiaAirEmissionsContent() {
                                                             {isPm25 && (
                                                                 <div className="space-y-1">
                                                                     <label className="text-[10px] font-semibold text-teal-700 block">
-                                                                        PM₂.₅ (mg/Nm³)
+                                                                        PM2.5 (mg/Nm3)
                                                                     </label>
                                                                     <input
                                                                         type="number"
@@ -1517,7 +1517,7 @@ function EiaAirEmissionsContent() {
                                                             {isCo && (
                                                                 <div className="space-y-1">
                                                                     <label className="text-[10px] font-semibold text-purple-700 block">
-                                                                        CO (mg/Nm³)
+                                                                        CO (mg/Nm3)
                                                                     </label>
                                                                     <input
                                                                         type="number"
@@ -1538,7 +1538,7 @@ function EiaAirEmissionsContent() {
                                                             {isPop && (
                                                                 <div className="space-y-1">
                                                                     <label className="text-[10px] font-semibold text-slate-700 block">
-                                                                        POP (mg/Nm³)
+                                                                        POP (mg/Nm3)
                                                                     </label>
                                                                     <input
                                                                         type="number"
@@ -1557,7 +1557,7 @@ function EiaAirEmissionsContent() {
                                                             {isVoc && (
                                                                 <div className="space-y-1">
                                                                     <label className="text-[10px] font-semibold text-slate-700 block">
-                                                                        VOC (mg/Nm³)
+                                                                        VOC (mg/Nm3)
                                                                     </label>
                                                                     <input
                                                                         type="number"
@@ -1576,7 +1576,7 @@ function EiaAirEmissionsContent() {
                                                             {isHap && (
                                                                 <div className="space-y-1">
                                                                     <label className="text-[10px] font-semibold text-slate-700 block">
-                                                                        HAP (mg/Nm³)
+                                                                        HAP (mg/Nm3)
                                                                     </label>
                                                                     <input
                                                                         type="number"
@@ -1595,7 +1595,7 @@ function EiaAirEmissionsContent() {
                                                             {isCo2 && (
                                                                 <div className="space-y-1">
                                                                     <label className="text-[10px] font-semibold text-slate-700 block">
-                                                                        CO₂ in Flue Gas (Vol %)
+                                                                        CO2 in Flue Gas (Vol %)
                                                                     </label>
                                                                     <input
                                                                         type="number"
@@ -1614,7 +1614,7 @@ function EiaAirEmissionsContent() {
                                                             {isO2 && (
                                                                 <div className="space-y-1">
                                                                     <label className="text-[10px] font-semibold text-slate-700 block">
-                                                                        O₂ in Flue Gas (Vol %)
+                                                                        O2 in Flue Gas (Vol %)
                                                                     </label>
                                                                     <input
                                                                         type="number"
@@ -1641,8 +1641,8 @@ function EiaAirEmissionsContent() {
 
                                                                 return (
                                                                     <div key={gasKey} className="space-y-1">
-                                                                        <label className="text-[10px] font-semibold text-indigo-700 block uppercase">
-                                                                            {gasKey} (mg/Nm³)
+                                                                        <label className="text-[10px] font-semibold text-indigo-700 block">
+                                                                            {gasKey.toUpperCase()} (mg/Nm3)
                                                                         </label>
                                                                         <input
                                                                             type="number"
@@ -1751,7 +1751,7 @@ function EiaAirEmissionsContent() {
                                         <span className="text-[11px] font-sans text-on-surface-variant">t/yr</span>
                                     </div>
                                     <p className="text-[10px] text-on-surface-variant mt-1 font-mono">
-                                        Avg Conc: {formatNum(plantTotals?.plant_pooled_average_concentration_mg_nm3?.nox)} mg/Nm³
+                                        Avg Conc: {formatNum(plantTotals?.plant_pooled_average_concentration_mg_nm3?.nox)} mg/Nm3
                                     </p>
                                     <p className="text-[10px] text-blue-700 font-mono">
                                         Rate: {formatNum(plantTotals?.plant_combined_hourly_rate_kg_hr?.nox)} kg/hr
@@ -1784,7 +1784,7 @@ function EiaAirEmissionsContent() {
                                         <span className="text-[11px] font-sans text-on-surface-variant">t/yr</span>
                                     </div>
                                     <p className="text-[10px] text-on-surface-variant mt-1 font-mono">
-                                        Avg Conc: {formatNum(plantTotals?.plant_pooled_average_concentration_mg_nm3?.sox)} mg/Nm³
+                                        Avg Conc: {formatNum(plantTotals?.plant_pooled_average_concentration_mg_nm3?.sox)} mg/Nm3
                                     </p>
                                     <p className="text-[10px] text-amber-700 font-mono">
                                         Rate: {formatNum(plantTotals?.plant_combined_hourly_rate_kg_hr?.sox)} kg/hr
@@ -1817,7 +1817,7 @@ function EiaAirEmissionsContent() {
                                         <span className="text-[11px] font-sans text-on-surface-variant">t/yr</span>
                                     </div>
                                     <p className="text-[10px] text-on-surface-variant mt-1 font-mono">
-                                        Avg Conc: {formatNum(plantTotals?.plant_pooled_average_concentration_mg_nm3?.pm ?? plantTotals?.plant_pooled_average_concentration_mg_nm3?.pm10)} mg/Nm³
+                                        Avg Conc: {formatNum(plantTotals?.plant_pooled_average_concentration_mg_nm3?.pm ?? plantTotals?.plant_pooled_average_concentration_mg_nm3?.pm10)} mg/Nm3
                                     </p>
                                     <p className="text-[10px] text-emerald-700 font-mono">
                                         Rate: {formatNum(plantTotals?.plant_combined_hourly_rate_kg_hr?.pm ?? plantTotals?.plant_combined_hourly_rate_kg_hr?.pm10)} kg/hr
@@ -1850,7 +1850,7 @@ function EiaAirEmissionsContent() {
                                         <span className="text-[11px] font-sans text-on-surface-variant">t/yr</span>
                                     </div>
                                     <p className="text-[10px] text-on-surface-variant mt-1 font-mono">
-                                        Avg Conc: {formatNum(plantTotals?.plant_pooled_average_concentration_mg_nm3?.co)} mg/Nm³
+                                        Avg Conc: {formatNum(plantTotals?.plant_pooled_average_concentration_mg_nm3?.co)} mg/Nm3
                                     </p>
                                     <p className="text-[10px] text-purple-700 font-mono">
                                         Rate: {formatNum(plantTotals?.plant_combined_hourly_rate_kg_hr?.co)} kg/hr
@@ -1923,7 +1923,7 @@ function EiaAirEmissionsContent() {
                                             <TableHead className="text-right text-amber-700">SOx (t/yr)</TableHead>
                                             <TableHead className="text-right text-emerald-700">PM (t/yr)</TableHead>
                                             <TableHead className="text-right text-purple-700">CO (t/yr)</TableHead>
-                                            <TableHead className="text-center">Avg Flow (Nm³/h)</TableHead>
+                                            <TableHead className="text-center">Avg Flow (Nm3/hr)</TableHead>
                                             <TableHead className="text-center">Hourly Rates (kg/hr)</TableHead>
                                             <TableHead className="text-center">Compliance</TableHead>
                                         </TableRow>
@@ -2028,11 +2028,11 @@ function EiaAirEmissionsContent() {
                                         <TableHeader>
                                             <TableRow className="bg-surface-container-low/50">
                                                 <TableHead className="text-xs">Sampling Date</TableHead>
-                                                <TableHead className="text-right text-xs">Gas Flow (Nm³/h)</TableHead>
-                                                <TableHead className="text-right text-xs">NOx (mg/Nm³)</TableHead>
-                                                <TableHead className="text-right text-xs">SOx (mg/Nm³)</TableHead>
-                                                <TableHead className="text-right text-xs">PM (mg/Nm³)</TableHead>
-                                                <TableHead className="text-right text-xs">CO (mg/Nm³)</TableHead>
+                                                <TableHead className="text-right text-xs">Gas Flow (Nm3/hr)</TableHead>
+                                                <TableHead className="text-right text-xs">NOx (mg/Nm3)</TableHead>
+                                                <TableHead className="text-right text-xs">SOx (mg/Nm3)</TableHead>
+                                                <TableHead className="text-right text-xs">PM (mg/Nm3)</TableHead>
+                                                <TableHead className="text-right text-xs">CO (mg/Nm3)</TableHead>
                                                 <TableHead className="text-center text-xs">Calculated Rates (kg/hr)</TableHead>
                                                 <TableHead className="text-center text-xs">Status</TableHead>
                                             </TableRow>

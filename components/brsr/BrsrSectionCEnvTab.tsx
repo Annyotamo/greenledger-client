@@ -846,11 +846,11 @@ export function BrsrSectionCEnvTab({
                                             <TableHeader>
                                                 <TableRow className="bg-surface-container-low">
                                                     <TableHead className="text-xs font-bold text-primary">Sampling Date</TableHead>
-                                                    <TableHead className="text-xs font-bold text-primary">Flow Rate (Nm³/hr)</TableHead>
-                                                    <TableHead className="text-xs font-bold text-primary">NOx (mg/Nm³)</TableHead>
-                                                    <TableHead className="text-xs font-bold text-primary">SOx (mg/Nm³)</TableHead>
-                                                    <TableHead className="text-xs font-bold text-primary">PM (mg/Nm³)</TableHead>
-                                                    <TableHead className="text-xs font-bold text-primary">CO (mg/Nm³)</TableHead>
+                                                    <TableHead className="text-xs font-bold text-primary">Flow Rate (Nm3/hr)</TableHead>
+                                                    <TableHead className="text-xs font-bold text-primary">NOx (mg/Nm3)</TableHead>
+                                                    <TableHead className="text-xs font-bold text-primary">SOx (mg/Nm3)</TableHead>
+                                                    <TableHead className="text-xs font-bold text-primary">PM (mg/Nm3)</TableHead>
+                                                    <TableHead className="text-xs font-bold text-primary">CO (mg/Nm3)</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>

@@ -17,6 +17,7 @@ export type NavScopeChild = {
 export const MAIN_NAV: NavItem[] = [
     { label: "Dashboard", icon: "dashboard", href: "/dashboard", featureKey: "analytics" },
     { label: "EU CBAM", icon: "verified", href: "/tenant-cbam", featureKey: "cbam" },
+    { label: "Risk Assessment", icon: "thunderstorm", href: "/risk-assessment" },
     { label: "Leather Module", icon: "workspace_premium", href: "/lwg", featureKey: "lwg" },
     { label: "Value Chain", icon: "hub", href: "/scope-3", featureKey: "scope_3_cat1" },
     { label: "Team Members", icon: "group", href: "/team-members", featureKey: "team_members" },

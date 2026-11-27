@@ -29,7 +29,7 @@ export const navIcon = (d: ReactNode) => (
     </svg>
 );
 
-/** Solutions dropdown: BRSR is a section of the landing page, CBAM and GHG Accounting are their own pages. */
+/** Solutions dropdown: each solution has its own page. */
 const SOLUTIONS = [
     {
         href: "/cbam",
@@ -44,7 +44,7 @@ const SOLUTIONS = [
         ),
     },
     {
-        href: "/#brsr",
+        href: "/brsr-reporting",
         title: "BRSR",
         note: "SEBI sustainability disclosures",
         color: "var(--ochre)",
@@ -116,13 +116,8 @@ export function SiteNav({ home = false }: { home?: boolean }) {
                         <small>{s.note}</small>
                     </>
                 );
-                const href = home && s.href === "/#brsr" ? "#brsr" : s.href;
-                return href.startsWith("#") ? (
-                    <a key={s.href} href={href} style={cssVars({ "--c": s.color })}>
-                        {inner}
-                    </a>
-                ) : (
-                    <Link key={s.href} href={href} style={cssVars({ "--c": s.color })} onClick={() => setOpen(false)}>
+                return (
+                    <Link key={s.href} href={s.href} style={cssVars({ "--c": s.color })} onClick={() => setOpen(false)}>
                         {inner}
                     </Link>
                 );
@@ -136,7 +131,7 @@ export function SiteNav({ home = false }: { home?: boolean }) {
             type="button"
             aria-expanded={home ? false : open}
             aria-controls="ddSol"
-            data-sec="#brsr"
+            data-sec="#solutions"
             onClick={home ? undefined : () => setOpen((o) => !o)}>
             Solutions
             <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -247,7 +242,7 @@ export function SiteFooter({ home = false }: { home?: boolean }) {
                         <nav className="f-nav f-fade" style={cssVars({ "--i": 2 })} aria-label="Footer">
                             <Link href="/cbam">CBAM Compliance</Link>
                             <Link href="/ghg-accounting">GHG Accounting</Link>
-                            <a href={home ? "#brsr" : "/#brsr"}>BRSR Reporting</a>
+                            <Link href="/brsr-reporting">BRSR Reporting</Link>
                             <a href="#">Privacy</a>
                             <a href="#">Terms</a>
                             <a href="#">Security</a>

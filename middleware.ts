@@ -18,6 +18,7 @@ const PROTECTED_PREFIXES = [
     "/brsr",
     "/scope-3",
     "/initializing",
+    "/risk-assessment",
 ];
 
 // Auth routes that authenticated users shouldn't access

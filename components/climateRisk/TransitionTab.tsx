@@ -240,7 +240,11 @@ function FacilityRow({ row: r, years, canEdit, assessmentId, revenue }: { row: R
                                 className="h-8 rounded-md border border-outline-variant bg-white px-2 text-[12px]"
                                 value={r.flag[flag]}
                                 disabled={action.isPending}
-                                onChange={(e) => action.mutate(() => setPolicyFlag(assessmentId, r.f.id, { [flag]: e.target.value as TriState }))}>
+                                onChange={(e) => {
+                                    // Read the choice now: by the time the save runs, React has reset this controlled select.
+                                    const value = e.target.value as TriState;
+                                    action.mutate(() => setPolicyFlag(assessmentId, r.f.id, { [flag]: value }));
+                                }}>
                                 <option value="yes">Yes</option>
                                 <option value="no">No</option>
                                 <option value="unknown">Unknown</option>

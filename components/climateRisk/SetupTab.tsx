@@ -95,7 +95,11 @@ export function SetupTab({ data, canEdit }: Props) {
                             className={selectCls}
                             value={data.company.sasb_industry_code ?? ""}
                             disabled={!canEdit || sasbAction.isPending}
-                            onChange={(e) => sasbAction.mutate(() => updateCompanySasb(e.target.value || null))}>
+                            onChange={(e) => {
+                                // Read the choice now: by the time the save runs, React has reset this controlled select.
+                                const code = e.target.value || null;
+                                sasbAction.mutate(() => updateCompanySasb(code));
+                            }}>
                             <option value="">Not set</option>
                             {SASB_OPTIONS.map((o) => (
                                 <option key={o.code} value={o.code}>

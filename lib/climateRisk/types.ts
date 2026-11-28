@@ -86,6 +86,8 @@ export type FacilityLocation = {
     longitude: number | null;
     confirmed_by: string | null;
     confirmed_at: string | null;
+    /** Analyst's reason when the district is in a different state from the facility's state on file. */
+    mismatch_reason: string | null;
 };
 
 export type HazardSnapshot = {

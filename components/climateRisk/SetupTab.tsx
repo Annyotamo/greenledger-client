@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { MaterialIcon } from "@/components/icons/MaterialIcon";
 import { cn } from "@/lib/utils/cn";
 import { saveFacilityLocation, updateAssessmentSetup, updateCompanySasb } from "@/lib/climateRisk/api";
+import { MIN_OVERRIDE_REASON } from "@/lib/climateRisk/engine";
 import { useRiskAction, useThinkHazardSearch } from "@/lib/climateRisk/hooks";
 import { REPORTING_YEARS, SASB_OPTIONS } from "@/lib/climateRisk/constants";
 import type { AssessmentDetail, ThinkHazardDivision } from "@/lib/climateRisk/types";
@@ -16,12 +17,11 @@ import { CRORE, ErrorNote, formatCrore, formatDateTime, SourceLink } from "./Ris
 type Props = { data: AssessmentDetail; canEdit: boolean };
 
 // ThinkHazard keeps pre-2011 / pre-2014 names, so the modern state name will not always match.
-const STATE_ALIASES: Record<string, string[]> = { odisha: ["orissa"] };
-const sameState = (facilityState: string | null, admin1: string | undefined) => {
-    if (!facilityState || !admin1) return false;
-    const s = facilityState.toLowerCase();
-    return admin1.toLowerCase() === s || (STATE_ALIASES[s] ?? []).includes(admin1.toLowerCase());
-};
+const OLD_STATE_NAMES: Record<string, string> = { orissa: "odisha", uttaranchal: "uttarakhand", pondicherry: "puducherry" };
+const normState = (s: string) => OLD_STATE_NAMES[s.trim().toLowerCase()] ?? s.trim().toLowerCase();
+/** True when both states are known and differ; the server then requires a written reason. */
+const stateMismatch = (facilityState: string | null, districtState: string | null | undefined) =>
+    Boolean(facilityState && districtState) && normState(facilityState!) !== normState(districtState!);
 
 const selectCls = "h-9 w-full rounded-lg border border-outline-variant bg-white px-3 text-body-md disabled:bg-surface-container-low disabled:text-on-surface-variant";
 
@@ -190,9 +190,11 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 function LocationRow({ facility: f, canEdit }: { facility: AssessmentDetail["facilities"][number]; canEdit: boolean }) {
     const [open, setOpen] = useState(false);
     const loc = f.location;
+    // Frozen reports only carry the reason; drafts can also show older matches saved without one.
+    const mismatch = Boolean(loc.thinkhazard_code) && (Boolean(loc.mismatch_reason) || stateMismatch(f.state, loc.state));
     return (
         <>
-            <TableRow className={cn(open && "bg-surface-container-low/60")}>
+            <TableRow className={cn(open && "bg-surface-container-low/60", mismatch && !open && "bg-[#fab219]/10")}>
                 <TableCell>
                     <p className="font-medium">{f.name}</p>
                     <p className="text-[11px] text-on-surface-variant">{f.facility_code}</p>
@@ -209,6 +211,7 @@ function LocationRow({ facility: f, canEdit }: { facility: AssessmentDetail["fac
                             <p className="text-[11px] text-on-surface-variant">
                                 Confirmed by {loc.confirmed_by} · {formatDateTime(loc.confirmed_at)}
                             </p>
+                            {mismatch && <MismatchNote facility={f} />}
                         </div>
                     ) : (
                         <span className="flex items-center gap-1 text-on-surface-variant">
@@ -236,12 +239,30 @@ function LocationRow({ facility: f, canEdit }: { facility: AssessmentDetail["fac
     );
 }
 
+function MismatchNote({ facility: f }: { facility: AssessmentDetail["facilities"][number] }) {
+    const loc = f.location;
+    return (
+        <p className="mt-1 flex items-start gap-1 rounded border border-[#d9970a]/50 bg-[#fab219]/15 px-2 py-1 text-[11px] text-on-surface">
+            <MaterialIcon name="warning" size="xs" className="mt-0.5" />
+            <span>
+                {loc.state ? `District is in ${loc.state}` : "District is outside the facility's state"}
+                {f.state ? `, facility is in ${f.state}. ` : ". "}
+                {loc.mismatch_reason ? `Reason: “${loc.mismatch_reason}”` : "No reason recorded: change the match, or confirm it again with a reason."}
+            </span>
+        </p>
+    );
+}
+
 function DistrictSearch({ facility: f, onDone }: { facility: AssessmentDetail["facilities"][number]; onDone: () => void }) {
     const [draft, setDraft] = useState(f.city);
     const [query, setQuery] = useState(f.city);
     const { data: results = [], isFetching, error: searchError } = useThinkHazardSearch(query);
     const action = useRiskAction();
-    const confirm = (d: ThinkHazardDivision | null) => action.mutate(() => saveFacilityLocation(f.id, d), { onSuccess: onDone });
+    // A district in another state is confirmed only with a written reason.
+    const [pending, setPending] = useState<ThinkHazardDivision | null>(null);
+    const [reason, setReason] = useState("");
+    const confirm = (d: ThinkHazardDivision | null, mismatchReason?: string) =>
+        action.mutate(() => saveFacilityLocation(f.id, d, mismatchReason), { onSuccess: onDone });
 
     return (
         <div className="space-y-3 rounded-lg border border-outline-variant bg-surface-container-lowest p-3">
@@ -272,21 +293,64 @@ function DistrictSearch({ facility: f, onDone }: { facility: AssessmentDetail["f
             )}
             <ul className="divide-y divide-outline-variant/50">
                 {results.map((d) => {
-                    const match = d.admin0 === "India" && sameState(f.state, d.admin1);
+                    const mismatch = stateMismatch(f.state, d.admin1);
+                    const asking = pending?.code === d.code;
                     return (
-                        <li key={d.code} className="flex items-center justify-between gap-3 py-2">
-                            <div>
-                                <p className="text-[13px]">
-                                    {[d.admin0, d.admin1, d.admin2].filter(Boolean).join(" › ")}{" "}
-                                    <span className="text-[11px] text-on-surface-variant">#{d.code}</span>
-                                </p>
-                                <p className={cn("text-[11px]", match ? "text-secondary" : "text-on-surface-variant")}>
-                                    {match ? "State matches the facility" : `Different state from the facility (${f.state ?? "no state on file"})`}
-                                </p>
+                        <li key={d.code} className={cn("space-y-2 py-2", mismatch && "rounded bg-[#fab219]/10 px-2")}>
+                            <div className="flex items-center justify-between gap-3">
+                                <div>
+                                    <p className="text-[13px]">
+                                        {[d.admin0, d.admin1, d.admin2].filter(Boolean).join(" › ")}{" "}
+                                        <span className="text-[11px] text-on-surface-variant">#{d.code}</span>
+                                    </p>
+                                    <p className={cn("text-[11px]", mismatch ? "font-semibold text-[#9a5b00]" : f.state ? "text-secondary" : "text-on-surface-variant")}>
+                                        {mismatch
+                                            ? `Different state from the facility (${f.state}): needs a reason`
+                                            : f.state
+                                              ? "State matches the facility"
+                                              : "No state on file to check against"}
+                                    </p>
+                                </div>
+                                {!asking && (
+                                    <Button
+                                        size="sm"
+                                        variant={mismatch ? "secondary" : "primary"}
+                                        onClick={() => (mismatch ? (setPending(d), setReason("")) : confirm(d))}
+                                        disabled={action.isPending}>
+                                        {mismatch ? "Confirm anyway…" : "Confirm"}
+                                    </Button>
+                                )}
                             </div>
-                            <Button size="sm" variant={match ? "primary" : "secondary"} onClick={() => confirm(d)} disabled={action.isPending}>
-                                Confirm
-                            </Button>
+                            {asking && (
+                                <form
+                                    className="space-y-2"
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                        confirm(d, reason.trim());
+                                    }}>
+                                    <label className="block space-y-1">
+                                        <span className="text-[12px] font-semibold text-on-surface-variant">
+                                            Why is this facility in {d.admin2}, {d.admin1}? (at least {MIN_OVERRIDE_REASON} characters)
+                                        </span>
+                                        <textarea
+                                            value={reason}
+                                            onChange={(e) => setReason(e.target.value)}
+                                            rows={2}
+                                            required
+                                            className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-body-sm"
+                                            placeholder="e.g. Facility record lists the head office state; the plant is in this district"
+                                        />
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <Button type="submit" size="sm" disabled={action.isPending || reason.trim().length < MIN_OVERRIDE_REASON}>
+                                            Confirm with reason
+                                        </Button>
+                                        <Button type="button" size="sm" variant="ghost" onClick={() => setPending(null)}>
+                                            Cancel
+                                        </Button>
+                                    </div>
+                                </form>
+                            )}
                         </li>
                     );
                 })}

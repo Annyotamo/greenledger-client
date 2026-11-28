@@ -111,6 +111,11 @@ export function PhysicalTab({ data, canEdit }: Props) {
                                                 <td className="sticky left-0 z-10 min-w-[180px] bg-surface-container-lowest px-4 py-3">
                                                     <p className="font-medium">{f.name}</p>
                                                     <p className="text-[11px] text-on-surface-variant">{f.location.thinkhazard_label ?? `${f.city}, ${f.state}`}</p>
+                                                    {f.location.mismatch_reason && (
+                                                        <p className="mt-1 text-[11px] font-semibold text-[#9a5b00]" title={f.location.mismatch_reason}>
+                                                            District outside {f.state ?? "the facility's state"}: “{f.location.mismatch_reason}”
+                                                        </p>
+                                                    )}
                                                 </td>
                                                 {/* Drivers are visible in the grid itself and on the report tab; the title keeps them on hover. */}
                                                 <td className="w-[120px] px-3 py-3" title={r?.driver ?? undefined}>

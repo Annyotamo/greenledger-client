@@ -156,10 +156,16 @@ export function searchThinkHazard(q: string): Promise<ThinkHazardDivision[]> {
     return call(privateApi.get(`${BASE}/locations/thinkhazard-search`, { params: { q }, timeout: SEARCH_TIMEOUT_MS }));
 }
 
-/** Confirm a facility's district, or clear it with null. */
-export function saveFacilityLocation(facilityId: string, division: ThinkHazardDivision | null) {
+/** Confirm a facility's district, or clear it with null. A district in another state needs a reason (server-enforced). */
+export function saveFacilityLocation(facilityId: string, division: ThinkHazardDivision | null, mismatchReason?: string) {
     const body = division
-        ? { thinkhazard_code: division.code, admin0: division.admin0, admin1: division.admin1 ?? null, admin2: division.admin2 ?? null }
+        ? {
+              thinkhazard_code: division.code,
+              admin0: division.admin0,
+              admin1: division.admin1 ?? null,
+              admin2: division.admin2 ?? null,
+              mismatch_reason: mismatchReason ?? null,
+          }
         : {};
     return call(privateApi.put(`${BASE}/facilities/${facilityId}/location`, body));
 }

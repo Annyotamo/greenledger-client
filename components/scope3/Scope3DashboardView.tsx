@@ -8,7 +8,6 @@ import { Scope3KpiCardsGrid } from "./Scope3KpiCardsGrid";
 import { Scope3CategoryDistributionSection } from "./Scope3CategoryDistributionSection";
 import { Scope3MonthlyTrendChart } from "./Scope3MonthlyTrendChart";
 import { Scope3TrackedCategoriesTable } from "./Scope3TrackedCategoriesTable";
-import { Scope3HotspotsAndActivities } from "./Scope3HotspotsAndActivities";
 import { Scope3GovernanceBanner } from "./Scope3GovernanceBanner";
 import { AiAssistantFAB } from "@/components/dashboard/AiAssistantFAB";
 import type { Scope3ViewMode } from "@/lib/scope3/data";

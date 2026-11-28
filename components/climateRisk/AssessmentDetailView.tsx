@@ -42,8 +42,11 @@ export function AssessmentDetailView({ id }: { id: string }) {
 
     const a = data.assessment;
     const locked = a.status === "approved";
+    // History is newest first. Only the newest version of a year can change; older ones are read-only (server-enforced).
+    const newer = data.history[0] && data.history[0].version > a.version ? data.history[0] : undefined;
+    const canAct = access.canWrite && !newer;
     // Only a draft is editable: the server freezes an assessment once it is submitted.
-    const canEdit = access.canWrite && a.status === "draft";
+    const canEdit = canAct && a.status === "draft";
     // Read-only users (client view) only get the report.
     const tabs = access.canWrite ? TABS : TABS.filter((t) => t.key === "report");
     const defaultTab: TabKey = !canEdit ? "report" : !a.physical_run_at ? "setup" : "report";
@@ -100,7 +103,7 @@ export function AssessmentDetailView({ id }: { id: string }) {
                             <MaterialIcon name="download" size="sm" />
                             {exporting ? "Exporting…" : "Export CSV"}
                         </Button>
-                        {access.canWrite && a.status === "draft" && (
+                        {canAct && a.status === "draft" && (
                             <Button
                                 onClick={() => action.mutate(() => submitAssessment(id))}
                                 disabled={action.isPending || !a.physical_run_at || !a.transition_run_at}
@@ -109,19 +112,19 @@ export function AssessmentDetailView({ id }: { id: string }) {
                                 Submit for review
                             </Button>
                         )}
-                        {access.canWrite && a.status === "in_review" && (
+                        {canAct && a.status === "in_review" && (
                             <Button variant="secondary" onClick={() => action.mutate(() => reopenAssessment(id))} disabled={action.isPending}>
                                 <MaterialIcon name="undo" size="sm" />
                                 Reopen as draft
                             </Button>
                         )}
-                        {access.canApprove && a.status === "in_review" && (
+                        {access.canApprove && !newer && a.status === "in_review" && (
                             <Button onClick={() => action.mutate(() => approveAssessment(id))} disabled={action.isPending}>
                                 <MaterialIcon name="verified" size="sm" />
                                 Approve and lock
                             </Button>
                         )}
-                        {access.canWrite && locked && (
+                        {canAct && locked && (
                             <Button
                                 onClick={() => action.mutate(async () => router.push(`/risk-assessment/${(await createNewVersion(id)).id}`))}
                                 disabled={action.isPending}>
@@ -159,7 +162,17 @@ export function AssessmentDetailView({ id }: { id: string }) {
                         Approved by {a.approved_by} on {formatDateTime(a.approved_at)}. This version is locked; any change creates a new version.
                     </div>
                 )}
-                {a.status === "in_review" && access.canWrite && (
+                {newer && (
+                    <div className="flex items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-[12px] text-on-surface-variant">
+                        <MaterialIcon name="history" size="sm" />
+                        This is an older version and is read-only.
+                        <Link href={`/risk-assessment/${newer.id}`} className="font-semibold text-on-surface underline underline-offset-2">
+                            Open v{newer.version}
+                        </Link>
+                        to make changes.
+                    </div>
+                )}
+                {a.status === "in_review" && canAct && (
                     <div className="flex items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-[12px] text-on-surface-variant">
                         <MaterialIcon name="rate_review" size="sm" />
                         In review and frozen. {access.canApprove ? "Approve it, or reopen it to make changes." : "An approver signs it off; reopen it to make changes."} Nothing

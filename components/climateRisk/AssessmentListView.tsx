@@ -144,7 +144,8 @@ function NewAssessmentForm({ onCancel, existing }: { onCancel: () => void; exist
     const action = useRiskAction();
     const [year, setYear] = useState(YEARS[0]);
     const [revenueCr, setRevenueCr] = useState("");
-    const draftExists = existing.some((a) => a.reporting_year === year && a.status !== "approved");
+    // One assessment per year; a change to it is a new version (server-enforced). The list is newest version first.
+    const taken = existing.find((a) => a.reporting_year === year);
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -182,7 +183,7 @@ function NewAssessmentForm({ onCancel, existing }: { onCancel: () => void; exist
                         />
                     </label>
                     <div className="flex gap-2">
-                        <Button type="submit" disabled={action.isPending}>
+                        <Button type="submit" disabled={action.isPending || !!taken}>
                             {action.isPending ? "Creating…" : "Create draft"}
                         </Button>
                         <Button type="button" variant="ghost" onClick={onCancel}>
@@ -190,9 +191,13 @@ function NewAssessmentForm({ onCancel, existing }: { onCancel: () => void; exist
                         </Button>
                     </div>
                 </form>
-                {draftExists && (
+                {taken && (
                     <p className="mt-3 text-[12px] text-on-surface-variant">
-                        FY {year} already has an open draft. A new draft becomes the next version of that year.
+                        FY {year} already has an assessment.{" "}
+                        <Link href={`/risk-assessment/${taken.id}`} className="font-semibold text-on-surface underline underline-offset-2">
+                            Open v{taken.version}
+                        </Link>{" "}
+                        {taken.status === "approved" ? "and create a new version from it." : "to continue it."}
                     </p>
                 )}
                 <ErrorNote error={action.error} />
